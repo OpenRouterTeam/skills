@@ -29,6 +29,7 @@ Pick the right script based on what the user is asking:
 | Find highest throughput models | `list-models.ts --sort throughput` | "Which models have the most output capacity?" |
 | Find models in a category | `list-models.ts --category X` | "Best programming models?" |
 | Search by name | `search-models.ts "query"` | "Do they have Claude?" |
+| Resolve an informal model name | `resolve-model.ts "query"` | "Use the nano banana 2.0 model" |
 | Find image-capable models | `search-models.ts --modality image` | "Which models accept images?" |
 | Compare specific models | `compare-models.ts A B` | "Compare Claude vs GPT-4o" |
 | Compare by throughput | `compare-models.ts A B --sort throughput` | "Which has higher throughput, Claude or GPT-4o?" |
@@ -36,6 +37,26 @@ Pick the right script based on what the user is asking:
 | Find fastest provider | `get-endpoints.ts "model-id" --sort throughput` | "Fastest provider for Claude Sonnet?" |
 | Find lowest-latency provider | `get-endpoints.ts "model-id" --sort latency` | "Lowest latency provider for GPT-4o?" |
 | Check model availability | `get-endpoints.ts "model-id"` | "Is Claude Sonnet 4 up right now?" |
+
+## Resolve Model
+
+Resolve an informal or vague model name to an exact OpenRouter model ID using fuzzy matching:
+
+```bash
+cd <skill-path>/scripts && npx tsx resolve-model.ts "claude sonnet"
+cd <skill-path>/scripts && npx tsx resolve-model.ts "gpt 4o mini"
+cd <skill-path>/scripts && npx tsx resolve-model.ts "llama 3.1"
+```
+
+Results include a `confidence` level and `score`:
+
+| Confidence | Score | Action |
+|---|---|---|
+| `high` (≥0.85) | Use the model directly — the match is unambiguous |
+| `medium` (≥0.55) | Confirm with the user before proceeding |
+| `low` (≥0.30) | Suggest the matches and ask the user to clarify |
+
+**Two-step workflow:** First resolve the informal name with `resolve-model.ts`, then feed the resolved `id` into other scripts (`compare-models.ts`, `get-endpoints.ts`, etc.).
 
 ## List Models
 
@@ -200,6 +221,7 @@ Returns for each provider:
 
 ## Presenting Results
 
+- When a user mentions a model by informal name, use `resolve-model.ts` first, then feed the resolved `id` into other scripts
 - Convert pricing to per-million-tokens format for readability
 - When comparing, use a markdown table with models as columns
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
