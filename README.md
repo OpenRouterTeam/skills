@@ -1,6 +1,6 @@
 # OpenRouter Skills
 
-A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) for building with [OpenRouter](https://openrouter.ai) — a unified API for 300+ AI models.
+A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) for building with [OpenRouter](https://openrouter.ai) — a unified API for [600+ AI models](https://openrouter.ai/models).
 
 ## Installing
 
@@ -41,7 +41,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 
 | Skill | Useful for |
 |-------|------------|
-| openrouter-typescript-sdk | Complete reference for integrating with 300+ AI models through the OpenRouter TypeScript SDK using the `callModel` pattern |
+| openrouter-typescript-sdk | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
 | openrouter-models | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
 | openrouter-images | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
 
