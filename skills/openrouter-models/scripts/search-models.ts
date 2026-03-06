@@ -1,6 +1,6 @@
-import { requireApiKey, fetchApi, formatModel, parseArgs } from "./lib.js";
+import { optionalApiKey, fetchApi, formatModel, parseArgs } from "./lib.js";
 
-const apiKey = requireApiKey();
+const apiKey = optionalApiKey();
 const args = parseArgs(process.argv.slice(2));
 const query = args.get("_0") as string | undefined;
 const modality = args.get("modality") as string | undefined;

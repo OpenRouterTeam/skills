@@ -10,11 +10,17 @@ export function requireApiKey(): string {
   return apiKey;
 }
 
-export async function fetchApi(path: string, apiKey: string): Promise<any> {
+export function optionalApiKey(): string | undefined {
+  return process.env.OPENROUTER_API_KEY;
+}
+
+export async function fetchApi(path: string, apiKey?: string): Promise<any> {
   const url = `https://openrouter.ai/api/v1${path}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${apiKey}` },
-  });
+  const headers: Record<string, string> = {};
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+  const res = await fetch(url, { headers });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");

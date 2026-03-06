@@ -9,7 +9,7 @@ Discover, search, and compare the 300+ AI models available on OpenRouter. Query 
 
 ## Prerequisites
 
-The `OPENROUTER_API_KEY` environment variable must be set. Get a key at https://openrouter.ai/keys
+The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
 
 ## First-Time Setup
 

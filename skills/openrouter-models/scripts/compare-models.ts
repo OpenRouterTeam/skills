@@ -1,6 +1,6 @@
-import { requireApiKey, fetchApi, parseArgs } from "./lib.js";
+import { optionalApiKey, fetchApi, parseArgs } from "./lib.js";
 
-const apiKey = requireApiKey();
+const apiKey = optionalApiKey();
 const args = parseArgs(process.argv.slice(2));
 const sortBy = args.get("sort") as string | undefined;
 

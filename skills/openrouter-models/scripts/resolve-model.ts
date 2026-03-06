@@ -1,4 +1,4 @@
-import { requireApiKey, fetchApi, formatModel, parseArgs } from "./lib.js";
+import { optionalApiKey, fetchApi, formatModel, parseArgs } from "./lib.js";
 
 const STOP_WORDS = new Set([
   "the", "a", "an", "model", "latest", "best", "from", "by", "most", "for",
@@ -109,7 +109,7 @@ function confidence(score: number): "high" | "medium" | "low" {
 
 // --- main ---
 
-const apiKey = requireApiKey();
+const apiKey = optionalApiKey();
 const args = parseArgs(process.argv.slice(2));
 const rawQuery = args.get("_0") as string | undefined;
 
