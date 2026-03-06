@@ -2,6 +2,22 @@
 
 A collection of [Agent Skills](https://agentskills.io/home) for working with the [OpenRouter](https://openrouter.ai) API. Install these skills to give agents like Claude Code, Codex, and more the ability to query models, generate images, and build applications using the OpenRouter TypeScript SDK.
 
+## Installation
+
+```bash
+npx skills add OpenRouterTeam/skills --skill openrouter-models --global -y
+```
+
+```bash
+npx skills add OpenRouterTeam/skills --skill openrouter-images --global -y
+```
+
+```bash
+npx skills add OpenRouterTeam/skills --skill openrouter-typescript-sdk --global -y
+```
+
+An `OPENROUTER_API_KEY` environment variable is required. Get a key at [openrouter.ai/keys](https://openrouter.ai/keys).
+
 ## Skills
 
 ### [`openrouter-models`](./openrouter-models/)
@@ -37,23 +53,6 @@ Complete reference for building agents powered by 300+ AI models through the Ope
 - Multi-turn agents with stop conditions (step count, cost, tool calls)
 - OAuth PKCE flow for user-facing applications
 - Format conversion between OpenAI and Claude message formats
-
-## Installation
-
-Each skill directory contains a `SKILL.md` file. To install a skill in Claude Code:
-
-1. Copy the skill directory into your project's `.claude/skills/` folder, or
-2. Add the skill path to your Claude Code configuration
-
-Skills that include scripts require a one-time setup:
-
-```bash
-cd <skill-directory>/scripts && npm install
-```
-
-## Prerequisites
-
-An `OPENROUTER_API_KEY` environment variable is required. Get a key at [openrouter.ai/keys](https://openrouter.ai/keys).
 
 ## License
 
