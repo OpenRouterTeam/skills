@@ -1,0 +1,13 @@
+{
+  "name": "openrouter",
+  "owner": {
+    "name": "OpenRouter"
+  },
+  "plugins": [
+    {
+      "name": "openrouter",
+      "source": "./",
+      "description": "Skills for the OpenRouter platform"
+    }
+  ]
+}

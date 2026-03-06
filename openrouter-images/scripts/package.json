@@ -1,8 +1,0 @@
-{
-  "name": "openrouter-images-scripts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "tsx": "^4.0.0"
-  }
-}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "openrouter",
+  "owner": {
+    "name": "OpenRouter",
+    "url": "https://openrouter.ai"
+  },
+  "plugins": [
+    {
+      "name": "openrouter",
+      "source": "./",
+      "description": "Skills for the OpenRouter platform"
+    }
+  ]
+}

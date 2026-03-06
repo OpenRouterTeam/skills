@@ -1,0 +1,11 @@
+{
+  "name": "openrouter",
+  "version": "1.0.0",
+  "description": "Skills for the OpenRouter platform: TypeScript SDK, model discovery, pricing, image generation, and provider performance",
+  "author": {
+    "name": "OpenRouter",
+    "url": "https://openrouter.ai"
+  },
+  "keywords": ["openrouter", "ai", "llm", "models", "typescript", "sdk", "image-generation", "model-routing", "ai-gateway"],
+  "logo": "logo.svg"
+}

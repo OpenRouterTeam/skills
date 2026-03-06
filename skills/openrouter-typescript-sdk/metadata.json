@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "OpenRouter Inc",
+  "date": "January 2026",
+  "abstract": "Complete reference for the OpenRouter TypeScript SDK, enabling AI agents to integrate with 300+ AI models through a unified, type-safe interface. Covers the callModel pattern for text generation, streaming, and multi-turn conversations with automatic tool execution. Includes detailed TypeScript interfaces for Responses API message shapes, streaming event types, authentication methods (API key and OAuth PKCE flow), Zod-based tool definitions, stop conditions, and format conversion helpers. Designed for AI agent consumption with production-ready examples and best practices.",
+  "references": [
+    "https://openrouter.ai/docs/sdks/typescript/call-model/overview",
+    "https://openrouter.ai/docs/sdks",
+    "https://openrouter.ai/docs/api/reference/overview",
+    "https://openrouter.ai/docs/sdks/typescript/api-reference/api-reference/oauth",
+    "https://openrouter.ai/docs/sdks/llms-full.txt"
+  ]
+}
