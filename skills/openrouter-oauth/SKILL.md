@@ -1,6 +1,6 @@
 ---
 name: openrouter-oauth
-description: Implement "Sign In with OpenRouter" using OAuth PKCE — a copy-pasteable auth module and sign-in button component. Use when the user wants to add OpenRouter authentication, login, sign-in buttons, or OAuth to their web app. No client registration, no backend, no secrets required.
+description: Framework-agnostic "Sign In with OpenRouter" using OAuth PKCE with plain fetch — no SDK or dependencies required. A copy-pasteable auth module and sign-in button component that works with React, Vue, Svelte, vanilla JS, or any framework. Use when the user wants to add OpenRouter authentication, login, sign-in buttons, or OAuth to their web app. No client registration, no backend, no secrets required.
 version: 1.0.0
 ---
 

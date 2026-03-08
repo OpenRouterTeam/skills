@@ -44,7 +44,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | openrouter-typescript-sdk | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
 | openrouter-models | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
 | openrouter-images | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
-| openrouter-oauth | Adding [Sign In with OpenRouter](https://openrouterteam.github.io/sign-in-with-openrouter/) — OAuth PKCE authentication with a copy-pasteable auth module and sign-in button component |
+| openrouter-oauth | Framework-agnostic [Sign In with OpenRouter](https://openrouterteam.github.io/sign-in-with-openrouter/) — OAuth PKCE authentication using plain `fetch`, no SDK or dependencies required. Includes a copy-pasteable auth module and sign-in button component |
 
 ## Environment
 
