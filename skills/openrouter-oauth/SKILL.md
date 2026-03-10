@@ -1,7 +1,8 @@
 ---
 name: openrouter-oauth
-description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add OpenRouter login, authentication, sign-in buttons, or OAuth to their app, even if they don't mention "OpenRouter" directly but need to authenticate users for AI model access.
+description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add login, authentication, sign-in buttons, OAuth, API keys for browser apps, PKCE, or needs to connect to AI models from the browser. Trigger even if "OpenRouter" isn't mentioned — if they need browser-based auth for AI model access, this is the skill.
 version: 2.0.0
+compatibility: browser (requires Web Crypto API, localStorage, sessionStorage)
 ---
 
 # Sign In with OpenRouter
@@ -33,7 +34,7 @@ code_challenge = base64url(SHA-256(code_verifier))
 
 - Use `crypto.getRandomValues(new Uint8Array(32))` for the random bytes
 - base64url encoding: standard base64, then replace `+` → `-`, `/` → `_`, strip trailing `=`
-- Store `code_verifier` in **`sessionStorage`** (not `localStorage`) — it's per-tab and auto-cleared on close
+- Store `code_verifier` in **`sessionStorage`** (not `localStorage`) — so the verifier doesn't persist after the tab closes or leak to other tabs (security: the verifier is a one-time secret)
 
 ### Step 2: Redirect to OpenRouter
 
@@ -51,7 +52,7 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 
 User returns to your `callback_url` with `?code=` appended. Extract the `code` query parameter.
 
-**Important:** Before processing `?code=`, check that a `code_verifier` exists in `sessionStorage`. This prevents hijacking unrelated query params that happen to be named `code`. Implement a `hasOAuthCallbackPending()` guard.
+**Important:** Before processing `?code=`, check that a `code_verifier` exists in `sessionStorage`. Other routes or third-party code might use `?code=` query params for unrelated purposes — a `hasOAuthCallbackPending()` guard ensures you only consume codes that belong to your OAuth flow.
 
 ### Step 4: Exchange code for API key
 
@@ -78,6 +79,75 @@ Remove the verifier from `sessionStorage` before or after the exchange.
 
 ---
 
+## Auth Module Reference
+
+Drop-in module implementing the full PKCE flow. Reduces risk of getting base64url encoding, sessionStorage handling, or the key exchange wrong.
+
+```typescript
+// lib/openrouter-auth.ts
+const STORAGE_KEY = "openrouter_api_key";
+const VERIFIER_KEY = "openrouter_code_verifier";
+
+type AuthListener = () => void;
+const listeners = new Set<AuthListener>();
+export const onAuthChange = (fn: AuthListener) => { listeners.add(fn); return () => listeners.delete(fn); };
+const notify = () => listeners.forEach((fn) => fn());
+
+// Cross-tab sync: other tabs update when user signs in/out
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => { if (e.key === STORAGE_KEY) notify(); });
+}
+
+export const getApiKey = (): string | null =>
+  typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+
+export const setApiKey = (key: string) => { localStorage.setItem(STORAGE_KEY, key); notify(); };
+export const clearApiKey = () => { localStorage.removeItem(STORAGE_KEY); notify(); };
+
+// Guard: only process ?code= if we initiated an OAuth flow in this tab
+export const hasOAuthCallbackPending = (): boolean =>
+  typeof window !== "undefined" && sessionStorage.getItem(VERIFIER_KEY) !== null;
+
+function generateCodeVerifier(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function computeS256Challenge(verifier: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+export async function initiateOAuth(callbackUrl?: string): Promise<void> {
+  const verifier = generateCodeVerifier();
+  sessionStorage.setItem(VERIFIER_KEY, verifier);
+  const challenge = await computeS256Challenge(verifier);
+  const url = callbackUrl ?? window.location.origin + window.location.pathname;
+  window.location.href = `https://openrouter.ai/auth?${new URLSearchParams({
+    callback_url: url, code_challenge: challenge, code_challenge_method: "S256",
+  })}`;
+}
+
+export async function handleOAuthCallback(code: string): Promise<void> {
+  const verifier = sessionStorage.getItem(VERIFIER_KEY);
+  if (!verifier) throw new Error("Missing code verifier");
+  sessionStorage.removeItem(VERIFIER_KEY);
+  const res = await fetch("https://openrouter.ai/api/v1/auth/keys", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, code_verifier: verifier, code_challenge_method: "S256" }),
+  });
+  if (!res.ok) throw new Error(`Key exchange failed (${res.status})`);
+  const { key } = await res.json();
+  setApiKey(key);
+}
+```
+
+---
+
 ## Sign-in Button
 
 Build a button component that calls `initiateOAuth()` on click. Include the OpenRouter logo and provide multiple visual variants.
@@ -94,6 +164,8 @@ Build a button component that calls `initiateOAuth()` on click. Include the Open
 ```
 
 ### Variants (Tailwind)
+
+Recommended classes for visual consistency with the reference implementation:
 
 | Variant | Classes |
 |---|---|
