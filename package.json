@@ -1,0 +1,15 @@
+{
+  "name": "openrouter-skills",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "format": "biome format --fix .",
+    "typecheck": "bun run typecheck:models && bun run typecheck:images",
+    "typecheck:models": "cd skills/openrouter-models/scripts && bunx tsc --noEmit",
+    "typecheck:images": "cd skills/openrouter-images/scripts && bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.0"
+  }
+}

@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - name: Biome lint
+        run: bunx biome check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - name: Install skill dependencies
+        run: |
+          cd skills/openrouter-models/scripts && bun install && cd ../../..
+          cd skills/openrouter-images/scripts && bun install && cd ../../..
+      - name: Type check
+        run: bun run typecheck
