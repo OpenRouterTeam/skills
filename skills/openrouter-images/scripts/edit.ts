@@ -1,4 +1,4 @@
-import type { ChatResponse, Modality } from '@openrouter/sdk/models';
+import type { ResponsesOutputModality } from '@openrouter/sdk/models';
 import {
   createClient,
   DEFAULT_MODEL,
@@ -36,52 +36,58 @@ if (imageSize) {
   imageConfig.image_size = imageSize;
 }
 
-const modalities: Modality[] = [
+const modalities: ResponsesOutputModality[] = [
   'image',
   'text',
 ];
 
-const response = (await client.chat.send({
-  chatGenerationParams: {
-    model,
-    messages: [
-      {
-        role: 'user' as const,
-        content: [
-          {
-            type: 'image_url' as const,
-            imageUrl: {
-              url: dataUrl,
-            },
-          },
-          {
-            type: 'text' as const,
-            text: prompt,
-          },
-        ],
-      },
-    ],
-    modalities,
-    ...(Object.keys(imageConfig).length > 0
-      ? {
-          imageConfig,
-        }
-      : {}),
-  },
-})) as ChatResponse;
+const result = client.callModel({
+  model,
+  input: [
+    {
+      role: 'user' as const,
+      content: [
+        {
+          type: 'input_image' as const,
+          detail: 'auto' as const,
+          imageUrl: dataUrl,
+        },
+        {
+          type: 'input_text' as const,
+          text: prompt,
+        },
+      ],
+    },
+  ],
+  modalities,
+  ...(Object.keys(imageConfig).length > 0
+    ? {
+        imageConfig,
+      }
+    : {}),
+});
 
-const message = response.choices?.[0]?.message;
+const response = await result.getResponse();
 
-if (!message) {
-  console.error('Error: No response from model.');
-  process.exit(1);
+// Extract text from message output items
+for (const item of response.output) {
+  if (item.type === 'message' && typeof item.content === 'string' && item.content) {
+    console.error(`Model: ${item.content}`);
+  }
 }
 
-if (message.content && typeof message.content === 'string') {
-  console.error(`Model: ${message.content}`);
-}
+// Extract images from image_generation_call output items
+const images: string[] = response.output
+  .filter(
+    (
+      item,
+    ): item is typeof item & {
+      type: 'image_generation_call';
+      result: string;
+    } => item.type === 'image_generation_call' && typeof item.result === 'string',
+  )
+  .map((item) => item.result);
 
-const images: string[] = message.images?.map((img) => img.imageUrl.url) ?? [];
 if (images.length === 0) {
   console.error('Error: No images returned by model.');
   process.exit(1);

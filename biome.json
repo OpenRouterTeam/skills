@@ -7,7 +7,12 @@
     "defaultBranch": "main"
   },
   "files": {
-    "includes": ["**", "!**/*.json", "!!**/biome.json", "!**/node_modules/**"]
+    "includes": [
+      "**",
+      "!**/*.json",
+      "!!**/biome.json",
+      "!**/node_modules"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -31,7 +36,12 @@
         "useBlockStatements": "error",
         "noParameterAssign": "error",
         "useConst": "error",
-        "useImportType": { "level": "on", "options": { "style": "separatedType" } },
+        "useImportType": {
+          "level": "on",
+          "options": {
+            "style": "separatedType"
+          }
+        },
         "noInferrableTypes": "error",
         "noUselessElse": "error"
       },
@@ -42,7 +52,12 @@
         "noExplicitAny": "error",
         "noAssignInExpressions": "error",
         "noConsole": "off",
-        "noDoubleEquals": { "level": "error", "options": { "ignoreNull": false } }
+        "noDoubleEquals": {
+          "level": "error",
+          "options": {
+            "ignoreNull": false
+          }
+        }
       },
       "performance": {
         "recommended": true,
