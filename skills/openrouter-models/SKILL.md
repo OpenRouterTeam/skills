@@ -1,6 +1,16 @@
 ---
 name: openrouter-models
-description: Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance. Use when the user asks about available OpenRouter models, model pricing, model context lengths, model capabilities, provider latency or uptime, throughput limits, supported parameters, wants to search/filter/compare models, or find the fastest provider for a model.
+description: >-
+  Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance.
+  Use this skill whenever the user asks about AI models — even if they don't explicitly mention OpenRouter.
+  Triggers include: "what models are available", "which model should I use", "recommend a model for X",
+  "cheapest/fastest/best model for Y", "how much does Claude/GPT/Llama cost", "what's the context length of X",
+  "what models support tool use/images/reasoning/audio", "is model X available on OpenRouter",
+  "compare Claude vs GPT vs Gemini", "model deprecation or expiration dates", "which provider is fastest",
+  "lowest latency provider", "provider uptime", "throughput limits", "find me a model that can do X",
+  searching/filtering/comparing models, or any question about model pricing, capabilities, or availability.
+  Also use when the user mentions a model by informal name (e.g. "sonnet", "4o mini", "llama 3") —
+  resolve it first, then answer their question with live data.
 ---
 
 # OpenRouter Models
@@ -223,10 +233,22 @@ Returns for each provider:
 ## Presenting Results
 
 - When a user mentions a model by informal name, use `resolve-model.ts` first, then feed the resolved `id` into other scripts
-- Convert pricing to per-million-tokens format for readability
-- When comparing, use a markdown table with models as columns
+- Convert pricing to per-million-tokens format — raw per-token numbers are tiny decimals that humans can't parse at a glance
+- When comparing, use a markdown table with models as columns — side-by-side layout is far easier to scan than sequential blocks
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
-- Note cache pricing when available — it can cut input costs 90%+
-- Flag models with `expiration_date` as deprecated
+- Highlight cache pricing when available — it can cut input costs by 90%+, which often changes the cost-optimal choice entirely
+- Flag models with `expiration_date` as deprecated — users need to plan migration before removal
 - When a model has multiple providers at different prices, mention the cheapest option
+
+## Common Workflows
+
+Chain scripts together based on what the user actually needs:
+
+| User intent | Workflow |
+|---|---|
+| "Which model should I use for X?" | `resolve-model.ts` (if informal name) → `search-models.ts --modality` or `list-models.ts --category` → `compare-models.ts` → recommend based on results |
+| "What's the cheapest model for Y?" | `list-models.ts --sort price` or `compare-models.ts A B --sort price` → highlight cache pricing if relevant |
+| "Fastest provider for model X?" | `resolve-model.ts` (if needed) → `get-endpoints.ts --sort throughput` → call out the top provider |
+| "Compare Claude vs GPT" | `resolve-model.ts` for each informal name → `compare-models.ts` with resolved IDs → present markdown table |
+| "Is model X being deprecated?" | `search-models.ts "X"` → check `expiration_date` field → advise on timeline and alternatives |
