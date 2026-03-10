@@ -185,6 +185,8 @@ type ToolStreamEvent =
 
 ## Message Stream Events
 
+> **Deprecated**: Prefer `getItemsStream()` which yields complete output items that update in place by ID. `getNewMessagesStream()` still works but `getItemsStream()` provides a better pattern for UI rendering.
+
 The `getNewMessagesStream()` yields OpenResponses format updates:
 
 ```typescript

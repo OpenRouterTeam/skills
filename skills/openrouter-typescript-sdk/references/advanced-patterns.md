@@ -67,10 +67,12 @@ const result = client.callModel({
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `numberOfTurns` | number | Current turn count |
-| `messages` | array | All messages so far |
-| `instructions` | string | Current system instructions |
-| `totalCost` | number | Accumulated cost |
+| `numberOfTurns` | `number` | Current turn count (1-indexed) |
+| `turnRequest` | `OpenResponsesRequest` | The current request being made |
+| `toolCall` | `OpenResponsesFunctionToolCall` | Current tool call (in tool context) |
+| `messageHistory` | `array` | All messages so far |
+| `model` | `string` | Current model being used |
+| `models` | `string[]` | Fallback models list |
 
 ---
 
@@ -123,6 +125,13 @@ const result = client.callModel({
 });
 ```
 
+Additional built-in stop conditions:
+
+| Condition | Description |
+|-----------|-------------|
+| `maxTokensUsed(n)` | Stop when total token usage exceeds n |
+| `finishReasonIs(reason)` | Stop on a specific finish reason |
+
 ---
 
 ## Generator Tools
@@ -160,4 +169,36 @@ const manualTool = tool({
   inputSchema: z.object({ message: z.string() }),
   execute: false
 });
+```
+
+---
+
+## Tool Approval
+
+Require human approval before tool execution:
+
+```typescript
+const dangerousTool = tool({
+  name: 'delete_file',
+  description: 'Delete a file',
+  inputSchema: z.object({ path: z.string() }),
+  requireApproval: true,
+  execute: async ({ path }) => { /* ... */ }
+});
+```
+
+When `requireApproval` is set, the tool call is returned without execution — the caller must approve and re-submit.
+
+---
+
+## Type Inference Utilities
+
+Extract input/output/event types from tool definitions:
+
+```typescript
+import type { InferToolInput, InferToolOutput, InferToolEvent } from '@openrouter/sdk';
+
+type WeatherInput = InferToolInput<typeof weatherTool>;
+type WeatherOutput = InferToolOutput<typeof weatherTool>;
+type SearchEvent = InferToolEvent<typeof searchTool>;
 ```

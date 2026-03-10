@@ -82,8 +82,8 @@ client.callModel({
   input: [{
     role: 'user',
     content: [
-      { type: 'text', text: 'What is in this image?' },
-      { type: 'image_url', image_url: { url: 'https://example.com/image.png' } }
+      { type: 'input_text', text: 'What is in this image?' },
+      { type: 'input_image', imageUrl: 'https://example.com/image.png', detail: 'auto' }
     ]
   }]
 });
@@ -106,8 +106,12 @@ client.callModel({
 | `getText()` | Get complete text after all tools complete |
 | `getResponse()` | Full response object with token usage |
 | `getTextStream()` | Stream text deltas as they arrive |
-| `getReasoningStream()` | Stream reasoning tokens (for o1/reasoning models) |
+| `getItemsStream()` | Stream complete output items (recommended for UIs) |
+| `getReasoningStream()` | Stream reasoning tokens (for reasoning models) |
 | `getToolCallsStream()` | Stream tool calls as they complete |
+| `getToolCalls()` | Get all tool calls after completion (non-streaming) |
+| `getFullResponsesStream()` | Raw stream events for custom processing |
+| `cancel()` | Cancel an in-progress request |
 
 ```typescript
 // Get text
@@ -217,6 +221,38 @@ for await (const delta of result.getTextStream()) {
 }
 ```
 
+### Items Streaming (Recommended for UIs)
+
+`getItemsStream()` yields complete output items (text, tool calls, reasoning, images) that update in place by ID — ideal for rendering in UIs:
+
+```typescript
+for await (const item of result.getItemsStream()) {
+  switch (item.type) {
+    case 'message':
+      // item.content updates progressively — same item.id, growing text
+      renderMessage(item.id, item.content);
+      break;
+    case 'function_call':
+      renderToolCall(item.id, item.name, item.arguments);
+      break;
+    case 'image_generation_call':
+      if (item.result) renderImage(item.result);
+      break;
+  }
+}
+```
+
+Items share a stable `id` — re-emitted with progressively more content. Use item ID as a React/UI key and replace-in-place on each emission.
+
+### Cancellation
+
+```typescript
+const result = client.callModel({ model: 'openai/gpt-5-nano', input: 'Long task...' });
+
+// Cancel after 5 seconds
+setTimeout(() => result.cancel(), 5000);
+```
+
 ### Streaming Tool Calls
 
 ```typescript
@@ -256,8 +292,100 @@ const result = client.callModel({
   topP: 0.9,               // Nucleus sampling parameter
   frequencyPenalty: 0.5,    // Reduce repetition
   presencePenalty: 0.5,     // Encourage new topics
-  stop: ['\n\n']           // Stop sequences
 });
+```
+
+---
+
+## Model Fallback
+
+Provide multiple models — the SDK tries each in order:
+
+```typescript
+const result = client.callModel({
+  models: ['anthropic/claude-sonnet-4', 'openai/gpt-4o', 'google/gemini-2.0-flash'],
+  input: 'Summarize this document'
+});
+```
+
+---
+
+## Image Generation
+
+Generate images via `callModel` with `modalities` and `imageConfig`:
+
+```typescript
+const result = client.callModel({
+  model: 'openai/dall-e-3',
+  input: 'A sunset over mountains',
+  modalities: ['image', 'text'],
+  imageConfig: {
+    aspect_ratio: '16:9',
+    image_size: '1024x1024'
+  }
+});
+
+const response = await result.getResponse();
+for (const item of response.output) {
+  if (item.type === 'image_generation_call' && item.result) {
+    // item.result is base64-encoded image data
+    saveImage(item.result);
+  }
+}
+```
+
+---
+
+## Structured Output
+
+Force JSON output with a schema:
+
+```typescript
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'List 3 programming languages with pros and cons',
+  text: {
+    format: {
+      type: 'json_schema',
+      name: 'languages',
+      schema: {
+        type: 'object',
+        properties: {
+          languages: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                pros: { type: 'array', items: { type: 'string' } },
+                cons: { type: 'array', items: { type: 'string' } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+});
+```
+
+---
+
+## Reasoning Models
+
+Enable extended thinking for reasoning models:
+
+```typescript
+const result = client.callModel({
+  model: 'openai/o3',
+  input: 'Solve this step by step: ...',
+  reasoning: { effort: 'high' }
+});
+
+// Stream reasoning tokens
+for await (const delta of result.getReasoningStream()) {
+  process.stdout.write(delta);
+}
 ```
 
 ---
@@ -377,8 +505,10 @@ console.log('Final answer:', answer);
 1. **Always use callModel** unless you need raw request/response control — it handles tool loops, streaming, and multi-turn state automatically
 2. **Use Zod for tool schemas** for runtime validation and TypeScript inference
 3. **Set stop conditions** to prevent runaway costs: `stopWhen: [stepCountIs(20), maxCost(5.00)]`
-4. **Use streaming** for long responses for better UX and early termination
-5. **Handle errors** with retry logic for transient failures (429, 5xx)
+4. **Use `getItemsStream()`** for UI rendering — items update in place by ID, no manual state management
+5. **Use `models` array** for automatic fallback across providers
+6. **Use streaming** for long responses for better UX and early termination
+7. **Handle errors** with retry logic for transient failures (429, 5xx)
 
 ---
 
@@ -389,7 +519,7 @@ console.log('Final answer:', answer);
 | `references/authentication.md` | OAuth PKCE flow, API key management, security best practices |
 | `references/event-shapes.md` | Full stream event type union, individual event interfaces, raw stream processing |
 | `references/message-shapes.md` | Message/response type interfaces, StepResult, TurnContext, tool call parsing |
-| `references/advanced-patterns.md` | Format conversion (OpenAI/Claude), dynamic parameters, nextTurnParams, generator/manual tools, custom stop conditions |
+| `references/advanced-patterns.md` | Format conversion (OpenAI/Claude), dynamic parameters, nextTurnParams, generator/manual tools, custom stop conditions, requireApproval, state persistence, type inference utilities |
 
 ---
 

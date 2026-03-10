@@ -140,6 +140,36 @@ interface FunctionCallOutputMessage {
   call_id: string;
   output: string;
 }
+
+// Reasoning output
+interface ResponseReasoningItem {
+  type: 'reasoning';
+  id: string;
+  summary?: Array<{ type: 'summary_text'; text: string }>;
+}
+
+// Image generation output
+interface ResponseImageGenerationCall {
+  type: 'image_generation_call';
+  id: string;
+  result?: string;  // base64 image data
+  status: 'in_progress' | 'generating' | 'completed';
+}
+
+// Web search output (plugin)
+interface ResponseWebSearchCall {
+  type: 'web_search_call';
+  id: string;
+  status: string;
+}
+
+// File search output (plugin)
+interface ResponseFileSearchCall {
+  type: 'file_search_call';
+  id: string;
+  status: string;
+  results?: Array<{ text: string; file_id: string }>;
+}
 ```
 
 ---
