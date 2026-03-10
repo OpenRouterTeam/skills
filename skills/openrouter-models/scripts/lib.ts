@@ -1,9 +1,13 @@
+import { OpenRouter } from '@openrouter/sdk';
+import type { Model } from '@openrouter/sdk/models';
+import type { FormattedModel } from './types.js';
+
 export function requireApiKey(): string {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     console.error(
-      "Error: OPENROUTER_API_KEY environment variable is not set.\n" +
-        "Get your API key at https://openrouter.ai/keys"
+      'Error: OPENROUTER_API_KEY environment variable is not set.\n' +
+        'Get your API key at https://openrouter.ai/keys',
     );
     process.exit(1);
   }
@@ -14,49 +18,71 @@ export function optionalApiKey(): string | undefined {
   return process.env.OPENROUTER_API_KEY;
 }
 
-export async function fetchApi(path: string, apiKey?: string): Promise<any> {
-  const url = `https://openrouter.ai/api/v1${path}`;
-  const headers: Record<string, string> = {};
-  if (apiKey) {
-    headers.Authorization = `Bearer ${apiKey}`;
-  }
-  const res = await fetch(url, { headers });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    switch (res.status) {
-      case 401:
-        console.error("Error 401: Invalid API key. Check your OPENROUTER_API_KEY.");
-        break;
-      case 404:
-        console.error(`Error 404: Not found — ${url}`);
-        console.error("Use list-models.ts to see available model IDs.");
-        break;
-      case 429:
-        console.error("Error 429: Rate limited. Wait a moment and try again.");
-        break;
-      default:
-        console.error(`Error ${res.status}: ${body || res.statusText}`);
-    }
-    process.exit(1);
-  }
-
-  return res.json();
+export function createClient(apiKey?: string): OpenRouter {
+  return new OpenRouter({
+    apiKey: apiKey ?? '',
+  });
 }
 
-export function formatModel(m: any) {
+export function formatModel(m: Model): FormattedModel {
   return {
     id: m.id,
     name: m.name,
     description: m.description,
     created: m.created,
-    context_length: m.context_length,
-    pricing: m.pricing,
-    architecture: m.architecture,
-    top_provider: m.top_provider,
-    per_request_limits: m.per_request_limits,
-    supported_parameters: m.supported_parameters,
-    ...(m.expiration_date ? { expiration_date: m.expiration_date } : {}),
+    context_length: m.contextLength,
+    pricing: {
+      prompt: m.pricing.prompt,
+      completion: m.pricing.completion,
+      ...(m.pricing.request !== undefined
+        ? {
+            request: m.pricing.request,
+          }
+        : {}),
+      ...(m.pricing.image !== undefined
+        ? {
+            image: m.pricing.image,
+          }
+        : {}),
+      ...(m.pricing.inputCacheRead !== undefined
+        ? {
+            input_cache_read: m.pricing.inputCacheRead,
+          }
+        : {}),
+      ...(m.pricing.inputCacheWrite !== undefined
+        ? {
+            input_cache_write: m.pricing.inputCacheWrite,
+          }
+        : {}),
+      ...(m.pricing.discount !== undefined
+        ? {
+            discount: m.pricing.discount,
+          }
+        : {}),
+    },
+    architecture: {
+      tokenizer: m.architecture.tokenizer ?? null,
+      modality: m.architecture.modality,
+      input_modalities: m.architecture.inputModalities.map(String),
+      output_modalities: m.architecture.outputModalities.map(String),
+    },
+    top_provider: {
+      context_length: m.topProvider.contextLength ?? null,
+      max_completion_tokens: m.topProvider.maxCompletionTokens ?? null,
+      is_moderated: m.topProvider.isModerated,
+    },
+    per_request_limits: m.perRequestLimits
+      ? {
+          prompt_tokens: m.perRequestLimits.promptTokens,
+          completion_tokens: m.perRequestLimits.completionTokens,
+        }
+      : null,
+    supported_parameters: m.supportedParameters.map(String),
+    ...(m.expirationDate
+      ? {
+          expiration_date: m.expirationDate,
+        }
+      : {}),
   };
 }
 
@@ -65,17 +91,21 @@ export function parseArgs(argv: string[]): Map<string, string | true> {
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i].startsWith("--") && argv[i + 1] && !argv[i + 1].startsWith("--")) {
-      result.set(argv[i].slice(2), argv[i + 1]);
+    const current = argv[i];
+    const next = argv[i + 1];
+    if (current.startsWith('--') && next && !next.startsWith('--')) {
+      result.set(current.slice(2), next);
       i++;
-    } else if (argv[i].startsWith("--")) {
-      result.set(argv[i].slice(2), true);
+    } else if (current.startsWith('--')) {
+      result.set(current.slice(2), true);
     } else {
-      positional.push(argv[i]);
+      positional.push(current);
     }
   }
 
-  positional.forEach((v, i) => result.set(`_${i}`, v));
-  result.set("_count", String(positional.length));
+  for (let j = 0; j < positional.length; j++) {
+    result.set(`_${j}`, positional[j]);
+  }
+  result.set('_count', String(positional.length));
   return result;
 }

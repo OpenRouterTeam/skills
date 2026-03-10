@@ -9,12 +9,13 @@ Discover, search, and compare the 300+ AI models available on OpenRouter. Query 
 
 ## Prerequisites
 
-The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
+- `bun` runtime installed
+- The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
 
 ## First-Time Setup
 
 ```bash
-cd <skill-path>/scripts && npm install
+cd <skill-path>/scripts && bun install
 ```
 
 ## Decision Tree
@@ -43,9 +44,9 @@ Pick the right script based on what the user is asking:
 Resolve an informal or vague model name to an exact OpenRouter model ID using fuzzy matching:
 
 ```bash
-cd <skill-path>/scripts && npx tsx resolve-model.ts "claude sonnet"
-cd <skill-path>/scripts && npx tsx resolve-model.ts "gpt 4o mini"
-cd <skill-path>/scripts && npx tsx resolve-model.ts "llama 3.1"
+cd <skill-path>/scripts && bun run resolve-model.ts "claude sonnet"
+cd <skill-path>/scripts && bun run resolve-model.ts "gpt 4o mini"
+cd <skill-path>/scripts && bun run resolve-model.ts "llama 3.1"
 ```
 
 Results include a `confidence` level and `score`:
@@ -61,7 +62,7 @@ Results include a `confidence` level and `score`:
 ## List Models
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts
+cd <skill-path>/scripts && bun run list-models.ts
 ```
 
 ### Filter by Category
@@ -69,7 +70,7 @@ cd <skill-path>/scripts && npx tsx list-models.ts
 Server-side category filtering:
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts --category programming
+cd <skill-path>/scripts && bun run list-models.ts --category programming
 ```
 
 Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology`, `science`, `translation`, `legal`, `finance`, `health`, `trivia`, `academia`
@@ -77,10 +78,10 @@ Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology
 ### Sort Results
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts --sort newest      # Recently added first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort price       # Cheapest first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort context     # Largest context first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort throughput  # Most output tokens first
+cd <skill-path>/scripts && bun run list-models.ts --sort newest      # Recently added first
+cd <skill-path>/scripts && bun run list-models.ts --sort price       # Cheapest first
+cd <skill-path>/scripts && bun run list-models.ts --sort context     # Largest context first
+cd <skill-path>/scripts && bun run list-models.ts --sort throughput  # Most output tokens first
 ```
 
 Models with upcoming `expiration_date` values trigger a stderr warning.
@@ -88,9 +89,9 @@ Models with upcoming `expiration_date` values trigger a stderr warning.
 ## Search Models
 
 ```bash
-cd <skill-path>/scripts && npx tsx search-models.ts "claude"
-cd <skill-path>/scripts && npx tsx search-models.ts --modality image
-cd <skill-path>/scripts && npx tsx search-models.ts "gpt" --modality text
+cd <skill-path>/scripts && bun run search-models.ts "claude"
+cd <skill-path>/scripts && bun run search-models.ts --modality image
+cd <skill-path>/scripts && bun run search-models.ts "gpt" --modality text
 ```
 
 Modalities: `text`, `image`, `audio`, `file`
@@ -100,8 +101,8 @@ Modalities: `text`, `image`, `audio`, `file`
 Compare two or more models side-by-side with pricing in per-million-tokens format. Uses exact ID matching — `openai/gpt-4o` matches only that model, not variants like `gpt-4o-mini`.
 
 ```bash
-cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"
-cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o" "google/gemini-2.5-pro" --sort price
+cd <skill-path>/scripts && bun run compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"
+cd <skill-path>/scripts && bun run compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o" "google/gemini-2.5-pro" --sort price
 ```
 
 Sort options: `price` (cheapest first), `context` (largest first), `speed`/`throughput` (most output tokens first)
@@ -111,9 +112,9 @@ Sort options: `price` (cheapest first), `context` (largest first), `speed`/`thro
 Get per-provider latency, uptime, and throughput for any model:
 
 ```bash
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "anthropic/claude-sonnet-4"
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "anthropic/claude-sonnet-4" --sort throughput
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "openai/gpt-4o" --sort latency
+cd <skill-path>/scripts && bun run get-endpoints.ts "anthropic/claude-sonnet-4"
+cd <skill-path>/scripts && bun run get-endpoints.ts "anthropic/claude-sonnet-4" --sort throughput
+cd <skill-path>/scripts && bun run get-endpoints.ts "openai/gpt-4o" --sort latency
 ```
 
 Sort options: `throughput` (fastest tokens/sec first), `latency` (lowest p50 ms first), `uptime` (most reliable first), `price` (cheapest first)
