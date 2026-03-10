@@ -1,6 +1,15 @@
 ---
 name: openrouter-images
-description: Generate images from text prompts and edit existing images using OpenRouter's image generation models. Use when the user asks to create, generate, or make an image, picture, or illustration from a description, or wants to edit, modify, transform, or alter an existing image with a text prompt.
+description: >
+  Generate images from text prompts and edit existing images using OpenRouter's image generation models.
+  Use this skill whenever the user wants to create visual content of any kind: generate an image, picture,
+  photo, artwork, illustration, logo, icon, banner, thumbnail, mockup, diagram, or sketch from a description.
+  Also use when the user wants to edit, modify, transform, or alter an existing image — changing colors,
+  adding or removing elements, converting style (watercolor, pixel art, oil painting, etc.), or fixing
+  something in a photo. Trigger on phrases like "make me a picture", "draw/sketch/paint this", "visualize
+  this concept", "create a logo", "generate a mockup", "change/fix/update this image", "add/remove something
+  from this photo", or any request that implies producing or modifying a visual. Even if the user doesn't
+  say "image generation" explicitly, use this skill whenever the output should be an image file.
 ---
 
 # OpenRouter Images
@@ -96,11 +105,20 @@ Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
 }
 ```
 
+## Prompt Tips
+
+Better prompts produce better images. A few specifics go a long way:
+
+- **State the medium** — "a watercolor painting", "a 35mm photograph", "pixel art", "3D render". This anchors the model's style.
+- **Describe style and mood** — lighting, color palette, atmosphere ("warm golden-hour light", "moody noir shadows", "vibrant pop-art colors").
+- **Be specific about composition** — what's in the foreground vs background, camera angle, framing ("close-up portrait", "wide aerial shot").
+- **For edits, be precise** — say exactly what to change and what to preserve ("make the sky sunset-orange but keep the buildings unchanged").
+
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use a different model, pass `--model <id>` with any OpenRouter model ID that supports image output modalities.
 
-Use the `openrouter-models` skill to discover image-capable models:
+To discover which models support image generation, use the `openrouter-models` skill to search by modality — it can filter and compare image-capable models by price, speed, and quality:
 
 ```bash
 cd <openrouter-models-skill-path>/scripts && bun run search-models.ts --modality image
@@ -108,8 +126,9 @@ cd <openrouter-models-skill-path>/scripts && bun run search-models.ts --modality
 
 ## Presenting Results
 
-- After generating or editing, display the saved image to the user
-- Include the model used and any text response the model provided (printed to stderr)
-- If multiple images are returned, show all of them
-- When the user doesn't specify an output path, tell them where the file was saved
-- For edit operations, mention the source image that was modified
+- **Display the saved image** to the user immediately — they need to evaluate quality and may want iterations.
+- **Mention the model used** — different models have different strengths, and the user may want to retry with another model.
+- **Tell them the file path** — they'll need it for further edits, to include in other work, or to share.
+- Include any text response the model provided (printed to stderr).
+- If multiple images are returned, show all of them.
+- For edit operations, mention the source image that was modified.
