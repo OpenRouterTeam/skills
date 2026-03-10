@@ -9,12 +9,13 @@ Generate images from text prompts and edit existing images via OpenRouter's chat
 
 ## Prerequisites
 
-The `OPENROUTER_API_KEY` environment variable must be set. Get a key at https://openrouter.ai/keys
+- The `OPENROUTER_API_KEY` environment variable must be set. Get a key at https://openrouter.ai/keys
+- `bun` must be installed
 
 ## First-Time Setup
 
 ```bash
-cd <skill-path>/scripts && npm install
+cd <skill-path>/scripts && bun install
 ```
 
 ## Decision Tree
@@ -34,10 +35,10 @@ Pick the right script based on what the user is asking:
 Create a new image from a text prompt:
 
 ```bash
-cd <skill-path>/scripts && npx tsx generate.ts "a red panda wearing sunglasses"
-cd <skill-path>/scripts && npx tsx generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9
-cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output dragon.png
-cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-2.5-flash-image
+cd <skill-path>/scripts && bun run generate.ts "a red panda wearing sunglasses"
+cd <skill-path>/scripts && bun run generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9
+cd <skill-path>/scripts && bun run generate.ts "pixel art of a dragon" --output dragon.png
+cd <skill-path>/scripts && bun run generate.ts "a watercolor painting" --model google/gemini-2.5-flash-image
 ```
 
 ### Options
@@ -54,9 +55,9 @@ cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model g
 Modify an existing image with a text prompt:
 
 ```bash
-cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
-cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
-cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor style" --model google/gemini-2.5-flash-image
+cd <skill-path>/scripts && bun run edit.ts photo.png "make the sky purple"
+cd <skill-path>/scripts && bun run edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
+cd <skill-path>/scripts && bun run edit.ts scene.png "convert to watercolor style" --model google/gemini-2.5-flash-image
 ```
 
 ### Options
@@ -102,7 +103,7 @@ The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To
 Use the `openrouter-models` skill to discover image-capable models:
 
 ```bash
-cd <openrouter-models-skill-path>/scripts && npx tsx search-models.ts --modality image
+cd <openrouter-models-skill-path>/scripts && bun run search-models.ts --modality image
 ```
 
 ## Presenting Results
