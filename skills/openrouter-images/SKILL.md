@@ -114,11 +114,20 @@ Better prompts produce better images. A few specifics go a long way:
 - **Be specific about composition** — what's in the foreground vs background, camera angle, framing ("close-up portrait", "wide aerial shot").
 - **For edits, be precise** — say exactly what to change and what to preserve ("make the sky sunset-orange but keep the buildings unchanged").
 
-## Using a Different Model
+## Model Selection
 
-The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use a different model, pass `--model <id>` with any OpenRouter model ID that supports image output modalities.
+The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2) — it's fast, free-tier eligible, and handles most requests well.
 
-To discover which models support image generation, use the `openrouter-models` skill to search by modality — it can filter and compare image-capable models by price, speed, and quality:
+Pass `--model <id>` to use a different model. Choose based on what the user needs:
+
+| Need | Recommended approach |
+|---|---|
+| Quick drafts, iteration | Default model — fast turnaround for exploring ideas |
+| Highest quality / artistic style | Try a dedicated image model (e.g. DALL-E, Stable Diffusion variants) |
+| Photo-realistic edits | Gemini models handle edit instructions well since they understand both text and images natively |
+| Budget-conscious | Stick with the default or check pricing via the `openrouter-models` skill |
+
+To discover all available image-generation models, use the `openrouter-models` skill:
 
 ```bash
 cd <openrouter-models-skill-path>/scripts && bun run search-models.ts --modality image
@@ -126,9 +135,10 @@ cd <openrouter-models-skill-path>/scripts && bun run search-models.ts --modality
 
 ## Presenting Results
 
-- **Display the saved image** to the user immediately — they need to evaluate quality and may want iterations.
-- **Mention the model used** — different models have different strengths, and the user may want to retry with another model.
+- **Display the saved image** to the user immediately — they need to see the result to decide if it's good or needs another iteration.
+- **Mention the model used** — so the user can switch models if the style doesn't match what they wanted.
 - **Tell them the file path** — they'll need it for further edits, to include in other work, or to share.
+- **Suggest refinements** — if the result isn't perfect, offer to tweak the prompt or try a different model. Image generation is inherently iterative.
 - Include any text response the model provided (printed to stderr).
 - If multiple images are returned, show all of them.
 - For edit operations, mention the source image that was modified.
