@@ -883,48 +883,95 @@ The `getFullResponsesStream()` method yields these event types:
 type EnhancedResponseStreamEvent =
   | ResponseCreatedEvent
   | ResponseInProgressEvent
+  | ResponseCompletedEvent
+  | ResponseIncompleteEvent
+  | ResponseFailedEvent
+  | ErrorEvent
+  | OutputItemAddedEvent
+  | OutputItemDoneEvent
+  | ContentPartAddedEvent
+  | ContentPartDoneEvent
   | OutputTextDeltaEvent
   | OutputTextDoneEvent
-  | ReasoningDeltaEvent
-  | ReasoningDoneEvent
+  | OutputTextAnnotationAddedEvent
+  | RefusalDeltaEvent
+  | RefusalDoneEvent
   | FunctionCallArgumentsDeltaEvent
   | FunctionCallArgumentsDoneEvent
-  | ResponseCompletedEvent
-  | ToolPreliminaryResultEvent;
+  | ReasoningTextDeltaEvent
+  | ReasoningTextDoneEvent
+  | ReasoningSummaryPartAddedEvent
+  | ReasoningSummaryPartDoneEvent
+  | ReasoningSummaryTextDeltaEvent
+  | ReasoningSummaryTextDoneEvent
+  | ImageGenCallInProgressEvent
+  | ImageGenCallGeneratingEvent
+  | ImageGenCallPartialImageEvent
+  | ImageGenCallCompletedEvent
+  | ToolPreliminaryResultEvent
+  | ToolResultEvent;
 ```
 
 ### Event Type Reference
 
-| Event Type | Description | Payload |
+| Event Type | Description | Key Payload Fields |
 |------------|-------------|---------|
-| `response.created` | Response object initialized | `{ response: ResponseObject }` |
-| `response.in_progress` | Generation has started | `{}` |
-| `response.output_text.delta` | Text chunk received | `{ delta: string }` |
-| `response.output_text.done` | Text generation complete | `{ text: string }` |
-| `response.reasoning.delta` | Reasoning chunk (o1 models) | `{ delta: string }` |
-| `response.reasoning.done` | Reasoning complete | `{ reasoning: string }` |
-| `response.function_call_arguments.delta` | Tool argument chunk | `{ delta: string }` |
-| `response.function_call_arguments.done` | Tool arguments complete | `{ arguments: string }` |
-| `response.completed` | Full response complete | `{ response: ResponseObject }` |
-| `tool.preliminary_result` | Generator tool progress | `{ toolCallId: string; result: unknown }` |
+| `response.created` | Response object initialized | `response`, `sequenceNumber` |
+| `response.in_progress` | Generation has started | `response`, `sequenceNumber` |
+| `response.completed` | Full response complete | `response`, `sequenceNumber` |
+| `response.incomplete` | Response incomplete | `response`, `sequenceNumber` |
+| `response.failed` | Response generation failed | `response`, `sequenceNumber` |
+| `error` | Streaming error occurred | `code`, `message`, `param`, `sequenceNumber` |
+| `response.output_item.added` | New output item added | `outputIndex`, `item`, `sequenceNumber` |
+| `response.output_item.done` | Output item complete | `outputIndex`, `item`, `sequenceNumber` |
+| `response.content_part.added` | New content part added | `outputIndex`, `itemId`, `contentIndex`, `part`, `sequenceNumber` |
+| `response.content_part.done` | Content part complete | `outputIndex`, `itemId`, `contentIndex`, `part`, `sequenceNumber` |
+| `response.output_text.delta` | Text chunk received | `delta`, `outputIndex`, `itemId`, `contentIndex`, `logprobs`, `sequenceNumber` |
+| `response.output_text.done` | Text generation complete | `text`, `outputIndex`, `itemId`, `contentIndex`, `logprobs`, `sequenceNumber` |
+| `response.output_text.annotation.added` | Text annotation added | `outputIndex`, `itemId`, `contentIndex`, `annotationIndex`, `annotation`, `sequenceNumber` |
+| `response.refusal.delta` | Refusal chunk streamed | `delta`, `outputIndex`, `itemId`, `contentIndex`, `sequenceNumber` |
+| `response.refusal.done` | Refusal complete | `refusal`, `outputIndex`, `itemId`, `contentIndex`, `sequenceNumber` |
+| `response.function_call_arguments.delta` | Tool argument chunk | `delta`, `itemId`, `outputIndex`, `sequenceNumber` |
+| `response.function_call_arguments.done` | Tool arguments complete | `arguments`, `name`, `itemId`, `outputIndex`, `sequenceNumber` |
+| `response.reasoning_text.delta` | Reasoning chunk (reasoning models) | `delta`, `outputIndex`, `itemId`, `contentIndex`, `sequenceNumber` |
+| `response.reasoning_text.done` | Reasoning complete | `text`, `outputIndex`, `itemId`, `contentIndex`, `sequenceNumber` |
+| `response.reasoning_summary_part.added` | Reasoning summary part added | `outputIndex`, `itemId`, `summaryIndex`, `part`, `sequenceNumber` |
+| `response.reasoning_summary_part.done` | Reasoning summary part complete | `outputIndex`, `itemId`, `summaryIndex`, `part`, `sequenceNumber` |
+| `response.reasoning_summary_text.delta` | Reasoning summary text chunk | `delta`, `itemId`, `outputIndex`, `summaryIndex`, `sequenceNumber` |
+| `response.reasoning_summary_text.done` | Reasoning summary text complete | `text`, `itemId`, `outputIndex`, `summaryIndex`, `sequenceNumber` |
+| `response.image_generation_call.in_progress` | Image generation started | `itemId`, `outputIndex`, `sequenceNumber` |
+| `response.image_generation_call.generating` | Image generation in progress | `itemId`, `outputIndex`, `sequenceNumber` |
+| `response.image_generation_call.partial_image` | Partial image available | `itemId`, `outputIndex`, `partialImageB64`, `partialImageIndex`, `sequenceNumber` |
+| `response.image_generation_call.completed` | Image generation complete | `itemId`, `outputIndex`, `sequenceNumber` |
+| `tool.preliminary_result` | Generator tool progress | `toolCallId`, `result`, `timestamp` |
+| `tool.result` | Tool execution complete | `toolCallId`, `result`, `timestamp`, `preliminaryResults?` |
 
 ### Text Delta Event
 
 ```typescript
 interface OutputTextDeltaEvent {
   type: 'response.output_text.delta';
+  logprobs: Array<OpenResponsesLogProbs>;
+  outputIndex: number;
+  itemId: string;
+  contentIndex: number;
   delta: string;
+  sequenceNumber: number;
 }
 ```
 
-### Reasoning Delta Event
+### Reasoning Text Delta Event
 
 For reasoning models (o1, etc.):
 
 ```typescript
-interface ReasoningDeltaEvent {
-  type: 'response.reasoning.delta';
+interface ReasoningTextDeltaEvent {
+  type: 'response.reasoning_text.delta';
+  outputIndex: number;
+  itemId: string;
+  contentIndex: number;
   delta: string;
+  sequenceNumber: number;
 }
 ```
 
@@ -933,7 +980,10 @@ interface ReasoningDeltaEvent {
 ```typescript
 interface FunctionCallArgumentsDeltaEvent {
   type: 'response.function_call_arguments.delta';
+  itemId: string;
+  outputIndex: number;
   delta: string;
+  sequenceNumber: number;
 }
 ```
 
@@ -942,10 +992,25 @@ interface FunctionCallArgumentsDeltaEvent {
 From generator tools that yield progress:
 
 ```typescript
-interface ToolPreliminaryResultEvent {
+interface ToolPreliminaryResultEvent<TEvent = unknown> {
   type: 'tool.preliminary_result';
   toolCallId: string;
-  result: unknown;  // Matches the tool's eventSchema
+  result: TEvent;    // Matches the tool's eventSchema
+  timestamp: number;
+}
+```
+
+### Tool Result Event
+
+Emitted when a tool execution completes:
+
+```typescript
+interface ToolResultEvent<TResult = unknown, TPreliminaryResults = unknown> {
+  type: 'tool.result';
+  toolCallId: string;
+  result: TResult;
+  timestamp: number;
+  preliminaryResults?: TPreliminaryResults[];
 }
 ```
 
@@ -955,6 +1020,7 @@ interface ToolPreliminaryResultEvent {
 interface ResponseCompletedEvent {
   type: 'response.completed';
   response: OpenResponsesNonStreamingResponse;
+  sequenceNumber: number;
 }
 ```
 
@@ -983,7 +1049,7 @@ for await (const event of result.getFullResponsesStream()) {
       process.stdout.write(event.delta);
       break;
 
-    case 'response.reasoning.delta':
+    case 'response.reasoning_text.delta':
       console.log('[Reasoning]', event.delta);
       break;
 
