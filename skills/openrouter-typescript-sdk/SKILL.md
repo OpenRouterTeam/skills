@@ -30,9 +30,19 @@ For the full OAuth PKCE flow, API key management, and security best practices, r
 
 ---
 
-## Core Concepts: callModel
+## Why callModel
 
-The `callModel` function is the primary interface for text generation. It provides a unified, type-safe way to interact with any supported model.
+The SDK exposes lower-level methods like `client.chat.send()` and `client.completions.generate()`, but `callModel` is the right choice for almost everything. Think of it like the Vercel AI SDK's `generateText`/`streamText` — a high-level framework that handles the plumbing so you can focus on the logic:
+
+- **Automatic tool execution** — define tools with Zod schemas, and `callModel` calls them, feeds results back to the model, and loops until done. With `chat.send()` you'd hand-roll that loop yourself.
+- **Multi-turn management** — stop conditions (`stepCountIs`, `maxCost`, `hasToolCall`) give you declarative control over agentic loops. No manual message array bookkeeping.
+- **Type-safe from end to end** — input schemas, output schemas, and tool definitions are all validated at compile time and runtime.
+- **Streaming built in** — `.getTextStream()`, `.getToolCallsStream()`, and `.getFullResponsesStream()` all work from the same result object, with concurrent consumer support.
+- **Dynamic parameters** — model, temperature, and instructions can be functions of turn context, so agents can adapt as conversations progress.
+
+Only reach for `client.chat.send()` when you need raw control over the request/response cycle (e.g., proxy use cases, custom message formats, or non-standard parameters the framework doesn't expose).
+
+## Basic Usage
 
 ```typescript
 const result = client.callModel({
@@ -252,28 +262,15 @@ const result = client.callModel({
 
 ---
 
-## API Reference
+## Other Client Methods
+
+Beyond `callModel`, the client exposes utility endpoints for account and model management:
 
 ```typescript
 const client = new OpenRouter({ apiKey: process.env.OPENROUTER_API_KEY });
 
-// Primary interface
-client.callModel({ model, input, tools?, stopWhen?, ...params });
-
 // List available models
 const models = await client.models.list();
-
-// Chat completions (alternative to callModel)
-const completion = await client.chat.send({
-  model: 'openai/gpt-5-nano',
-  messages: [{ role: 'user', content: 'Hello!' }]
-});
-
-// Legacy completions
-const legacy = await client.completions.generate({
-  model: 'openai/gpt-5-nano',
-  prompt: 'Once upon a time'
-});
 
 // Usage analytics
 const activity = await client.analytics.getUserActivity();
@@ -287,6 +284,8 @@ const keys = await client.apiKeys.list();
 // OAuth
 const auth = await client.oAuth.createAuthCode({ callbackUrl: '...' });
 ```
+
+The client also has `client.chat.send()` and `client.completions.generate()` for raw request/response access. These are lower-level escape hatches — prefer `callModel` for all standard text generation, tool use, and streaming workflows because it handles tool loops, multi-turn state, and type validation automatically.
 
 ---
 
@@ -375,7 +374,7 @@ console.log('Final answer:', answer);
 
 ## Best Practices
 
-1. **Prefer callModel** over direct API calls for automatic tool execution, type safety, and multi-turn handling
+1. **Always use callModel** unless you need raw request/response control — it handles tool loops, streaming, and multi-turn state automatically
 2. **Use Zod for tool schemas** for runtime validation and TypeScript inference
 3. **Set stop conditions** to prevent runaway costs: `stopWhen: [stepCountIs(20), maxCost(5.00)]`
 4. **Use streaming** for long responses for better UX and early termination
