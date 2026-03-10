@@ -1,78 +1,108 @@
+import type { ResponsesOutputModality } from '@openrouter/sdk/models';
 import {
+  createClient,
   DEFAULT_MODEL,
-  requireApiKey,
+  defaultOutputPath,
   parseArgs,
-  postChatCompletion,
   readImageAsDataUrl,
   saveImage,
-  defaultOutputPath,
-} from "./lib.js";
+} from './lib.js';
 
-const apiKey = requireApiKey();
+const client = createClient();
 const args = parseArgs(process.argv.slice(2));
 
-const imagePath = args.get("_0") as string | undefined;
-const prompt = args.get("_1") as string | undefined;
+const imagePath = args.get('_0') as string | undefined;
+const prompt = args.get('_1') as string | undefined;
 
 if (!imagePath || !prompt) {
-  console.error("Usage: npx tsx edit.ts <image-path> \"prompt\" [--model <id>] [--output <path>] [--aspect-ratio <r>] [--image-size <s>]");
+  console.error(
+    'Usage: bun run edit.ts <image-path> "prompt" [--model <id>] [--output <path>] [--aspect-ratio <r>] [--image-size <s>]',
+  );
   process.exit(1);
 }
 
-const model = (args.get("model") as string) || DEFAULT_MODEL;
-const outputBase = (args.get("output") as string) || defaultOutputPath();
-const aspectRatio = args.get("aspect-ratio") as string | undefined;
-const imageSize = args.get("image-size") as string | undefined;
+const model = (args.get('model') as string) || DEFAULT_MODEL;
+const outputBase = (args.get('output') as string) || defaultOutputPath();
+const aspectRatio = args.get('aspect-ratio') as string | undefined;
+const imageSize = args.get('image-size') as string | undefined;
 
-const dataUrl = readImageAsDataUrl(imagePath as string);
+const dataUrl = readImageAsDataUrl(imagePath);
 
 const imageConfig: Record<string, string> = {};
-if (aspectRatio) imageConfig.aspect_ratio = aspectRatio;
-if (imageSize) imageConfig.image_size = imageSize;
+if (aspectRatio) {
+  imageConfig.aspect_ratio = aspectRatio;
+}
+if (imageSize) {
+  imageConfig.image_size = imageSize;
+}
 
-const body: any = {
+const modalities: ResponsesOutputModality[] = [
+  'image',
+  'text',
+];
+
+const result = client.callModel({
   model,
-  messages: [
+  input: [
     {
-      role: "user",
+      role: 'user' as const,
       content: [
-        { type: "image_url", image_url: { url: dataUrl } },
-        { type: "text", text: prompt },
+        {
+          type: 'input_image' as const,
+          detail: 'auto' as const,
+          imageUrl: dataUrl,
+        },
+        {
+          type: 'input_text' as const,
+          text: prompt,
+        },
       ],
     },
   ],
-  modalities: ["image", "text"],
-  ...(Object.keys(imageConfig).length > 0 ? { image_config: imageConfig } : {}),
-};
+  modalities,
+  ...(Object.keys(imageConfig).length > 0
+    ? {
+        imageConfig,
+      }
+    : {}),
+});
 
-const json = await postChatCompletion(apiKey, body);
-const message = json.choices?.[0]?.message;
+const response = await result.getResponse();
 
-if (!message) {
-  console.error("Error: No response from model.");
-  process.exit(1);
+// Extract text from message output items
+for (const item of response.output) {
+  if (item.type === 'message' && typeof item.content === 'string' && item.content) {
+    console.error(`Model: ${item.content}`);
+  }
 }
 
-if (message.content) {
-  console.error(`Model: ${message.content}`);
-}
+// Extract images from image_generation_call output items
+const images: string[] = response.output
+  .filter(
+    (
+      item,
+    ): item is typeof item & {
+      type: 'image_generation_call';
+      result: string;
+    } => item.type === 'image_generation_call' && typeof item.result === 'string',
+  )
+  .map((item) => item.result);
 
-const images: string[] = message.images ?? [];
 if (images.length === 0) {
-  console.error("Error: No images returned by model.");
+  console.error('Error: No images returned by model.');
   process.exit(1);
 }
 
 const saved: string[] = [];
 for (let i = 0; i < images.length; i++) {
-  const img = images[i].startsWith("data:") ? images[i] : `data:image/png;base64,${images[i]}`;
+  const img = images[i].startsWith('data:') ? images[i] : `data:image/png;base64,${images[i]}`;
   let outPath: string;
   if (images.length === 1) {
     outPath = outputBase;
   } else {
-    const dotIdx = outputBase.lastIndexOf(".");
+    const dotIdx = outputBase.lastIndexOf('.');
     const base = dotIdx > 0 ? outputBase.slice(0, dotIdx) : outputBase;
-    const ext = dotIdx > 0 ? outputBase.slice(dotIdx) : ".png";
+    const ext = dotIdx > 0 ? outputBase.slice(dotIdx) : '.png';
     outPath = `${base}-${i + 1}${ext}`;
   }
   const abs = saveImage(img, outPath);
@@ -81,8 +111,14 @@ for (let i = 0; i < images.length; i++) {
 
 console.log(
   JSON.stringify(
-    { model, source_image: imagePath, prompt, images_saved: saved, count: saved.length },
+    {
+      model,
+      source_image: imagePath,
+      prompt,
+      images_saved: saved,
+      count: saved.length,
+    },
     null,
-    2
-  )
+    2,
+  ),
 );

@@ -1,6 +1,16 @@
 ---
 name: openrouter-models
-description: Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance. Use when the user asks about available OpenRouter models, model pricing, model context lengths, model capabilities, provider latency or uptime, throughput limits, supported parameters, wants to search/filter/compare models, or find the fastest provider for a model.
+description: >-
+  Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance.
+  Use this skill whenever the user asks about AI models — even if they don't explicitly mention OpenRouter.
+  Triggers include: "what models are available", "which model should I use", "recommend a model for X",
+  "cheapest/fastest/best model for Y", "how much does Claude/GPT/Llama cost", "what's the context length of X",
+  "what models support tool use/images/reasoning/audio", "is model X available on OpenRouter",
+  "compare Claude vs GPT vs Gemini", "model deprecation or expiration dates", "which provider is fastest",
+  "lowest latency provider", "provider uptime", "throughput limits", "find me a model that can do X",
+  searching/filtering/comparing models, or any question about model pricing, capabilities, or availability.
+  Also use when the user mentions a model by informal name (e.g. "sonnet", "4o mini", "llama 3") —
+  resolve it first, then answer their question with live data.
 ---
 
 # OpenRouter Models
@@ -9,12 +19,13 @@ Discover, search, and compare the 300+ AI models available on OpenRouter. Query 
 
 ## Prerequisites
 
-The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
+- `bun` runtime installed
+- The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
 
 ## First-Time Setup
 
 ```bash
-cd <skill-path>/scripts && npm install
+cd <skill-path>/scripts && bun install
 ```
 
 ## Decision Tree
@@ -43,9 +54,9 @@ Pick the right script based on what the user is asking:
 Resolve an informal or vague model name to an exact OpenRouter model ID using fuzzy matching:
 
 ```bash
-cd <skill-path>/scripts && npx tsx resolve-model.ts "claude sonnet"
-cd <skill-path>/scripts && npx tsx resolve-model.ts "gpt 4o mini"
-cd <skill-path>/scripts && npx tsx resolve-model.ts "llama 3.1"
+cd <skill-path>/scripts && bun run resolve-model.ts "claude sonnet"
+cd <skill-path>/scripts && bun run resolve-model.ts "gpt 4o mini"
+cd <skill-path>/scripts && bun run resolve-model.ts "llama 3.1"
 ```
 
 Results include a `confidence` level and `score`:
@@ -61,7 +72,7 @@ Results include a `confidence` level and `score`:
 ## List Models
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts
+cd <skill-path>/scripts && bun run list-models.ts
 ```
 
 ### Filter by Category
@@ -69,7 +80,7 @@ cd <skill-path>/scripts && npx tsx list-models.ts
 Server-side category filtering:
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts --category programming
+cd <skill-path>/scripts && bun run list-models.ts --category programming
 ```
 
 Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology`, `science`, `translation`, `legal`, `finance`, `health`, `trivia`, `academia`
@@ -77,10 +88,10 @@ Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology
 ### Sort Results
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts --sort newest      # Recently added first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort price       # Cheapest first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort context     # Largest context first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort throughput  # Most output tokens first
+cd <skill-path>/scripts && bun run list-models.ts --sort newest      # Recently added first
+cd <skill-path>/scripts && bun run list-models.ts --sort price       # Cheapest first
+cd <skill-path>/scripts && bun run list-models.ts --sort context     # Largest context first
+cd <skill-path>/scripts && bun run list-models.ts --sort throughput  # Most output tokens first
 ```
 
 Models with upcoming `expiration_date` values trigger a stderr warning.
@@ -88,9 +99,9 @@ Models with upcoming `expiration_date` values trigger a stderr warning.
 ## Search Models
 
 ```bash
-cd <skill-path>/scripts && npx tsx search-models.ts "claude"
-cd <skill-path>/scripts && npx tsx search-models.ts --modality image
-cd <skill-path>/scripts && npx tsx search-models.ts "gpt" --modality text
+cd <skill-path>/scripts && bun run search-models.ts "claude"
+cd <skill-path>/scripts && bun run search-models.ts --modality image
+cd <skill-path>/scripts && bun run search-models.ts "gpt" --modality text
 ```
 
 Modalities: `text`, `image`, `audio`, `file`
@@ -100,8 +111,8 @@ Modalities: `text`, `image`, `audio`, `file`
 Compare two or more models side-by-side with pricing in per-million-tokens format. Uses exact ID matching — `openai/gpt-4o` matches only that model, not variants like `gpt-4o-mini`.
 
 ```bash
-cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"
-cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o" "google/gemini-2.5-pro" --sort price
+cd <skill-path>/scripts && bun run compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"
+cd <skill-path>/scripts && bun run compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o" "google/gemini-2.5-pro" --sort price
 ```
 
 Sort options: `price` (cheapest first), `context` (largest first), `speed`/`throughput` (most output tokens first)
@@ -111,9 +122,9 @@ Sort options: `price` (cheapest first), `context` (largest first), `speed`/`thro
 Get per-provider latency, uptime, and throughput for any model:
 
 ```bash
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "anthropic/claude-sonnet-4"
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "anthropic/claude-sonnet-4" --sort throughput
-cd <skill-path>/scripts && npx tsx get-endpoints.ts "openai/gpt-4o" --sort latency
+cd <skill-path>/scripts && bun run get-endpoints.ts "anthropic/claude-sonnet-4"
+cd <skill-path>/scripts && bun run get-endpoints.ts "anthropic/claude-sonnet-4" --sort throughput
+cd <skill-path>/scripts && bun run get-endpoints.ts "openai/gpt-4o" --sort latency
 ```
 
 Sort options: `throughput` (fastest tokens/sec first), `latency` (lowest p50 ms first), `uptime` (most reliable first), `price` (cheapest first)
@@ -222,10 +233,22 @@ Returns for each provider:
 ## Presenting Results
 
 - When a user mentions a model by informal name, use `resolve-model.ts` first, then feed the resolved `id` into other scripts
-- Convert pricing to per-million-tokens format for readability
-- When comparing, use a markdown table with models as columns
+- Convert pricing to per-million-tokens format — raw per-token numbers are tiny decimals that humans can't parse at a glance
+- When comparing, use a markdown table with models as columns — side-by-side layout is far easier to scan than sequential blocks
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
-- Note cache pricing when available — it can cut input costs 90%+
-- Flag models with `expiration_date` as deprecated
+- Highlight cache pricing when available — it can cut input costs by 90%+, which often changes the cost-optimal choice entirely
+- Flag models with `expiration_date` as deprecated — users need to plan migration before removal
 - When a model has multiple providers at different prices, mention the cheapest option
+
+## Common Workflows
+
+Chain scripts together based on what the user actually needs:
+
+| User intent | Workflow |
+|---|---|
+| "Which model should I use for X?" | `resolve-model.ts` (if informal name) → `search-models.ts --modality` or `list-models.ts --category` → `compare-models.ts` → recommend based on results |
+| "What's the cheapest model for Y?" | `list-models.ts --sort price` or `compare-models.ts A B --sort price` → highlight cache pricing if relevant |
+| "Fastest provider for model X?" | `resolve-model.ts` (if needed) → `get-endpoints.ts --sort throughput` → call out the top provider |
+| "Compare Claude vs GPT" | `resolve-model.ts` for each informal name → `compare-models.ts` with resolved IDs → present markdown table |
+| "Is model X being deprecated?" | `search-models.ts "X"` → check `expiration_date` field → advise on timeline and alternatives |

@@ -1,8 +1,12 @@
 {
-  "name": "openrouter-models-scripts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "tsx": "^4.0.0"
-  }
+	"name": "openrouter-models-scripts",
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"@openrouter/sdk": "^0.9.11"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.10",
+		"typescript": "^5.8.0"
+	}
 }

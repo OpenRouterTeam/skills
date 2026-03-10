@@ -2,7 +2,11 @@
   "name": "openrouter-images-scripts",
   "type": "module",
   "private": true,
+  "dependencies": {
+    "@openrouter/sdk": "^0.9.11"
+  },
   "devDependencies": {
-    "tsx": "^4.0.0"
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.8.0"
   }
 }
