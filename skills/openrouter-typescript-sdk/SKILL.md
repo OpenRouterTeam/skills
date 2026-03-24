@@ -347,6 +347,7 @@ The result object provides multiple methods for consuming the response:
 | `getTextStream()` | Stream text deltas as they arrive |
 | `getReasoningStream()` | Stream reasoning tokens (for o1/reasoning models) |
 | `getToolCallsStream()` | Stream tool calls as they complete |
+| `getItemsStream()` | Stream response items cumulatively as they build up |
 
 ### getText()
 
@@ -1283,6 +1284,40 @@ for await (const message of result.getNewMessagesStream()) {
   }
 }
 ```
+
+### Items Stream (Cumulative Emission)
+
+The `getItemsStream()` method yields response items as they build up. Unlike delta-based streams, `function_call` items are **emitted cumulatively** — the same tool call is yielded multiple times with progressively longer `arguments` as chunks arrive from the API. Each emission represents the current accumulated state of that item.
+
+`JSON.parse` on `arguments` and structured results will always succeed, even on partial emissions. The SDK heals incomplete JSON from the stream so that each cumulative snapshot is valid and parseable.
+
+```typescript
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Look up the weather in Paris and Tokyo',
+  tools: [weatherTool]
+});
+
+for await (const item of result.getItemsStream()) {
+  if (item.type === 'function_call') {
+    // This item may be emitted multiple times as arguments grow.
+    // Each time, item.arguments contains the accumulated string so far.
+    // JSON.parse is safe on every emission — callModel heals partial JSON.
+    const partialArgs = JSON.parse(item.arguments);
+    console.log(`[${item.name}] args so far:`, partialArgs);
+  }
+
+  if (item.type === 'message') {
+    console.log('Text:', item.content);
+  }
+}
+```
+
+**Key behaviors:**
+
+- **Cumulative, not incremental**: Each `function_call` emission contains the full accumulated `arguments` string up to that point, not just the new delta. Consumers that track tool calls by `call_id` should **replace** the previous snapshot, not append to it.
+- **JSON is always valid**: `callModel` heals partial JSON in `arguments` and structured output fields. `JSON.parse(item.arguments)` will not throw, even mid-stream. This means consumers can safely render or inspect partial tool call arguments at any point during the stream.
+- **Text items accumulate similarly**: `message` items grow as text content is appended.
 
 ---
 
