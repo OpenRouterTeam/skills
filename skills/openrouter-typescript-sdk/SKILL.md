@@ -1253,17 +1253,17 @@ for await (const event of result.getFullResponsesStream()) {
 }
 ```
 
-### Message Stream Events
+### Message Stream Events (Cumulative Snapshots)
 
-The `getNewMessagesStream()` yields OpenResponses format updates:
+The `getNewMessagesStream()` yields **cumulative message snapshots, not deltas**. Each `message` event contains the full text up to that point. Replace your display text on each event rather than appending.
 
 ```typescript
 type MessageStreamUpdate =
-  | ResponsesOutputMessage        // Text/content updates
+  | ResponsesOutputMessage        // Text/content snapshots
   | OpenResponsesFunctionCallOutput;  // Tool results
 ```
 
-### Example: Tracking New Messages
+### Example: Displaying Message Stream
 
 ```typescript
 const result = client.callModel({
@@ -1272,18 +1272,18 @@ const result = client.callModel({
   tools: [searchTool]
 });
 
-const allMessages: MessageStreamUpdate[] = [];
-
 for await (const message of result.getNewMessagesStream()) {
-  allMessages.push(message);
-
   if (message.type === 'message') {
-    console.log('Assistant:', message.content);
+    // Replace display text — message.content is the full text so far, not a delta
+    clearLine();
+    process.stdout.write(message.content);
   } else if (message.type === 'function_call_output') {
     console.log('Tool result:', message.output);
   }
 }
 ```
+
+**Important:** Do not append `message.content` across events — each emission is the complete accumulated text. Appending will produce duplicated output.
 
 ### Items Stream (Cumulative Emission)
 
