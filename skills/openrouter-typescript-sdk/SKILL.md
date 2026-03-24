@@ -478,8 +478,6 @@ const searchTool = tool({
 #### Manual Tools
 Set `execute: false` for human-in-the-loop flows where a person produces the tool call result. When the model calls a manual tool during the `callModel` loop, the loop exits early and returns. The model's response (including the tool call) is available in the response output. Present the tool call to the user, collect their response, and pass it back as a `function_call_output` message on the next `callModel` call. See [Manual Tool Execution](#manual-tool-execution) for the full lifecycle.
 
-**Note:** Manual tools are specifically for cases where a human provides the result. For programmatic tool execution that needs approval before running, use [Approval Flows](#approval-flows) instead.
-
 ```typescript
 const manualTool = tool({
   name: 'user_confirmation',
@@ -539,7 +537,7 @@ const result = client.callModel({
 
 Manual tools (`execute: false`) are for **human-in-the-loop flows** where a person — not code — produces the tool call result. When the model calls a manual tool, the `callModel` loop exits early and returns. The model's response — including the tool call — is in the response output. Present the tool call to the user, collect their input, and pass it back as a `function_call_output` on the next `callModel` invocation.
 
-If the tool result is produced by code and just needs approval before running, use [Approval Flows](#approval-flows) instead — the SDK manages the execution once approved.
+Manual tools do not support approval flows — they are a separate mechanism.
 
 ### Manual Tool Lifecycle
 
