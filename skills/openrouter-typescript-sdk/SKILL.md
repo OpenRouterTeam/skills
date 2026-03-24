@@ -347,7 +347,7 @@ The result object provides multiple methods for consuming the response:
 | `getTextStream()` | Stream text deltas as they arrive |
 | `getReasoningStream()` | Stream reasoning tokens (for o1/reasoning models) |
 | `getToolCallsStream()` | Stream tool calls as they complete |
-| `getItemsStream()` | Stream cumulative item snapshots with `isComplete` flag and `parsedArguments` |
+| `getItemsStream()` | Stream cumulative item snapshots with `isComplete` flag and healed `arguments` |
 | `getNewMessagesStream()` | Stream cumulative message snapshots with `isComplete` flag |
 
 ### getText()
@@ -1273,14 +1273,18 @@ Use `isComplete` to distinguish in-progress snapshots from the finished version 
 type WithCompletion<T> = T & { isComplete: boolean };
 ```
 
-#### parsedArguments (getItemsStream only)
+#### arguments and rawArguments (getItemsStream only)
 
-`function_call` items in `getItemsStream()` include a `parsedArguments` field — a best-effort parsed object produced by the SDK's internal `healJson()` utility, which closes truncated strings, objects, and arrays in the accumulated `arguments` string. This means `parsedArguments` is always a valid object (or `undefined` if healing fails), even mid-stream when `arguments` is still an incomplete JSON string.
+`function_call` items in `getItemsStream()` expose two argument fields:
+
+- **`arguments`** — a best-effort parsed object produced by the SDK's internal `healJson()` utility, which closes truncated strings, objects, and arrays. Always a valid object (or `undefined` if healing fails), safe to use at any point during the stream.
+- **`rawArguments`** — the raw accumulated JSON string from the API, which may be incomplete/unparseable mid-stream.
 
 ```typescript
 // StreamingFunctionCallItem — the function_call type in getItemsStream()
-type StreamingFunctionCallItem = ResponsesOutputItemFunctionCall & {
-  parsedArguments?: Record<string, unknown> | undefined;
+type StreamingFunctionCallItem = Omit<ResponsesOutputItemFunctionCall, 'arguments'> & {
+  arguments?: Record<string, unknown> | undefined;  // Healed, always valid
+  rawArguments: string;                              // Raw accumulated string
 };
 ```
 
@@ -1319,7 +1323,7 @@ for await (const message of result.getNewMessagesStream()) {
 
 #### getItemsStream()
 
-Yields cumulative item-level snapshots. Each `function_call` item is emitted multiple times with progressively longer `arguments` and a healed `parsedArguments` object. Each `message` item grows as text content accumulates. All items carry `isComplete`.
+Yields cumulative item-level snapshots. Each `function_call` item is emitted multiple times with a progressively more complete `arguments` object (healed) and `rawArguments` string. Each `message` item grows as text content accumulates. All items carry `isComplete`.
 
 ```typescript
 const result = client.callModel({
@@ -1331,13 +1335,14 @@ const result = client.callModel({
 for await (const item of result.getItemsStream()) {
   if (item.type === 'function_call') {
     // Emitted multiple times as arguments grow — replace, don't append.
-    // Use parsedArguments for safe access to partial args (healed JSON).
-    console.log(`[${item.name}] args so far:`, item.parsedArguments);
+    // item.arguments is the healed parsed object — safe to use mid-stream.
+    console.log(`[${item.name}] args so far:`, item.arguments);
 
     if (item.isComplete) {
-      // Final emission — arguments is now complete valid JSON
-      const finalArgs = JSON.parse(item.arguments);
-      console.log(`[${item.name}] final args:`, finalArgs);
+      // Final emission — arguments is the complete parsed object.
+      // rawArguments is the complete JSON string if needed.
+      console.log(`[${item.name}] final args:`, item.arguments);
+      console.log(`[${item.name}] raw JSON:`, item.rawArguments);
     }
   }
 
