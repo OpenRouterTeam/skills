@@ -347,7 +347,8 @@ The result object provides multiple methods for consuming the response:
 | `getTextStream()` | Stream text deltas as they arrive |
 | `getReasoningStream()` | Stream reasoning tokens (for o1/reasoning models) |
 | `getToolCallsStream()` | Stream tool calls as they complete |
-| `getItemsStream()` | Stream response items cumulatively as they build up |
+| `getItemsStream()` | Stream cumulative item snapshots with `isComplete` flag and `parsedArguments` |
+| `getNewMessagesStream()` | Stream cumulative message snapshots with `isComplete` flag |
 
 ### getText()
 
@@ -1259,16 +1260,39 @@ Both `getNewMessagesStream()` and `getItemsStream()` yield **cumulative snapshot
 
 This differs from delta-based streams like `getTextStream()` and `getFullResponsesStream()`, which yield incremental chunks.
 
-`JSON.parse` on `arguments` and structured results will always succeed, even on partial emissions. The SDK heals incomplete JSON from the stream so that each cumulative snapshot is valid and parseable.
+#### isComplete Flag
+
+Every item from both streams carries an `isComplete: boolean` field:
+
+- `false` — the item is still receiving data (more emissions will follow for this item)
+- `true` — this is the final emission for this item
+
+Use `isComplete` to distinguish in-progress snapshots from the finished version without needing to track item IDs yourself.
+
+```typescript
+type WithCompletion<T> = T & { isComplete: boolean };
+```
+
+#### parsedArguments (getItemsStream only)
+
+`function_call` items in `getItemsStream()` include a `parsedArguments` field — a best-effort parsed object produced by the SDK's internal `healJson()` utility, which closes truncated strings, objects, and arrays in the accumulated `arguments` string. This means `parsedArguments` is always a valid object (or `undefined` if healing fails), even mid-stream when `arguments` is still an incomplete JSON string.
+
+```typescript
+// StreamingFunctionCallItem — the function_call type in getItemsStream()
+type StreamingFunctionCallItem = ResponsesOutputItemFunctionCall & {
+  parsedArguments?: Record<string, unknown> | undefined;
+};
+```
 
 #### getNewMessagesStream()
 
-Yields cumulative message-level snapshots. Each `message` event contains the full text generated so far.
+Yields cumulative message-level snapshots. Each `message` event contains the full text generated so far, plus `isComplete` to indicate whether the message is still streaming.
 
 ```typescript
 type MessageStreamUpdate =
-  | ResponsesOutputMessage        // Text/content snapshots
-  | OpenResponsesFunctionCallOutput;  // Tool results
+  | WithCompletion<ResponsesOutputMessage>  // Text/content snapshots with isComplete
+  | OpenResponsesFunctionCallOutput         // Tool results
+  | ResponsesOutputItemFunctionCall;        // Function calls
 ```
 
 ```typescript
@@ -1283,6 +1307,10 @@ for await (const message of result.getNewMessagesStream()) {
     // Replace display text — message.content is the full text so far, not a delta
     clearLine();
     process.stdout.write(message.content);
+
+    if (message.isComplete) {
+      console.log('\n[Message complete]');
+    }
   } else if (message.type === 'function_call_output') {
     console.log('Tool result:', message.output);
   }
@@ -1291,7 +1319,7 @@ for await (const message of result.getNewMessagesStream()) {
 
 #### getItemsStream()
 
-Yields cumulative item-level snapshots. Each `function_call` item is emitted multiple times with progressively longer `arguments` as chunks arrive. Each `message` item grows as text content accumulates.
+Yields cumulative item-level snapshots. Each `function_call` item is emitted multiple times with progressively longer `arguments` and a healed `parsedArguments` object. Each `message` item grows as text content accumulates. All items carry `isComplete`.
 
 ```typescript
 const result = client.callModel({
@@ -1303,9 +1331,14 @@ const result = client.callModel({
 for await (const item of result.getItemsStream()) {
   if (item.type === 'function_call') {
     // Emitted multiple times as arguments grow — replace, don't append.
-    // JSON.parse is safe on every emission — callModel heals partial JSON.
-    const partialArgs = JSON.parse(item.arguments);
-    console.log(`[${item.name}] args so far:`, partialArgs);
+    // Use parsedArguments for safe access to partial args (healed JSON).
+    console.log(`[${item.name}] args so far:`, item.parsedArguments);
+
+    if (item.isComplete) {
+      // Final emission — arguments is now complete valid JSON
+      const finalArgs = JSON.parse(item.arguments);
+      console.log(`[${item.name}] final args:`, finalArgs);
+    }
   }
 
   if (item.type === 'message') {
