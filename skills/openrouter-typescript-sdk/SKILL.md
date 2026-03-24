@@ -474,7 +474,7 @@ const searchTool = tool({
 ```
 
 #### Manual Tools
-Set `execute: false` to prevent the SDK from automatically executing the tool. When a manual tool is called during a multi-turn `callModel` invocation, the SDK stops the automatic tool-execution loop, populates `finalResponse`, and returns. The model's response that requested the manual tool call is available in `finalResponse.output`. See [Approval Flows with Manual Tools](#approval-flows-with-manual-tools) for the full pattern.
+Set `execute: false` to handle tool execution entirely outside the SDK. When the model calls a manual tool during the `callModel` loop, the loop exits early and returns. The model's response (including the tool call) is available in the response output. Retrieve the tool calls, execute them externally, and pass results back as `function_call_output` messages on the next `callModel` call. See [Manual Tool Execution](#manual-tool-execution) for the full lifecycle.
 
 ```typescript
 const manualTool = tool({
@@ -531,17 +531,11 @@ const result = client.callModel({
 
 ---
 
-## Approval Flows with Manual Tools
+## Manual Tool Execution
 
-When a manual tool (`execute: false`) is called during a multi-turn `callModel` invocation, the SDK **stops the tool-execution loop immediately** and returns. The key behavior:
+When the model calls a manual tool (`execute: false`) during the `callModel` loop, the loop exits early and returns. The model's response — including the tool call — is in the response output. The developer is responsible for executing the tool externally and passing results back on the next `callModel` invocation.
 
-1. The loop does **not** execute the tool (there is no `execute` function)
-2. The loop sets `finalResponse` and returns control to the caller
-3. The model's response that requested the manual tool call **is included in `finalResponse.output`** — this is how to extract the tool call arguments
-
-This makes manual tools the foundation for approval flows, human-in-the-loop patterns, and any scenario where external action must be confirmed before proceeding.
-
-### Approval Flow Pattern
+### Manual Tool Lifecycle
 
 ```typescript
 import OpenRouter, { tool } from '@openrouter/sdk';
@@ -551,133 +545,59 @@ const client = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
-// Step 1: Define a manual tool for the action requiring approval
-const sendEmailTool = tool({
-  name: 'send_email',
-  description: 'Send an email to a recipient',
+// 1. Define a manual tool
+const runQueryTool = tool({
+  name: 'run_query',
+  description: 'Execute a database query',
   inputSchema: z.object({
-    to: z.string().describe('Recipient email address'),
-    subject: z.string().describe('Email subject'),
-    body: z.string().describe('Email body')
+    sql: z.string().describe('The SQL query to execute')
   }),
-  execute: false  // Manual — SDK will stop and return when this is called
+  execute: false  // SDK will not execute this — loop exits when called
 });
 
-// Step 2: Call the model with the manual tool
+// 2. Call the model — loop exits when the manual tool is called
 const result = client.callModel({
   model: 'openai/gpt-5-nano',
-  instructions: 'You are an email assistant. Use the send_email tool when the user asks to send an email.',
-  input: 'Send an email to alice@example.com about the meeting tomorrow at 3pm',
-  tools: [sendEmailTool]
+  input: 'How many users signed up last week?',
+  tools: [runQueryTool]
 });
 
-// Step 3: Get the final response — the loop stopped at the manual tool call
 const response = await result.getResponse();
 
-// Step 4: Find the manual tool call in the response output
+// 3. Extract the tool call from response output
 const toolCall = response.output.find(
-  (item) => item.type === 'function_call' && item.name === 'send_email'
+  (item) => item.type === 'function_call' && item.name === 'run_query'
 );
 
 if (toolCall) {
   const args = JSON.parse(toolCall.arguments);
 
-  // Step 5: Present to user for approval
-  console.log('The assistant wants to send an email:');
-  console.log(`  To: ${args.to}`);
-  console.log(`  Subject: ${args.subject}`);
-  console.log(`  Body: ${args.body}`);
+  // 4. Execute the tool externally
+  const queryResult = await db.query(args.sql);
 
-  const approved = await promptUser('Approve? (y/n)');
-
-  if (approved) {
-    // Step 6: Execute the action manually
-    await sendEmail(args.to, args.subject, args.body);
-    console.log('Email sent.');
-  } else {
-    console.log('Email cancelled.');
-  }
-}
-```
-
-### Streaming with Manual Tool Detection
-
-For streaming scenarios, use `getFullResponsesStream()` to detect the manual tool call as it arrives:
-
-```typescript
-const result = client.callModel({
-  model: 'openai/gpt-5-nano',
-  input: 'Send a message to the team about the deploy',
-  tools: [sendEmailTool, searchTool]  // Mix of manual and automatic tools
-});
-
-let manualToolArgs = '';
-let manualToolDetected = false;
-
-for await (const event of result.getFullResponsesStream()) {
-  switch (event.type) {
-    case 'response.output_text.delta':
-      process.stdout.write(event.delta);
-      break;
-
-    case 'response.function_call_arguments.delta':
-      manualToolArgs += event.delta;
-      break;
-
-    case 'response.function_call_arguments.done':
-      // Check the completed response to identify if this is the manual tool
-      manualToolDetected = true;
-      break;
-
-    case 'response.completed':
-      // The response is complete — if the manual tool was called,
-      // the loop has stopped and we can inspect the output
-      if (manualToolDetected) {
-        const call = event.response.output.find(
-          (item) => item.type === 'function_call' && item.name === 'send_email'
-        );
-        if (call) {
-          const args = JSON.parse(call.arguments);
-          // Present to user for approval...
-        }
+  // 5. Pass the result back on the next callModel call
+  const followUp = client.callModel({
+    model: 'openai/gpt-5-nano',
+    input: [
+      ...previousMessages,
+      ...response.output,
+      {
+        type: 'function_call_output',
+        call_id: toolCall.call_id,
+        output: JSON.stringify(queryResult)
       }
-      break;
-  }
+    ],
+    tools: [runQueryTool]
+  });
+
+  const text = await followUp.getText();
+  console.log(text);
 }
-```
-
-### Resuming After Approval
-
-To continue the conversation after manually handling the tool call, pass the tool result back as input for the next `callModel` invocation:
-
-```typescript
-// After the user approves and the action is executed:
-const toolResult = { status: 'sent', messageId: '12345' };
-
-const followUp = client.callModel({
-  model: 'openai/gpt-5-nano',
-  input: [
-    // Include the prior conversation history
-    ...previousMessages,
-    // Include the assistant's tool call from finalResponse.output
-    ...response.output,
-    // Add the tool result
-    {
-      type: 'function_call_output',
-      call_id: toolCall.call_id,
-      output: JSON.stringify(toolResult)
-    }
-  ],
-  tools: [sendEmailTool]
-});
-
-const text = await followUp.getText();
-console.log(text);  // e.g. "Email sent successfully to alice@example.com!"
 ```
 
 ### Mixing Manual and Automatic Tools
 
-When both manual and automatic tools are provided, the SDK executes automatic tools normally through the multi-turn loop. The loop only stops when the model calls a manual tool:
+When both manual and automatic tools are provided, automatic tools execute normally through the multi-turn loop. The loop only exits when the model calls a manual tool:
 
 ```typescript
 const searchTool = tool({
@@ -689,24 +609,174 @@ const searchTool = tool({
   }
 });
 
+const deployTool = tool({
+  name: 'deploy',
+  description: 'Deploy to production',
+  inputSchema: z.object({
+    service: z.string().describe('Service to deploy'),
+    version: z.string().describe('Version tag')
+  }),
+  execute: false  // Developer handles this externally
+});
+
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Find the latest stable version of the auth service and deploy it',
+  tools: [searchTool, deployTool]
+});
+
+// The SDK automatically executes search calls in the loop.
+// When the model calls deploy, the loop exits and returns.
+const response = await result.getResponse();
+```
+
+---
+
+## Approval Flows
+
+The SDK provides a built-in approval system for tools that should execute automatically *once approved*, but pause the loop when approval has not yet been granted. Unlike manual tools (where the developer always handles execution externally), approval-gated tools have an `execute` function — the SDK just won't call it until the tool call is approved.
+
+Approval state is persisted across `callModel` invocations via a `state` accessor, so the developer can inspect pending tool calls, present them to the user, and provide approval or rejection decisions on the next call.
+
+### Defining Approval-Gated Tools
+
+Set `requireApproval` on the tool definition — either a static boolean or a dynamic check function:
+
+```typescript
+import OpenRouter, { tool } from '@openrouter/sdk';
+import { z } from 'zod';
+
+// Static: always requires approval
 const deleteTool = tool({
   name: 'delete_record',
   description: 'Delete a database record',
   inputSchema: z.object({
     recordId: z.string().describe('ID of the record to delete')
   }),
-  execute: false  // Requires approval
+  requireApproval: true,
+  execute: async ({ recordId }) => {
+    await db.delete(recordId);
+    return { deleted: recordId };
+  }
 });
 
+// Dynamic: conditionally requires approval based on arguments
+const transferTool = tool({
+  name: 'transfer_funds',
+  description: 'Transfer funds between accounts',
+  inputSchema: z.object({
+    from: z.string(),
+    to: z.string(),
+    amount: z.number()
+  }),
+  requireApproval: async (params, context) => {
+    // Only require approval for large transfers
+    return params.amount > 1000;
+  },
+  execute: async ({ from, to, amount }) => {
+    return await ledger.transfer(from, to, amount);
+  }
+});
+```
+
+### State Management
+
+Approval flows require a `state` accessor to persist conversation state (including pending tool calls) across `callModel` invocations. The `state` parameter uses a `StateAccessor` interface:
+
+```typescript
+// In-memory state storage (for simple cases)
+let savedState = null;
+
+const stateAccessor = {
+  get: async () => savedState,
+  set: async (state) => { savedState = state; }
+};
+```
+
+The `ConversationState` object managed by the SDK contains:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique conversation ID |
+| `messages` | `Message[]` | Full message history |
+| `status` | `string` | `'in_progress'` \| `'awaiting_approval'` \| `'complete'` \| `'interrupted'` |
+| `pendingToolCalls` | `ParsedToolCall[]` | Tool calls awaiting approval |
+| `unsentToolResults` | `ToolExecutionResult[]` | Results not yet sent to API |
+| `previousResponseId` | `string` | Last response ID |
+| `updatedAt` | `Date` | Auto-updated timestamp |
+
+### callModel-Level Approval Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `state` | `StateAccessor` (`get`/`set`) — required for approval/rejection params |
+| `requireApproval` | Callback `(toolCall, context) => boolean` checked for each tool call (overrides tool-level setting) |
+| `approveToolCalls` | Array of tool call IDs to approve and execute |
+| `rejectToolCalls` | Array of tool call IDs to reject |
+
+**Note:** `approveToolCalls` and `rejectToolCalls` require a `state` accessor — TypeScript will emit a compilation error if state is omitted.
+
+### Complete Approval Flow Example
+
+```typescript
+const client = new OpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY
+});
+
+let savedState = null;
+const stateAccessor = {
+  get: async () => savedState,
+  set: async (state) => { savedState = state; }
+};
+
+const deleteTool = tool({
+  name: 'delete_user',
+  description: 'Delete a user account',
+  inputSchema: z.object({
+    userId: z.string().describe('User ID to delete')
+  }),
+  requireApproval: true,
+  execute: async ({ userId }) => {
+    await db.deleteUser(userId);
+    return { deleted: userId };
+  }
+});
+
+// First call — the loop pauses when delete_user is called
 const result = client.callModel({
   model: 'openai/gpt-5-nano',
-  input: 'Find the outdated records and delete them',
-  tools: [searchTool, deleteTool]
+  input: 'Delete the account for user u_abc123',
+  tools: [deleteTool],
+  state: stateAccessor
 });
 
-// The SDK will automatically execute search calls in the loop.
-// When the model calls delete_record, the loop stops and returns.
 const response = await result.getResponse();
+// response status is 'awaiting_approval'
+// savedState.pendingToolCalls contains the delete_user call
+
+// Inspect pending calls and present to user
+const pending = savedState.pendingToolCalls;
+for (const call of pending) {
+  console.log(`Tool: ${call.name}, Args: ${JSON.stringify(call.arguments)}`);
+}
+
+// User approves — pass approval decisions on next callModel call
+const approved = await promptUser('Approve deletion? (y/n)');
+
+const followUp = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: [],  // No new user input — just processing approvals
+  tools: [deleteTool],
+  state: stateAccessor,
+  ...(approved
+    ? { approveToolCalls: pending.map(c => c.id) }
+    : { rejectToolCalls: pending.map(c => c.id) }
+  )
+});
+
+// If approved, the SDK executes delete_user and continues the loop
+const text = await followUp.getText();
+console.log(text);
 ```
 
 ---
