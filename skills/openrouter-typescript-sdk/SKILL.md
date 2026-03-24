@@ -1253,17 +1253,23 @@ for await (const event of result.getFullResponsesStream()) {
 }
 ```
 
-### Message Stream Events (Cumulative Snapshots)
+### Cumulative Streams: getNewMessagesStream() and getItemsStream()
 
-The `getNewMessagesStream()` yields **cumulative message snapshots, not deltas**. Each `message` event contains the full text up to that point. Replace your display text on each event rather than appending.
+Both `getNewMessagesStream()` and `getItemsStream()` yield **cumulative snapshots, not deltas**. Each emission contains the full accumulated state of that item up to that point. The same item is emitted multiple times as it grows — always **replace** your previous snapshot rather than appending.
+
+This differs from delta-based streams like `getTextStream()` and `getFullResponsesStream()`, which yield incremental chunks.
+
+`JSON.parse` on `arguments` and structured results will always succeed, even on partial emissions. The SDK heals incomplete JSON from the stream so that each cumulative snapshot is valid and parseable.
+
+#### getNewMessagesStream()
+
+Yields cumulative message-level snapshots. Each `message` event contains the full text generated so far.
 
 ```typescript
 type MessageStreamUpdate =
   | ResponsesOutputMessage        // Text/content snapshots
   | OpenResponsesFunctionCallOutput;  // Tool results
 ```
-
-### Example: Displaying Message Stream
 
 ```typescript
 const result = client.callModel({
@@ -1283,13 +1289,9 @@ for await (const message of result.getNewMessagesStream()) {
 }
 ```
 
-**Important:** Do not append `message.content` across events — each emission is the complete accumulated text. Appending will produce duplicated output.
+#### getItemsStream()
 
-### Items Stream (Cumulative Emission)
-
-The `getItemsStream()` method yields response items as they build up. Unlike delta-based streams, `function_call` items are **emitted cumulatively** — the same tool call is yielded multiple times with progressively longer `arguments` as chunks arrive from the API. Each emission represents the current accumulated state of that item.
-
-`JSON.parse` on `arguments` and structured results will always succeed, even on partial emissions. The SDK heals incomplete JSON from the stream so that each cumulative snapshot is valid and parseable.
+Yields cumulative item-level snapshots. Each `function_call` item is emitted multiple times with progressively longer `arguments` as chunks arrive. Each `message` item grows as text content accumulates.
 
 ```typescript
 const result = client.callModel({
@@ -1300,24 +1302,21 @@ const result = client.callModel({
 
 for await (const item of result.getItemsStream()) {
   if (item.type === 'function_call') {
-    // This item may be emitted multiple times as arguments grow.
-    // Each time, item.arguments contains the accumulated string so far.
+    // Emitted multiple times as arguments grow — replace, don't append.
     // JSON.parse is safe on every emission — callModel heals partial JSON.
     const partialArgs = JSON.parse(item.arguments);
     console.log(`[${item.name}] args so far:`, partialArgs);
   }
 
   if (item.type === 'message') {
-    console.log('Text:', item.content);
+    // message.content is the full text so far — replace, don't append.
+    clearLine();
+    process.stdout.write(item.content);
   }
 }
 ```
 
-**Key behaviors:**
-
-- **Cumulative, not incremental**: Each `function_call` emission contains the full accumulated `arguments` string up to that point, not just the new delta. Consumers that track tool calls by `call_id` should **replace** the previous snapshot, not append to it.
-- **JSON is always valid**: `callModel` heals partial JSON in `arguments` and structured output fields. `JSON.parse(item.arguments)` will not throw, even mid-stream. This means consumers can safely render or inspect partial tool call arguments at any point during the stream.
-- **Text items accumulate similarly**: `message` items grow as text content is appended.
+**Important:** Do not append content across events from either stream — each emission is the complete accumulated state. Appending will produce duplicated output. Track items by `call_id` (for tool calls) or by index and replace the previous snapshot on each emission.
 
 ---
 
