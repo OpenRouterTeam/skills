@@ -474,7 +474,7 @@ const searchTool = tool({
 ```
 
 #### Manual Tools
-Set `execute: false` to handle tool calls yourself:
+Set `execute: false` to prevent the SDK from automatically executing the tool. When a manual tool is called during a multi-turn `callModel` invocation, the SDK stops the automatic tool-execution loop, populates `finalResponse`, and returns. The model's response that requested the manual tool call is available in `finalResponse.output`. See [Approval Flows with Manual Tools](#approval-flows-with-manual-tools) for the full pattern.
 
 ```typescript
 const manualTool = tool({
@@ -527,6 +527,186 @@ const result = client.callModel({
   tools: [myTool],
   stopWhen: customStop
 });
+```
+
+---
+
+## Approval Flows with Manual Tools
+
+When a manual tool (`execute: false`) is called during a multi-turn `callModel` invocation, the SDK **stops the tool-execution loop immediately** and returns. The key behavior:
+
+1. The loop does **not** execute the tool (there is no `execute` function)
+2. The loop sets `finalResponse` and returns control to the caller
+3. The model's response that requested the manual tool call **is included in `finalResponse.output`** — this is how to extract the tool call arguments
+
+This makes manual tools the foundation for approval flows, human-in-the-loop patterns, and any scenario where external action must be confirmed before proceeding.
+
+### Approval Flow Pattern
+
+```typescript
+import OpenRouter, { tool } from '@openrouter/sdk';
+import { z } from 'zod';
+
+const client = new OpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY
+});
+
+// Step 1: Define a manual tool for the action requiring approval
+const sendEmailTool = tool({
+  name: 'send_email',
+  description: 'Send an email to a recipient',
+  inputSchema: z.object({
+    to: z.string().describe('Recipient email address'),
+    subject: z.string().describe('Email subject'),
+    body: z.string().describe('Email body')
+  }),
+  execute: false  // Manual — SDK will stop and return when this is called
+});
+
+// Step 2: Call the model with the manual tool
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  instructions: 'You are an email assistant. Use the send_email tool when the user asks to send an email.',
+  input: 'Send an email to alice@example.com about the meeting tomorrow at 3pm',
+  tools: [sendEmailTool]
+});
+
+// Step 3: Get the final response — the loop stopped at the manual tool call
+const response = await result.getResponse();
+
+// Step 4: Find the manual tool call in the response output
+const toolCall = response.output.find(
+  (item) => item.type === 'function_call' && item.name === 'send_email'
+);
+
+if (toolCall) {
+  const args = JSON.parse(toolCall.arguments);
+
+  // Step 5: Present to user for approval
+  console.log('The assistant wants to send an email:');
+  console.log(`  To: ${args.to}`);
+  console.log(`  Subject: ${args.subject}`);
+  console.log(`  Body: ${args.body}`);
+
+  const approved = await promptUser('Approve? (y/n)');
+
+  if (approved) {
+    // Step 6: Execute the action manually
+    await sendEmail(args.to, args.subject, args.body);
+    console.log('Email sent.');
+  } else {
+    console.log('Email cancelled.');
+  }
+}
+```
+
+### Streaming with Manual Tool Detection
+
+For streaming scenarios, use `getFullResponsesStream()` to detect the manual tool call as it arrives:
+
+```typescript
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Send a message to the team about the deploy',
+  tools: [sendEmailTool, searchTool]  // Mix of manual and automatic tools
+});
+
+let manualToolArgs = '';
+let manualToolDetected = false;
+
+for await (const event of result.getFullResponsesStream()) {
+  switch (event.type) {
+    case 'response.output_text.delta':
+      process.stdout.write(event.delta);
+      break;
+
+    case 'response.function_call_arguments.delta':
+      manualToolArgs += event.delta;
+      break;
+
+    case 'response.function_call_arguments.done':
+      // Check the completed response to identify if this is the manual tool
+      manualToolDetected = true;
+      break;
+
+    case 'response.completed':
+      // The response is complete — if the manual tool was called,
+      // the loop has stopped and we can inspect the output
+      if (manualToolDetected) {
+        const call = event.response.output.find(
+          (item) => item.type === 'function_call' && item.name === 'send_email'
+        );
+        if (call) {
+          const args = JSON.parse(call.arguments);
+          // Present to user for approval...
+        }
+      }
+      break;
+  }
+}
+```
+
+### Resuming After Approval
+
+To continue the conversation after manually handling the tool call, pass the tool result back as input for the next `callModel` invocation:
+
+```typescript
+// After the user approves and the action is executed:
+const toolResult = { status: 'sent', messageId: '12345' };
+
+const followUp = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: [
+    // Include the prior conversation history
+    ...previousMessages,
+    // Include the assistant's tool call from finalResponse.output
+    ...response.output,
+    // Add the tool result
+    {
+      type: 'function_call_output',
+      call_id: toolCall.call_id,
+      output: JSON.stringify(toolResult)
+    }
+  ],
+  tools: [sendEmailTool]
+});
+
+const text = await followUp.getText();
+console.log(text);  // e.g. "Email sent successfully to alice@example.com!"
+```
+
+### Mixing Manual and Automatic Tools
+
+When both manual and automatic tools are provided, the SDK executes automatic tools normally through the multi-turn loop. The loop only stops when the model calls a manual tool:
+
+```typescript
+const searchTool = tool({
+  name: 'search',
+  description: 'Search for information',
+  inputSchema: z.object({ query: z.string() }),
+  execute: async ({ query }) => {
+    return { results: ['Result 1', 'Result 2'] };
+  }
+});
+
+const deleteTool = tool({
+  name: 'delete_record',
+  description: 'Delete a database record',
+  inputSchema: z.object({
+    recordId: z.string().describe('ID of the record to delete')
+  }),
+  execute: false  // Requires approval
+});
+
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Find the outdated records and delete them',
+  tools: [searchTool, deleteTool]
+});
+
+// The SDK will automatically execute search calls in the loop.
+// When the model calls delete_record, the loop stops and returns.
+const response = await result.getResponse();
 ```
 
 ---
