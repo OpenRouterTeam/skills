@@ -476,7 +476,9 @@ const searchTool = tool({
 ```
 
 #### Manual Tools
-Set `execute: false` to handle tool execution entirely outside the SDK. When the model calls a manual tool during the `callModel` loop, the loop exits early and returns. The model's response (including the tool call) is available in the response output. Retrieve the tool calls, execute them externally, and pass results back as `function_call_output` messages on the next `callModel` call. See [Manual Tool Execution](#manual-tool-execution) for the full lifecycle.
+Set `execute: false` for human-in-the-loop flows where a person produces the tool call result. When the model calls a manual tool during the `callModel` loop, the loop exits early and returns. The model's response (including the tool call) is available in the response output. Present the tool call to the user, collect their response, and pass it back as a `function_call_output` message on the next `callModel` call. See [Manual Tool Execution](#manual-tool-execution) for the full lifecycle.
+
+**Note:** Manual tools are specifically for cases where a human provides the result. For programmatic tool execution that needs approval before running, use [Approval Flows](#approval-flows) instead.
 
 ```typescript
 const manualTool = tool({
@@ -535,7 +537,9 @@ const result = client.callModel({
 
 ## Manual Tool Execution
 
-When the model calls a manual tool (`execute: false`) during the `callModel` loop, the loop exits early and returns. The model's response — including the tool call — is in the response output. The developer is responsible for executing the tool externally and passing results back on the next `callModel` invocation.
+Manual tools (`execute: false`) are for **human-in-the-loop flows** where a person — not code — produces the tool call result. When the model calls a manual tool, the `callModel` loop exits early and returns. The model's response — including the tool call — is in the response output. Present the tool call to the user, collect their input, and pass it back as a `function_call_output` on the next `callModel` invocation.
+
+If the tool result is produced by code and just needs approval before running, use [Approval Flows](#approval-flows) instead — the SDK manages the execution once approved.
 
 ### Manual Tool Lifecycle
 
@@ -547,37 +551,37 @@ const client = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
-// 1. Define a manual tool
-const runQueryTool = tool({
-  name: 'run_query',
-  description: 'Execute a database query',
+// 1. Define a manual tool — the human provides the result
+const askUserTool = tool({
+  name: 'ask_user',
+  description: 'Ask the user a clarifying question',
   inputSchema: z.object({
-    sql: z.string().describe('The SQL query to execute')
+    question: z.string().describe('The question to ask the user')
   }),
-  execute: false  // SDK will not execute this — loop exits when called
+  execute: false  // Human-in-the-loop — loop exits when called
 });
 
 // 2. Call the model — loop exits when the manual tool is called
 const result = client.callModel({
   model: 'openai/gpt-5-nano',
-  input: 'How many users signed up last week?',
-  tools: [runQueryTool]
+  input: 'Help me plan a trip to Japan',
+  tools: [askUserTool]
 });
 
 const response = await result.getResponse();
 
 // 3. Extract the tool call from response output
 const toolCall = response.output.find(
-  (item) => item.type === 'function_call' && item.name === 'run_query'
+  (item) => item.type === 'function_call' && item.name === 'ask_user'
 );
 
 if (toolCall) {
   const args = JSON.parse(toolCall.arguments);
 
-  // 4. Execute the tool externally
-  const queryResult = await db.query(args.sql);
+  // 4. Present the question to the user and collect their response
+  const userAnswer = await promptUser(args.question);
 
-  // 5. Pass the result back on the next callModel call
+  // 5. Pass the human's response back on the next callModel call
   const followUp = client.callModel({
     model: 'openai/gpt-5-nano',
     input: [
@@ -586,10 +590,10 @@ if (toolCall) {
       {
         type: 'function_call_output',
         call_id: toolCall.call_id,
-        output: JSON.stringify(queryResult)
+        output: JSON.stringify({ answer: userAnswer })
       }
     ],
-    tools: [runQueryTool]
+    tools: [askUserTool]
   });
 
   const text = await followUp.getText();
@@ -611,24 +615,25 @@ const searchTool = tool({
   }
 });
 
-const deployTool = tool({
-  name: 'deploy',
-  description: 'Deploy to production',
+const getUserInputTool = tool({
+  name: 'get_user_preference',
+  description: 'Ask the user for their preference',
   inputSchema: z.object({
-    service: z.string().describe('Service to deploy'),
-    version: z.string().describe('Version tag')
+    question: z.string().describe('The question to ask'),
+    options: z.array(z.string()).describe('Available options')
   }),
-  execute: false  // Developer handles this externally
+  execute: false  // Human provides the answer
 });
 
 const result = client.callModel({
   model: 'openai/gpt-5-nano',
-  input: 'Find the latest stable version of the auth service and deploy it',
-  tools: [searchTool, deployTool]
+  input: 'Help me pick a restaurant for dinner tonight',
+  tools: [searchTool, getUserInputTool]
 });
 
 // The SDK automatically executes search calls in the loop.
-// When the model calls deploy, the loop exits and returns.
+// When the model calls get_user_preference, the loop exits so the
+// human can answer, and their response is passed back on the next call.
 const response = await result.getResponse();
 ```
 
@@ -636,7 +641,7 @@ const response = await result.getResponse();
 
 ## Approval Flows
 
-The SDK provides a built-in approval system for tools that should execute automatically *once approved*, but pause the loop when approval has not yet been granted. Unlike manual tools (where the developer always handles execution externally), approval-gated tools have an `execute` function — the SDK just won't call it until the tool call is approved.
+The SDK provides a built-in approval system for tools that should execute automatically *once approved*, but pause the loop when approval has not yet been granted. Unlike manual tools (where a human produces the result), approval-gated tools have an `execute` function that runs code — the SDK just won't call it until the tool call is approved.
 
 Approval state is persisted across `callModel` invocations via a `state` accessor, so the developer can inspect pending tool calls, present them to the user, and provide approval or rejection decisions on the next call.
 
