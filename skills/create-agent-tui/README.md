@@ -75,13 +75,13 @@ The `block` style automatically detects your terminal's background color and alp
 
 Three loader styles shown while waiting for the model. Set `display.loader.style` and `display.loader.text`:
 
-**Gradient** (default) — scrolling color shimmer over the text:
-
-![Gradient loader](sample/screenshots/loader-gradient.png)
-
-**Spinner** — braille dot animation to the left:
+**Spinner** (default) — braille dot animation to the left:
 
 ![Spinner loader](sample/screenshots/loader-spinner.png)
+
+**Gradient** — scrolling color shimmer over the text:
+
+![Gradient loader](sample/screenshots/loader-gradient.png)
 
 **Minimal** — trailing dots:
 
