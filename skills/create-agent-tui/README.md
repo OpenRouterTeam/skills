@@ -6,18 +6,22 @@ A skill for AI coding agents (Claude Code, Cursor, etc.) that scaffolds a comple
 
 ## Quickstart
 
-Install the [OpenRouter skills plugin](https://github.com/OpenRouterTeam/skills) in Claude Code:
+Install just this skill with the [GitHub CLI](https://cli.github.com/) (v2.90.0+) — works with Claude Code, Cursor, Codex, OpenCode, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install):
+
+```bash
+gh skill install OpenRouterTeam/skills create-agent-tui
+```
+
+Add `--scope user` to install across every project for your current agent, or `--agent claude-code` to target a specific agent.
+
+Or install the full [OpenRouter skills plugin](https://github.com/OpenRouterTeam/skills) in Claude Code:
 
 ```
 /plugin marketplace add OpenRouterTeam/skills
 /plugin install openrouter@openrouter
 ```
 
-Or with the [Skills CLI](https://skills.sh/docs/cli) (works with any supported agent):
-
-```
-npx skills add OpenRouterTeam/skills
-```
+For other install methods (Cursor Rules, OpenCode, etc.) see the [root README](../../README.md#installing).
 
 Then tell your agent to build an agent TUI — it will use this skill automatically.
 
