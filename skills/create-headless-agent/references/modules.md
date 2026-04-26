@@ -497,6 +497,8 @@ Emit typed JSON events to stderr or a log file for observability. Headless agent
 ### src/logger.ts
 
 ```typescript
+import { appendFileSync } from 'fs';
+
 type EventType =
   | 'agent_start'
   | 'agent_end'
@@ -540,11 +542,10 @@ export function stderrJsonHandler(event: AgentEvent): void {
   process.stderr.write(JSON.stringify(event) + '\n');
 }
 
-/** Write JSON lines to a file using Bun.write (append mode) */
+/** Append JSON lines to a file. Use `appendFileSync` — Bun.write truncates. */
 export function fileLogHandler(logPath: string): EventHandler {
   return (event: AgentEvent) => {
-    const line = JSON.stringify(event) + '\n';
-    Bun.write(Bun.file(logPath), line);
+    appendFileSync(logPath, JSON.stringify(event) + '\n');
   };
 }
 ```

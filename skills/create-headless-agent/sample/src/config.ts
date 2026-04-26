@@ -1,6 +1,14 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
+function positiveNumber(name: string, raw: string): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`${name} must be a positive number, got: ${JSON.stringify(raw)}`);
+  }
+  return n;
+}
+
 export type OutputMode = 'text' | 'json' | 'quiet';
 
 export interface AgentConfig {
@@ -51,8 +59,8 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
 
   if (process.env.OPENROUTER_API_KEY) config.apiKey = process.env.OPENROUTER_API_KEY;
   if (process.env.AGENT_MODEL) config.model = process.env.AGENT_MODEL;
-  if (process.env.AGENT_MAX_STEPS) config.maxSteps = Number(process.env.AGENT_MAX_STEPS);
-  if (process.env.AGENT_MAX_COST) config.maxCost = Number(process.env.AGENT_MAX_COST);
+  if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
+  if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
   config = { ...config, ...overrides };
   if (!config.apiKey && !opts?.skipApiKey) throw new Error('OPENROUTER_API_KEY is required.');

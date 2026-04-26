@@ -24,23 +24,45 @@ import { runAgentWithRetry, type AgentEvent } from './agent.js';
 import { initSessionDir, saveMessage, newSessionPath } from './session.js';
 
 // ── Argument parsing ────────────────────────────────────────────────
+// Pre-scan argv for output mode so the catch below can format errors
+// (unknown flag, bad schema path, etc.) according to --json / --quiet.
 
-const { values, positionals } = parseArgs({
-  args: Bun.argv.slice(2),
-  options: {
-    prompt:        { type: 'string',  short: 'p' },
-    json:          { type: 'boolean', short: 'j', default: false },
-    quiet:         { type: 'boolean', short: 'q', default: false },
-    'no-session':  { type: 'boolean', default: false },
-    model:         { type: 'string',  short: 'm' },
-    'max-steps':   { type: 'string' },
-    'max-cost':    { type: 'string' },
-    'output-schema': { type: 'string' },
-    help:          { type: 'boolean', short: 'h', default: false },
-  },
-  allowPositionals: true,
-  strict: true,
-});
+const argv = Bun.argv.slice(2);
+const preMode: 'text' | 'json' | 'quiet' =
+  argv.includes('--json') || argv.includes('-j') ? 'json' :
+  argv.includes('--quiet') || argv.includes('-q') ? 'quiet' : 'text';
+
+function reportError(err: any): never {
+  const message = err?.message ?? String(err);
+  if (preMode === 'json') process.stdout.write(JSON.stringify({ type: 'error', message }) + '\n');
+  else if (preMode !== 'quiet') process.stderr.write(`Error: ${message}\n`);
+  process.exit(1);
+}
+
+let values: Record<string, any>;
+let positionals: string[];
+try {
+  const parsed = parseArgs({
+    args: argv,
+    options: {
+      prompt:        { type: 'string',  short: 'p' },
+      json:          { type: 'boolean', short: 'j', default: false },
+      quiet:         { type: 'boolean', short: 'q', default: false },
+      'no-session':  { type: 'boolean', default: false },
+      model:         { type: 'string',  short: 'm' },
+      'max-steps':   { type: 'string' },
+      'max-cost':    { type: 'string' },
+      'output-schema': { type: 'string' },
+      help:          { type: 'boolean', short: 'h', default: false },
+    },
+    allowPositionals: true,
+    strict: true,
+  });
+  values = parsed.values;
+  positionals = parsed.positionals;
+} catch (err) {
+  reportError(err);
+}
 
 // ── Help ────────────────────────────────────────────────────────────
 
@@ -149,13 +171,20 @@ try {
     saveMessage(sessionPath, { role: 'assistant', content: result.text });
   }
 
-  // Validate output against schema if provided
+  // Validate output against schema if provided. Install: `bun add ajv`.
   if (outputSchema) {
-    // Basic structural check — for production use, use ajv or similar
+    const { default: Ajv } = await import('ajv');
+    const ajv = new Ajv({ allErrors: true });
+    const validate = ajv.compile(outputSchema);
+    let parsed: unknown;
     try {
-      JSON.parse(result.text);
+      parsed = JSON.parse(result.text);
     } catch {
       console.error('Error: agent output is not valid JSON (output-schema was specified)');
+      process.exit(2);
+    }
+    if (!validate(parsed)) {
+      console.error(`Error: agent output failed schema validation: ${ajv.errorsText(validate.errors)}`);
       process.exit(2);
     }
   }
@@ -241,6 +270,13 @@ const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? '*';
 const API_SECRET = process.env.AGENT_API_SECRET;
 const MAX_BODY = 1 * 1024 * 1024; // 1 MB
 
+if (!API_SECRET) {
+  console.warn(
+    'WARNING: AGENT_API_SECRET is not set. All requests will be rejected with 401.\n' +
+    'Set AGENT_API_SECRET=<secret> and send `Authorization: Bearer <secret>` on every request.',
+  );
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function corsHeaders(): Record<string, string> {
@@ -262,8 +298,11 @@ function unauthorized(): Response {
   return json({ error: 'Unauthorized' }, 401);
 }
 
+// Fail-closed auth: require AGENT_API_SECRET to be set. The HTTP server
+// exposes shell execution and file mutation — running it unauthenticated
+// is an access-control footgun. See OWASP A01:2021.
 function checkAuth(req: Request): boolean {
-  if (!API_SECRET) return true;
+  if (!API_SECRET) return false;
   return req.headers.get('Authorization') === `Bearer ${API_SECRET}`;
 }
 

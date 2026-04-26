@@ -35,6 +35,11 @@ export async function runAgent(
   const onAbort = () => result.cancel();
   options?.signal?.addEventListener('abort', onAbort);
 
+  // Draining getTextStream concurrently with getItemsStream reads the
+  // stream dry, so getResponse().outputText ends up empty. We accumulate
+  // text deltas here as a source of truth for the final text.
+  let accumulatedText = '';
+
   try {
     if (options?.onEvent) {
       // Run two streams concurrently: getTextStream for text deltas (no
@@ -46,6 +51,7 @@ export async function runAgent(
         for await (const delta of result.getTextStream()) {
           if (options?.signal?.aborted) break;
           options.onEvent!({ type: 'text', delta });
+          accumulatedText += delta;
         }
       };
 
@@ -81,23 +87,41 @@ export async function runAgent(
 
     const response = await result.getResponse();
     const durationMs = Date.now() - startedAt;
+    // Prefer the streamed-accumulated text; fall back to response.outputText.
+    const text = accumulatedText || (response.outputText ?? '');
     options?.onEvent?.({ type: 'done', usage: response.usage, durationMs });
-    return { text: response.outputText ?? '', usage: response.usage, output: response.output, durationMs };
+    return { text, usage: response.usage, output: response.output, durationMs };
   } finally {
     options?.signal?.removeEventListener('abort', onAbort);
   }
 }
 
+/**
+ * Retry on 429/5xx — but ONLY if no tool calls have been executed yet.
+ * Once a mutating tool (file_write, shell, etc.) has run, replaying the
+ * whole agent from the initial prompt would double-execute side effects.
+ * For mid-run resilience, use a StateAccessor (see references/modules.md).
+ */
 export async function runAgentWithRetry(
   config: AgentConfig,
   input: string | ChatMessage[],
   options?: { onEvent?: (event: AgentEvent) => void; signal?: AbortSignal; maxRetries?: number },
 ) {
   for (let attempt = 0, max = options?.maxRetries ?? 3; attempt <= max; attempt++) {
-    try { return await runAgent(config, input, options); }
-    catch (err: any) {
+    let toolCallsMade = 0;
+    const wrappedOptions = {
+      ...options,
+      onEvent: (event: AgentEvent) => {
+        if (event.type === 'tool_call') toolCallsMade++;
+        options?.onEvent?.(event);
+      },
+    };
+    try {
+      return await runAgent(config, input, wrappedOptions);
+    } catch (err: any) {
       const s = err?.status ?? err?.statusCode;
-      if (!(s === 429 || (s >= 500 && s < 600)) || attempt === max) throw err;
+      const retryable = s === 429 || (s >= 500 && s < 600);
+      if (!retryable || attempt === max || toolCallsMade > 0) throw err;
       await new Promise((r) => setTimeout(r, Math.min(1000 * 2 ** attempt, 30000)));
     }
   }

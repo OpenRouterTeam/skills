@@ -122,10 +122,12 @@ my-agent/
       grep.ts               Search content by regex
       list-dir.ts           List directories
       shell.ts              Execute commands (Bun.spawn)
-      web-fetch.ts          Fetch and extract text from URLs
+      custom.ts             Empty skeleton for domain-specific tools
   test/
     agent.test.ts           Example test (bun:test)
 ```
+
+Server tools (`openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`) are wired in `tools/index.ts` and execute on OpenRouter's side — no client code.
 
 ## Sample
 
@@ -152,6 +154,40 @@ bun run src/cli.ts --json "Search for TODO comments"
 # Override model
 bun run src/cli.ts -m anthropic/claude-sonnet-4.6 -p "Review this code"
 ```
+
+## Highlighted features
+
+### Safe retry on 429/5xx
+
+The generated `runAgentWithRetry` wrapper retries transient API errors (rate limits, 5xx) with exponential backoff — **but only if no tool calls have executed yet**. Once a mutating tool (`file_write`, `shell`, etc.) has run, replaying the whole agent from the initial prompt would double-execute its side effects. Retries after a tool call throw immediately.
+
+For mid-run resilience (crash-resume, cross-process approval flows), pair with the optional **Persistent State (StateAccessor)** module documented in [references/modules.md](references/modules.md).
+
+### Structured output with `--output-schema`
+
+Constrain the final response to match a JSON Schema using Ajv. The scaffold is tolerant of markdown fences, so schemas work even when the model wraps JSON in ```` ``` ```` blocks:
+
+```bash
+cat > report.schema.json <<'EOF'
+{
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string" },
+    "count":   { "type": "integer", "minimum": 0 }
+  },
+  "required": ["summary", "count"],
+  "additionalProperties": false
+}
+EOF
+
+bun run src/cli.ts --output-schema report.schema.json \
+  "Analyze README.md and return a JSON report with summary and count fields"
+```
+
+Exit codes:
+- `0` — agent succeeded and output matched schema
+- `1` — agent or API error
+- `2` — output failed schema validation (Ajv error message on stderr, or emitted as a `validation_error` event in `--json` mode)
 
 ## Environment
 

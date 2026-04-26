@@ -14,30 +14,24 @@ export const fileEditTool = tool({
   execute: async ({ path, edits }) => {
     try {
       let content = await Bun.file(path).text();
-      const original = content;
+      // Show each substitution as a self-contained -/+ block. Positional
+      // line-by-line diffs lie when an edit inserts or deletes lines — this
+      // approach is always correct because it reflects exactly what changed.
+      const diffParts: string[] = [`--- ${path}`, `+++ ${path}`];
 
       for (const edit of edits) {
         const count = content.split(edit.old_text).length - 1;
         if (count === 0) return { error: `Text not found: "${edit.old_text.slice(0, 50)}"` };
         if (count > 1) return { error: `Ambiguous match (${count} occurrences): "${edit.old_text.slice(0, 50)}"` };
         content = content.replace(edit.old_text, edit.new_text);
+
+        diffParts.push('@@ edit @@');
+        for (const line of edit.old_text.split('\n')) diffParts.push(`-${line}`);
+        for (const line of edit.new_text.split('\n')) diffParts.push(`+${line}`);
       }
 
       await Bun.write(path, content);
-
-      const oldLines = original.split('\n');
-      const newLines = content.split('\n');
-      const diff = [`--- ${path}`, `+++ ${path}`];
-      let i = 0;
-      while (i < oldLines.length || i < newLines.length) {
-        if (oldLines[i] !== newLines[i]) {
-          if (i < oldLines.length) diff.push(`-${oldLines[i]}`);
-          if (i < newLines.length) diff.push(`+${newLines[i]}`);
-        }
-        i++;
-      }
-
-      return { edited: true, path, diff: diff.join('\n') };
+      return { edited: true, path, edits: edits.length, diff: diffParts.join('\n') };
     } catch (err: any) {
       return { error: err.message };
     }

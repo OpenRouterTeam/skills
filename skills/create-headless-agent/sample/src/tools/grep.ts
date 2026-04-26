@@ -30,12 +30,18 @@ export const grepTool = tool({
       }
 
       const stdout = proc.stdout.toString();
-      const matches = stdout.split('\n').filter(Boolean).slice(0, 100).map((line) => {
+      const allLines = stdout.split('\n').filter(Boolean);
+      const truncated = allLines.length > 100;
+      const matches = allLines.slice(0, 100).map((line) => {
         const match = line.match(/^(.+?):(\d+):(.*)$/);
         if (!match) return { raw: line };
         return { file: match[1], line: Number(match[2]), content: match[3] };
       });
-      return { matches, total: matches.length };
+      return {
+        matches,
+        total: allLines.length,
+        ...(truncated && { truncated: true }),
+      };
     } catch (err: any) {
       if (err.code === 'ENOENT') return { error: 'ripgrep (rg) not found. Install: https://github.com/BurntSushi/ripgrep' };
       return { error: err.message };
