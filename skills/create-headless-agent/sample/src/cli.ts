@@ -97,6 +97,7 @@ async function main() {
       saveMessage(sessionPath, { role: 'user', content: prompt });
     }
 
+    let hasEmittedText = false;
     const result = await runAgentWithRetry(config, prompt, {
       onEvent: (event: AgentEvent) => {
         if (outputMode === 'quiet') return;
@@ -106,9 +107,13 @@ async function main() {
           return;
         }
 
-        // Text mode: stream text deltas to stdout
+        // Text mode: stream text deltas to stdout, insert a newline at turn
+        // boundaries so multi-turn responses don't run together visually.
         if (event.type === 'text') {
           process.stdout.write(event.delta);
+          hasEmittedText = true;
+        } else if (event.type === 'turn_end' && hasEmittedText) {
+          process.stdout.write('\n');
         }
       },
     });

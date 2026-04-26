@@ -8,6 +8,7 @@ Optional architectural modules that extend the core headless agent. Each section
 - [Context Compaction](#context-compaction) -- summarize older messages
 - [System Prompt Composition](#system-prompt-composition) -- dynamic instructions from context files
 - [Tool Approval](#tool-approval) -- programmatic approval for headless execution
+- [Persistent State (StateAccessor)](#persistent-state-stateaccessor) -- resumable agent state for approvals, interruptions, multi-turn
 - [Structured Event Logging](#structured-event-logging) -- emit typed events for observability
 - [Output Schema Validation](#output-schema-validation) -- constrain final output to a schema (headless-specific)
 - [Webhook Notifications](#webhook-notifications) -- POST results on completion (headless-specific)
@@ -263,6 +264,8 @@ const result = client.callModel({
 
 Gate dangerous tools behind programmatic approval. Unlike the TUI version, headless agents have no stdin -- approval decisions come from a callback function, an allow-list, or an external service.
 
+> **For approval workflows that need to survive across process restarts** (e.g. an HTTP server that queues tool calls for human review, then resumes the agent when approvals arrive): pair this module with [Persistent State (StateAccessor)](#persistent-state-stateaccessor). Without persistent state, pending tool calls are lost when the process exits.
+
 ### Adding requireApproval to tools
 
 Set `requireApproval` on individual tool definitions. It accepts `true`, `false`, or a function that receives the tool arguments and returns a boolean:
@@ -364,6 +367,126 @@ export function buildTools(config: AgentConfig) {
   ];
 }
 ```
+
+---
+
+## Persistent State (StateAccessor)
+
+The SDK's [`StateAccessor`](https://openrouter.ai/docs/agent-sdk/call-model/tool-approval-state) pattern provides **live, resumable agent state** -- including `pendingToolCalls`, `unsentToolResults`, and a `status` field that tracks whether the agent is `in_progress`, `awaiting_approval`, `complete`, or `interrupted`. It's the recommended mechanism for:
+
+- Multi-turn conversations that accumulate across processes
+- Approval flows that survive restarts (pair with [Tool Approval](#tool-approval))
+- Resuming interrupted runs (timeouts, crashes) without replaying from scratch
+- Running the same agent loop across multiple worker processes backed by shared storage
+
+### How it differs from Session Persistence
+
+| Concern | [Session Persistence](#session-persistence) | StateAccessor |
+|---|---|---|
+| What it stores | User/assistant content only | Full `ConversationState`: messages, pending tool calls, unsent tool results, status |
+| Purpose | Audit log, debugging | Live agent state, resumable |
+| Format | Append-only JSONL | Read/write JSON (typically one file per session) |
+| Wire-up | `saveMessage()` in `cli.ts` | Passed to `callModel({ state: ... })` |
+| Required for approval? | No | Yes, if approvals span processes |
+
+### src/state.ts
+
+```typescript
+import type { StateAccessor, ConversationState } from '@openrouter/agent';
+import { createInitialState } from '@openrouter/agent';
+import { mkdirSync, existsSync } from 'fs';
+import { resolve } from 'path';
+
+export function fileStateAccessor(stateDir: string, sessionId: string): StateAccessor {
+  mkdirSync(stateDir, { recursive: true });
+  const path = resolve(stateDir, `${sessionId}.state.json`);
+
+  return {
+    async load(): Promise<ConversationState | null> {
+      if (!existsSync(path)) return null;
+      try {
+        const text = await Bun.file(path).text();
+        return JSON.parse(text) as ConversationState;
+      } catch {
+        return null;
+      }
+    },
+    async save(state: ConversationState): Promise<void> {
+      await Bun.write(path, JSON.stringify(state, null, 2));
+    },
+  };
+}
+
+/** Helper: create fresh state or resume existing state by id. */
+export async function loadOrCreateState(
+  stateDir: string,
+  sessionId: string,
+  initialInput: string,
+): Promise<{ accessor: StateAccessor; state: ConversationState }> {
+  const accessor = fileStateAccessor(stateDir, sessionId);
+  const existing = await accessor.load();
+  const state = existing ?? createInitialState({ input: initialInput });
+  return { accessor, state };
+}
+```
+
+### Wire into agent.ts
+
+```typescript
+const result = client.callModel({
+  model: config.model,
+  instructions: config.systemPrompt.replace('{cwd}', process.cwd()),
+  input: input as string | Item[],
+  tools,
+  stopWhen: [stepCountIs(config.maxSteps), maxCost(config.maxCost)],
+  state: stateAccessor,  // <-- persists state across runs
+});
+```
+
+### Usage: resuming an interrupted run
+
+```typescript
+import { fileStateAccessor } from './state.js';
+
+// Fresh start
+const accessor = fileStateAccessor('.agent-state', 'session-abc');
+await runAgent(config, 'Refactor the auth module', {
+  onEvent: (e) => { /* ... */ },
+  // state is passed internally
+});
+
+// Later: resume from the same session id (process restart, requeue, etc.)
+const accessor = fileStateAccessor('.agent-state', 'session-abc');
+// callModel will detect state.status === 'interrupted' and resume automatically
+await runAgent(config, '', { onEvent: ... });
+```
+
+### Usage: approval flow that survives restart
+
+```typescript
+// Run 1: agent generates a tool call requiring approval, state.status = 'awaiting_approval'
+await runAgent(config, 'Delete all .bak files', { /* ... */ });
+
+// Out of process: human reviews state.pendingToolCalls, decides
+const pending = (await accessor.load())!.pendingToolCalls;
+console.log('Pending:', pending);  // => [{ id: 'call_1', name: 'shell', ... }]
+
+// Run 2: resume with approvals
+await client.callModel({
+  // ... same config ...
+  state: accessor,
+  approveToolCalls: ['call_1'],   // or rejectToolCalls: ['call_1']
+});
+```
+
+### When to skip this module
+
+For the simple fire-and-forget CLI case (one prompt, one response, no approvals), the default `session.ts` is sufficient. Add `StateAccessor` when any of the following apply:
+
+- Tool approvals must survive a process restart
+- Users expect to resume a conversation after an interruption (timeout, crash)
+- The agent runs in a queue worker where jobs can be retried across machines
+- You need to expose `pendingToolCalls` or `unsentToolResults` to an external UI
 
 ---
 

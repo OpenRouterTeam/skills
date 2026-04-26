@@ -120,15 +120,21 @@ if (config.sessionEnabled && !values['no-session']) {
 // ── Run agent ───────────────────────────────────────────────────────
 
 try {
+  let hasEmittedText = false;
   const result = await runAgentWithRetry(config, prompt, {
     outputSchema,
     onEvent: (event: AgentEvent) => {
       if (values.json) {
-        // NDJSON mode: write every event as a JSON line
+        // NDJSON mode: write every event as a JSON line (including turn_end and done)
         process.stdout.write(JSON.stringify(event) + '\n');
-      } else if (!values.quiet && event.type === 'text') {
-        // Text mode: stream text deltas to stdout
-        process.stdout.write(event.delta);
+      } else if (!values.quiet) {
+        // Text mode: stream text deltas, insert newline at turn boundaries
+        if (event.type === 'text') {
+          process.stdout.write(event.delta);
+          hasEmittedText = true;
+        } else if (event.type === 'turn_end' && hasEmittedText) {
+          process.stdout.write('\n');
+        }
       }
     },
   });

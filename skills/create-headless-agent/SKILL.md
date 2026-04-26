@@ -108,6 +108,7 @@ After getting checklist selections, follow this workflow:
 - [ ] Generate .env.example
 - [ ] Generate test/agent.test.ts
 - [ ] Verify: run bunx tsc --noEmit
+- [ ] Optional: run `npx skills-ref validate .` to check SKILL.md frontmatter (if installed)
 ```
 
 ---
@@ -281,8 +282,10 @@ import { globTool } from './glob.js';
 import { grepTool } from './grep.js';
 import { listDirTool } from './list-dir.js';
 import { shellTool } from './shell.js';
-import { webFetchTool } from './web-fetch.js';
+import { myCustomTool } from './custom.js';
 
+// `as const` unlocks full type inference for tool calls downstream.
+// See: https://openrouter.ai/docs/agent-sdk/call-model/tools
 export const tools = [
   // User-defined tools — executed client-side
   fileReadTool,
@@ -292,12 +295,13 @@ export const tools = [
   grepTool,
   listDirTool,
   shellTool,
-  webFetchTool,
+  myCustomTool,
 
   // Server tools — executed by OpenRouter, no client implementation needed
   serverTool({ type: 'openrouter:web_search' }),
+  serverTool({ type: 'openrouter:web_fetch' }),
   serverTool({ type: 'openrouter:datetime', parameters: { timezone: 'UTC' } }),
-];
+] as const;
 ```
 
 ### src/agent.ts
@@ -315,13 +319,16 @@ export type AgentEvent =
   | { type: 'text'; delta: string }
   | { type: 'tool_call'; name: string; callId: string; args: Record<string, unknown> }
   | { type: 'tool_result'; name: string; callId: string; output: string }
-  | { type: 'reasoning'; delta: string };
+  | { type: 'reasoning'; delta: string }
+  | { type: 'turn_end' }
+  | { type: 'done'; usage: { inputTokens?: number; outputTokens?: number; totalTokens?: number } | null | undefined; durationMs: number };
 
 export async function runAgent(
   config: AgentConfig,
   input: string | ChatMessage[],
   options?: { onEvent?: (event: AgentEvent) => void; signal?: AbortSignal },
 ) {
+  const startedAt = Date.now();
   const client = new OpenRouter({ apiKey: config.apiKey });
 
   const result = client.callModel({
@@ -332,56 +339,62 @@ export async function runAgent(
     stopWhen: [stepCountIs(config.maxSteps), maxCost(config.maxCost)],
   });
 
-  if (options?.onEvent) {
-    // Run two streams concurrently: getTextStream for text deltas (no
-    // bookkeeping required) and getItemsStream filtered to tool events.
-    // The SDK's ReusableReadableStream allows concurrent consumption.
-    const callNames = new Map<string, string>();
-    let needsTurnSeparator = false;
-    let hasEmittedText = false;
+  // Wire AbortSignal → result.cancel() so the underlying network stream
+  // actually closes (not just the iterator we're about to walk).
+  const onAbort = () => result.cancel();
+  options?.signal?.addEventListener('abort', onAbort);
 
-    const streamText = async () => {
-      for await (const delta of result.getTextStream()) {
-        if (options?.signal?.aborted) break;
-        if (needsTurnSeparator && hasEmittedText) {
-          options.onEvent!({ type: 'text', delta: '\n' });
-          needsTurnSeparator = false;
+  try {
+    if (options?.onEvent) {
+      // Run two streams concurrently: getTextStream for text deltas (no
+      // bookkeeping required) and getItemsStream filtered to tool events.
+      // The SDK's ReusableReadableStream allows concurrent consumption.
+      const callNames = new Map<string, string>();
+
+      const streamText = async () => {
+        for await (const delta of result.getTextStream()) {
+          if (options?.signal?.aborted) break;
+          options.onEvent!({ type: 'text', delta });
         }
-        options.onEvent!({ type: 'text', delta });
-        hasEmittedText = true;
-      }
-    };
+      };
 
-    const streamTools = async () => {
-      for await (const item of result.getItemsStream()) {
-        if (options?.signal?.aborted) break;
-        if (item.type === 'function_call') {
-          callNames.set(item.callId, item.name);
-          if (item.status === 'completed') {
-            const args = (() => { try { return item.arguments ? JSON.parse(item.arguments) : {}; } catch { return {}; } })();
-            options.onEvent!({ type: 'tool_call', name: item.name, callId: item.callId, args });
+      const streamTools = async () => {
+        for await (const item of result.getItemsStream()) {
+          if (options?.signal?.aborted) break;
+          if (item.type === 'function_call') {
+            callNames.set(item.callId, item.name);
+            if (item.status === 'completed') {
+              const args = (() => { try { return item.arguments ? JSON.parse(item.arguments) : {}; } catch { return {}; } })();
+              options.onEvent!({ type: 'tool_call', name: item.name, callId: item.callId, args });
+            }
+          } else if (item.type === 'function_call_output') {
+            const out = typeof item.output === 'string' ? item.output : JSON.stringify(item.output);
+            options.onEvent!({
+              type: 'tool_result',
+              name: callNames.get(item.callId) ?? 'unknown',
+              callId: item.callId,
+              output: out.length > 200 ? out.slice(0, 200) + '...' : out,
+            });
+            // Signal a turn boundary; consumers (e.g. CLI text mode) can
+            // render a separator. Keeps presentation out of agent.ts.
+            options.onEvent!({ type: 'turn_end' });
+          } else if (item.type === 'reasoning') {
+            const text = item.summary?.map((s: { text: string }) => s.text).join('') ?? '';
+            if (text) options.onEvent!({ type: 'reasoning', delta: text });
           }
-        } else if (item.type === 'function_call_output') {
-          const out = typeof item.output === 'string' ? item.output : JSON.stringify(item.output);
-          options.onEvent!({
-            type: 'tool_result',
-            name: callNames.get(item.callId) ?? 'unknown',
-            callId: item.callId,
-            output: out.length > 200 ? out.slice(0, 200) + '...' : out,
-          });
-          needsTurnSeparator = true;
-        } else if (item.type === 'reasoning') {
-          const text = item.summary?.map((s: { text: string }) => s.text).join('') ?? '';
-          if (text) options.onEvent!({ type: 'reasoning', delta: text });
         }
-      }
-    };
+      };
 
-    await Promise.all([streamText(), streamTools()]);
+      await Promise.all([streamText(), streamTools()]);
+    }
+
+    const response = await result.getResponse();
+    const durationMs = Date.now() - startedAt;
+    options?.onEvent?.({ type: 'done', usage: response.usage, durationMs });
+    return { text: response.outputText ?? '', usage: response.usage, output: response.output, durationMs };
+  } finally {
+    options?.signal?.removeEventListener('abort', onAbort);
   }
-
-  const response = await result.getResponse();
-  return { text: response.outputText ?? '', usage: response.usage, output: response.output };
 }
 
 export async function runAgentWithRetry(
