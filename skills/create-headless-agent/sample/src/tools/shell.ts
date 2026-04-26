@@ -40,7 +40,16 @@ export const shellTool = tool({
       const [stdoutBuf, stderrBuf] = await Promise.race([drain, drainTimeout]);
       clearTimeout(killTimer);
 
-      const exitCode = await proc.exited;
+      // proc.exited can also hang if the child process ignores SIGTERM
+      // (e.g. `trap "" SIGTERM; sleep 100`). Escalate to SIGKILL after a
+      // grace period and fall back to -1 exit code if it still doesn't.
+      const exitCode = await Promise.race([
+        proc.exited,
+        new Promise<number>((res) => setTimeout(() => {
+          proc.kill('SIGKILL');
+          setTimeout(() => res(-1), 500);
+        }, 2000)),
+      ]);
       let output = (stdoutBuf + stderrBuf).trim();
 
       // Truncate by byte size

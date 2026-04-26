@@ -184,9 +184,22 @@ try {
     const { default: Ajv } = await import('ajv');
     const ajv = new Ajv({ allErrors: true });
     const validate = ajv.compile(outputSchema);
+
+    // Models often wrap JSON in markdown fences (```json ... ```) or
+    // include prose around it. Extract the first JSON block permissively.
+    const extractJson = (text: string): string => {
+      const trimmed = text.trim();
+      const fence = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+      if (fence) return fence[1].trim();
+      const first = trimmed.indexOf('{');
+      const last = trimmed.lastIndexOf('}');
+      if (first !== -1 && last > first) return trimmed.slice(first, last + 1);
+      return trimmed;
+    };
+
     let parsed: unknown;
     try {
-      parsed = JSON.parse(result.text);
+      parsed = JSON.parse(extractJson(result.text));
     } catch {
       console.error('Error: agent output is not valid JSON (output-schema was specified)');
       process.exit(2);
