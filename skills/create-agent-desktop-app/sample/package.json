@@ -1,0 +1,48 @@
+{
+  "name": "my-agent-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "smoke-test": "npm run build && node scripts/smoke-test.js",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/inter-tight": "^5.2.7",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@openrouter/agent": "^0.4.0",
+    "better-sqlite3": "^12.9.0",
+    "dotenv": "^17.4.2",
+    "glob": "^11.0.0",
+    "nanoid": "^5.0.9",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.1",
+    "rehype-highlight": "^7.0.1",
+    "remark-gfm": "^4.0.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^41.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^5.0.0",
+    "highlight.js": "^11.11.0",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}

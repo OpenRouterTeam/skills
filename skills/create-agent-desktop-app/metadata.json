@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "OpenRouter Inc",
+  "date": "April 2026",
+  "abstract": "Scaffolds a complete Electron desktop agent app in TypeScript using @openrouter/agent — React chat UI with themes, SQLite persistence, streaming, configurable tools, and native desktop features.",
+  "references": [
+    "https://openrouter.ai/docs/guides/features/server-tools/overview",
+    "https://openrouter.ai/docs/guides/features/tool-calling",
+    "https://github.com/meltylabs/chorus",
+    "https://github.com/different-ai/openwork",
+    "https://electron-vite.org"
+  ]
+}
