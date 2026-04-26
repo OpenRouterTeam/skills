@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "organization": "OpenRouter Inc",
+  "date": "April 2026",
+  "abstract": "Scaffolds a headless agent in TypeScript using @openrouter/agent and Bun — for CLI tools, API servers, queue workers, and pipelines. No terminal UI.",
+  "references": [
+    "https://openrouter.ai/docs/guides/features/server-tools/overview",
+    "https://openrouter.ai/docs/guides/features/tool-calling",
+    "https://github.com/badlogic/pi-mono",
+    "https://github.com/openai/codex"
+  ]
+}
