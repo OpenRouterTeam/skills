@@ -4,6 +4,21 @@ description: Migration guide from @openrouter/sdk to @openrouter/agent for callM
 version: 1.0.0
 ---
 
+## Installation
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-agent-migration
+```
+
+To target a specific agent (e.g. Claude Code):
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-agent-migration --agent claude-code
+```
+
+---
+
+
 # Migrating from @openrouter/sdk to @openrouter/agent
 
 Agent functionality (`callModel`, `tool()`, stop conditions, format converters, streaming helpers) has moved from `@openrouter/sdk` to the standalone `@openrouter/agent` package. The `@openrouter/agent` package includes its own `OpenRouter` client class, so you do not need `@openrouter/sdk` for agent use cases.
@@ -347,4 +362,3 @@ const result = client.callModel({
 | `@openrouter/agent/tool-context` | `buildToolExecuteContext`, `ToolContextStore` |
 | `@openrouter/agent/tool-event-broadcaster` | `ToolEventBroadcaster` |
 | `@openrouter/agent/turn-context` | `buildTurnContext` |
-
