@@ -5,6 +5,21 @@ version: 2.0.0
 compatibility: browser (requires Web Crypto API, localStorage, sessionStorage)
 ---
 
+## Installation
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-oauth
+```
+
+To target a specific agent (e.g. Claude Code):
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-oauth --agent claude-code
+```
+
+---
+
+
 # Sign In with OpenRouter
 
 Add OAuth login to any web app. Users authorize on OpenRouter and your app receives an API key — no client registration, no backend, no secrets. Works with any framework.
@@ -197,7 +212,7 @@ For dark mode support, add dark variants: swap light backgrounds to dark (`dark:
 ## Using the API Key
 
 ```typescript
-const response = await fetch("https://openrouter.ai/api/v1/responses", {
+const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${apiKey}`,
@@ -205,7 +220,7 @@ const response = await fetch("https://openrouter.ai/api/v1/responses", {
   },
   body: JSON.stringify({
     model: "openai/gpt-4o-mini",
-    input: [{ type: "message", role: "user", content: "Hello!" }],
+    messages: [{ role: "user", content: "Hello!" }],
   }),
 });
 ```
@@ -217,6 +232,5 @@ For the type-safe SDK approach (`callModel`, streaming, tool use), see the `open
 ## Resources
 
 - [OAuth PKCE guide](https://openrouter.ai/docs/guides/overview/auth/oauth) — full parameter reference and key management
-- [Authentication guide](https://openrouter.ai/docs/api/reference/authentication) — API key usage and Bearer token setup
 - [Live demo](https://openrouterteam.github.io/sign-in-with-openrouter/) — interactive button playground
 - [OpenRouter TypeScript SDK](https://openrouter.ai/docs/sdks/typescript/overview) — `callModel` pattern for completions and streaming
