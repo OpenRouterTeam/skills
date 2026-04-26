@@ -348,9 +348,12 @@ export async function runAgent(
   });
 
   // Wire AbortSignal → result.cancel() so the underlying network stream
-  // actually closes (not just the iterator we're about to walk).
+  // actually closes (not just the iterator we're about to walk). Also
+  // handle the pre-aborted case: addEventListener('abort') does not fire
+  // for signals already in the aborted state.
   const onAbort = () => result.cancel();
   options?.signal?.addEventListener('abort', onAbort);
+  if (options?.signal?.aborted) result.cancel();
 
   // Draining getTextStream concurrently with getItemsStream reads the
   // stream dry, so getResponse().outputText ends up empty. We accumulate

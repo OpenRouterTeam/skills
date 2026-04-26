@@ -191,9 +191,14 @@ try {
       const trimmed = text.trim();
       const fence = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
       if (fence) return fence[1].trim();
-      const first = trimmed.indexOf('{');
-      const last = trimmed.lastIndexOf('}');
-      if (first !== -1 && last > first) return trimmed.slice(first, last + 1);
+      const objStart = trimmed.indexOf('{');
+      const objEnd = trimmed.lastIndexOf('}');
+      const arrStart = trimmed.indexOf('[');
+      const arrEnd = trimmed.lastIndexOf(']');
+      const useArr = arrStart !== -1 && (objStart === -1 || arrStart < objStart);
+      const start = useArr ? arrStart : objStart;
+      const end = useArr ? arrEnd : objEnd;
+      if (start !== -1 && end > start) return trimmed.slice(start, end + 1);
       return trimmed;
     };
 
@@ -331,6 +336,10 @@ function checkAuth(req: Request): boolean {
 
 Bun.serve({
   port: PORT,
+  // Enforce body limit at the server level — the Content-Length header
+  // check is bypassable (chunked encoding, omitted header). Bun's default
+  // is 128 MB which is too large for an agent RPC endpoint.
+  maxRequestBodySize: MAX_BODY,
   async fetch(req) {
     const url = new URL(req.url);
 
