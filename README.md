@@ -27,13 +27,31 @@ cp -r /tmp/openrouter-skills/skills/* ~/.config/opencode/skills/
 rm -rf /tmp/openrouter-skills
 ```
 
-### Skills CLI
+### GitHub CLI (`gh skill`)
 
-Works with any supported agent ([docs](https://skills.sh/docs/cli)):
+Works with Claude Code, Cursor, OpenCode, Codex, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install). Requires [GitHub CLI](https://cli.github.com/) v2.90.0 or later.
 
+Install all OpenRouter skills:
+
+```bash
+gh skill install OpenRouterTeam/skills
 ```
-npx skills add OpenRouterTeam/skills
+
+#### Installing a single skill
+
+Pass the skill name as the second argument — see each skill's README (linked in the table below) for the exact name and a copy‑pasteable command.
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-images
 ```
+
+By default skills install at project scope (inside the current git repo). To make a skill available across every project for your current agent, add `--scope user`:
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-images --scope user
+```
+
+To target a specific agent, add `--agent` (e.g. `--agent claude-code`, `--agent cursor`). [Full flag reference](https://cli.github.com/manual/gh_skill_install).
 
 ## Skills
 
@@ -41,11 +59,12 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 
 | Skill | Useful for |
 |-------|------------|
-| create-agent-tui | Scaffolds a complete agent TUI in TypeScript — like `create-react-app` for terminal agents. Customizable input styles, tool display modes, ASCII banners, loaders, session persistence, and [14 built-in tools](skills/create-agent-tui/README.md) |
-| openrouter-typescript-sdk | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
-| openrouter-models | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
-| openrouter-images | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
-| openrouter-oauth | Framework-agnostic [Sign In with OpenRouter](https://openrouterteam.github.io/sign-in-with-openrouter/) — OAuth PKCE authentication using plain `fetch`, no SDK or dependencies required. Includes a copy-pasteable auth module and sign-in button component |
+| [create-agent-tui](skills/create-agent-tui/README.md) | Scaffolds a complete agent TUI in TypeScript — like `create-react-app` for terminal agents. Customizable input styles, tool display modes, ASCII banners, loaders, session persistence, and [14 built-in tools](skills/create-agent-tui/README.md) |
+| [openrouter-typescript-sdk](skills/openrouter-typescript-sdk/README.md) | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
+| [openrouter-agent-migration](skills/openrouter-agent-migration/README.md) | Migrating from `@openrouter/sdk` to the standalone `@openrouter/agent` package for `callModel`, `tool()`, stop conditions, and streaming helpers |
+| [openrouter-models](skills/openrouter-models/README.md) | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
+| [openrouter-images](skills/openrouter-images/README.md) | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
+| [openrouter-oauth](skills/openrouter-oauth/README.md) | Framework-agnostic [Sign In with OpenRouter](https://openrouterteam.github.io/sign-in-with-openrouter/) — OAuth PKCE authentication using plain `fetch`, no SDK or dependencies required. Includes a copy-pasteable auth module and sign-in button component |
 
 ## Environment
 
