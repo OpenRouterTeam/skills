@@ -3,6 +3,21 @@ name: openrouter-images
 description: Generate images from text prompts and edit existing images using OpenRouter's image generation models. Use when the user asks to create, generate, or make an image, picture, or illustration from a description, or wants to edit, modify, transform, or alter an existing image with a text prompt.
 ---
 
+## Installation
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-images
+```
+
+To target a specific agent (e.g. Claude Code):
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-images --agent claude-code
+```
+
+---
+
+
 # OpenRouter Images
 
 Generate images from text prompts and edit existing images via OpenRouter's chat completions API with image modalities.
@@ -94,23 +109,6 @@ Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
   "count": 1
 }
 ```
-
-## API Response Shapes
-
-Image generation uses `POST /api/v1/responses` with `modalities: ["image", "text"]`. See the [Responses API reference](https://openrouter.ai/docs/api/reference/responses/overview) and [image generation guide](https://openrouter.ai/docs/guides/overview/multimodal/image-generation) for full request details.
-
-The image-specific output item type is `image_generation_call` — this is not obvious from the general Responses API docs:
-
-```json
-{
-  "type": "image_generation_call",
-  "id": "imagegen-abc123",
-  "status": "completed",
-  "result": "<base64-encoded image data>"
-}
-```
-
-This appears alongside standard `message` output items in the `output` array. Text and image outputs may each be absent depending on the model and prompt.
 
 ## Using a Different Model
 
