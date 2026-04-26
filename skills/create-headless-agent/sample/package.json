@@ -1,6 +1,9 @@
 {
   "name": "my-agent",
   "type": "module",
+  "bin": {
+    "my-agent": "src/cli.ts"
+  },
   "scripts": {
     "start": "bun run src/cli.ts",
     "dev": "bun --watch src/cli.ts",

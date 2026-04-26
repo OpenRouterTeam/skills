@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { parseArgs } from 'util';
 import { readFileSync } from 'fs';
 import { loadConfig } from './config.js';
