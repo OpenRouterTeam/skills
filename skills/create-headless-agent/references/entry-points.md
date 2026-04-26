@@ -144,7 +144,7 @@ if (config.sessionEnabled && !values['no-session']) {
 try {
   let hasEmittedText = false;
   const result = await runAgentWithRetry(config, prompt, {
-    outputSchema,
+    // outputSchema is validated after the agent returns, not passed in
     onEvent: (event: AgentEvent) => {
       if (values.json) {
         // NDJSON mode: write every event as a JSON line (including turn_end and done)

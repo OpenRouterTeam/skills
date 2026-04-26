@@ -23,7 +23,10 @@ export const fileEditTool = tool({
         const count = content.split(edit.old_text).length - 1;
         if (count === 0) return { error: `Text not found: "${edit.old_text.slice(0, 50)}"` };
         if (count > 1) return { error: `Ambiguous match (${count} occurrences): "${edit.old_text.slice(0, 50)}"` };
-        content = content.replace(edit.old_text, edit.new_text);
+        // Use indexOf + slice instead of String.replace: `$&`, `$\``, `$'`, `$$`
+        // in new_text would otherwise be expanded as substitution patterns.
+        const idx = content.indexOf(edit.old_text);
+        content = content.slice(0, idx) + edit.new_text + content.slice(idx + edit.old_text.length);
 
         diffParts.push('@@ edit @@');
         for (const line of edit.old_text.split('\n')) diffParts.push(`-${line}`);

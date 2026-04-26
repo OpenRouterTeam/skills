@@ -21,13 +21,24 @@ export const shellTool = tool({
         stderr: 'pipe',
       });
 
-      const timer = setTimeout(() => proc.kill(), timeoutMs);
+      let timedOut = false;
+      const killTimer = setTimeout(() => {
+        timedOut = true;
+        proc.kill();
+      }, timeoutMs);
 
-      const [stdoutBuf, stderrBuf] = await Promise.all([
+      // Backgrounded children can keep stdout/stderr pipes open even after
+      // proc.kill() (they inherit the fds). Race the drain against a second
+      // timeout so the tool can return instead of hanging.
+      const drain = Promise.all([
         new Response(proc.stdout).text(),
         new Response(proc.stderr).text(),
       ]);
-      clearTimeout(timer);
+      const drainTimeout = new Promise<[string, string]>((res) =>
+        setTimeout(() => res(['', '']), timeoutMs + 2000),
+      );
+      const [stdoutBuf, stderrBuf] = await Promise.race([drain, drainTimeout]);
+      clearTimeout(killTimer);
 
       const exitCode = await proc.exited;
       let output = (stdoutBuf + stderrBuf).trim();
@@ -47,7 +58,8 @@ export const shellTool = tool({
       return {
         output,
         exitCode,
-        ...(truncated && { truncated: true }),
+        ...(truncated ? { truncated: true } : {}),
+        ...(timedOut ? { timedOut: true } : {}),
       };
     } catch (err: any) {
       return {

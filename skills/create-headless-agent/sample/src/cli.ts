@@ -101,8 +101,16 @@ async function main() {
     // Build config overrides from CLI flags
     const overrides: Record<string, unknown> = { outputMode };
     if (values.model) overrides.model = values.model;
-    if (values['max-steps']) overrides.maxSteps = Number(values['max-steps']);
-    if (values['max-cost']) overrides.maxCost = Number(values['max-cost']);
+    if (values['max-steps']) {
+      const n = Number(values['max-steps']);
+      if (!Number.isFinite(n) || n <= 0) throw new Error(`--max-steps must be a positive number, got: ${values['max-steps']}`);
+      overrides.maxSteps = n;
+    }
+    if (values['max-cost']) {
+      const n = Number(values['max-cost']);
+      if (!Number.isFinite(n) || n <= 0) throw new Error(`--max-cost must be a positive number, got: ${values['max-cost']}`);
+      overrides.maxCost = n;
+    }
 
     const config = loadConfig(overrides);
     const noSession = values['no-session'];
