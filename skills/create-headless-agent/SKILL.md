@@ -44,10 +44,11 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 | Tool | Type string | Default |
 |------|------------|---------|
 | Web Search | `openrouter:web_search` | ON |
+| Web Fetch | `openrouter:web_fetch` | ON |
 | Datetime | `openrouter:datetime` | ON |
 | Image Generation | `openrouter:image_generation` | OFF |
 
-Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
+Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them. Docs: [openrouter.ai/docs/guides/features/server-tools](https://openrouter.ai/docs/guides/features/server-tools/overview).
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
@@ -60,7 +61,6 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
 | Shell/Bash | ON | Execute commands with timeout and output capture |
-| Web Fetch | ON | Fetch and extract text from URLs |
 | Custom Tool Template | ON | Empty skeleton for domain-specific tools |
 | JS/TS REPL | OFF | Persistent Bun REPL |
 | Sub-agent Spawn | OFF | Delegate tasks to child agents |

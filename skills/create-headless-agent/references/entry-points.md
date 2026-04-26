@@ -114,8 +114,16 @@ if (!prompt) {
 const config = loadConfig();
 
 if (values.model) config.model = values.model;
-if (values['max-steps']) config.maxSteps = parseInt(values['max-steps'], 10);
-if (values['max-cost']) config.maxCost = parseFloat(values['max-cost']);
+if (values['max-steps']) {
+  const n = Number(values['max-steps']);
+  if (!Number.isFinite(n) || n <= 0) throw new Error(`--max-steps must be a positive number, got: ${values['max-steps']}`);
+  config.maxSteps = n;
+}
+if (values['max-cost']) {
+  const n = Number(values['max-cost']);
+  if (!Number.isFinite(n) || n <= 0) throw new Error(`--max-cost must be a positive number, got: ${values['max-cost']}`);
+  config.maxCost = n;
+}
 
 // ── Load output schema (optional) ──────────────────────────────────
 

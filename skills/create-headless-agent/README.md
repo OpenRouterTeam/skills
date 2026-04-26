@@ -55,6 +55,7 @@ The skill presents an interactive checklist when invoked:
 | Tool | Default | What it does |
 |---|---|---|
 | Web Search | on | Real-time web search via `openrouter:web_search` |
+| Web Fetch | on | Fetch text content from a URL via `openrouter:web_fetch` |
 | Datetime | on | Current date/time via `openrouter:datetime` |
 | Image Generation | off | Generate images via `openrouter:image_generation` |
 
@@ -69,7 +70,6 @@ The skill presents an interactive checklist when invoked:
 | Grep/Search | on | Search file contents by regex |
 | Directory List | on | List directory entries |
 | Shell/Bash | on | Execute commands with timeout |
-| Web Fetch | on | Fetch and extract text from URLs |
 | Custom Tool Template | on | Empty skeleton for your domain |
 | JS/TS REPL | off | Persistent Bun REPL |
 | Sub-agent Spawn | off | Delegate tasks to child agents |
