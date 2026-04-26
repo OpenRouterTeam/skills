@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "types": ["node", "electron-vite/node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["src/main/*"],
+      "@preload/*": ["src/preload/*"]
+    }
+  },
+  "include": ["src/main/**/*.ts", "src/preload/**/*.ts", "src/preload/api.d.ts", "electron.vite.config.ts"]
+}

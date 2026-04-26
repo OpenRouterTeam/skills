@@ -1,0 +1,147 @@
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    /* Paper & Ink — warm editorial default */
+    --bg-primary: #f5efe6;
+    --bg-secondary: #eee6d8;
+    --bg-chat: #f5efe6;
+    --bg-input: #fffbf4;
+    --bg-user: #2a2724;
+    --bg-assistant: transparent;
+    --bg-code: #e8dfce;
+    --bg-tool: #eee6d8;
+
+    --text-primary: #2a2724;
+    --text-secondary: #7a6f60;
+    --text-muted: #9a8f7e;
+    --text-on-user: #f5efe6;
+    --text-code: #2a2724;
+
+    --accent: #b8573a;
+    --accent-hover: #9e4a32;
+    --accent-soft: #f2d6c8;
+
+    --border: #dfd5c2;
+    --border-strong: #c9bda6;
+
+    --radius-msg: 16px;
+    --radius-card: 10px;
+    --radius-btn: 8px;
+
+    --font-display: 'Fraunces Variable', 'Fraunces', 'Times New Roman', serif;
+    --font-body: 'Inter Tight Variable', 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  }
+
+  .dark {
+    --bg-primary: #1b1916;
+    --bg-secondary: #22201c;
+    --bg-chat: #1b1916;
+    --bg-input: #2a2724;
+    --bg-user: #e8dfce;
+    --bg-assistant: transparent;
+    --bg-code: #12100e;
+    --bg-tool: #22201c;
+
+    --text-primary: #e8dfce;
+    --text-secondary: #9a8f7e;
+    --text-muted: #7a6f60;
+    --text-on-user: #2a2724;
+    --text-code: #e8dfce;
+
+    --accent: #d67458;
+    --accent-hover: #e8886c;
+    --accent-soft: #3b2a22;
+
+    --border: #332f29;
+    --border-strong: #4a443b;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-feature-settings: 'ss01', 'cv11';
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.003em;
+  }
+
+  button {
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  textarea,
+  input {
+    font-family: inherit;
+  }
+}
+
+/* Keyframes live at the top level — Tailwind v4 can strip them from @layer blocks. */
+@keyframes working-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0) scale(0.85);
+    opacity: 0.45;
+  }
+  40% {
+    transform: translateY(-2px) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: 'ss01', 'ss02';
+    letter-spacing: -0.01em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  /* Morphing dots for WorkingIndicator */
+  .working-dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin: 0 1.5px;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: working-dot 1.4s ease-in-out infinite;
+  }
+
+  .working-dot:nth-child(2) {
+    animation-delay: 0.16s;
+  }
+
+  .working-dot:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+
+  /* Fade-in for content replacing the loader */
+  .fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+}
