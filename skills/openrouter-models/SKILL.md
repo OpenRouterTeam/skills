@@ -3,6 +3,21 @@ name: openrouter-models
 description: Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance. Use when the user asks about available OpenRouter models, model pricing, model context lengths, model capabilities, provider latency or uptime, throughput limits, supported parameters, wants to search/filter/compare models, or find the fastest provider for a model.
 ---
 
+## Installation
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-models
+```
+
+To target a specific agent (e.g. Claude Code):
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-models --agent claude-code
+```
+
+---
+
+
 # OpenRouter Models
 
 Discover, search, and compare the 300+ AI models available on OpenRouter. Query live data including pricing, context lengths, per-provider latency and uptime, throughput, supported modalities, and supported parameters.
@@ -126,34 +141,37 @@ Returns for each provider:
 - **Provider-specific pricing** — some providers offer discounts
 - **Supported parameters** — varies by provider (some don't support all features)
 
-## API Response Shapes
-
-`GET /api/v1/models` returns `{ data: Model[] }`. For full field reference, see the [Models reference](https://openrouter.ai/docs/guides/overview/models).
-
-**Query parameters** (all optional):
-
-| Parameter | Example | Effect |
-|---|---|---|
-| `category` | `?category=programming` | Server-side category filter |
-| `supported_parameters` | `?supported_parameters=tools` | Only models supporting this parameter |
-
-**Tips for working with the response:**
-
-- To check if a model supports a feature, use `model.supported_parameters` (e.g. `.includes("tools")`), or filter server-side with `?supported_parameters=tools`.
-- To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
-- Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
-- `knowledge_cutoff` and `expiration_date` are date strings or null.
-- `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
-- Endpoint `status`: `0` = operational, non-zero = degraded.
-- Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
-
-## Script Output Formats
-
-The scripts below reformat the raw API data. When calling the API directly (e.g. via `fetch`), refer to the [OpenAPI spec](https://openrouter.ai/openapi.json) for field names.
+## Output Formats
 
 ### list-models.ts / search-models.ts
 
-A subset of the raw API fields — the scripts run `formatModel()` which drops `canonical_slug`, `hugging_face_id`, `default_parameters`, `knowledge_cutoff`, and `links`. If you need those fields, call the API directly.
+```json
+{
+  "id": "anthropic/claude-sonnet-4",
+  "name": "Anthropic: Claude Sonnet 4",
+  "description": "...",
+  "created": 1747930371,
+  "context_length": 1000000,
+  "pricing": {
+    "prompt": "0.000003",
+    "completion": "0.000015",
+    "input_cache_read": "0.0000003"
+  },
+  "architecture": {
+    "tokenizer": "Claude",
+    "modality": "text+image->text",
+    "input_modalities": ["text", "image"],
+    "output_modalities": ["text"]
+  },
+  "top_provider": {
+    "context_length": 1000000,
+    "max_completion_tokens": 64000,
+    "is_moderated": false
+  },
+  "per_request_limits": null,
+  "supported_parameters": ["max_tokens", "temperature", "tools", "reasoning", "..."]
+}
+```
 
 ### compare-models.ts
 
