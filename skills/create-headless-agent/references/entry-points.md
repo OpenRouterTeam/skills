@@ -16,7 +16,10 @@ The primary entry point. Accepts a prompt via `--prompt`, positional argument, o
 
 ### src/cli.ts
 
+The `#!/usr/bin/env bun` shebang on line 1 is required so the OS can execute the file directly when it's invoked via the `bin` symlink created by `bun link`. Without it, the linked binary fails with "Exec format error".
+
 ```typescript
+#!/usr/bin/env bun
 import { parseArgs } from 'util';
 import { readFileSync } from 'fs';
 import { loadConfig } from './config.js';

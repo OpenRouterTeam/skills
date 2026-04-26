@@ -117,6 +117,8 @@ After getting the name and checklist selections, follow this workflow:
 - [ ] Run `bun install` to fetch dependencies
 - [ ] Verify: run `bunx tsc --noEmit`
 - [ ] Run `bun link` inside the project to register <agent-name> globally
+- [ ] Verify the command is on PATH: `command -v <agent-name>` should print a path. If it fails, tell the user to add Bun's bin dir to their shell rc:
+      `export PATH="$HOME/.bun/bin:$PATH"` (for bash/zsh). `bun link` silently succeeds even when `~/.bun/bin` isn't on PATH, so without this check the user will be told the agent is globally available but `command not found` will greet them.
 - [ ] Tell the user they can now invoke their agent from anywhere with `<agent-name> "<prompt>"`
 - [ ] Optional: run `npx skills-ref validate .` to check SKILL.md frontmatter (if installed)
 ```
