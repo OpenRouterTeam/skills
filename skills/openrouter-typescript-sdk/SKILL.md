@@ -4,6 +4,21 @@ description: Complete reference for integrating with 300+ AI models through the 
 version: 2.0.0
 ---
 
+## Installation
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-typescript-sdk
+```
+
+To target a specific agent (e.g. Claude Code):
+
+```bash
+gh skill install OpenRouterTeam/skills openrouter-typescript-sdk --agent claude-code
+```
+
+---
+
+
 # OpenRouter TypeScript SDK
 
 A comprehensive TypeScript SDK for interacting with OpenRouter's unified API, providing access to 300+ AI models through a single, type-safe interface. This skill enables AI agents to leverage the `callModel` pattern for text generation, tool usage, streaming, and multi-turn conversations.
