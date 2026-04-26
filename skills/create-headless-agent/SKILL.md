@@ -91,10 +91,17 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 
 ## Generation Workflow
 
-After getting checklist selections, follow this workflow:
+Before generating, **ask the user what to name their agent**. This name is used as:
+- the `"name"` field in `package.json`
+- the `"bin"` command (so `bun link` makes it a globally-invokable CLI)
+- the project directory name (if creating a new directory)
+
+Suggested question: *"What would you like to call your agent? (short kebab-case, e.g. `research-bot` or `docs-helper`)"*. Validate the answer is a valid npm package name (lowercase, kebab-case, no spaces). Default to `my-agent` if the user has no preference. Use the chosen name everywhere the workflow below shows `<agent-name>`.
+
+After getting the name and checklist selections, follow this workflow:
 
 ```
-- [ ] Generate package.json (bun init, add deps)
+- [ ] Generate package.json with name=<agent-name> and bin={"<agent-name>": "src/cli.ts"}
 - [ ] Generate tsconfig.json (Bun-native)
 - [ ] Generate src/config.ts
 - [ ] Generate src/tools/index.ts wiring selected tools
@@ -102,14 +109,27 @@ After getting checklist selections, follow this workflow:
 - [ ] Generate src/agent.ts (core runner)
 - [ ] If Session Persistence ON: generate src/session.ts (spec in references/modules.md)
 - [ ] Generate selected modules (specs in references/modules.md)
-- [ ] Generate src/cli.ts entry point (spec in references/entry-points.md)
+- [ ] Generate src/cli.ts entry point with shebang `#!/usr/bin/env bun` (spec in references/entry-points.md)
 - [ ] If HTTP server selected: generate src/server.ts (spec in references/entry-points.md)
 - [ ] If MCP server selected: generate src/mcp-server.ts (spec in references/entry-points.md)
 - [ ] Generate .env.example
 - [ ] Generate test/agent.test.ts
-- [ ] Verify: run bunx tsc --noEmit
+- [ ] Run `bun install` to fetch dependencies
+- [ ] Verify: run `bunx tsc --noEmit`
+- [ ] Run `bun link` inside the project to register <agent-name> globally
+- [ ] Tell the user they can now invoke their agent from anywhere with `<agent-name> "<prompt>"`
 - [ ] Optional: run `npx skills-ref validate .` to check SKILL.md frontmatter (if installed)
 ```
+
+After generation, the user can run their agent from any directory:
+
+```bash
+<agent-name> "What's in this repo?"
+echo "Summarize README.md" | <agent-name>
+<agent-name> --json "List all TODOs" | jq .
+```
+
+To later rename the agent, update the `name` and `bin` keys in `package.json`, then run `bun unlink && bun link`.
 
 ---
 
@@ -160,7 +180,7 @@ These files are always generated. The agent adapts them based on checklist selec
 
 ### package.json
 
-Initialize the project and install dependencies:
+Initialize the project and install dependencies. Replace `<agent-name>` with the name the user chose:
 
 ```bash
 bun init -y
@@ -169,8 +189,11 @@ bun init -y
 
 ```json
 {
-  "name": "my-agent",
+  "name": "<agent-name>",
   "type": "module",
+  "bin": {
+    "<agent-name>": "src/cli.ts"
+  },
   "scripts": {
     "start": "bun run src/cli.ts",
     "dev": "bun --watch src/cli.ts",
@@ -187,6 +210,8 @@ bun init -y
   }
 }
 ```
+
+The `bin` entry is what makes the agent invokable by name after `bun link`. The target (`src/cli.ts`) must have a `#!/usr/bin/env bun` shebang on the first line.
 
 ### tsconfig.json
 

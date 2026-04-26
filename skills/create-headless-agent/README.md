@@ -136,24 +136,34 @@ A complete working agent with all defaults is in [`sample/`](sample/).
 ```bash
 cd sample
 bun install
-OPENROUTER_API_KEY=your-key bun start
+export OPENROUTER_API_KEY=your-key
+
+# Register the agent as a global CLI (one-time setup)
+bun link
+
+# Now invoke it by name from anywhere
+my-agent "List all TypeScript files"
 ```
 
-Usage:
+The skill asks for the agent's name during generation and wires it as the `bin` entry in `package.json` — so `bun link` makes it a globally-invokable command with that name.
+
+Other usage:
 
 ```bash
-# From argument
-bun run src/cli.ts "List all TypeScript files"
-
 # From stdin
-echo "Summarize README.md" | bun run src/cli.ts
+echo "Summarize README.md" | my-agent
 
 # JSON event stream
-bun run src/cli.ts --json "Search for TODO comments"
+my-agent --json "Search for TODO comments"
 
 # Override model
-bun run src/cli.ts -m anthropic/claude-sonnet-4.6 -p "Review this code"
+my-agent -m anthropic/claude-sonnet-4.6 -p "Review this code"
+
+# Without linking (run directly via Bun)
+bun run src/cli.ts "List all TypeScript files"
 ```
+
+To unregister later: `bun unlink` inside the project directory.
 
 ## Highlighted features
 
