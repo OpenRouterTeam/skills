@@ -60,6 +60,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | Skill | Useful for |
 |-------|------------|
 | [create-agent-tui](skills/create-agent-tui/README.md) | Scaffolds a complete agent TUI in TypeScript — like `create-react-app` for terminal agents. Customizable input styles, tool display modes, ASCII banners, loaders, session persistence, and [14 built-in tools](skills/create-agent-tui/README.md) |
+| [create-headless-agent](skills/create-headless-agent/README.md) | Scaffolds a headless agent in TypeScript + Bun — for CLI tools, API servers, queue workers, and pipelines. No terminal UI. [12 built-in tools](skills/create-headless-agent/README.md), session persistence, output schema validation, and webhook notifications |
 | [openrouter-typescript-sdk](skills/openrouter-typescript-sdk/README.md) | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
 | [openrouter-agent-migration](skills/openrouter-agent-migration/README.md) | Migrating from `@openrouter/sdk` to the standalone `@openrouter/agent` package for `callModel`, `tool()`, stop conditions, and streaming helpers |
 | [openrouter-models](skills/openrouter-models/README.md) | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
