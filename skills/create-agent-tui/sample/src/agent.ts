@@ -28,7 +28,13 @@ export async function runAgent(
   });
 
   if (options?.onEvent) {
-    let lastTextLen = 0;
+    // Track text length PER message item by id. A multi-step agent emits
+    // multiple OutputMessage items over the course of a single run (one per
+    // assistant turn between tool calls), and each one grows from 0 to its
+    // final length. A single global cursor breaks on the second message:
+    // when its length is smaller than the cursor from the first, the slice
+    // cuts mid-string and drops the start of the new message's text.
+    const textByItem = new Map<string, number>();
     const callNames = new Map<string, string>();
 
     for await (const item of result.getItemsStream()) {
@@ -38,9 +44,10 @@ export async function runAgent(
           ?.filter((c): c is { type: 'output_text'; text: string } => 'text' in c)
           .map((c) => c.text)
           .join('') ?? '';
-        if (text.length > lastTextLen) {
-          options.onEvent({ type: 'text', delta: text.slice(lastTextLen) });
-          lastTextLen = text.length;
+        const prev = textByItem.get(item.id) ?? 0;
+        if (text.length > prev) {
+          options.onEvent({ type: 'text', delta: text.slice(prev) });
+          textByItem.set(item.id, text.length);
         }
       } else if (item.type === 'function_call') {
         callNames.set(item.callId, item.name);

@@ -92,6 +92,12 @@ export class TuiRenderer {
   }
 
   private renderText(delta: string): void {
+    // Flush any pending tool-call buffers BEFORE streaming text. Grouped
+    // mode queues tool calls until category change or endTurn, so without
+    // this the block would appear delayed — sometimes at the very end of
+    // the response — instead of in the spot where the model actually
+    // called the tool.
+    this.flushGrouped();
     this.flushMinimal();
     this.streaming = true;
     this.lineBuf += delta;
