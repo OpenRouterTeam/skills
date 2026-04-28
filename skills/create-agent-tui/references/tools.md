@@ -17,6 +17,9 @@ Read file contents with optional offset/limit. Full example in SKILL.md.
 
 - **inputSchema**: `path` (string), `offset?` (number, 1-indexed line), `limit?` (number, max lines)
 - **Behavior**: Read file as UTF-8, split lines, slice by offset/limit, return content + totalLines + truncated flag
+- **Default line cap**: When `limit` is omitted, return at most 2000 lines. The harness caps *even if the model didn't ask*, so the model never accidentally floods context with a 50k-line file. Pi and Claude Code both use this pattern (Pi: 2000 lines/50KB, Claude Code: 2000 lines + 256KB byte gate).
+- **Per-line truncation**: Truncate any single line longer than 2000 characters with a `… [line truncated, N chars dropped]` suffix. This dodges minified bundles and JSON dumps that would otherwise consume a whole output budget in one line. Count how many lines were affected so the model sees that fact in the hint — otherwise a 500-line file with one 10MB minified line would silently return incomplete content with `truncated: false`.
+- **Continuation hint**: When *anything* was truncated (tail OR any per-line truncation), set `truncated: true` and include a `hint` string explaining both forms of truncation. Example: `"Showing lines 1-2000 of 50000. Use offset=2001 to continue. 3 line(s) exceeded 2000 chars and were per-line truncated; use grep to fetch content from those lines."` The hint lives inside the returned JSON so the model actually sees it — a `truncated: true` boolean alone is easy to miss. `nextOffset` is only set when the *tail* was truncated, since line-based pagination can't recover per-line truncated content.
 - **Image detection**: Check extension for jpg/png/gif/webp — if image, read as base64 and return `{ type: 'image', data, mimeType }`
 - **Read-only**
 

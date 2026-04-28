@@ -6,6 +6,7 @@ Optional architectural modules that extend the core headless agent. Each section
 
 - [Session Persistence](#session-persistence) -- JSONL conversation log (DEFAULT ON)
 - [Context Compaction](#context-compaction) -- summarize older messages
+- [Tool Result Offload](#tool-result-offload) -- persist oversized tool outputs to disk, keep preview in context
 - [System Prompt Composition](#system-prompt-composition) -- dynamic instructions from context files
 - [Tool Approval](#tool-approval) -- programmatic approval for headless execution
 - [Persistent State (StateAccessor)](#persistent-state-stateaccessor) -- resumable agent state for approvals, interruptions, multi-turn
@@ -143,6 +144,43 @@ const DEFAULTS: CompactionConfig = {
   model: 'openai/gpt-4.1-mini',
 };
 
+/**
+ * Walk the initial cut point forward until we land somewhere that doesn't
+ * split a tool turn. A tool turn looks like:
+ *
+ *   assistant (with tool_calls) → tool (result) × N → assistant (text)
+ *
+ * If the boundary falls between the assistant-with-calls and its tool
+ * results, the summarized half would end with an unresolved call and the
+ * kept half would start with orphaned results — the model sees a
+ * half-finished turn and gets confused. Pi, OpenClaw, and Claude Code all
+ * enforce this invariant in their compaction paths.
+ *
+ * Safe cut points are before a user message or before a plain assistant
+ * message with no pending tool_calls.
+ */
+function findSafeBoundary(messages: Message[], cut: number): number {
+  while (cut < messages.length) {
+    const msg = messages[cut];
+
+    // Orphaned tool result at the boundary — step past it so the pair
+    // stays together on the summarized side.
+    if (msg.role === 'tool') { cut++; continue; }
+
+    // Assistant with unresolved tool_calls — step past it and any
+    // trailing tool results from the same turn.
+    const toolCalls = (msg as { tool_calls?: unknown[] }).tool_calls;
+    if (msg.role === 'assistant' && Array.isArray(toolCalls) && toolCalls.length > 0) {
+      cut++;
+      while (cut < messages.length && messages[cut].role === 'tool') cut++;
+      continue;
+    }
+
+    break;
+  }
+  return cut;
+}
+
 export async function compactMessages(
   client: OpenRouter,
   messages: Message[],
@@ -152,8 +190,16 @@ export async function compactMessages(
 
   if (messages.length <= opts.threshold) return messages;
 
-  const toSummarize = messages.slice(0, -opts.keepRecent);
-  const toKeep = messages.slice(-opts.keepRecent);
+  const idealCut = messages.length - opts.keepRecent;
+  const safeCut = findSafeBoundary(messages, idealCut);
+
+  // If the boundary walked all the way to the end (rare: every remaining
+  // message is part of one giant tool turn), give up on compacting rather
+  // than summarize everything and leave nothing behind.
+  if (safeCut >= messages.length) return messages;
+
+  const toSummarize = messages.slice(0, safeCut);
+  const toKeep = messages.slice(safeCut);
 
   const summaryResult = client.callModel({
     model: opts.model,
@@ -199,6 +245,221 @@ export async function runAgent(config: AgentConfig, input: string | Message[], o
   // ...
 }
 ```
+
+---
+
+## Tool Result Offload
+
+Compaction handles context pressure *after* it builds up. This module prevents oversized tool results from entering context in the first place: when a tool returns more than a configurable byte budget, the full output is persisted to disk and the model sees only a preview plus a pointer. The model can retrieve more via a companion `read_persisted_result` tool.
+
+This is the same pattern Claude Code uses for oversized tool results (persist to disk, replace with ~2KB preview) and the same pattern Arize's Alyx uses for large JSON payloads (compressed preview + server-side copy the model drills into). A single oversized `grep` or `shell` output can otherwise consume tens of thousands of tokens on the very first turn.
+
+### When to use
+
+Enable this when the agent's tools can produce large outputs that may not all be relevant:
+
+- `shell` running builds, migrations, or log scrapes
+- `grep` against a large tree
+- `web_fetch` against verbose pages
+- Any custom tool that returns bulk data
+
+You generally do **not** need to offload `file_read` (it already paginates), `file_write`/`file_edit` (they return short confirmations), or `glob`/`list_dir` (capped by design).
+
+### src/tool-offload.ts
+
+An inline helper: each tool calls `offloadIfLarge(result, ctx, opts?)` at the end of its `execute`. If the serialized result is under the byte budget, it passes through unchanged; otherwise it gets written to disk and replaced with a preview + pointer. This pattern doesn't require refactoring the existing `tool({...})` exports in `references/tools.md` — the check just lives inside the tool's own `execute` body.
+
+```typescript
+import { resolve, sep } from 'path';
+import { mkdirSync, existsSync } from 'fs';
+
+export interface OffloadConfig {
+  /** Results larger than this are persisted. Default 50,000 bytes — matches Claude Code's per-tool cap. */
+  maxInlineBytes: number;
+  /** How many bytes of the head to keep inline as a preview. */
+  previewBytes: number;
+  /** Where to write persisted results. One file per call id. */
+  storageDir: string;
+}
+
+export const OFFLOAD_DEFAULTS: OffloadConfig = {
+  maxInlineBytes: 50_000,
+  previewBytes: 2_000,
+  storageDir: '.agent-state/tool-results',
+};
+
+/**
+ * If a tool's serialized result exceeds `maxInlineBytes`, persist it to disk
+ * and return a preview + pointer instead. Otherwise pass it through.
+ * Call from the end of a tool's execute function: `return offloadIfLarge(result, ctx)`.
+ *
+ * The storage directory is created lazily on first persist, not at import
+ * time, so enabling this module never fails startup in a read-only cwd.
+ */
+export async function offloadIfLarge<T>(
+  result: T,
+  ctx: { callId?: string } | undefined,
+  opts: Partial<OffloadConfig> = {},
+): Promise<T | {
+  preview: string;
+  truncated: true;
+  totalBytes: number;
+  persistedAt: string;
+  hint: string;
+}> {
+  const config = { ...OFFLOAD_DEFAULTS, ...opts };
+  const serialized = typeof result === 'string' ? result : JSON.stringify(result);
+
+  if (serialized.length <= config.maxInlineBytes) return result;
+
+  if (!existsSync(config.storageDir)) mkdirSync(config.storageDir, { recursive: true });
+
+  const callId = ctx?.callId ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const path = resolve(config.storageDir, `${callId}.txt`);
+  await Bun.write(path, serialized);
+
+  return {
+    preview: serialized.slice(0, config.previewBytes),
+    truncated: true,
+    totalBytes: serialized.length,
+    persistedAt: path,
+    hint: `Full output (${serialized.length} bytes) saved to ${path}. Use read_persisted_result({ path, offset, limit }) to read specific sections.`,
+  };
+}
+
+/**
+ * Validate that a path resolves to somewhere inside `storageDir`. Used by
+ * `read_persisted_result` to refuse arbitrary filesystem reads.
+ */
+export function isInsideStorageDir(path: string, storageDir: string): boolean {
+  const resolvedDir = resolve(storageDir) + sep;
+  const resolvedPath = resolve(path);
+  return resolvedPath === resolve(storageDir) || resolvedPath.startsWith(resolvedDir);
+}
+```
+
+### Patch your tools to use it
+
+No plain-object refactor needed. Add one line at the return sites of tools whose output can be large. For the `shell` tool defined in `references/tools.md`:
+
+```typescript
+// src/tools/shell.ts
+import { tool } from '@openrouter/agent/tool';
+import { z } from 'zod';
+import { offloadIfLarge } from '../tool-offload.js';
+
+export const shellTool = tool({
+  name: 'shell',
+  description: 'Execute a shell command and return stdout+stderr',
+  inputSchema: z.object({
+    command: z.string(),
+    timeout: z.number().optional(),
+  }),
+  execute: async ({ command, timeout }, ctx) => {
+    // ... existing spawn + capture + truncate logic ...
+    const result = { output, exitCode };
+    return offloadIfLarge(result, ctx);   // <-- one line, at the return
+  },
+});
+```
+
+Same pattern for `grep`, `web_fetch`, or any custom tool that can return bulk data. `file_read` already paginates, so skip it.
+
+### src/tools/read-persisted-result.ts
+
+The companion tool — the model needs a way to retrieve more of the persisted payload when the preview isn't enough. **Important**: this tool takes a `path` argument and must validate it stays inside the offload storage directory, otherwise it becomes a general-purpose file reader that can be pointed at anything on disk.
+
+It's exported as a factory so the storage dir can be passed in and wired from the same place that configures `offloadIfLarge`:
+
+```typescript
+import { tool } from '@openrouter/agent/tool';
+import { z } from 'zod';
+import { isInsideStorageDir } from '../tool-offload.js';
+
+const DEFAULT_LIMIT = 10_000;
+
+export function createReadPersistedResultTool(storageDir: string) {
+  return tool({
+    name: 'read_persisted_result',
+    description:
+      `Read a section of a previously-persisted oversized tool result. The path comes from a prior tool response\'s persistedAt field and must be inside the offload storage directory (${storageDir}). Supports offset/limit pagination; when output is truncated, the hint field tells you how to continue.`,
+    inputSchema: z.object({
+      path: z.string().describe('Path returned in a previous tool result\'s persistedAt field'),
+      offset: z.number().optional().describe('Byte offset to start from (default 0)'),
+      limit: z.number().optional().describe(`Max bytes to return (default ${DEFAULT_LIMIT})`),
+    }),
+    execute: async ({ path, offset = 0, limit = DEFAULT_LIMIT }) => {
+      if (!isInsideStorageDir(path, storageDir)) {
+        return { error: `Access denied: ${path} is outside the offload storage directory (${storageDir}).` };
+      }
+      try {
+        const buf = await Bun.file(path).arrayBuffer();
+        const total = buf.byteLength;
+        const end = Math.min(offset + limit, total);
+        const text = new TextDecoder().decode(new Uint8Array(buf).subarray(offset, end));
+        const truncated = end < total;
+        return {
+          content: text,
+          totalBytes: total,
+          ...(truncated && {
+            truncated: true,
+            nextOffset: end,
+            hint: `Showing bytes ${offset}-${end} of ${total}. Use offset=${end} to continue.`,
+          }),
+        };
+      } catch (err: any) {
+        if (err.code === 'ENOENT') return { error: `Persisted result not found: ${path}` };
+        return { error: err.message };
+      }
+    },
+  });
+}
+```
+
+### Wire into src/tools/index.ts
+
+Use a single `storageDir` constant so `offloadIfLarge` inside each tool and `createReadPersistedResultTool` in the registry agree on the location:
+
+```typescript
+import { serverTool } from '@openrouter/agent';
+import { OFFLOAD_DEFAULTS } from '../tool-offload.js';
+import { createReadPersistedResultTool } from './read-persisted-result.js';
+import { fileReadTool } from './file-read.js';
+import { fileWriteTool } from './file-write.js';
+import { fileEditTool } from './file-edit.js';
+import { globTool } from './glob.js';
+import { grepTool } from './grep.js';     // unchanged from references/tools.md
+import { shellTool } from './shell.js';   // unchanged — just calls offloadIfLarge inside execute
+import { listDirTool } from './list-dir.js';
+
+const STORAGE_DIR = OFFLOAD_DEFAULTS.storageDir;
+
+export const tools = [
+  fileReadTool,
+  fileWriteTool,
+  fileEditTool,
+  globTool,
+  listDirTool,
+  grepTool,                              // large tree → disk via offloadIfLarge
+  shellTool,                             // noisy build/test output → disk
+  createReadPersistedResultTool(STORAGE_DIR),  // so the model can drill into persisted payloads
+  serverTool({ type: 'openrouter:web_search' }),
+] as const;
+```
+
+If you want per-tool offload config (e.g. a larger budget for shell), pass the overrides to `offloadIfLarge` directly inside that tool and make sure its `storageDir` still matches the one passed to `createReadPersistedResultTool`.
+
+### Why not just truncate?
+
+Truncation loses information silently. With offload, the full output is on disk — if the model picked the wrong slice, it can ask for more. This matters especially for shell output where the error (and the tail) often matter more than the head, and for grep where the matches you care about may be anywhere in the list.
+
+### Cleanup
+
+Persisted files accumulate. Options:
+
+- **Per-session cleanup**: delete the `storageDir` when the CLI exits successfully.
+- **Age-based cleanup**: run a `find .agent-state/tool-results -mtime +7 -delete` in a cron or on startup.
+- **Session-scoped**: set `storageDir: .agent-state/tool-results/<sessionId>` so each run has its own directory.
 
 ---
 

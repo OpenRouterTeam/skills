@@ -126,6 +126,43 @@ const DEFAULTS: CompactionConfig = {
   model: 'openai/gpt-4.1-mini',
 };
 
+/**
+ * Walk the initial cut point forward until we land somewhere that doesn't
+ * split a tool turn. A tool turn looks like:
+ *
+ *   assistant (with tool_calls) → tool (result) × N → assistant (text)
+ *
+ * If the boundary falls between the assistant-with-calls and its tool
+ * results, the summarized half would end with an unresolved call and the
+ * kept half would start with orphaned results — the model sees a
+ * half-finished turn and gets confused. Pi, OpenClaw, and Claude Code all
+ * enforce this invariant in their compaction paths.
+ *
+ * Safe cut points are before a user message or before a plain assistant
+ * message with no pending tool_calls.
+ */
+function findSafeBoundary(messages: Message[], cut: number): number {
+  while (cut < messages.length) {
+    const msg = messages[cut];
+
+    // Orphaned tool result at the boundary — step past it so the pair
+    // stays together on the summarized side.
+    if (msg.role === 'tool') { cut++; continue; }
+
+    // Assistant with unresolved tool_calls — step past it and any
+    // trailing tool results from the same turn.
+    const toolCalls = (msg as { tool_calls?: unknown[] }).tool_calls;
+    if (msg.role === 'assistant' && Array.isArray(toolCalls) && toolCalls.length > 0) {
+      cut++;
+      while (cut < messages.length && messages[cut].role === 'tool') cut++;
+      continue;
+    }
+
+    break;
+  }
+  return cut;
+}
+
 export async function compactMessages(
   client: OpenRouter,
   messages: Message[],
@@ -135,8 +172,16 @@ export async function compactMessages(
 
   if (messages.length <= opts.threshold) return messages;
 
-  const toSummarize = messages.slice(0, -opts.keepRecent);
-  const toKeep = messages.slice(-opts.keepRecent);
+  const idealCut = messages.length - opts.keepRecent;
+  const safeCut = findSafeBoundary(messages, idealCut);
+
+  // If the boundary walked all the way to the end (rare: every remaining
+  // message is part of one giant tool turn), give up on compacting rather
+  // than summarize everything and leave nothing behind.
+  if (safeCut >= messages.length) return messages;
+
+  const toSummarize = messages.slice(0, safeCut);
+  const toKeep = messages.slice(safeCut);
 
   const summaryResult = client.callModel({
     model: opts.model,
