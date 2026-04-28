@@ -108,8 +108,6 @@ Example:
 }
 ```
 
-Unknown passthrough keys are accepted by OpenRouter and forwarded; the provider silently drops ones it doesn't recognize. So verify every key against both `allowed_passthrough_parameters` and the upstream provider's docs — a typo won't fail loudly.
-
 ## Webhooks (optional)
 
 Pass `callback_url` (HTTPS) in the submit body. On terminal state, OpenRouter POSTs a `video.generation.{completed,failed,cancelled,expired}` event. Each delivery carries `X-OpenRouter-Idempotency-Key: <job_id>-<status>`. If a signing secret is configured on the workspace, verify `X-OpenRouter-Signature: t=<ts>,v1=<hmac>` — HMAC-SHA256 of `<ts>,<raw_body>` with the secret, reject timestamps older than ~5 minutes.
