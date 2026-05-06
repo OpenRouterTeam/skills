@@ -103,3 +103,33 @@ export function defaultOutputPath(): string {
     `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   return `image-${stamp}.png`;
 }
+
+/**
+ * Normalize an entry from `message.images` into a data-URL string.
+ *
+ * The chat-completions response shape for `images` varies by model:
+ *   - some models return a raw base64 string,
+ *   - some return a data URL string,
+ *   - others (e.g. openai/gpt-5.4-image-2, recent google/gemini-*-image
+ *     variants) return an object: `{ type: "image_url", image_url: { url } }`
+ *     or `{ b64_json: "..." }`.
+ *
+ * This helper accepts any of those and returns a `data:...;base64,...` URL
+ * suitable for `saveImage()`. It exits with a clean error on unrecognized
+ * shapes rather than throwing a `TypeError`.
+ */
+export function toDataUrl(entry: unknown): string {
+  let str: string | undefined;
+  if (typeof entry === "string") {
+    str = entry;
+  } else if (entry && typeof entry === "object") {
+    const e = entry as { image_url?: { url?: string }; url?: string; b64_json?: string; data?: string };
+    str = e.image_url?.url ?? e.url ?? e.b64_json ?? e.data;
+  }
+  if (typeof str !== "string" || str.length === 0) {
+    const preview = JSON.stringify(entry).slice(0, 200);
+    console.error(`Error: Unrecognized image payload shape in response: ${preview}`);
+    process.exit(1);
+  }
+  return str.startsWith("data:") ? str : `data:image/png;base64,${str}`;
+}
