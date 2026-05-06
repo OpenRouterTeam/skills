@@ -65,7 +65,22 @@ if (images.length === 0) {
 
 const saved: string[] = [];
 for (let i = 0; i < images.length; i++) {
-  const img = images[i].startsWith("data:") ? images[i] : `data:image/png;base64,${images[i]}`;
+  const raw = images[i] as any;
+  let str: string;
+  if (typeof raw === "string") {
+    str = raw;
+  } else if (raw && typeof raw === "object") {
+    // Handle OpenAI-style {type:"image_url", image_url:{url:"..."}} or {b64_json:"..."}
+    str = raw.image_url?.url ?? raw.url ?? raw.b64_json ?? raw.data ?? "";
+    if (!str) {
+      console.error("Error: Unrecognized image payload shape:", JSON.stringify(raw).slice(0, 300));
+      process.exit(1);
+    }
+  } else {
+    console.error("Error: Unexpected image type:", typeof raw);
+    process.exit(1);
+  }
+  const img = str.startsWith("data:") ? str : `data:image/png;base64,${str}`;
   let outPath: string;
   if (images.length === 1) {
     outPath = outputBase;
