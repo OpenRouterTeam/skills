@@ -52,28 +52,30 @@ MODEL="google/chirp-3"
 FORMAT="wav"                          # wav, mp3, flac, m4a, ogg, webm, aac
 AUDIO="audio.wav"
 BODY=$(mktemp)
+PAYLOAD=$(mktemp)
 
 audio_b64=$(base64 < "$AUDIO" | tr -d '\n')
 
-payload=$(jq -n --arg model "$MODEL" --arg data "$audio_b64" --arg fmt "$FORMAT" \
-  '{model: $model, input_audio: {data: $data, format: $fmt}}')
+jq -n --arg model "$MODEL" --arg data "$audio_b64" --arg fmt "$FORMAT" \
+  '{model: $model, input_audio: {data: $data, format: $fmt}}' > "$PAYLOAD"
 
+# --data-binary @file keeps the base64 payload off argv (avoids E2BIG / ARG_MAX).
 http_code=$(curl -sS -X POST https://openrouter.ai/api/v1/audio/transcriptions \
   -H "Authorization: Bearer $OPENROUTER_API_KEY" \
   -H "Content-Type: application/json" \
   --output "$BODY" \
   -w '%{http_code}' \
-  -d "$payload")
+  --data-binary @"$PAYLOAD")
 
 if [[ "$http_code" != "200" ]]; then
   echo "STT failed (HTTP $http_code):" >&2
   cat "$BODY" >&2
-  rm -f "$BODY"
+  rm -f "$BODY" "$PAYLOAD"
   exit 1
 fi
 
 jq -r '.text' "$BODY"
-rm -f "$BODY"
+rm -f "$BODY" "$PAYLOAD"
 ```
 
 ## Discovering STT models
