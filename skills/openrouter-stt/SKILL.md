@@ -14,15 +14,26 @@ Transcribe audio via `POST /api/v1/audio/transcriptions` using `curl`. Requires 
 Both request and response are JSON. The response body carries:
 
 - `text` — the transcript.
-- `usage` — `{ seconds, total_tokens, input_tokens, output_tokens, cost }`. Useful for logging and cost reconciliation.
+- `usage` — always includes `cost`. Providers additionally report either `seconds` of audio billed or a token breakdown (`total_tokens`, `input_tokens`, `output_tokens`), depending on how they price the request. Don't assume both are present.
 
-Sample response:
+Sample response (duration-priced provider, e.g. `google/chirp-3`):
+
+```json
+{
+  "text": "I used to rule the world.",
+  "usage": {
+    "seconds": 20,
+    "cost": 0.005333
+  }
+}
+```
+
+Sample response (token-priced provider):
 
 ```json
 {
   "text": "Hello, this is a test of speech-to-text transcription.",
   "usage": {
-    "seconds": 9.2,
     "total_tokens": 113,
     "input_tokens": 83,
     "output_tokens": 30,
@@ -30,10 +41,6 @@ Sample response:
   }
 }
 ```
-
-One response header is worth keeping:
-
-- `X-Generation-Id` — unique ID for the request, useful for tracking, debugging, and cost lookups.
 
 ## Drop-in workflow
 
