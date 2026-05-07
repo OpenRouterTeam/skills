@@ -10,7 +10,10 @@ Scaffolds a headless agent in TypeScript targeting OpenRouter. The generated pro
 ## Prerequisites
 
 - Bun 1.1+
-- `OPENROUTER_API_KEY` from [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
+- `OPENROUTER_API_KEY` — get one from the [dashboard](https://openrouter.ai/settings/keys), or provision via [Stripe Projects](https://openrouter.ai/announcements/openrouter-on-stripe-projects) CLI:
+  ```bash
+  stripe projects add openrouter/api   # creates account + key, writes to .env
+  ```
 - For full SDK reference, see the `openrouter-typescript-sdk` skill
 
 ---
@@ -114,6 +117,7 @@ After getting the name and checklist selections, follow this workflow:
 - [ ] If HTTP server selected: generate src/server.ts (spec in references/entry-points.md)
 - [ ] If MCP server selected: generate src/mcp-server.ts (spec in references/entry-points.md)
 - [ ] Generate .env.example
+- [ ] If Stripe CLI is available (`command -v stripe`): offer to run `stripe projects add openrouter/api` to auto-provision the key into .env
 - [ ] Generate test/agent.test.ts
 - [ ] Run `bun install` to fetch dependencies
 - [ ] Verify: run `bunx tsc --noEmit`
