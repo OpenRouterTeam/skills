@@ -51,7 +51,6 @@ set -euo pipefail
 MODEL="google/chirp-3"
 FORMAT="wav"                          # wav, mp3, flac, m4a, ogg, webm, aac
 AUDIO="audio.wav"
-HEADERS=$(mktemp)
 BODY=$(mktemp)
 
 audio_b64=$(base64 < "$AUDIO" | tr -d '\n')
@@ -62,7 +61,6 @@ payload=$(jq -n --arg model "$MODEL" --arg data "$audio_b64" --arg fmt "$FORMAT"
 http_code=$(curl -sS -X POST https://openrouter.ai/api/v1/audio/transcriptions \
   -H "Authorization: Bearer $OPENROUTER_API_KEY" \
   -H "Content-Type: application/json" \
-  -D "$HEADERS" \
   --output "$BODY" \
   -w '%{http_code}' \
   -d "$payload")
@@ -70,14 +68,12 @@ http_code=$(curl -sS -X POST https://openrouter.ai/api/v1/audio/transcriptions \
 if [[ "$http_code" != "200" ]]; then
   echo "STT failed (HTTP $http_code):" >&2
   cat "$BODY" >&2
-  rm -f "$BODY" "$HEADERS"
+  rm -f "$BODY"
   exit 1
 fi
 
-gen_id=$(grep -i '^x-generation-id:' "$HEADERS" | awk '{print $2}' | tr -d '\r')
 jq -r '.text' "$BODY"
-echo "(generation_id=${gen_id:-unknown})" >&2
-rm -f "$BODY" "$HEADERS"
+rm -f "$BODY"
 ```
 
 ## Discovering STT models
