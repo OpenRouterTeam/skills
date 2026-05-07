@@ -175,7 +175,10 @@ res = requests.post(
         "input_audio": {"data": data, "format": "wav"},
     },
 )
-res.raise_for_status()
+
+if not res.ok:
+    raise RuntimeError(f"STT failed (HTTP {res.status_code}): {res.text}")
+
 print(res.json()["text"])
 ```
 
