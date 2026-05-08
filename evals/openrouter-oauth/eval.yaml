@@ -1,0 +1,33 @@
+name: openrouter-oauth-eval
+description: |
+  Evaluation suite for the openrouter-oauth skill. Validates that the agent,
+  when the skill is loaded, produces responses that actually follow the
+  documented PKCE flow and surface skill-specific guarantees (sessionStorage
+  for verifier, S256 challenge, openrouter.ai/auth, callback guard, etc.).
+
+  Graders are defined PER-TASK (task-level graders are additive in waza) —
+  only universal checks live here at the eval level.
+skill: openrouter-oauth
+version: "1.0"
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-opus-4.7
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.8
+    description: Did the skill produce a correct, skill-faithful response?
+
+graders:
+  # Universal: every task must produce a non-empty response.
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 50"
+
+tasks:
+  - "tasks/*.yaml"

@@ -1,0 +1,50 @@
+id: anti-trigger-video-theory-001
+name: Anti-Trigger - Video Gen Theory Question
+description: |
+  Negative test: conceptual question about video generation models. Shares
+  keywords but is not a generation request.
+tags:
+  - anti-trigger
+  - negative-test
+  - trigger-specificity
+
+inputs:
+  prompt: |
+    What's the difference between diffusion-based video models like Sora
+    and older GAN-based approaches for video generation? I'm writing a
+    primer for my blog.
+
+graders:
+  - type: code
+    name: no_openrouter_api_call
+    config:
+      language: python
+      assertions:
+        - "'openrouter.ai/api/v1/videos' not in output.lower()"
+        - "'polling_url' not in output.lower()"
+        - "'$openrouter_api_key' not in output.lower()"
+
+  - type: prompt
+    name: stays_educational
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked a conceptual question about video generation
+        architectures. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (2 calls total).
+
+        1) Answers the question: explains diffusion video models (noise
+           → latent video via iterative denoising, e.g., Sora, Veo) vs
+           GAN-based video (generator/discriminator adversarial training,
+           e.g., VGAN, MoCoGAN), covering differences in training
+           stability, output quality, temporal coherence, or compute.
+
+        2) No OpenRouter contamination: does NOT produce curl commands,
+           does NOT invoke /api/v1/videos, does NOT include any script
+           that submits a generation job. A brief mention of "OpenRouter
+           exposes these models" is fine; generating code is not.
+
+expected:
+  outcomes:
+    - type: task_completed
