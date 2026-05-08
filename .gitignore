@@ -5,3 +5,7 @@ build/
 .env.*
 .DS_Store
 .claude/worktrees/
+
+# waza eval outputs and caches (local to each run; not source-of-truth)
+.waza-results/
+.waza-cache/

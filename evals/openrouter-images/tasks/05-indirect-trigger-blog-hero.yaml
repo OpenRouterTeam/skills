@@ -1,0 +1,51 @@
+id: indirect-trigger-blog-hero-001
+name: Indirect Trigger - Blog Hero Image
+description: |
+  User is writing a blog post and needs a hero image — doesn't say
+  "generate an image". The skill should activate and generate.ts should
+  be invoked.
+tags:
+  - happy-path
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    I'm writing a blog post about remote work and need a hero image for
+    the top of the page. Something that captures "working from a quiet
+    home office with good natural light".
+
+graders:
+  - type: code
+    name: invoked_generate
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"home office" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower() or "remote work" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower()'
+
+  - type: prompt
+    name: indirect_assembly
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants a blog hero image. Call set_waza_grade_pass or
+        set_waza_grade_fail once per criterion (3 calls total).
+
+        1) Recognizes this as image-gen: loads the openrouter-images
+           skill and uses generate.ts, even though the user didn't
+           directly say "generate an image".
+
+        2) Prompt faithfully captures the user's intent: the script is
+           invoked with a prompt referencing home-office / quiet /
+           natural light — not a generic placeholder or the user's full
+           sentence verbatim.
+
+        3) Aspect ratio appropriate for a hero image: passes
+           --aspect-ratio with a wide ratio (16:9, 21:9, 3:1, etc.)
+           typical for blog hero banners. Square (1:1) or portrait
+           ratios do not satisfy this criterion.
+
+expected:
+  outcomes:
+    - type: task_completed

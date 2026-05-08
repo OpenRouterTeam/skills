@@ -1,0 +1,54 @@
+id: edit-image-001
+name: Edit Existing Image
+description: |
+  User wants to modify an existing image → edit.ts, not generate.ts.
+  Common failure mode: agent uses generate.ts with the edit description.
+tags:
+  - happy-path
+  - edit
+
+inputs:
+  prompt: |
+    I have a file called photo.png. Edit it so the sky is purple.
+
+graders:
+  - type: code
+    name: uses_edit_script
+    config:
+      language: python
+      assertions:
+        - '"edit.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"generate.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "edit.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: code
+    name: passes_photo_path
+    config:
+      language: python
+      assertions:
+        - '"photo.png" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"purple" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower() or "sky" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower()'
+
+  - type: prompt
+    name: edit_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked to edit photo.png (sky → purple). Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Correct script: used edit.ts (not generate.ts, not a raw API
+           call), per the decision tree "edit existing image → edit.ts".
+
+        2) Passed source path and prompt: first positional arg was
+           photo.png, second positional arg was a prompt about making
+           the sky purple.
+
+        3) Reports result: tells the user the output location and
+           references the source (photo.png), per the skill's presenting
+           guidance for edit operations.
+
+expected:
+  outcomes:
+    - type: task_completed

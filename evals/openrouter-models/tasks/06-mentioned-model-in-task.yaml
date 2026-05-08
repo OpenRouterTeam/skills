@@ -1,0 +1,67 @@
+id: mentioned-model-in-task-001
+name: Model Mentioned In Larger Task
+description: |
+  Tests the subtler trigger: the user doesn't ask about models directly —
+  they NAME a model (informally, partial, or ambiguous) as part of a larger
+  coding task. The skill should activate and resolve the name to an exact
+  OpenRouter ID before proceeding, rather than guessing or using the
+  informal string verbatim.
+tags:
+  - happy-path
+  - resolve-model
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    Write a small Node.js script that sends a prompt to OpenRouter and
+    prints the response. Use GLM as the model.
+
+graders:
+  - type: code
+    name: invoked_resolve_model
+    config:
+      language: python
+      assertions:
+        - '"resolve-model.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"glm" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower()'
+
+  - type: code
+    name: resolved_id_used_in_output
+    config:
+      language: python
+      assertions:
+        - '"glm" in output.lower()'
+        - '"/" in output'
+
+  - type: prompt
+    name: silent_resolve_then_use
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a Node.js OpenRouter script "using GLM as the
+        model." Call set_waza_grade_pass or set_waza_grade_fail once per
+        criterion (3 calls total).
+
+        1) Resolved, didn't guess: the agent invoked resolve-model.ts for
+           "glm" before writing code. It did NOT hardcode a made-up string
+           like "glm" or "glm-4" as the model ID — it used the resolver to
+           get an exact OpenRouter-style "vendor/model-id" and put THAT
+           string in the code.
+
+        2) Task completed: the response includes an actual Node.js script
+           that sends a prompt to OpenRouter (fetch to /api/v1/* or SDK
+           call) and prints the response. A snippet that only resolves the
+           model ID without producing the script does NOT pass this
+           criterion.
+
+        3) Noted resolution confidence (soft): if the resolver returned
+           medium/low confidence the agent either picked the best match and
+           mentioned it, OR asked the user to confirm. If the resolver
+           returned high confidence and the agent just used it silently,
+           that also passes this criterion — confirm-or-use is the right
+           behavior either way.
+
+expected:
+  outcomes:
+    - type: task_completed
