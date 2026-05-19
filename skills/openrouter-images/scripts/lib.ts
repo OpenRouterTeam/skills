@@ -57,7 +57,10 @@ export async function postChatCompletion(apiKey: string, body: any): Promise<any
     const text = await res.text().catch(() => "");
 
     if ((res.status === 429 || res.status >= 500) && attempt < MAX_RETRIES) {
-      const delay = BASE_DELAY_MS * attempt;
+      const retryAfterRaw = res.headers.get("retry-after");
+      const delay = retryAfterRaw
+        ? parseInt(retryAfterRaw, 10) * 1000
+        : BASE_DELAY_MS * attempt;
       console.error(
         `Warning: HTTP ${res.status}, retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})...`
       );
@@ -151,10 +154,11 @@ export function readImageAsDataUrl(filePath: string): string {
 }
 
 // Replace or add the correct extension on outputPath based on MIME type.
+// Uses path.extname() so dots in parent directory names (e.g. `..`) are ignored.
 export function pathWithMimeExt(outputPath: string, mime: string): string {
   const ext = MIME_TO_EXT[mime] ?? ".png";
-  const dotIdx = outputPath.lastIndexOf(".");
-  const stem = dotIdx > 0 ? outputPath.slice(0, dotIdx) : outputPath;
+  const currentExt = extname(outputPath);
+  const stem = currentExt ? outputPath.slice(0, -currentExt.length) : outputPath;
   return stem + ext;
 }
 

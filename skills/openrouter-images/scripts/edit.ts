@@ -1,3 +1,4 @@
+import { extname } from "node:path";
 import {
   DEFAULT_MODEL,
   requireApiKey,
@@ -95,8 +96,8 @@ for (let i = 0; i < images.length; i++) {
   if (images.length === 1) {
     outPath = outputBase;
   } else {
-    const dotIdx = outputBase.lastIndexOf(".");
-    const base = dotIdx > 0 ? outputBase.slice(0, dotIdx) : outputBase;
+    const currentExt = extname(outputBase);
+    const base = currentExt ? outputBase.slice(0, -currentExt.length) : outputBase;
     outPath = `${base}-${i + 1}`;
   }
   const abs = await saveImage(imgData, outPath);
