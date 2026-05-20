@@ -47,7 +47,15 @@ async function fetchApi(
     Authorization: `Bearer ${opts.apiKey}`,
   };
 
-  const res = await fetch(url.toString(), { headers });
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), { headers });
+  } catch (err) {
+    console.error(
+      `Network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     switch (res.status) {
@@ -79,8 +87,8 @@ async function fetchApi(
   return res.json();
 }
 
-export function parseArgs(argv: string[]): Map<string, string | true> {
-  const result = new Map<string, string | true>();
+export function parseArgs(argv: string[]): Map<string, string> {
+  const result = new Map<string, string>();
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
@@ -92,7 +100,7 @@ export function parseArgs(argv: string[]): Map<string, string | true> {
       result.set(argv[i].slice(2), argv[i + 1]);
       i++;
     } else if (argv[i].startsWith("--")) {
-      result.set(argv[i].slice(2), true);
+      result.set(argv[i].slice(2), "true");
     } else {
       positional.push(argv[i]);
     }

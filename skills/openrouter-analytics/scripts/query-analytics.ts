@@ -57,10 +57,6 @@ if (orderField) {
 
 const limit = args.get("limit");
 if (limit !== undefined) {
-  if (typeof limit !== "string") {
-    console.error("Error: --limit requires a numeric value.");
-    process.exit(1);
-  }
   const limitNum = Number(limit);
   if (!Number.isInteger(limitNum) || limitNum < 1 || limitNum > 10000) {
     console.error(`Error: --limit must be an integer between 1 and 10000 (got: ${limit})`);

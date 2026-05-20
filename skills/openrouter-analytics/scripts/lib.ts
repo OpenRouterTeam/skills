@@ -79,8 +79,8 @@ async function fetchApi(
   return res.json();
 }
 
-export function parseArgs(argv: string[]): Map<string, string | true> {
-  const result = new Map<string, string | true>();
+export function parseArgs(argv: string[]): Map<string, string> {
+  const result = new Map<string, string>();
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
@@ -88,7 +88,7 @@ export function parseArgs(argv: string[]): Map<string, string | true> {
       result.set(argv[i].slice(2), argv[i + 1]);
       i++;
     } else if (argv[i].startsWith("--")) {
-      result.set(argv[i].slice(2), true);
+      result.set(argv[i].slice(2), "true");
     } else {
       positional.push(argv[i]);
     }

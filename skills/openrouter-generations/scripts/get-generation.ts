@@ -36,10 +36,10 @@ if (json) {
   console.log("--- Tokens ---");
   console.log("Prompt:", data.tokens_prompt);
   console.log("Completion:", data.tokens_completion);
-  if (data.native_tokens_reasoning) {
+  if (data.native_tokens_reasoning != null) {
     console.log("Reasoning:", data.native_tokens_reasoning);
   }
-  if (data.native_tokens_cached) {
+  if (data.native_tokens_cached != null) {
     console.log("Cached:", data.native_tokens_cached);
   }
   console.log("");
