@@ -13,6 +13,9 @@ export function requireApiKey(): string {
   return apiKey;
 }
 
+// management-key-only — /api/v1/analytics/meta and /api/v1/analytics/query
+// are not in the public OpenAPI spec. Schema source of truth lives in
+// openrouter-web (analytics package). Regular API keys get a 403 here.
 export async function fetchMeta(apiKey: string): Promise<unknown> {
   return fetchApi("/analytics/meta", { apiKey });
 }

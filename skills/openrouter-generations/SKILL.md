@@ -12,6 +12,12 @@ Retrieve detailed metadata and stored content for individual OpenRouter generati
 - `OPENROUTER_API_KEY` environment variable set to any valid OpenRouter API key (regular or management key). Get one at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
 - Generation IDs look like `gen-1234567890` or `gen-aBcDeFgHiJkLmNoPqRsT`.
 
+## First-Time Setup
+
+```bash
+cd <skill-path>/scripts && npm install
+```
+
 ## Endpoints
 
 | Endpoint | Method | Purpose |
@@ -30,8 +36,8 @@ Full API reference: [openrouter.ai/docs/api/api-reference/generations/get-genera
 Retrieves everything about a generation *except* the actual prompt/completion text:
 
 ```bash
-npx tsx scripts/get-generation.ts gen-1234567890
-npx tsx scripts/get-generation.ts --id gen-1234567890 --json
+cd <skill-path>/scripts && npx tsx get-generation.ts gen-1234567890
+npx tsx get-generation.ts --id gen-1234567890 --json
 ```
 
 **What you get back:**
@@ -49,8 +55,8 @@ npx tsx scripts/get-generation.ts --id gen-1234567890 --json
 Retrieves the stored prompt and completion:
 
 ```bash
-npx tsx scripts/get-generation-content.ts gen-1234567890
-npx tsx scripts/get-generation-content.ts --id gen-1234567890 --json
+cd <skill-path>/scripts && npx tsx get-generation-content.ts gen-1234567890
+npx tsx get-generation-content.ts --id gen-1234567890 --json
 ```
 
 **What you get back:**
@@ -146,7 +152,7 @@ curl -G https://openrouter.ai/api/v1/generation/content \
 
 ```bash
 # Check what happened — look at finish_reason, provider_responses, and cancelled
-npx tsx scripts/get-generation.ts gen-abc123 --json
+cd <skill-path>/scripts && npx tsx get-generation.ts gen-abc123 --json
 ```
 
 Look for:
@@ -158,7 +164,7 @@ Look for:
 ### Check cost of a specific request
 
 ```bash
-npx tsx scripts/get-generation.ts gen-abc123
+cd <skill-path>/scripts && npx tsx get-generation.ts gen-abc123
 ```
 
 Check `total_cost` (what you were charged) vs `upstream_inference_cost` (what the provider charged OpenRouter).
@@ -166,7 +172,7 @@ Check `total_cost` (what you were charged) vs `upstream_inference_cost` (what th
 ### Review what was actually sent/received
 
 ```bash
-npx tsx scripts/get-generation-content.ts gen-abc123
+cd <skill-path>/scripts && npx tsx get-generation-content.ts gen-abc123
 ```
 
 Useful for debugging unexpected outputs — verify the actual prompt sent and completion received.
