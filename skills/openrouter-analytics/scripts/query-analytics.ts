@@ -51,6 +51,10 @@ if (filterField && filterOp && filterValue) {
 
 const orderField = args.get("order-by") as string | undefined;
 const orderDir = args.get("order-dir") as string | undefined;
+if (orderDir && !orderField) {
+  console.error("Error: --order-dir requires --order-by to be specified.");
+  process.exit(1);
+}
 if (orderField) {
   body.order_by = { field: orderField, direction: orderDir ?? "desc" };
 }

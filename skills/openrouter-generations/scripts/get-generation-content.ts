@@ -39,7 +39,12 @@ if (json) {
   console.log("Generation:", generationId);
   console.log("");
 
-  if (input) {
+  const hasInput = Boolean(
+    input && (input.prompt || (input.messages && input.messages.length > 0))
+  );
+  const hasOutput = Boolean(output && (output.completion || output.reasoning));
+
+  if (hasInput && input) {
     console.log("=== INPUT ===");
     if (input.prompt) {
       console.log("Prompt:", input.prompt);
@@ -57,7 +62,7 @@ if (json) {
     console.log("");
   }
 
-  if (output) {
+  if (hasOutput && output) {
     console.log("=== OUTPUT ===");
     if (output.completion) {
       console.log("Completion:", output.completion);
@@ -68,7 +73,7 @@ if (json) {
     }
   }
 
-  if (!input && !output) {
+  if (!hasInput && !hasOutput) {
     console.log("No content available for this generation.");
     console.log(
       "This may be because Zero Data Retention (ZDR) was enabled."

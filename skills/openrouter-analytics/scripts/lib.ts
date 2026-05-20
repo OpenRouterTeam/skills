@@ -70,6 +70,11 @@ async function fetchApi(
             "Try narrowing the time range, reducing dimensions, or adding filters."
         );
         break;
+      case 429:
+        console.error(
+          "Error 429: Rate limited (64 RPM). Wait a moment and try again."
+        );
+        break;
       default:
         console.error(`Error ${res.status}: ${body || res.statusText}`);
     }

@@ -17,7 +17,7 @@ if (!generationId) {
   console.error("  - Cost (total_cost, upstream_inference_cost, usage)");
   console.error("  - Latency and generation time");
   console.error("  - Finish reason, streaming status, BYOK flag");
-  console.error("  - Provider response chain (fallback attempts)");
+  console.error("  - Provider response chain (fallback attempts) — via --json only");
   process.exit(1);
 }
 
