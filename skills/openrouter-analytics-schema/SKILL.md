@@ -9,7 +9,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 
 ## Prerequisites
 
-- `OPENROUTER_API_KEY` must be set to a **management key**. Get one at https://openrouter.ai/settings/keys
+- `OPENROUTER_API_KEY` must be set to a **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
 
 ## Discovery Endpoint
 

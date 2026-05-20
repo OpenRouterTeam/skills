@@ -68,6 +68,8 @@ const TEMPLATES = [
       order_by: { field: "request_count", direction: "desc" },
     },
     cli: "--metrics request_count,total_usage,avg_latency --dimensions provider --order-by request_count",
+    interpretation:
+      "Generations-only query (provider + avg_latency). Limited to 31-day time windows. Default omits time_range to use the API's 7-day default.",
   },
   {
     question: "What is my hourly traffic pattern today?",

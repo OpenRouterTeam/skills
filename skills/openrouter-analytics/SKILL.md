@@ -10,7 +10,7 @@ Query your OpenRouter usage data programmatically. Answer questions like "What w
 ## Prerequisites
 
 - `OPENROUTER_API_KEY` must be set to a **management key** (provisioning key). Regular API keys will get a 403.
-- Get a management key at https://openrouter.ai/settings/keys
+- Get a management key at https://openrouter.ai/settings/management-keys (separate from the regular API keys page)
 
 ## First-Time Setup
 

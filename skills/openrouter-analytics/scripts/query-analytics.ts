@@ -50,7 +50,12 @@ if (orderField) {
 
 const limit = args.get("limit") as string | undefined;
 if (limit) {
-  body.limit = Number(limit);
+  const limitNum = Number(limit);
+  if (!Number.isInteger(limitNum) || limitNum < 1 || limitNum > 10000) {
+    console.error(`Error: --limit must be an integer between 1 and 10000 (got: ${limit})`);
+    process.exit(1);
+  }
+  body.limit = limitNum;
 }
 
 const json = (await fetchQuery(apiKey, body)) as {

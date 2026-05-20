@@ -9,7 +9,7 @@ Full reference for constructing and executing analytics queries against the Open
 
 ## Prerequisites
 
-- `OPENROUTER_API_KEY` must be set to a **management key**. Get one at https://openrouter.ai/settings/keys
+- `OPENROUTER_API_KEY` must be set to a **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
 
 ## Query Endpoint
 
@@ -118,14 +118,16 @@ The `query-analytics.ts` script in the `openrouter-analytics` skill accepts thes
 | `--granularity` | Time bucket size | `--granularity day` |
 | `--start` | Time range start (ISO 8601) | `--start 2026-05-01T00:00:00Z` |
 | `--end` | Time range end (ISO 8601) | `--end 2026-05-20T00:00:00Z` |
-| `--filter-field` | Filter dimension name | `--filter-field model` |
-| `--filter-op` | Filter operator | `--filter-op eq` |
+| `--filter-field` | Filter dimension name (see note below) | `--filter-field model` |
+| `--filter-op` | Filter operator (see note below) | `--filter-op eq` |
 | `--filter-value` | Filter value (comma-separated for `in`/`not_in`) | `--filter-value anthropic/claude-sonnet-4` |
 | `--order-by` | Field to sort by | `--order-by total_usage` |
 | `--order-dir` | Sort direction | `--order-dir desc` |
-| `--limit` | Max rows | `--limit 100` |
+| `--limit` | Max rows (1–10000) | `--limit 100` |
 
 Data rows are printed to stdout as JSON. Query metadata is printed to stderr.
+
+**Single-filter limitation:** the `--filter-*` flags only accept one filter at a time, so the CLI can only construct a single-element `filters` array. The API itself accepts up to 20 filters (ANDed together). For compound queries (e.g. `model = X AND provider = Y`), use the direct curl example below — the CLI cannot express multi-filter queries.
 
 ## Direct API Usage (curl)
 
@@ -211,7 +213,7 @@ Combine up to 2 dimensions for cross-tabulation:
 |---|---|---|
 | 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
-| 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/keys |
+| 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
 | 429 | Rate limited (64 RPM) | Wait and retry |
 | 500 | Server error | Retry after a moment |

@@ -6,7 +6,7 @@ export function requireApiKey(): string {
     console.error(
       "Error: OPENROUTER_API_KEY environment variable is not set.\n" +
         "This must be a management key (provisioning key).\n" +
-        "Get one at https://openrouter.ai/settings/keys"
+        "Get one at https://openrouter.ai/settings/management-keys"
     );
     process.exit(1);
   }
@@ -53,7 +53,7 @@ async function fetchApi(
       case 403:
         console.error(
           "Error 403: Forbidden. Analytics endpoints require a management key.\n" +
-            "Create one at https://openrouter.ai/settings/keys"
+            "Create one at https://openrouter.ai/settings/management-keys"
         );
         break;
       case 408:
