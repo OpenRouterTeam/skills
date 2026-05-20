@@ -84,7 +84,14 @@ async function fetchApi(
     process.exit(1);
   }
 
-  return res.json();
+  try {
+    return await res.json();
+  } catch (err) {
+    console.error(
+      `Invalid JSON in response: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
 }
 
 export function parseArgs(argv: string[]): Map<string, string> {
