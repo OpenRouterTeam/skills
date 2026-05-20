@@ -1,0 +1,76 @@
+import { requireApiKey, fetchGenerationContent, parseArgs } from "./lib.js";
+
+const apiKey = requireApiKey();
+const args = parseArgs(process.argv.slice(2));
+
+const generationId =
+  (args.get("id") as string | undefined) ??
+  (args.get("_0") as string | undefined);
+
+if (!generationId) {
+  console.error("Usage: npx tsx get-generation-content.ts <generation-id>");
+  console.error("       npx tsx get-generation-content.ts --id gen-1234567890");
+  console.error("");
+  console.error("Returns the stored prompt and completion content:");
+  console.error("  - Input: original prompt text and messages array");
+  console.error("  - Output: completion text and reasoning (if available)");
+  console.error("");
+  console.error("Note: Content is only available if the generation was not");
+  console.error("made with Zero Data Retention (ZDR) enabled.");
+  process.exit(1);
+}
+
+const result = await fetchGenerationContent(apiKey, generationId);
+
+const json = args.has("json");
+if (json) {
+  console.log(JSON.stringify(result, null, 2));
+} else {
+  const data = (result as { data: Record<string, unknown> }).data;
+  const input = data.input as {
+    prompt?: string;
+    messages?: Array<{ role: string; content: string }>;
+  } | null;
+  const output = data.output as {
+    completion?: string;
+    reasoning?: string;
+  } | null;
+
+  console.log("Generation:", generationId);
+  console.log("");
+
+  if (input) {
+    console.log("=== INPUT ===");
+    if (input.prompt) {
+      console.log("Prompt:", input.prompt);
+    }
+    if (input.messages && input.messages.length > 0) {
+      console.log("Messages:");
+      for (const msg of input.messages) {
+        console.log(`  [${msg.role}]: ${msg.content}`);
+      }
+    }
+    console.log("");
+  }
+
+  if (output) {
+    console.log("=== OUTPUT ===");
+    if (output.completion) {
+      console.log("Completion:", output.completion);
+    }
+    if (output.reasoning) {
+      console.log("");
+      console.log("Reasoning:", output.reasoning);
+    }
+  }
+
+  if (!input && !output) {
+    console.log("No content available for this generation.");
+    console.log(
+      "This may be because Zero Data Retention (ZDR) was enabled."
+    );
+  }
+
+  console.log("");
+  console.log("Use --json for full raw response");
+}

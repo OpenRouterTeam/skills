@@ -1,0 +1,8 @@
+{
+  "name": "openrouter-generations-scripts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}
