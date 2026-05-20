@@ -16,7 +16,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## Prerequisites
 
-`OPENROUTER_API_KEY` must be set to a **management key** (provisioning key). Regular API keys will get a 403. Get one at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
+`OPENROUTER_API_KEY` must be set to a **management key** (provisioning key). Regular API keys will get a 403. Get one at [openrouter.ai/settings/management-keys](https://openrouter.ai/settings/management-keys). Management keys are separate from regular API keys.
 
 ## What it covers
 
