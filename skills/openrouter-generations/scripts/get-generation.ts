@@ -49,17 +49,17 @@ if (json) {
     data.total_cost != null ? `$${data.total_cost}` : "n/a"
   );
   console.log("Usage:", data.usage != null ? `$${data.usage}` : "n/a");
-  if (data.upstream_inference_cost) {
+  if (data.upstream_inference_cost != null) {
     console.log("Upstream cost: $" + data.upstream_inference_cost);
   }
-  if (data.cache_discount) {
+  if (data.cache_discount != null) {
     console.log("Cache discount:", data.cache_discount);
   }
   console.log("");
   console.log("--- Performance ---");
   console.log("Latency:", data.latency, "ms");
   console.log("Generation time:", data.generation_time, "ms");
-  if (data.moderation_latency) {
+  if (data.moderation_latency != null) {
     console.log("Moderation latency:", data.moderation_latency, "ms");
   }
   console.log("");
