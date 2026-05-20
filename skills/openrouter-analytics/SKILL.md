@@ -137,4 +137,4 @@ Both endpoints require a management key via `Authorization: Bearer sk-or-v1-...`
 | `/api/v1/analytics/meta` | GET | Returns available metrics, dimensions, operators, granularities |
 | `/api/v1/analytics/query` | POST | Executes an analytics query and returns structured data |
 
-Full documentation: https://openrouter.ai/docs/api-reference/analytics
+Full documentation: https://openrouter.ai/docs/api/api-reference/analytics

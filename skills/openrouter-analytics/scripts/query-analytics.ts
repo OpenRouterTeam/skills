@@ -35,9 +35,16 @@ if (start && end) {
 const filterField = args.get("filter-field") as string | undefined;
 const filterOp = args.get("filter-op") as string | undefined;
 const filterValue = args.get("filter-value") as string | undefined;
+const filterParts = [filterField, filterOp, filterValue].filter(Boolean);
+if (filterParts.length > 0 && filterParts.length < 3) {
+  console.error(
+    "Error: --filter-field, --filter-op, and --filter-value must all be provided together."
+  );
+  process.exit(1);
+}
 if (filterField && filterOp && filterValue) {
   const value = filterOp === "in" || filterOp === "not_in"
-    ? filterValue.split(",")
+    ? filterValue.split(",").map((v) => v.trim()).filter(Boolean)
     : filterValue;
   body.filters = [{ field: filterField, operator: filterOp, value }];
 }
@@ -48,8 +55,12 @@ if (orderField) {
   body.order_by = { field: orderField, direction: orderDir ?? "desc" };
 }
 
-const limit = args.get("limit") as string | undefined;
-if (limit) {
+const limit = args.get("limit");
+if (limit !== undefined) {
+  if (typeof limit !== "string") {
+    console.error("Error: --limit requires a numeric value.");
+    process.exit(1);
+  }
   const limitNum = Number(limit);
   if (!Number.isInteger(limitNum) || limitNum < 1 || limitNum > 10000) {
     console.error(`Error: --limit must be an integer between 1 and 10000 (got: ${limit})`);

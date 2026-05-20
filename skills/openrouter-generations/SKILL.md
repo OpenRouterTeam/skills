@@ -1,3 +1,8 @@
+---
+name: openrouter-generations
+description: Retrieve detailed metadata and stored content for individual OpenRouter generations.
+---
+
 # openrouter-generations
 
 Retrieve detailed metadata and stored content for individual OpenRouter generations. Use this skill when you need to inspect a specific request — its cost, latency, token usage, provider routing, or the actual prompt/completion text.

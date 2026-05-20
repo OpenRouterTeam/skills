@@ -43,7 +43,15 @@ async function fetchApi(
     init.body = JSON.stringify(opts.body);
   }
 
-  const res = await fetch(url, init);
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    console.error(
+      `Network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     switch (res.status) {

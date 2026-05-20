@@ -29,7 +29,7 @@ if (json) {
   const data = (result as { data: Record<string, unknown> }).data;
   const input = data.input as {
     prompt?: string;
-    messages?: Array<{ role: string; content: string }>;
+    messages?: Array<{ role: string; content: string | unknown[] }>;
   } | null;
   const output = data.output as {
     completion?: string;
@@ -47,7 +47,11 @@ if (json) {
     if (input.messages && input.messages.length > 0) {
       console.log("Messages:");
       for (const msg of input.messages) {
-        console.log(`  [${msg.role}]: ${msg.content}`);
+        const content =
+          typeof msg.content === "string"
+            ? msg.content
+            : JSON.stringify(msg.content);
+        console.log(`  [${msg.role}]: ${content}`);
       }
     }
     console.log("");

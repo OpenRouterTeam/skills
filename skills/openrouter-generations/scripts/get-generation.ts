@@ -44,8 +44,11 @@ if (json) {
   }
   console.log("");
   console.log("--- Cost ---");
-  console.log("Total cost: $" + data.total_cost);
-  console.log("Usage: $" + data.usage);
+  console.log(
+    "Total cost:",
+    data.total_cost != null ? `$${data.total_cost}` : "n/a"
+  );
+  console.log("Usage:", data.usage != null ? `$${data.usage}` : "n/a");
   if (data.upstream_inference_cost) {
     console.log("Upstream cost: $" + data.upstream_inference_cost);
   }
