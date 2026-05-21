@@ -27,6 +27,7 @@ cd <skill-path>/scripts && npm install
 | Break down by model, provider, API key | Add `--dimensions` to the query |
 | See trends over time | Add `--granularity day` (or `hour`, `week`, `month`) |
 | Reduce costs | Run `suggest-queries.ts`, find the cost optimization template, execute it |
+| Inspect individual generations | Add `--dimensions generation_id`, then use the `openrouter-generations` skill for details |
 | Answer a specific question | Map the question → metrics + dimensions, then query |
 
 ## Workflow
@@ -127,6 +128,27 @@ When the user asks "How can I spend less?" or similar:
    - Expensive models that could be replaced by cheaper alternatives for specific tasks
    - High token counts with low request counts — may indicate oversized prompts
    - Models where `reasoning_tokens` are a large fraction of total — consider disabling extended thinking if not needed
+
+## Drilling Down to Individual Generations
+
+To inspect specific generations from your analytics results, add `generation_id` as a dimension. This is a generations-only dimension (31-day limit) that returns the unique ID for each generation in the result set.
+
+```bash
+npx tsx query-analytics.ts --metrics total_usage,tokens_total --dimensions generation_id --order-by total_usage --limit 10
+```
+
+Once you have a generation ID (e.g., `gen-aBcDeFgHiJkLmNoPqRsT`), use the `openrouter-generations` skill to get detailed information:
+
+- **`get-generation`** — Fetch full request metadata: cost breakdown, token counts, latency, provider routing chain, finish reason, and more
+- **`get-generation-content`** — Fetch the stored prompt and completion text (unless Zero Data Retention was enabled)
+
+```bash
+cd <openrouter-generations-skill-path>/scripts
+npx tsx get-generation.ts gen-aBcDeFgHiJkLmNoPqRsT
+npx tsx get-generation-content.ts gen-aBcDeFgHiJkLmNoPqRsT
+```
+
+This workflow is useful for identifying your most expensive or slowest requests via analytics, then inspecting the actual prompt/completion to understand why.
 
 ## API Reference
 

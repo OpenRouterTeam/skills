@@ -106,6 +106,7 @@ You can combine up to 2 dimensions in a single query (e.g., `["model", "provider
 - `user` — the creator user ID (for org-level queries)
 
 **Generations-only** (31-day limit):
+- `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
 - `provider` — upstream provider name
 - `origin` — request origin/source
 - `country` — request country
@@ -161,6 +162,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Latency trends" | `p90_latency` | — | Set `granularity: "hour"`, 31d limit |
 | "Usage by country" | `request_count` | `country` | Generations-only |
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
+| "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | Generations-only. Use returned IDs with `openrouter-generations` skill for full metadata and content |
 
 ## Constraints
 
