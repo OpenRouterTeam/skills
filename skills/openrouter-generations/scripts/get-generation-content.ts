@@ -40,13 +40,17 @@ if (json) {
   console.log("");
 
   const hasInput = Boolean(
-    input && (input.prompt || (input.messages && input.messages.length > 0))
+    input &&
+      (input.prompt != null ||
+        (input.messages && input.messages.length > 0))
   );
-  const hasOutput = Boolean(output && (output.completion || output.reasoning));
+  const hasOutput = Boolean(
+    output && (output.completion != null || output.reasoning != null)
+  );
 
   if (hasInput && input) {
     console.log("=== INPUT ===");
-    if (input.prompt) {
+    if (input.prompt != null) {
       console.log("Prompt:", input.prompt);
     }
     if (input.messages && input.messages.length > 0) {
@@ -64,10 +68,10 @@ if (json) {
 
   if (hasOutput && output) {
     console.log("=== OUTPUT ===");
-    if (output.completion) {
+    if (output.completion != null) {
       console.log("Completion:", output.completion);
     }
-    if (output.reasoning) {
+    if (output.reasoning != null) {
       console.log("");
       console.log("Reasoning:", output.reasoning);
     }
