@@ -1,7 +1,7 @@
 import { requireApiKey, fetchQuery, parseArgs } from "./lib.js";
 
-const apiKey = requireApiKey();
 const args = parseArgs(process.argv.slice(2));
+const apiKey = requireApiKey(args);
 
 const metrics = (args.get("metrics") as string | undefined)?.split(",") ?? [];
 if (metrics.length === 0) {

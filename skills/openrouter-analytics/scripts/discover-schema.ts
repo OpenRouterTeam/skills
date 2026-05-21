@@ -1,7 +1,7 @@
 import { requireApiKey, fetchMeta, parseArgs } from "./lib.js";
 
-const apiKey = requireApiKey();
 const args = parseArgs(process.argv.slice(2));
+const apiKey = requireApiKey(args);
 const section = args.get("section") as string | undefined;
 
 const json = (await fetchMeta(apiKey)) as {

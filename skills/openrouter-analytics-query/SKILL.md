@@ -113,6 +113,7 @@ The `query-analytics.ts` script in the `openrouter-analytics` skill accepts thes
 
 | Flag | Description | Example |
 |---|---|---|
+| `--api-key` | API key (falls back to `OPENROUTER_API_KEY` env var) | `--api-key sk-or-v1-...` |
 | `--metrics` | Comma-separated metric names (required) | `--metrics request_count,total_usage` |
 | `--dimensions` | Comma-separated dimension names | `--dimensions model,provider` |
 | `--granularity` | Time bucket size | `--granularity day` |

@@ -1,10 +1,11 @@
 const BASE_URL = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai";
 
-export function requireApiKey(): string {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+export function requireApiKey(args?: Map<string, string>): string {
+  const apiKey = args?.get("api-key") ?? process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     console.error(
-      "Error: OPENROUTER_API_KEY environment variable is not set.\n" +
+      "Error: No API key provided.\n" +
+        "Pass --api-key <key> or set the OPENROUTER_API_KEY environment variable.\n" +
         "This must be a management key (provisioning key).\n" +
         "Get one at https://openrouter.ai/settings/management-keys"
     );

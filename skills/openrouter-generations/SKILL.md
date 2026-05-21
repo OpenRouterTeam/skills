@@ -9,7 +9,8 @@ Retrieve detailed metadata and stored content for individual OpenRouter generati
 
 ## Prerequisites
 
-- `OPENROUTER_API_KEY` environment variable set to any valid OpenRouter API key (regular or management key). Get one at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
+- Any valid OpenRouter API key (regular or management key). Get one at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
+- Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 - Generation IDs look like `gen-1234567890` or `gen-aBcDeFgHiJkLmNoPqRsT`.
 
 ## First-Time Setup
