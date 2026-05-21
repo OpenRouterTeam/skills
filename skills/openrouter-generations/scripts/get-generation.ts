@@ -68,7 +68,7 @@ if (json) {
   console.log("Streamed:", data.streamed);
   console.log("BYOK:", data.is_byok);
   console.log("Cancelled:", data.cancelled);
-  if (data.web_search_engine) {
+  if (data.web_search_engine != null) {
     console.log("Web search:", data.web_search_engine);
   }
   console.log("");

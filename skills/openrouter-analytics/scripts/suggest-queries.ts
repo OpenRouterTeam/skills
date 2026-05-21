@@ -45,6 +45,8 @@ const TEMPLATES = [
       limit: 10,
     },
     cli: "--metrics avg_latency,p90_latency,request_count --dimensions model --order-by p90_latency --limit 10",
+    interpretation:
+      "Generations-only query (avg_latency + p90_latency). Limited to 31-day time windows.",
   },
   {
     question: "How can I reduce my costs?",
