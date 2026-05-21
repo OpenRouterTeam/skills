@@ -42,6 +42,12 @@ if (json) {
   if (data.native_tokens_cached != null) {
     console.log("Cached:", data.native_tokens_cached);
   }
+  if (data.native_tokens_prompt != null) {
+    console.log("Native prompt:", data.native_tokens_prompt);
+  }
+  if (data.native_tokens_completion != null) {
+    console.log("Native completion:", data.native_tokens_completion);
+  }
   console.log("");
   console.log("--- Cost ---");
   console.log(

@@ -26,7 +26,19 @@ const json = args.has("json");
 if (json) {
   console.log(JSON.stringify(result, null, 2));
 } else {
-  const data = (result as { data: Record<string, unknown> }).data;
+  const rawData = (result as { data: Record<string, unknown> | null }).data;
+  if (!rawData) {
+    console.log("Generation:", generationId);
+    console.log("");
+    console.log("No content available for this generation.");
+    console.log(
+      "This may be because Zero Data Retention (ZDR) was enabled."
+    );
+    console.log("");
+    console.log("Use --json for full raw response");
+    process.exit(0);
+  }
+  const data = rawData as Record<string, unknown>;
   const input = data.input as {
     prompt?: string;
     messages?: Array<{ role: string; content: string | unknown[] }>;
