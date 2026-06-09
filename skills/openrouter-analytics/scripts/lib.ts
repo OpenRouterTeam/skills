@@ -23,8 +23,6 @@ interface QueryResponse {
     data: unknown[];
     metadata: { query_time_ms: number; row_count: number; truncated: boolean };
     cachedAt?: number;
-    // ID → human-readable label map for dimensions like api_key_id/app/user/workspace.
-    label_map?: Record<string, Record<string, string>>;
   };
 }
 

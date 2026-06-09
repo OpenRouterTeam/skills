@@ -148,13 +148,12 @@ const cached = data.cachedAt ? " (cached)" : "";
 // that agents capture from stdout.
 console.error(`Query: ${meta.row_count} rows in ${timeStr}ms${truncated}${cached}`);
 
-// Emit data, metadata, and label_map together on stdout. Agents parsing stdout
-// need metadata.truncated to know the result is partial, and label_map to
-// resolve dimension IDs (api_key_id, user, app, workspace) to human names —
-// both were previously discarded to stderr where stdout consumers never see them.
+// Emit data and metadata together on stdout. Agents parsing stdout
+// need metadata.truncated to know the result is partial.
+// Dimensions like api_key_id, user, app, workspace are already resolved
+// to human-readable names in the data rows.
 const out: Record<string, unknown> = {
   data: data.data,
   metadata: data.metadata,
 };
-if (data.label_map) out.label_map = data.label_map;
 console.log(JSON.stringify(out, null, 2));

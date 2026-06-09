@@ -89,19 +89,13 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 {
   "data": {
     "data": [
-      { "date": "2026-05-19 00:00:00", "model": "anthropic/claude-sonnet-4", "request_count": 1523, "total_usage": 4.27 },
-      { "date": "2026-05-18 00:00:00", "model": "openai/gpt-4o", "request_count": 892, "total_usage": 2.15 }
+      { "date__day": "2026-05-19", "model": "anthropic/claude-sonnet-4", "request_count": "1523", "total_usage": 4.27 },
+      { "date__day": "2026-05-18", "model": "openai/gpt-4o", "request_count": "892", "total_usage": 2.15 }
     ],
     "metadata": {
       "query_time_ms": 142,
       "row_count": 2,
       "truncated": false
-    },
-    "label_map": {
-      "api_key_id": { "123": "Production Key" },
-      "app": { "42": "My App" },
-      "user": { "user_abc": "alice@example.com" },
-      "workspace": { "ws-uuid-1": "Engineering" }
     },
     "cachedAt": 1747699200000
   }
@@ -112,12 +106,15 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date` (when granularity is set) |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set, e.g. `date__day`, `date__hour`) |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
-| `data.label_map` | Maps raw dimension values to human-readable labels. Present when the query includes resolvable dimensions (`api_key_id`, `app`, `user`, `workspace`). Data rows already contain the resolved names — this map provides the original ID→name mapping |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
+
+> **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
+
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
 
 ## CLI Reference
 
@@ -142,19 +139,18 @@ The `query-analytics.ts` script in the `openrouter-analytics` skill accepts thes
 | `--limit` | Max total rows (1–10000) | `--limit 100` |
 | `--group-limit` | Max rows per dimension combination (1–10000). When omitted on time-series queries with dimensions, auto-computed server-side. | `--group-limit 50` |
 
-The CLI prints a single JSON object to **stdout** with three keys — `data` (the result rows), `metadata`, and `label_map` (present only when the query includes resolvable dimensions):
+The CLI prints a single JSON object to **stdout** with two keys — `data` (the result rows) and `metadata`:
 
 ```json
 {
   "data": [ { "model": "anthropic/claude-sonnet-4", "total_usage": 4.27 } ],
-  "metadata": { "query_time_ms": 142, "row_count": 2, "truncated": false },
-  "label_map": { "api_key_id": { "123": "Production Key" } }
+  "metadata": { "query_time_ms": 142, "row_count": 2, "truncated": false }
 }
 ```
 
 A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
 
-> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Use `label_map` to resolve raw dimension IDs (`api_key_id`, `user`, `app`, `workspace`) to human-readable names.
+> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
 
 **Multi-filter queries:** the CLI builds a multi-element `filters` array (ANDed together) from the unindexed base flag (`--filter-field`/`--filter-op`/`--filter-value`) plus the indexed `--filter-field-N`/`--filter-op-N`/`--filter-value-N` flags. Each filter must supply all three parts (field, op, value); a partial triplet is rejected. Up to **20 filters** total (the base flag plus indices 1–19), matching the API cap. Indices may be sparse (e.g. base + `-2` with `-1` omitted is fine — gaps are skipped, not silently dropped). For a query like `model = X AND provider = Y`:
 
@@ -256,14 +252,11 @@ Combine up to 2 dimensions for cross-tabulation:
 | 429 | Rate limited (64 RPM) | Wait and retry |
 | 500 | Server error | Retry after a moment |
 
-## Data Source Behavior
+## Time Range Behavior
 
-The query engine automatically selects the optimal data source based on the requested metrics and dimensions:
+Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-- If all requested metrics and dimensions are available in the materialized views → uses the MV (fast, up to 365 days)
-- If any metric or dimension requires raw generations data → uses the generations table (slower, up to 31 days)
-
-You do not control this directly — it is resolved automatically. If a query times out, it is likely hitting the generations table. Try:
-- Removing generations-only dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)
+If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics
+- Removing per-generation dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)

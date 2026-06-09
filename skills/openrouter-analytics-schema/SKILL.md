@@ -57,26 +57,25 @@ Each metric has:
 | `display_label` | Human-readable label |
 | `is_rate` | Whether this is a ratio/rate (averaged, not summed) |
 
-### Data Sources
+### Time Range Limits
 
-The query engine uses two data sources and automatically picks the optimal one based on the requested metrics and dimensions:
-
-- **Materialized views (MV)** — Pre-aggregated. Fast, supports longer time ranges (up to 365 days for daily granularity). Available for most volume/cost metrics.
-- **Generations** — Raw generations table. Required for latency, throughput, and per-generation dimensions like `provider`, `origin`, `finish_reason`. Limited to 31-day range.
+Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
 **Volume metrics** (how much):
-- `request_count` — number of API requests
-- `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts
-- `reasoning_tokens` — tokens used for extended thinking
-- `cached_tokens` — tokens served from cache
-- `byok_request_count` — number of BYOK requests
+- `request_count` — number of API requests (up to 365 days)
+- `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts (up to 365 days)
+- `reasoning_tokens` — tokens used for extended thinking (up to 365 days)
+- `cached_tokens` — tokens served from cache (up to 365 days)
+- `byok_request_count` — number of BYOK requests (up to 365 days)
+- `guardrail_invoked_count` — count of requests that triggered guardrails (31-day limit)
+- `response_cached_count` — count of responses served from cache (31-day limit)
 
 **Cost metrics** (how much money):
-- `total_usage` — total cost in USD
-- `byok_usage` — cost from bring-your-own-key requests
-- `credits_usage` — cost from credit-funded requests
+- `total_usage` — total cost in USD (up to 365 days)
+- `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 365 days)
+- `credits_usage` — credits-based usage in USD (31-day limit)
 
 **Performance metrics** (how fast):
 - `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
@@ -84,9 +83,7 @@ The query engine uses two data sources and automatically picks the optimal one b
 
 **Efficiency metrics** (how well):
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
-- `guardrail_invoked_count` — number of requests that triggered guardrails
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
-- `response_cached_count` — number of responses served from cache
 - `response_cached_rate` — ratio of responses served from cache
 
 ## Understanding Dimensions
@@ -104,26 +101,28 @@ You can combine up to 2 dimensions in a single query (e.g., `["model", "provider
 
 ### Label Resolution
 
-Some dimensions return raw IDs that the query endpoint automatically resolves to human-readable labels. When you query with these dimensions, data rows contain the resolved names and the response includes a `label_map` for the ID→name mapping:
+Some dimensions have their raw IDs automatically resolved to human-readable labels in query results. Data rows contain the resolved display names directly:
 
-| Dimension | Raw value | Resolved to |
-|---|---|---|
-| `api_key_id` | Numeric ID | Key name/label |
-| `app` | Numeric ID | App title or origin URL |
-| `user` | Clerk user ID | Email address |
-| `workspace` | UUID | Workspace name |
+| Dimension | Resolved to |
+|---|---|
+| `api_key_id` | Key name/label |
+| `app` | App title or origin URL |
+| `user` | User name or email address |
+| `workspace` | Workspace name |
 
 All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
+> Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
+
 ### Dimension Categories
 
-**Always available** (MV + generations):
+**Available with all time ranges:**
 - `model` — the OpenRouter model ID (permaslug)
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
 
-**Generations-only** (31-day limit):
+**Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
 - `provider` — upstream provider name
 - `origin` — request origin/source
@@ -180,7 +179,11 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Latency trends" | `p90_latency` | — | Set `granularity: "hour"`, 31d limit |
 | "Usage by country" | `request_count` | `country` | Generations-only |
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
-| "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | Generations-only. Use returned IDs with `openrouter-generations` skill for full metadata and content |
+| "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | 31-day limit. Use returned IDs with `openrouter-generations` skill for full metadata and content |
+| "How much BYOK spend?" | `byok_usage` | `model` | Up to 365 days |
+| "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | `credits_usage` limited to 31 days |
+| "How many guardrail triggers?" | `guardrail_invoked_count`, `guardrail_invoked_rate` | `model` | 31-day limit |
+| "How many cached responses?" | `response_cached_count`, `response_cached_rate` | `model` | 31-day limit |
 
 ## Constraints
 
@@ -188,7 +191,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 - Maximum 20 filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
-- MV sources: up to 365 days for daily granularity
-- Generations source: up to 31 days
+- Most volume/cost metrics: up to 365 days with daily granularity
+- Latency/throughput metrics and per-generation dimensions: up to 31 days
 - Minute granularity: only available when the time window is ≤ 3 hours
 - Rate-limited to 64 requests per minute

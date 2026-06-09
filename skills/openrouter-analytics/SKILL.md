@@ -90,7 +90,7 @@ Usage by API key:
 npx tsx query-analytics.ts --metrics request_count,tokens_total --dimensions api_key_id --order-by request_count --limit 10
 ```
 
-Latency by provider (requires raw generations data, limited to 31-day range):
+Latency by provider (limited to 31-day range):
 
 ```bash
 npx tsx query-analytics.ts --metrics avg_latency,p90_latency --dimensions provider --order-by p90_latency
@@ -118,8 +118,8 @@ When interpreting results for the user:
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
 - **Throughput** (`avg_throughput`) is tokens per second
-- When `granularity` is set, rows include a `date` field for the time bucket
-- **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, email, workspace name). The `query-analytics.ts` CLI emits a single stdout JSON object — `{ data, metadata, label_map }` — so the original ID→name mappings in `label_map` are available to agents capturing stdout (not just printed to the terminal)
+- When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
+- **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
 
 ### Cost Optimization Guidance
