@@ -172,12 +172,12 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Which models cost the most?" | `total_usage` | `model` | Order by `total_usage` desc |
 | "How many requests?" | `request_count` | — | Add `model` or `api_key_id` for breakdown |
 | "How many tokens?" | `tokens_total` | — | Use `tokens_prompt` / `tokens_completion` for split |
-| "Which provider is fastest?" | `avg_latency`, `p90_latency` | `provider` | Generations-only, 31d limit |
+| "Which provider is fastest?" | `avg_latency`, `p90_latency` | `provider` | 31-day limit |
 | "What's my cache hit rate?" | `cache_hit_rate` | `model` | Rate metric — shows per-model caching |
 | "Which API key uses the most?" | `request_count`, `total_usage` | `api_key_id` | — |
 | "Usage over time" | `request_count` or `total_usage` | — | Set `granularity: "day"` |
 | "Latency trends" | `p90_latency` | — | Set `granularity: "hour"`, 31d limit |
-| "Usage by country" | `request_count` | `country` | Generations-only |
+| "Usage by country" | `request_count` | `country` | 31-day limit |
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
 | "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | 31-day limit. Use returned IDs with `openrouter-generations` skill for full metadata and content |
 | "How much BYOK spend?" | `byok_usage` | `model` | Up to 365 days |
