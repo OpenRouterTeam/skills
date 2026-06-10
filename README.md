@@ -65,7 +65,14 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | [openrouter-agent-migration](skills/openrouter-agent-migration/README.md) | Migrating from `@openrouter/sdk` to the standalone `@openrouter/agent` package for `callModel`, `tool()`, stop conditions, and streaming helpers |
 | [openrouter-models](skills/openrouter-models/README.md) | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
 | [openrouter-images](skills/openrouter-images/README.md) | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
+| [openrouter-stt](skills/openrouter-stt/README.md) | Transcribing speech to text via `POST /api/v1/audio/transcriptions` — model discovery, audio format selection, provider-specific options, and zero-dep TypeScript/Python examples |
+| [openrouter-tts](skills/openrouter-tts/README.md) | Synthesizing speech from text via `POST /api/v1/audio/speech` — model/voice discovery, format selection (mp3 vs pcm), provider-specific options, and OpenAI-SDK compatibility |
+| [openrouter-video](skills/openrouter-video/README.md) | Generating videos from text prompts (with optional frame or reference images) via OpenRouter's asynchronous video generation API — the submit → poll → download flow |
 | [openrouter-oauth](skills/openrouter-oauth/README.md) | Framework-agnostic [Sign In with OpenRouter](https://openrouterteam.github.io/sign-in-with-openrouter/) — OAuth PKCE authentication using plain `fetch`, no SDK or dependencies required. Includes a copy-pasteable auth module and sign-in button component |
+| [openrouter-analytics](skills/openrouter-analytics/README.md) | Answering natural-language questions about your OpenRouter usage data — spend, request volume, model breakdown, latency, token usage, and cost optimization |
+| [openrouter-analytics-schema](skills/openrouter-analytics-schema/README.md) | Discovering the OpenRouter analytics schema — available metrics, dimensions, filter operators, and granularities, and mapping natural-language questions to query parameters |
+| [openrouter-analytics-query](skills/openrouter-analytics-query/README.md) | Constructing and executing analytics queries against the OpenRouter API — full parameter reference for metrics, dimensions, filters, time ranges, ordering, and pagination |
+| [openrouter-generations](skills/openrouter-generations/README.md) | Inspecting individual OpenRouter generations — request metadata (cost, latency, tokens, model, provider routing) and stored prompt/completion content |
 
 ## Environment
 
