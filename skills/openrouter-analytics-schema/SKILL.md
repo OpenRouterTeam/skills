@@ -32,7 +32,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx discover-schema.ts
 {
   "data": {
     "metrics": [
-      { "name": "request_count", "display_label": "Request Count", "is_rate": false }
+      { "name": "request_count", "display_label": "Request Count", "is_rate": false, "display_format": "number" }
     ],
     "dimensions": [
       { "name": "model", "display_label": "Model" }
@@ -56,6 +56,7 @@ Each metric has:
 | `name` | Identifier to use in query requests |
 | `display_label` | Human-readable label |
 | `is_rate` | Whether this is a ratio/rate (averaged, not summed) |
+| `display_format` | How the value should be formatted: `number`, `currency`, `percent`, `latency`, or `throughput` |
 
 ### Time Range Limits
 
