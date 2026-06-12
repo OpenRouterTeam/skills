@@ -256,6 +256,8 @@ Combine up to 2 dimensions for cross-tabulation:
 
 Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
+Usage breakdown metrics follow the same pattern: `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+
 If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics

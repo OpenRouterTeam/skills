@@ -96,6 +96,12 @@ Latency by provider (limited to 31-day range):
 npx tsx query-analytics.ts --metrics avg_latency,p90_latency --dimensions provider --order-by p90_latency
 ```
 
+Usage cost breakdown (upstream, cache, data logging, web search):
+
+```bash
+npx tsx query-analytics.ts --metrics usage_upstream,usage_cache,usage_data,usage_web --granularity day
+```
+
 ## Common Query Templates
 
 ```bash
@@ -113,7 +119,7 @@ Returns a list of pre-built query templates for common questions, each with:
 The query endpoint returns an array of data rows. Each row is a flat object with keys matching the requested metrics and dimensions.
 
 When interpreting results for the user:
-- **Spend metrics** (`total_usage`) are in USD
+- **Spend metrics** (`total_usage`, `usage_upstream`, `usage_cache`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD. `usage_data` is typically negative (a data logging discount)
 - **Token counts** (`tokens_total`, `tokens_prompt`, `tokens_completion`) are in native model tokens
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
@@ -127,11 +133,13 @@ When interpreting results for the user:
 When the user asks "How can I spend less?" or similar:
 
 1. Query top models by spend: `--metrics total_usage,tokens_total,cache_hit_rate,request_count --dimensions model --order-by total_usage --limit 10`
-2. Look for:
+2. Query cost breakdown: `--metrics usage_upstream,usage_cache,usage_data,usage_web,usage_file --granularity day` to see where spend goes
+3. Look for:
    - Models with high spend but low `cache_hit_rate` — prompt caching can help
    - Expensive models that could be replaced by cheaper alternatives for specific tasks
    - High token counts with low request counts — may indicate oversized prompts
    - Models where `reasoning_tokens` are a large fraction of total — consider disabling extended thinking if not needed
+   - High `usage_web` or `usage_file` relative to `usage_upstream` — web search and file processing add-on costs may be significant
 
 ## Drilling Down to Individual Generations
 

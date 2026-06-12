@@ -77,6 +77,15 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `total_usage` — total cost in USD (up to 365 days)
 - `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 365 days)
 - `credits_usage` — credits-based usage in USD (31-day limit)
+- `usage_upstream` — provider-side (upstream) cost in USD (up to 365 days)
+- `usage_cache` — cache cost component in USD (up to 365 days)
+- `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 365 days)
+- `usage_web` — web search cost in USD (up to 365 days)
+- `usage_upstream_web` — provider-side web search cost in USD (up to 365 days)
+- `usage_file` — file processing cost in USD (31-day limit)
+- `usage_upstream_file` — provider-side file processing cost in USD (31-day limit)
+- `usage_web_fetch` — web fetch cost in USD (31-day limit)
+- `usage_upstream_web_fetch` — provider-side web fetch cost in USD (31-day limit)
 
 **Performance metrics** (how fast):
 - `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
@@ -185,6 +194,10 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | `credits_usage` limited to 31 days |
 | "How many guardrail triggers?" | `guardrail_invoked_count`, `guardrail_invoked_rate` | `model` | 31-day limit |
 | "How many cached responses?" | `response_cached_count`, `response_cached_rate` | `model` | 31-day limit |
+| "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 365 days) |
+| "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
+| "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
+| "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
 ## Constraints
 
