@@ -79,7 +79,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `credits_usage` — credits-based usage in USD (31-day limit)
 - `usage_upstream` — provider-side (upstream) cost in USD (up to 365 days)
 - `usage_cache` — cache cost component in USD (up to 365 days)
-- `usage_data` — data logging discount in USD (up to 365 days)
+- `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 365 days)
 - `usage_web` — web search cost in USD (up to 365 days)
 - `usage_upstream_web` — provider-side web search cost in USD (up to 365 days)
 - `usage_file` — file processing cost in USD (31-day limit)
@@ -197,6 +197,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 365 days) |
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
+| "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
 ## Constraints
 

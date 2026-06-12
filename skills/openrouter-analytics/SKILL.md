@@ -119,7 +119,7 @@ Returns a list of pre-built query templates for common questions, each with:
 The query endpoint returns an array of data rows. Each row is a flat object with keys matching the requested metrics and dimensions.
 
 When interpreting results for the user:
-- **Spend metrics** (`total_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD
+- **Spend metrics** (`total_usage`, `usage_upstream`, `usage_cache`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD. `usage_data` is typically negative (a data logging discount)
 - **Token counts** (`tokens_total`, `tokens_prompt`, `tokens_completion`) are in native model tokens
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
