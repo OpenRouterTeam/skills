@@ -115,31 +115,32 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 
 | Dimension | Resolved to |
 |---|---|
-| `api_key_id` | Key name/label |
-| `app` | App title or origin URL |
+| `model` | Formatted model name (shortened display name) |
+| `api_key_id` | Key name/label (with `-1` sentinel surfaced as "Chatroom") |
+| `app` | App title or origin URL (with `-1` sentinel surfaced as "Unknown") |
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+All other dimensions (e.g., `provider`, `country`, `origin`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
 ### Dimension Categories
 
-**Available with all time ranges:**
+**Available with all time ranges (up to 365 days via daily MV):**
 - `model` — the OpenRouter model ID (permaslug)
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
+- `workspace` — workspace UUID
+- `app` — application ID
 - `user` — the creator user ID (for org-level queries)
 
-**Limited to 31-day time ranges:**
+**Limited to 31-day time ranges (generations table only):**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
 - `provider` — upstream provider name
 - `origin` — request origin/source
 - `country` — request country
 - `finish_reason` — why the generation ended (stop, length, etc.)
-- `workspace` — workspace ID
-- `app` — application ID
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 
