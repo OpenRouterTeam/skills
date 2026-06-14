@@ -127,7 +127,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 ### Dimension Categories
 
 **Available with all time ranges:**
-- `model` — the OpenRouter model ID (permaslug)
+- `model` — the resolved model that actually served the generation (permaslug, e.g., `openai/gpt-4o`). For routed requests, this is the downstream model the router chose — not the router itself. To analyze router traffic, filter on the router field instead.
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)

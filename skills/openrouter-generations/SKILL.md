@@ -44,7 +44,7 @@ npx tsx get-generation.ts --id gen-1234567890 --json
 
 **What you get back:**
 
-- **Model & routing**: `model`, `provider_name`, `router`, `service_tier`
+- **Model & routing**: `model` (resolved model that served the request), `provider_name`, `router` (the router that chose the model, if any), `service_tier`
 - **Tokens**: `tokens_prompt`, `tokens_completion`, `native_tokens_reasoning`, `native_tokens_cached`
 - **Cost**: `total_cost`, `usage`, `upstream_inference_cost`, `cache_discount`
 - **Performance**: `latency`, `generation_time`, `moderation_latency`
@@ -201,7 +201,7 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Generation ID (`gen-...`) |
-| `model` | string | Model permaslug (e.g., `openai/gpt-4o`) |
+| `model` | string | Resolved model permaslug (e.g., `openai/gpt-4o`). For routed requests, this is the downstream model the router chose — not the router slug. |
 | `provider_name` | string\|null | Provider that served the request |
 | `api_type` | string | One of: `completions`, `embeddings`, `rerank`, `tts`, `stt`, `video` |
 | `tokens_prompt` | int\|null | Prompt token count |
@@ -224,7 +224,7 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 | `external_user` | string\|null | External user identifier (X-External-User header) |
 | `session_id` | string\|null | Session grouping ID |
 | `request_id` | string\|null | Request grouping ID (all gens from one API call) |
-| `router` | string\|null | Router used (e.g., `openrouter/auto`) |
+| `router` | string\|null | Router that selected the model (e.g., `openrouter/auto`, `openrouter/fusion`). Null when the user explicitly chose a model. Use this — not `model` — to identify router traffic. |
 | `service_tier` | string\|null | Provider service tier |
 | `web_search_engine` | string\|null | Search engine used (e.g., `exa`, `firecrawl`) |
 | `num_search_results` | int\|null | Number of search results included |
