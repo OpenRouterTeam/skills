@@ -128,7 +128,7 @@ All other dimensions (e.g., `provider`, `country`) are returned as-is without re
 ### Dimension Categories
 
 **Available with all time ranges:**
-- `model` — the OpenRouter model ID (permaslug)
+- `model` — the OpenRouter model ID (permaslug); resolved to display name in responses (see Label Resolution above)
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)

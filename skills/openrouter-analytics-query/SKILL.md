@@ -89,8 +89,8 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 {
   "data": {
     "data": [
-      { "date__day": "2026-05-19", "model": "anthropic/claude-sonnet-4", "request_count": "1523", "total_usage": 4.27 },
-      { "date__day": "2026-05-18", "model": "openai/gpt-4o", "request_count": "892", "total_usage": 2.15 }
+      { "date__day": "2026-05-19", "model": "Claude Sonnet 4", "request_count": "1523", "total_usage": 4.27 },
+      { "date__day": "2026-05-18", "model": "GPT-4o", "request_count": "892", "total_usage": 2.15 }
     ],
     "metadata": {
       "query_time_ms": 142,
@@ -143,7 +143,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 
 ```json
 {
-  "data": [ { "model": "anthropic/claude-sonnet-4", "total_usage": 4.27 } ],
+  "data": [ { "model": "Claude Sonnet 4", "total_usage": 4.27 } ],
   "metadata": { "query_time_ms": 142, "row_count": 2, "truncated": false }
 }
 ```
