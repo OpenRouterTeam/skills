@@ -127,7 +127,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 ### Dimension Categories
 
 **Available with all time ranges:**
-- `model` — the resolved model that actually served the generation (permaslug, e.g., `openai/gpt-4o`). For routed requests, this is the downstream model the router chose — not the router itself. To analyze router traffic, filter on the router field instead.
+- `model` — the resolved model that actually served the generation (permaslug, e.g., `openai/gpt-4o`). For routed requests, this is the downstream model the router chose — not the router itself. To identify router traffic, drill down to individual generations via `generation_id` and check the `router` field using the `openrouter-generations` skill, or query `router_permaslug` in ClickHouse directly.
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
