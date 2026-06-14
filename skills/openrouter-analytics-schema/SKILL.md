@@ -115,12 +115,13 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 
 | Dimension | Resolved to |
 |---|---|
+| `model` | Model display name (e.g., `openai/gpt-4o-2024-08-06` → `GPT-4o`) |
 | `api_key_id` | Key name/label |
 | `app` | App title or origin URL |
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+All other dimensions (e.g., `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
@@ -131,6 +132,8 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
+- `workspace` — workspace ID
+- `app` — application ID
 
 **Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
@@ -138,8 +141,6 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `origin` — request origin/source
 - `country` — request country
 - `finish_reason` — why the generation ended (stop, length, etc.)
-- `workspace` — workspace ID
-- `app` — application ID
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 
