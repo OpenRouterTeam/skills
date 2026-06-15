@@ -115,21 +115,24 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 
 | Dimension | Resolved to |
 |---|---|
-| `api_key_id` | Key name/label |
-| `app` | App title or origin URL |
+| `model` | Formatted model name |
+| `api_key_id` | Key name/label (rows with value `-1` render as "Chatroom") |
+| `app` | App title or origin URL (rows with value `-1` render as "Unknown") |
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+All other dimensions (e.g., `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
 ### Dimension Categories
 
-**Available with all time ranges:**
+**Available with all time ranges (up to 365 days):**
 - `model` — the OpenRouter model ID (permaslug)
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
+- `workspace` — workspace ID
+- `app` — application ID
 - `user` — the creator user ID (for org-level queries)
 
 **Limited to 31-day time ranges:**
@@ -138,8 +141,6 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `origin` — request origin/source
 - `country` — request country
 - `finish_reason` — why the generation ended (stop, length, etc.)
-- `workspace` — workspace ID
-- `app` — application ID
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 
