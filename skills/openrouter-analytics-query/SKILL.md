@@ -114,7 +114,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `model`, `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (model display names, key names, app titles, user names, workspace names), not raw IDs.
 
 ## CLI Reference
 
@@ -150,7 +150,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 
 A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
 
-> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
+> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `model`, `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
 
 **Multi-filter queries:** the CLI builds a multi-element `filters` array (ANDed together) from the unindexed base flag (`--filter-field`/`--filter-op`/`--filter-value`) plus the indexed `--filter-field-N`/`--filter-op-N`/`--filter-value-N` flags. Each filter must supply all three parts (field, op, value); a partial triplet is rejected. Up to **20 filters** total (the base flag plus indices 1–19), matching the API cap. Indices may be sparse (e.g. base + `-2` with `-1` omitted is fine — gaps are skipped, not silently dropped). For a query like `model = X AND provider = Y`:
 
@@ -261,4 +261,4 @@ Usage breakdown metrics follow the same pattern: `usage_upstream`, `usage_cache`
 If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics
-- Removing per-generation dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)
+- Removing generations-only dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`)
