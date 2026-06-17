@@ -112,6 +112,26 @@ The image-specific output item type is `image_generation_call` — this is not o
 
 This appears alongside standard `message` output items in the `output` array. Text and image outputs may each be absent depending on the model and prompt.
 
+## Provider Response Shapes (important)
+
+OpenRouter normalizes most fields, but the per-image payload inside `message.images[]` differs by provider:
+
+| Provider family | `images[i]` shape | Notes |
+|---|---|---|
+| Google Gemini (`google/gemini-*-image-*`) | plain string — either raw base64 or full `data:image/png;base64,...` URL | Original assumption baked into older versions of these scripts. |
+| OpenAI (`openai/gpt-5.4-image-2`, `openai/gpt-5-image*`) | object `{type:"image_url", image_url:{url:"data:image/png;base64,..."}}` | Will crash any code that calls `.startsWith` on the element directly. |
+
+The bundled `generate.ts` and `edit.ts` handle both shapes (string, `image_url.url`, `b64_json`, `url`, `data` fallbacks). If you write new tooling against the chat-completions modality response, normalize first:
+
+```ts
+const raw = message.images[i];
+const str =
+  typeof raw === "string"
+    ? raw
+    : raw?.image_url?.url ?? raw?.url ?? raw?.b64_json ?? raw?.data;
+const dataUrl = str.startsWith("data:") ? str : `data:image/png;base64,${str}`;
+```
+
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use a different model, pass `--model <id>` with any OpenRouter model ID that supports image output modalities.
