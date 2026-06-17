@@ -203,14 +203,19 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
-## API Key Hash Filters
+## Filter Value Reference
 
-When filtering by `api_key_id`, you can pass:
+Several dimensions are **label-resolved** in query results — the response shows human-readable names, but filters must use the underlying ID. Here's where to find each:
 
-- The **numeric ID** — found in generation metadata (the `api_key_id` field on each generation) and in label-resolved analytics query results.
-- The **64-character SHA-256 hash** — returned by `GET /api/v1/keys` as the `key_hash` field.
+| Dimension | Filter value | Where to find it |
+|---|---|---|
+| `api_key_id` | Numeric ID **or** 64-char SHA-256 hash | Numeric ID: generation metadata (`api_key_id` field). Hash: `GET /api/v1/keys` (`key_hash` field). Hashes are auto-resolved server-side. If a hash can't be resolved, a sentinel value returns zero rows (no error). |
+| `user` | Clerk user ID (e.g. `user_abc123`) | User settings or org member list — not the display name/email shown in results. |
+| `workspace` | Workspace UUID | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
+| `app` | Numeric app ID | Generation metadata (`app_id` field) or app settings — not the app title shown in results. |
+| `model` | Permaslug (e.g. `openai/gpt-4o`) | Model page URL or `GET /api/v1/models` — not the display name. |
 
-Hash values are automatically resolved to numeric IDs before querying ClickHouse. If a hash cannot be resolved, the filter uses a sentinel value that returns zero rows (no error).
+Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
 
 ## Constraints
 
