@@ -78,7 +78,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 365 days)
 - `credits_usage` — all charges billed to OpenRouter credits in USD, including BYOK platform fees (up to 365 days)
 - `openrouter_usage` — non-BYOK inference spend in USD; excludes requests made with user-provided keys (31-day limit)
-- `byok_fees` — BYOK platform fees in USD; the margin charged on top of BYOK inference cost (31-day limit)
+- `byok_fees` — BYOK platform fees in USD; the platform fee portion of `credits_usage` charged on BYOK requests (31-day limit). `credits_usage` includes both non-BYOK inference charges and these BYOK platform fees.
 - `usage_upstream` — provider-side (upstream) cost in USD (up to 365 days)
 - `usage_cache` — cache cost component in USD (up to 365 days)
 - `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 365 days)
