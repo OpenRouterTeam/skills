@@ -96,10 +96,10 @@ Latency by provider (limited to 31-day range):
 npx tsx query-analytics.ts --metrics avg_latency,p90_latency --dimensions provider --order-by p90_latency
 ```
 
-Usage cost breakdown (upstream, cache, data logging, web search):
+Usage cost breakdown (credits, BYOK, upstream, cache, data logging, web search):
 
 ```bash
-npx tsx query-analytics.ts --metrics usage_upstream,usage_cache,usage_data,usage_web --granularity day
+npx tsx query-analytics.ts --metrics credits_usage,byok_usage,byok_fees,usage_upstream,usage_cache,usage_data,usage_web --granularity day
 ```
 
 ## Common Query Templates
@@ -119,7 +119,7 @@ Returns a list of pre-built query templates for common questions, each with:
 The query endpoint returns an array of data rows. Each row is a flat object with keys matching the requested metrics and dimensions.
 
 When interpreting results for the user:
-- **Spend metrics** (`total_usage`, `usage_upstream`, `usage_cache`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD. `usage_data` is typically negative (a data logging discount)
+- **Spend metrics** (`total_usage`, `credits_usage`, `openrouter_usage`, `byok_usage`, `byok_fees`, `usage_upstream`, `usage_cache`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD. `total_usage` includes BYOK inference cost. `usage_data` is typically negative (a data logging discount)
 - **Token counts** (`tokens_total`, `tokens_prompt`, `tokens_completion`) are in native model tokens
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
@@ -133,7 +133,7 @@ When interpreting results for the user:
 When the user asks "How can I spend less?" or similar:
 
 1. Query top models by spend: `--metrics total_usage,tokens_total,cache_hit_rate,request_count --dimensions model --order-by total_usage --limit 10`
-2. Query cost breakdown: `--metrics usage_upstream,usage_cache,usage_data,usage_web,usage_file --granularity day` to see where spend goes
+2. Query cost breakdown: `--metrics credits_usage,byok_usage,byok_fees,usage_upstream,usage_cache,usage_data,usage_web,usage_file --granularity day` to see where spend goes
 3. Look for:
    - Models with high spend but low `cache_hit_rate` — prompt caching can help
    - Expensive models that could be replaced by cheaper alternatives for specific tasks

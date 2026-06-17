@@ -74,6 +74,13 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
+  - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
+  - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `app` — numeric app ID, not the app title shown in results.
+  - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
+- Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
 
 ### Order By
 
@@ -256,7 +263,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-Usage breakdown metrics follow the same pattern: `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 If a query times out, try:
 - Narrowing the time range
