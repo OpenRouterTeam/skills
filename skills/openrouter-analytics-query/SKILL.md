@@ -74,7 +74,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
-- For `api_key_id` filters: you can pass either the numeric internal ID or the 64-character SHA-256 hash from the keys API. Hashes are auto-resolved to numeric IDs before querying.
+- For `api_key_id` filters: you can pass the numeric ID (returned in generation metadata and label-resolved query results) or the 64-character SHA-256 hash (returned by `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
 
 ### Order By
 

@@ -205,7 +205,12 @@ Use this guide to translate natural-language questions into the right metric/dim
 
 ## API Key Hash Filters
 
-When filtering by `api_key_id`, you can pass either the numeric internal ID or the 64-character SHA-256 hash exposed by the keys API. Hash values are automatically resolved to numeric IDs before querying ClickHouse. If a hash cannot be resolved, the filter uses a sentinel value that returns zero rows (no error).
+When filtering by `api_key_id`, you can pass:
+
+- The **numeric ID** — found in generation metadata (the `api_key_id` field on each generation) and in label-resolved analytics query results.
+- The **64-character SHA-256 hash** — returned by `GET /api/v1/keys` as the `key_hash` field.
+
+Hash values are automatically resolved to numeric IDs before querying ClickHouse. If a hash cannot be resolved, the filter uses a sentinel value that returns zero rows (no error).
 
 ## Constraints
 
