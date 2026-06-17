@@ -74,9 +74,11 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `response_cached_count` — count of responses served from cache (31-day limit)
 
 **Cost metrics** (how much money):
-- `total_usage` — total cost in USD (up to 365 days)
+- `total_usage` — total cost in USD, including BYOK inference cost (up to 365 days). Computed as `sum(usage) + sum(byok_usage_inference)` so it reflects true spend for both credits and BYOK users.
 - `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 365 days)
-- `credits_usage` — credits-based usage in USD (31-day limit)
+- `credits_usage` — all charges billed to OpenRouter credits in USD, including BYOK platform fees (up to 365 days)
+- `openrouter_usage` — non-BYOK inference spend in USD; excludes requests made with user-provided keys (31-day limit)
+- `byok_fees` — BYOK platform fees in USD; the margin charged on top of BYOK inference cost (31-day limit)
 - `usage_upstream` — provider-side (upstream) cost in USD (up to 365 days)
 - `usage_cache` — cache cost component in USD (up to 365 days)
 - `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 365 days)
@@ -131,6 +133,8 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
+- `workspace` — workspace ID
+- `app` — application ID
 
 **Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
@@ -138,8 +142,6 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `origin` — request origin/source
 - `country` — request country
 - `finish_reason` — why the generation ended (stop, length, etc.)
-- `workspace` — workspace ID
-- `app` — application ID
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 
@@ -191,7 +193,9 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
 | "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | 31-day limit. Use returned IDs with `openrouter-generations` skill for full metadata and content |
 | "How much BYOK spend?" | `byok_usage` | `model` | Up to 365 days |
-| "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | `credits_usage` limited to 31 days |
+| "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | Both up to 365 days |
+| "BYOK platform fees?" | `byok_fees` | `model` | 31-day limit |
+| "Non-BYOK inference spend?" | `openrouter_usage` | `model` | 31-day limit |
 | "How many guardrail triggers?" | `guardrail_invoked_count`, `guardrail_invoked_rate` | `model` | 31-day limit |
 | "How many cached responses?" | `response_cached_count`, `response_cached_rate` | `model` | 31-day limit |
 | "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 365 days) |
@@ -199,9 +203,35 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
+## Classifier Dimensions
+
+The query builder supports dynamic dimensions backed by a classifier join table (`generation_classifications`). These allow grouping generations by custom classification labels (e.g., category, sentiment) without adding static columns to the schema.
+
+To use classifier dimensions, add the `classifier_dimensions` field to your query request:
+
+```json
+{
+  "metrics": ["request_count", "total_usage"],
+  "classifier_dimensions": {
+    "classifier_id": "my-classifier-uuid",
+    "dimension_names": ["category", "sentiment"]
+  },
+  "granularity": "day"
+}
+```
+
+- `classifier_id` (required) — the UUID of the classifier whose labels to group by
+- `dimension_names` (optional) — array of specific dimension field names within the classifier. If omitted, all dimensions for the classifier are included (max 10).
+
+Classifier dimensions are always resolved against the raw generations table (31-day time range limit) via a LEFT JOIN. They cannot be combined with materialized-view-only queries.
+
+## API Key Hash Filters
+
+When filtering by `api_key_id`, you can pass either the numeric internal ID or the 64-character SHA-256 hash exposed by the keys API. Hash values are automatically resolved to numeric IDs before querying ClickHouse. If a hash cannot be resolved, the filter uses a sentinel value that returns zero rows (no error).
+
 ## Constraints
 
-- Maximum 2 dimensions per query
+- Maximum 2 dimensions per query (plus optional classifier dimensions)
 - Maximum 20 filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).

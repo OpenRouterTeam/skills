@@ -59,12 +59,31 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `dimensions` | `string[]` | `[]` | Up to 2 dimensions to group by |
+| `classifier_dimensions` | `object` | none | Dynamic dimensions from a classifier join table. See below. |
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
+
+### Classifier Dimensions
+
+Use `classifier_dimensions` to group by dynamic labels from a classifier join table:
+
+```json
+{
+  "classifier_dimensions": {
+    "classifier_id": "uuid-of-classifier",
+    "dimension_names": ["category", "sentiment"]
+  }
+}
+```
+
+- `classifier_id` (required): UUID of the classifier
+- `dimension_names` (optional): specific fields to include (max 10). Omit for all fields.
+
+Classifier dimensions force the query to the raw generations table (31-day limit). They can be used alongside regular `dimensions`.
 
 ### Filter Object Shape
 
@@ -74,6 +93,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- For `api_key_id` filters: you can pass either the numeric internal ID or the 64-character SHA-256 hash from the keys API. Hashes are auto-resolved to numeric IDs before querying.
 
 ### Order By
 
@@ -256,7 +276,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-Usage breakdown metrics follow the same pattern: `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days. Classifier dimensions (`classifier_dimensions` field) always force the 31-day generations table.
 
 If a query times out, try:
 - Narrowing the time range
