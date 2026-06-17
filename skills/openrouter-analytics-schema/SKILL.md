@@ -203,35 +203,13 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
-## Classifier Dimensions
-
-The query builder supports dynamic dimensions backed by a classifier join table (`generation_classifications`). These allow grouping generations by custom classification labels (e.g., category, sentiment) without adding static columns to the schema.
-
-To use classifier dimensions, add the `classifier_dimensions` field to your query request:
-
-```json
-{
-  "metrics": ["request_count", "total_usage"],
-  "classifier_dimensions": {
-    "classifier_id": "my-classifier-uuid",
-    "dimension_names": ["category", "sentiment"]
-  },
-  "granularity": "day"
-}
-```
-
-- `classifier_id` (required) — the UUID of the classifier whose labels to group by
-- `dimension_names` (optional) — array of specific dimension field names within the classifier. If omitted, all dimensions for the classifier are included (max 10).
-
-Classifier dimensions are always resolved against the raw generations table (31-day time range limit) via a LEFT JOIN. They cannot be combined with materialized-view-only queries.
-
 ## API Key Hash Filters
 
 When filtering by `api_key_id`, you can pass either the numeric internal ID or the 64-character SHA-256 hash exposed by the keys API. Hash values are automatically resolved to numeric IDs before querying ClickHouse. If a hash cannot be resolved, the filter uses a sentinel value that returns zero rows (no error).
 
 ## Constraints
 
-- Maximum 2 dimensions per query (plus optional classifier dimensions)
+- Maximum 2 dimensions per query
 - Maximum 20 filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
