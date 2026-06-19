@@ -27,6 +27,7 @@ cd <skill-path>/scripts && npm install
 | Know what data is available | Run `discover-schema.ts` to see metrics, dimensions, and filters |
 | See spend / usage / volume | Run `query-analytics.ts` with appropriate metrics |
 | Break down by model, provider, API key | Add `--dimensions` to the query |
+| Break down by classifier labels | Add `classifier_dimensions` via curl (CLI flags not yet available). Set `include_nulls: true` to include unclassified generations |
 | See trends over time | Add `--granularity day` (or `hour`, `week`, `month`) |
 | Reduce costs | Run `suggest-queries.ts`, find the cost optimization template, execute it |
 | Inspect individual generations | Add `--dimensions generation_id`, then use the `openrouter-generations` skill for details |
@@ -105,6 +106,25 @@ curl -X POST https://openrouter.ai/api/v1/analytics/query \
     "granularity": "day"
   }'
 ```
+
+Same query but including unclassified generations (to see full traffic):
+
+```bash
+curl -X POST https://openrouter.ai/api/v1/analytics/query \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "metrics": ["total_usage", "request_count"],
+    "classifier_dimensions": {
+      "classifier_id": "<your-classifier-uuid>",
+      "dimension_names": ["category"],
+      "include_nulls": true
+    },
+    "granularity": "day"
+  }'
+```
+
+With `include_nulls: true`, rows for unclassified generations appear with an empty `category` value. Without it (default), only classified generations are counted.
 
 Latency by provider (limited to 31-day range):
 

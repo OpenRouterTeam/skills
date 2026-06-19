@@ -268,9 +268,57 @@ Group by or filter on classifier-assigned values (e.g. categories, sentiment, in
 
 - `classifier_id` (UUID, required) — must belong to your account
 - `dimension_names` (string[], optional) — specific dimension names to group by. Max 10. Omit to include all.
-- `include_nulls` (boolean, optional) — `true` = LEFT JOIN (unclassified generations appear with null values). `false` (default) = INNER JOIN (only classified generations).
+- `include_nulls` (boolean, optional, default `false`) — controls whether generations that haven't been classified yet are included in results. See [include_nulls behavior](#include_nulls-behavior) below.
 
 With a single dimension name (e.g. `["category"]`), result rows contain `category` as a column. With multiple, rows contain `clf_dimension_name` and `clf_dimension_value` columns.
+
+#### `include_nulls` behavior
+
+By default (`include_nulls: false`), the query uses an INNER JOIN — only generations with a matching classification row are counted. Generations the classifier hasn't processed (or that don't match any of the requested `dimension_names`) are excluded entirely from metrics like `request_count` and `total_usage`.
+
+Set `include_nulls: true` to switch to a LEFT JOIN. Every generation in the time range is counted, and unclassified ones appear with empty/null classifier values.
+
+**Example — `include_nulls: false` (default):**
+
+```json
+{
+  "metrics": ["request_count"],
+  "classifier_dimensions": {
+    "classifier_id": "a1b2c3d4-...",
+    "dimension_names": ["category"]
+  }
+}
+```
+```json
+[
+  { "category": "code_generation", "request_count": "120" },
+  { "category": "summarization",   "request_count": "45" }
+]
+```
+
+Only classified generations are counted — the totals reflect the subset that the classifier has labeled.
+
+**Example — `include_nulls: true`:**
+
+```json
+{
+  "metrics": ["request_count"],
+  "classifier_dimensions": {
+    "classifier_id": "a1b2c3d4-...",
+    "dimension_names": ["category"],
+    "include_nulls": true
+  }
+}
+```
+```json
+[
+  { "category": "code_generation", "request_count": "120" },
+  { "category": "summarization",   "request_count": "45" },
+  { "category": "",                 "request_count": "300" }
+]
+```
+
+The empty `category` row captures all generations without a classification. Use this when you need the full request count to add up — for instance, to see what fraction of traffic the classifier covers.
 
 ### classifier_filters
 
