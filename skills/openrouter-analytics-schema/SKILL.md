@@ -117,12 +117,13 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 
 | Dimension | Resolved to |
 |---|---|
+| `model` | Formatted model display name (e.g. `openai/gpt-4o` → `GPT-4o`) |
 | `api_key_id` | Key name/label |
 | `app` | App title or origin URL |
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+All other dimensions (e.g., `provider`, `country`, `origin`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
@@ -217,13 +218,65 @@ Several dimensions are **label-resolved** in query results — the response show
 
 Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
 
+## Classifier Dimensions & Filters
+
+The query builder supports **classifier dimensions** and **classifier filters** for grouping and filtering by user-defined classification labels (e.g. categories, sentiment, intent tags assigned to generations by a classifier).
+
+These are dynamic dimensions backed by the `generation_classifications` table via a JOIN, so they always query the raw generations table (31-day limit).
+
+### Classifier Dimensions
+
+Add a `classifier_dimensions` object to the query request to group by classifier-assigned values:
+
+```json
+{
+  "classifier_dimensions": {
+    "classifier_id": "<uuid>",
+    "dimension_names": ["category", "sentiment"],
+    "include_nulls": false
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `classifier_id` | UUID (required) | The classifier to use. Must belong to your account. |
+| `dimension_names` | string[] (optional) | Specific dimension names to include. Omit to include all. Max 10. |
+| `include_nulls` | boolean (optional) | When `true`, unclassified generations appear with null values (LEFT JOIN). Default `false` (INNER JOIN — only classified generations). |
+
+When a single `dimension_names` entry is provided (e.g. `["category"]`), result rows contain `category` as a column. With multiple names, rows contain `clf_dimension_name` and `clf_dimension_value` columns.
+
+### Classifier Filters
+
+Add a `classifier_filters` object to filter by classifier-assigned values:
+
+```json
+{
+  "classifier_filters": {
+    "classifier_id": "<uuid>",
+    "filters": [
+      { "field": "category", "operator": "eq", "value": "code_generation" }
+    ]
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `classifier_id` | UUID (required) | The classifier to use. Must belong to your account. |
+| `filters` | array (required) | 1–10 filter conditions on classifier dimension values. |
+
+Classifier filters only support equality/set operators: `eq`, `neq`, `in`, `not_in`. Ordered comparison (`gt`, `lt`, etc.) is not supported because classifier values are strings.
+
 ## Constraints
 
-- Maximum 2 dimensions per query
-- Maximum 20 filters per query
+- Maximum 2 dimensions per query (classifier dimensions are separate and don't count toward this limit)
+- Maximum 20 filters per query (classifier filters are separate)
+- Maximum 10 classifier filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
 - Most volume/cost metrics: up to 365 days with daily granularity
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
+- Classifier dimensions and classifier filters always query raw generations (31-day limit)
 - Minute granularity: only available when the time window is ≤ 3 hours
 - Rate-limited to 64 requests per minute

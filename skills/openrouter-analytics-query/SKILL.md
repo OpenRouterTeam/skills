@@ -59,9 +59,11 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `dimensions` | `string[]` | `[]` | Up to 2 dimensions to group by |
+| `classifier_dimensions` | `object` | none | Dynamic classifier-based grouping. See [Classifier Dimensions & Filters](#classifier-dimensions--filters). |
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
+| `classifier_filters` | `object` | none | Filter by classifier-assigned values. See [Classifier Dimensions & Filters](#classifier-dimensions--filters). |
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
@@ -121,7 +123,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `model`, `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (model display names, key names, app titles, user names, workspace names), not raw IDs.
 
 ## CLI Reference
 
@@ -157,7 +159,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 
 A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
 
-> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
+> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `model`, `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
 
 **Multi-filter queries:** the CLI builds a multi-element `filters` array (ANDed together) from the unindexed base flag (`--filter-field`/`--filter-op`/`--filter-value`) plus the indexed `--filter-field-N`/`--filter-op-N`/`--filter-value-N` flags. Each filter must supply all three parts (field, op, value); a partial triplet is rejected. Up to **20 filters** total (the base flag plus indices 1–19), matching the API cap. Indices may be sparse (e.g. base + `-2` with `-1` omitted is fine — gaps are skipped, not silently dropped). For a query like `model = X AND provider = Y`:
 
@@ -248,13 +250,54 @@ Combine up to 2 dimensions for cross-tabulation:
 }
 ```
 
+## Classifier Dimensions & Filters
+
+Group by or filter on classifier-assigned values (e.g. categories, sentiment, intent tags). These are dynamic dimensions backed by the `generation_classifications` table. Both always force queries to the raw generations table (31-day limit).
+
+### classifier_dimensions
+
+```json
+{
+  "classifier_dimensions": {
+    "classifier_id": "<uuid>",
+    "dimension_names": ["category"],
+    "include_nulls": false
+  }
+}
+```
+
+- `classifier_id` (UUID, required) — must belong to your account
+- `dimension_names` (string[], optional) — specific dimension names to group by. Max 10. Omit to include all.
+- `include_nulls` (boolean, optional) — `true` = LEFT JOIN (unclassified generations appear with null values). `false` (default) = INNER JOIN (only classified generations).
+
+With a single dimension name (e.g. `["category"]`), result rows contain `category` as a column. With multiple, rows contain `clf_dimension_name` and `clf_dimension_value` columns.
+
+### classifier_filters
+
+```json
+{
+  "classifier_filters": {
+    "classifier_id": "<uuid>",
+    "filters": [
+      { "field": "category", "operator": "eq", "value": "code_generation" },
+      { "field": "sentiment", "operator": "in", "value": ["positive", "neutral"] }
+    ]
+  }
+}
+```
+
+- `classifier_id` (UUID, required) — must belong to your account
+- `filters` (array, required) — 1–10 filter conditions. Only equality/set operators are supported: `eq`, `neq`, `in`, `not_in`. Ordered comparison (`gt`, `lt`, etc.) is not available because classifier values are strings.
+
+You can combine `classifier_dimensions` and `classifier_filters` in the same query (they can reference different classifiers), and combine them with regular `dimensions` and `filters`.
+
 ## Error Handling
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
+| 400 | Invalid query (bad metric name, too many dimensions, invalid time range, unknown classifier dimension names) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
-| 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
+| 403 | Not a management key, or classifier doesn't belong to your account | The key must be a provisioning/management key. Classifier must belong to the authenticated account. |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
 | 429 | Rate limited (64 RPM) | Wait and retry |
 | 500 | Server error | Retry after a moment |
@@ -264,6 +307,8 @@ Combine up to 2 dimensions for cross-tabulation:
 Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+
+Classifier dimensions and classifier filters always force the query to the raw generations table, so the 31-day limit applies regardless of which metrics are requested.
 
 If a query times out, try:
 - Narrowing the time range
