@@ -295,7 +295,7 @@ You can combine `classifier_dimensions` and `classifier_filters` in the same que
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range, unknown classifier dimension names) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
+| 400 | Invalid query (bad metric name, too many dimensions, invalid time range, unknown classifier dimension names) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters, 10 classifier filters. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key, or classifier doesn't belong to your account | The key must be a provisioning/management key. Classifier must belong to the authenticated account. |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
