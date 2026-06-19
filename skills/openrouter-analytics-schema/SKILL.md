@@ -242,9 +242,11 @@ Add a `classifier_dimensions` object to the query request to group by classifier
 |---|---|---|
 | `classifier_id` | UUID (required) | The classifier to use. Must belong to your account. |
 | `dimension_names` | string[] (optional) | Specific dimension names to include. Omit to include all. Max 10. |
-| `include_nulls` | boolean (optional) | When `true`, unclassified generations appear with null values (LEFT JOIN). Default `false` (INNER JOIN — only classified generations). |
+| `include_nulls` | boolean (optional) | Default `false`. Controls whether unclassified generations appear in results. See below. |
 
 When a single `dimension_names` entry is provided (e.g. `["category"]`), result rows contain `category` as a column. With multiple names, rows contain `clf_dimension_name` and `clf_dimension_value` columns.
+
+**`include_nulls` behavior:** With `false` (default), only generations that have a classification row are included — the query uses an INNER JOIN, so unclassified generations are excluded from all metric totals. With `true`, the query uses a LEFT JOIN — every generation is counted, and those without a classification appear with an empty string as the dimension value. Set `true` when you need totals to match your overall traffic (e.g. to compute what percentage of requests the classifier covers).
 
 ### Classifier Filters
 
