@@ -117,13 +117,12 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 
 | Dimension | Resolved to |
 |---|---|
-| `model` | Formatted model display name (e.g. `openai/gpt-4o` → `GPT-4o`) |
 | `api_key_id` | Key name/label |
 | `app` | App title or origin URL |
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `provider`, `country`, `origin`) are returned as-is without resolution.
+All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
