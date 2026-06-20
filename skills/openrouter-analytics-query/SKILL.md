@@ -65,6 +65,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
+| `classifier_dimensions` | `object` | none | Group by dynamic classifier dimensions. See [Classifier Dimensions and Filters](#classifier-dimensions-and-filters) below. |
+| `classifier_filters` | `object` | none | Filter by classifier dimension values. See [Classifier Dimensions and Filters](#classifier-dimensions-and-filters) below. |
 
 ### Filter Object Shape
 
@@ -118,6 +120,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
+| `data.warnings` | Optional array of strings about filter resolution issues (e.g. an `api_key_id` hash that couldn't be resolved). The query still runs; these inform the caller that some filter values may not have matched. |
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
@@ -247,6 +250,55 @@ Combine up to 2 dimensions for cross-tabulation:
   "limit": 20
 }
 ```
+
+## Classifier Dimensions and Filters
+
+Classifier dimensions let you group and filter analytics by custom tags applied to your generations via classifiers. A classifier is a set of named dimensions (e.g. `category`, `sentiment`) whose values are stored per-generation in a separate table.
+
+### `classifier_dimensions` object
+
+```json
+{
+  "classifier_dimensions": {
+    "classifier_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "dimension_names": ["category"],
+    "include_nulls": false
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classifier_id` | `string` (UUID) | yes | The classifier to query against. Must belong to the caller's account. |
+| `dimension_names` | `string[]` | no | Specific dimension names to group by (max 10). If omitted, all configured dimensions are included. When exactly one name is given, the result column uses that name directly (e.g. `"category": "billing"`). With multiple names, results use generic `clf_dimension_name` / `clf_dimension_value` columns. |
+| `include_nulls` | `boolean` | no | When `true`, unclassified generations appear in results with null classifier values (LEFT JOIN). When `false` (default), only classified generations are included (INNER JOIN). |
+
+### `classifier_filters` object
+
+```json
+{
+  "classifier_filters": {
+    "classifier_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "filters": [
+      { "field": "category", "operator": "eq", "value": "billing" }
+    ]
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classifier_id` | `string` (UUID) | yes | The classifier to filter against. Must belong to the caller's account. |
+| `filters` | `object[]` | yes | 1–10 filter conditions. Each has `field` (dimension name), `operator`, and `value`. |
+
+Classifier filter operators are limited to `eq`, `neq`, `in`, and `not_in` — ordered comparisons (`gt`, `lt`, etc.) are not supported because classifier values are strings.
+
+### Constraints
+
+- Classifier dimensions and filters force the query to use the raw generations table (31-day time range limit).
+- `classifier_dimensions` and `classifier_filters` can reference different classifiers (each has its own `classifier_id`).
+- Dimension names must match what's configured on the classifier. Invalid names return a 400 error.
+- Classifier dimension names cannot collide with built-in metric or dimension names.
 
 ## Error Handling
 

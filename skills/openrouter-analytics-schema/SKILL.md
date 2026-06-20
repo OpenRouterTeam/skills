@@ -145,6 +145,18 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 
+## Classifier Dimensions
+
+Beyond the built-in dimensions above, the query endpoint supports **classifier dimensions** — dynamic, user-defined groupings backed by a `generation_classifications` table. Classifiers tag individual generations with key/value pairs (e.g. `category=billing`, `sentiment=positive`).
+
+Classifier dimensions are only available on the raw generations table (31-day time range limit). See the `openrouter-analytics-query` skill for the full `classifier_dimensions` and `classifier_filters` request field reference.
+
+Key points:
+- Each classifier is identified by a UUID and must belong to the caller's account
+- Dimension names are freeform identifiers matching `/^[a-zA-Z_][a-zA-Z0-9_]{0,63}$/`
+- Classifier filters only support `eq`, `neq`, `in`, `not_in` (no ordered comparisons — values are strings)
+- Classifier dimensions cannot collide with built-in metric or dimension names
+
 ## Understanding Operators
 
 Filter operators for the `filters` array in query requests:
@@ -202,6 +214,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
+| "Spend by classifier tag?" | `total_usage` | — | Use `classifier_dimensions` with the classifier UUID and dimension name. 31-day limit |
 
 ## Filter Value Reference
 
@@ -227,3 +240,5 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
 - Minute granularity: only available when the time window is ≤ 3 hours
 - Rate-limited to 64 requests per minute
+- Classifier dimensions: max 10 dimension names, max 10 classifier filters
+- Classifier dimensions/filters force the generations table (31-day limit)
