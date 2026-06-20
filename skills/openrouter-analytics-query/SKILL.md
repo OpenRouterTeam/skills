@@ -289,7 +289,7 @@ Classifier dimensions let you group and filter analytics by custom tags applied 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `classifier_id` | `string` (UUID) | yes | The classifier to filter against. Must belong to the caller's account. |
-| `filters` | `object[]` | yes | 1–10 filter conditions. Each has `field` (dimension name), `operator`, and `value`. |
+| `filters` | `object[]` | yes | 1–10 filter conditions. Each has `field` (dimension name), `operator` (`eq`/`neq`/`in`/`not_in`), and `value` (string for scalar operators, array of strings for `in`/`not_in`). |
 
 Classifier filter operators are limited to `eq`, `neq`, `in`, and `not_in` — ordered comparisons (`gt`, `lt`, etc.) are not supported because classifier values are strings.
 
