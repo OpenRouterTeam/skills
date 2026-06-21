@@ -202,6 +202,17 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
+| "Break down by custom category?" | any metric | use `classifier_dimensions` | Requires a classifier; 31-day limit. See `openrouter-analytics-query` skill. |
+| "Filter to a classification?" | any metric | use `classifier_filters` | Requires a classifier; 31-day limit. See `openrouter-analytics-query` skill. |
+
+## Classifier Dimensions & Filters
+
+The analytics API supports dynamic, user-defined dimensions and filters backed by classifiers. Classifiers tag generations with custom fields (e.g., "category", "sentiment") and store them in the `generation_classifications` ClickHouse table.
+
+- **`classifier_dimensions`** — group query results by classifier field values. Accepts a `classifier_id` (UUID), optional `dimension_names` (up to 10), and `include_nulls` flag.
+- **`classifier_filters`** — filter results by classifier field values without grouping. Accepts a `classifier_id` and 1–10 filters using only `eq`, `neq`, `in`, `not_in` operators.
+
+Both force the query to the raw generations table (31-day time range limit). See the `openrouter-analytics-query` skill for the full request schema and examples.
 
 ## Filter Value Reference
 
@@ -219,11 +230,12 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 
 ## Constraints
 
-- Maximum 2 dimensions per query
-- Maximum 20 filters per query
+- Maximum 2 dimensions per query (plus up to 10 classifier dimensions)
+- Maximum 20 filters per query (plus up to 10 classifier filters)
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
 - Most volume/cost metrics: up to 365 days with daily granularity
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
+- Classifier dimensions/filters: always 31 days (forced to generations table)
 - Minute granularity: only available when the time window is ≤ 3 hours
 - Rate-limited to 64 requests per minute

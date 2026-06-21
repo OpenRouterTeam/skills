@@ -66,6 +66,54 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
 
+### Classifier Dimensions
+
+Classifier dimensions let you group results by dynamic, user-defined classification fields (e.g., "category", "sentiment") stored in the `generation_classifications` table. They require a classifier configured at [openrouter.ai/activity](https://openrouter.ai/activity).
+
+```json
+{
+  "metrics": ["request_count", "total_usage"],
+  "classifier_dimensions": {
+    "classifier_id": "<uuid>",
+    "dimension_names": ["category", "sentiment"],
+    "include_nulls": false
+  },
+  "granularity": "day"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `classifier_id` | `string` (UUID) | The classifier to join against. Must belong to the caller's account. |
+| `dimension_names` | `string[]` | Up to 10 dimension field names configured on the classifier. Omit to group by all configured dimensions. |
+| `include_nulls` | `boolean` | Whether to include generations that have no classification for this classifier. Defaults to `false`. |
+
+Classifier dimensions force the query to the raw generations table (31-day limit), since they require a LEFT JOIN against `generation_classifications`.
+
+### Classifier Filters
+
+Filter by classifier-assigned values independently of grouping. Requires the same classifier ownership check.
+
+```json
+{
+  "metrics": ["request_count"],
+  "classifier_filters": {
+    "classifier_id": "<uuid>",
+    "filters": [
+      { "field": "category", "operator": "eq", "value": "support" },
+      { "field": "sentiment", "operator": "in", "value": ["positive", "neutral"] }
+    ]
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `classifier_id` | `string` (UUID) | The classifier whose values to filter on. |
+| `filters` | `object[]` | 1–10 filter conditions on classifier dimension fields. Only `eq`, `neq`, `in`, `not_in` operators are supported (no ordered comparison — the underlying column is String). |
+
+Classifier filters also force the generations table (31-day limit). You can combine `classifier_dimensions` and `classifier_filters` in the same query (they must reference the same `classifier_id`).
+
 ### Filter Object Shape
 
 ```json
@@ -104,7 +152,8 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
       "row_count": 2,
       "truncated": false
     },
-    "cachedAt": 1747699200000
+    "cachedAt": 1747699200000,
+    "warnings": ["Could not resolve api_key_id hash: abc123..."]
   }
 }
 ```
@@ -118,6 +167,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
+| `data.warnings` | Optional array of warning strings (e.g., unresolvable `api_key_id` hashes). The query still runs; these are informational |
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 

@@ -102,6 +102,22 @@ Usage cost breakdown (credits, BYOK, upstream, cache, data logging, web search):
 npx tsx query-analytics.ts --metrics credits_usage,byok_usage,byok_fees,usage_upstream,usage_cache,usage_data,usage_web --granularity day
 ```
 
+Break down by classifier dimension (requires a classifier configured at openrouter.ai/activity):
+
+```bash
+curl -X POST https://openrouter.ai/api/v1/analytics/query \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "metrics": ["request_count", "total_usage"],
+    "classifier_dimensions": {
+      "classifier_id": "<uuid>",
+      "dimension_names": ["category"]
+    },
+    "granularity": "day"
+  }'
+```
+
 ## Common Query Templates
 
 ```bash
@@ -126,6 +142,7 @@ When interpreting results for the user:
 - **Throughput** (`avg_throughput`) is tokens per second
 - When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
 - **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows
+- **Warnings**: the response may include an optional `warnings` array (e.g., when an `api_key_id` hash filter couldn't be resolved). The query still executes normally; warnings are informational.
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
 
 ### Cost Optimization Guidance
