@@ -30,6 +30,8 @@ cd <skill-path>/scripts && npm install
 | See trends over time | Add `--granularity day` (or `hour`, `week`, `month`) |
 | Reduce costs | Run `suggest-queries.ts`, find the cost optimization template, execute it |
 | Inspect individual generations | Add `--dimensions generation_id`, then use the `openrouter-generations` skill for details |
+| Break down by classifier labels | Use `classifier_dimensions` in the request body (see `openrouter-analytics-query` skill) |
+| Filter by classifier labels | Use `classifier_filters` in the request body (see `openrouter-analytics-query` skill) |
 | Answer a specific question | Map the question → metrics + dimensions, then query |
 
 ## Workflow

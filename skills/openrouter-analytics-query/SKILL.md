@@ -44,7 +44,18 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
   ],
   "order_by": { "field": "total_usage", "direction": "desc" },
   "limit": 100,
-  "group_limit": 20
+  "group_limit": 20,
+  "classifier_dimensions": {
+    "classifier_id": "<uuid>",
+    "dimension_names": ["category"],
+    "include_nulls": false
+  },
+  "classifier_filters": {
+    "classifier_id": "<uuid>",
+    "filters": [
+      { "field": "sentiment", "operator": "eq", "value": "positive" }
+    ]
+  }
 }
 ```
 
@@ -65,6 +76,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
+| `classifier_dimensions` | `object` | none | Group by dynamic classifier-produced dimensions. See [Classifier Dimensions](#classifier-dimensions) below. |
+| `classifier_filters` | `object` | none | Filter on classifier-produced dimension values. See [Classifier Filters](#classifier-filters) below. |
 
 ### Filter Object Shape
 
@@ -90,6 +103,60 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 When `granularity` is set and no `order_by` is specified, results are ordered by time descending.
 
+## Classifier Dimensions
+
+Classifier dimensions allow grouping by dynamic, user-defined classification labels (e.g., topic, sentiment, category) produced by a classifier attached to your account. They join the `generation_classifications` table.
+
+```json
+{
+  "classifier_dimensions": {
+    "classifier_id": "550e8400-e29b-41d4-a716-446655440000",
+    "dimension_names": ["category"],
+    "include_nulls": false
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classifier_id` | `string` (UUID) | Yes | ID of the classifier (must belong to the caller's account) |
+| `dimension_names` | `string[]` | No | Specific dimension names to group by (max 10). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars). |
+| `include_nulls` | `boolean` | No | When `true`, unclassified rows are included (LEFT JOIN). Default `false` (INNER JOIN — only classified rows). |
+
+**Constraints:**
+- Forces the query to use the raw generations table (31-day time range limit)
+- Single dimension name → result column is aliased to that name (e.g., `category`)
+- Multiple dimension names → result uses generic `clf_dimension_name` / `clf_dimension_value` columns
+
+## Classifier Filters
+
+Classifier filters narrow results to generations matching specific classification values. They can be used independently or alongside `classifier_dimensions`.
+
+```json
+{
+  "classifier_filters": {
+    "classifier_id": "550e8400-e29b-41d4-a716-446655440000",
+    "filters": [
+      { "field": "category", "operator": "eq", "value": "billing" },
+      { "field": "sentiment", "operator": "in", "value": ["positive", "neutral"] }
+    ]
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classifier_id` | `string` (UUID) | Yes | ID of the classifier (must belong to the caller's account) |
+| `filters` | `object[]` | Yes | 1–10 filter conditions on classifier dimensions |
+| `filters[].field` | `string` | Yes | Classifier dimension name to filter on |
+| `filters[].operator` | `string` | Yes | One of: `eq`, `neq`, `in`, `not_in` (no `gt`/`lt` — values are strings) |
+| `filters[].value` | `string \| string[]` | Yes | Scalar for `eq`/`neq`, array for `in`/`not_in` |
+
+**Constraints:**
+- Forces the query to use the raw generations table (31-day time range limit)
+- Only equality/set operators supported (underlying value column is String — ordered comparisons would be lexicographic)
+- All filter field names must be configured dimensions on the classifier
+
 ## Response Schema
 
 ```json
@@ -104,7 +171,8 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
       "row_count": 2,
       "truncated": false
     },
-    "cachedAt": 1747699200000
+    "cachedAt": 1747699200000,
+    "warnings": ["Could not resolve api_key_id hash: abc123..."]
   }
 }
 ```
@@ -118,6 +186,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
+| `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). The query still executes normally; these inform the caller about filter resolution issues. |
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
@@ -265,7 +334,10 @@ Some metric/dimension combinations support time ranges up to **365 days** (with 
 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
+Classifier dimensions and classifier filters always force the 31-day limit (they require the raw generations table via a JOIN on `generation_classifications`).
+
 If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics
 - Removing per-generation dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)
+- Removing classifier dimensions/filters (they require expensive JOINs)
