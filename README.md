@@ -64,6 +64,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | [openrouter-typescript-sdk](skills/openrouter-typescript-sdk/README.md) | Complete reference for integrating with [600+ AI models](https://openrouter.ai/models) through the OpenRouter TypeScript SDK using the `callModel` pattern |
 | [openrouter-agent-migration](skills/openrouter-agent-migration/README.md) | Migrating from `@openrouter/sdk` to the standalone `@openrouter/agent` package for `callModel`, `tool()`, stop conditions, and streaming helpers |
 | [openrouter-models](skills/openrouter-models/README.md) | Querying available models, comparing pricing, checking context lengths, finding provider performance, and fuzzy model name resolution |
+| [openrouter-benchmarks](skills/openrouter-benchmarks/README.md) | Querying benchmark-backed model rankings from Artificial Analysis and Design Arena via `GET /api/v1/benchmarks` |
 | [openrouter-images](skills/openrouter-images/README.md) | Generating images from text prompts and editing existing images using OpenRouter's image generation models |
 | [openrouter-stt](skills/openrouter-stt/README.md) | Transcribing speech to text via `POST /api/v1/audio/transcriptions` — model discovery, audio format selection, provider-specific options, and zero-dep TypeScript/Python examples |
 | [openrouter-tts](skills/openrouter-tts/README.md) | Synthesizing speech from text via `POST /api/v1/audio/speech` — model/voice discovery, format selection (mp3 vs pcm), provider-specific options, and OpenAI-SDK compatibility |
