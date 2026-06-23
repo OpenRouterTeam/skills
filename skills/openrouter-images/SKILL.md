@@ -36,8 +36,9 @@ Create a new image from a text prompt:
 ```bash
 cd <skill-path>/scripts && npx tsx generate.ts "a red panda wearing sunglasses"
 cd <skill-path>/scripts && npx tsx generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9
-cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output dragon.png
+cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output dragon
 cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-2.5-flash-image
+cd <skill-path>/scripts && npx tsx generate.ts "red logo on white" --model recraft-ai/recraft-v3-svg --rgb-colors "220,30,30"
 ```
 
 ### Options
@@ -45,9 +46,14 @@ cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model g
 | Flag | Description | Default |
 |---|---|---|
 | `--model <id>` | OpenRouter model ID | `google/gemini-3.1-flash-image-preview` |
-| `--output <path>` | Output file path | `image-YYYYMMDD-HHmmss.png` |
+| `--output <stem>` | Output path stem (extension auto-derived from MIME type) | `image-YYYYMMDD-HHmmss` |
 | `--aspect-ratio <r>` | Aspect ratio (e.g. `16:9`, `1:1`, `4:3`) | Model default |
 | `--image-size <s>` | Image size (e.g. `1K`, `2K`) | Model default |
+| `--rgb-colors <list>` | Semicolon-separated RGB palette, e.g. `255,0,0;0,128,0` (Recraft) | — |
+| `--background-rgb-color <rgb>` | Background color as `r,g,b` (Recraft) | — |
+| `--strength <0-1>` | Influence strength for style/color transfer (Recraft) | — |
+
+**Output extension:** The file extension (`.png`, `.jpg`, `.webp`, `.svg`, etc.) is derived automatically from the MIME type returned by the model. If you pass `--output dragon`, the saved file might be `dragon.png` or `dragon.svg` depending on the model.
 
 ## Edit Image
 
@@ -55,8 +61,9 @@ Modify an existing image with a text prompt:
 
 ```bash
 cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
-cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
+cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat
 cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor style" --model google/gemini-2.5-flash-image
+cd <skill-path>/scripts && npx tsx edit.ts logo.png "recolor in red palette" --rgb-colors "220,30,30;180,20,20"
 ```
 
 ### Options
@@ -64,9 +71,12 @@ cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor styl
 | Flag | Description | Default |
 |---|---|---|
 | `--model <id>` | OpenRouter model ID | `google/gemini-3.1-flash-image-preview` |
-| `--output <path>` | Output file path | `image-YYYYMMDD-HHmmss.png` |
+| `--output <stem>` | Output path stem (extension auto-derived from MIME type) | `image-YYYYMMDD-HHmmss` |
 | `--aspect-ratio <r>` | Aspect ratio (e.g. `16:9`, `1:1`, `4:3`) | Model default |
 | `--image-size <s>` | Image size (e.g. `1K`, `2K`) | Model default |
+| `--rgb-colors <list>` | Semicolon-separated RGB palette, e.g. `255,0,0;0,128,0` (Recraft) | — |
+| `--background-rgb-color <rgb>` | Background color as `r,g,b` (Recraft) | — |
+| `--strength <0-1>` | Influence strength for style/color transfer (Recraft) | — |
 
 Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
 
@@ -97,20 +107,16 @@ Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
 
 ## API Response Shapes
 
-Image generation uses `POST /api/v1/responses` with `modalities: ["image", "text"]`. See the [Responses API reference](https://openrouter.ai/docs/api/reference/responses/overview) and [image generation guide](https://openrouter.ai/docs/guides/overview/multimodal/image-generation) for full request details.
+Image generation uses `POST /api/v1/chat/completions`. Google models require `modalities: ["image", "text"]`; other models (Recraft, DALL-E, etc.) must omit `modalities` to avoid a 404.
 
-The image-specific output item type is `image_generation_call` — this is not obvious from the general Responses API docs:
+Images are extracted from four possible response shapes, tried in order:
 
-```json
-{
-  "type": "image_generation_call",
-  "id": "imagegen-abc123",
-  "status": "completed",
-  "result": "<base64-encoded image data>"
-}
-```
+1. **OpenRouter extension** — `choices[0].message.images[]` (string array)
+2. **Responses API items** — `output[].type == "image_generation_call"` with `status == "completed"`
+3. **DALL-E / native** — `data[].url` or `data[].b64_json`
+4. **Content array** — `choices[0].message.content[].type == "image_url"`
 
-This appears alongside standard `message` output items in the `output` array. Text and image outputs may each be absent depending on the model and prompt.
+The saved file extension (`.png`, `.jpg`, `.webp`, `.svg`, etc.) is derived from the MIME type in the response — either the `content-type` header (for HTTP URL images) or the `data:` URL prefix (for base64 images).
 
 ## Using a Different Model
 
