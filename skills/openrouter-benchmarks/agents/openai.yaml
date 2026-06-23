@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenRouter Benchmarks"
+  short_description: "Query model benchmark rankings"
+  default_prompt: "Use $openrouter-benchmarks to find benchmark-ranked OpenRouter models for coding."
