@@ -18,9 +18,14 @@ const SORT_MAP: Record<string, string> = {
   "design-arena-elo": "design-arena-elo-high-to-low",
 };
 
+const apiSort = sort ? SORT_MAP[sort] : undefined;
+if (sort && !apiSort) {
+  console.error(`Unknown sort option: "${sort}". Available: ${Object.keys(SORT_MAP).join(", ")}`);
+  process.exit(1);
+}
+
 const params = new URLSearchParams();
 if (category) params.set("category", category);
-const apiSort = sort ? SORT_MAP[sort] : undefined;
 if (apiSort) params.set("sort", apiSort);
 
 const path = params.size > 0 ? `/models?${params}` : "/models";
@@ -34,11 +39,6 @@ if (expiring.length > 0) {
   console.error(
     `Warning: ${expiring.length} model(s) have upcoming expiration dates.\n`
   );
-}
-
-if (sort && !apiSort) {
-  console.error(`Unknown sort option: "${sort}". Available: ${Object.keys(SORT_MAP).join(", ")}`);
-  process.exit(1);
 }
 
 console.log(JSON.stringify(models, null, 2));
