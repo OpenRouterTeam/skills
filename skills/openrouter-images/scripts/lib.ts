@@ -95,6 +95,15 @@ export function saveImage(dataUrl: string, outputPath: string): string {
   return abs;
 }
 
+export function imageEntryToDataUrl(entry: unknown): string {
+  const raw =
+    typeof entry === "string"
+      ? entry
+      : ((entry as { image_url?: { url?: string } } | null)?.image_url?.url ?? "");
+  if (!raw) return "";
+  return raw.startsWith("data:") ? raw : `data:image/png;base64,${raw}`;
+}
+
 export function defaultOutputPath(): string {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
