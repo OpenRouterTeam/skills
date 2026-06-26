@@ -8,6 +8,12 @@ version: 2.0.0
 
 A comprehensive TypeScript SDK for interacting with OpenRouter's unified API, providing access to 300+ AI models through a single, type-safe interface. This skill enables AI agents to leverage the `callModel` pattern for text generation, tool usage, streaming, and multi-turn conversations.
 
+## Resolving Model Names Before Use
+
+**If the user names a specific model — exact ID, informal alias, or passing mention ("use GLM", "hit the latest Claude") — resolve it to an exact OpenRouter ID BEFORE writing any SDK code that passes the model string.** Load the `openrouter-models` skill and run its `resolve-model.ts` with the user's phrase. Do not guess a model ID, do not query `/api/v1/models` directly, do not hardcode a string like `"glm"` or `"claude-4"` into the `model:` field.
+
+After resolution, use the exact `id` (e.g. `z-ai/glm-4.5`, `anthropic/claude-opus-4.7`) in `callModel({ model: ... })`. If the resolver returns medium/low confidence, surface the chosen match to the user or ask for confirmation.
+
 The SDK is split into two packages:
 - **`@openrouter/agent`** — Agent features: `callModel`, `tool()`, stop conditions, streaming, format converters
 - **`@openrouter/sdk`** — Platform features: model listing, chat completions, credits, OAuth, API key management

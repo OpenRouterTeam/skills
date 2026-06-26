@@ -1,0 +1,61 @@
+id: callback-guard-001
+name: Callback Guard for Ambiguous ?code= Params
+description: |
+  Tests whether the skill surfaces the callback-guard requirement
+  (hasOAuthCallbackPending / verifier presence check) when the user's app
+  already uses ?code= for other things. This is a concrete, security-relevant
+  detail the skill documents — the task is narrow by design, so graders
+  should focus on guard handling, not the full protocol restate.
+tags:
+  - edge-case
+  - security
+  - guard
+
+inputs:
+  prompt: |
+    My existing app already uses ?code= query parameters for a different
+    feature (a referral tracking thing). I want to add Sign In with
+    OpenRouter without breaking that. How do I safely handle the OAuth
+    callback so I only consume codes that belong to the OpenRouter flow?
+
+graders:
+  # Narrow, focused graders — the guard mechanism is the point of this task.
+  - type: code
+    name: guard_claims
+    config:
+      language: python
+      assertions:
+        # The skill-native guard function, or at minimum the underlying check.
+        - "'hasoauthcallbackpending' in output.lower() or 'sessionstorage.getitem' in output.lower()"
+        # Must mention sessionStorage as the signal for guard.
+        - "'sessionstorage' in output.lower()"
+        # Must mention the verifier key as the signal.
+        - "'verifier' in output.lower()"
+
+  - type: prompt
+    name: guard_reasoning
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user already uses ?code= for their own unrelated feature.
+        Evaluate these criteria. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (3 total calls).
+
+        1) Explains the hazard: makes clear that blindly consuming ?code= in
+           the OpenRouter callback handler would clash with the user's
+           existing feature.
+
+        2) Correct guard mechanism: proposes checking for the presence of a
+           code_verifier in sessionStorage (hasOAuthCallbackPending or
+           equivalent) BEFORE invoking handleOAuthCallback. Gates the
+           OpenRouter code path on "did this tab initiate an OAuth flow?"
+
+        3) Doesn't recommend fragile alternatives as primary: does not
+           recommend checking URL path, a custom query param name, or
+           abandoning ?code= as the main fix. A sessionStorage-backed
+           verifier check is the correct approach here.
+
+expected:
+  outcomes:
+    - type: task_completed
