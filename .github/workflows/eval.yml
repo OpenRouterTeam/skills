@@ -6,25 +6,75 @@ on:
     paths:
       - 'evals/**'
       - 'skills/**'
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'OpenRouter model slug for agent + judge'
+        required: false
+        default: 'anthropic/claude-opus-4.8'
 
 permissions:
   contents: read
 
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # waza drives its embedded GitHub Copilot CLI through OpenRouter via BYOK —
+  # no GitHub Copilot account, no adapter. OpenRouter is OpenAI-compatible.
+  COPILOT_PROVIDER_TYPE: openai
+  COPILOT_PROVIDER_BASE_URL: https://openrouter.ai/api/v1
+  COPILOT_PROVIDER_WIRE_API: completions
+  COPILOT_PROVIDER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  COPILOT_MODEL: ${{ github.event.inputs.model || 'anthropic/claude-opus-4.8' }}
+  COPILOT_DISABLE_KEYTARCLI: '1'
+  EVAL_MODEL: ${{ github.event.inputs.model || 'anthropic/claude-opus-4.8' }}
+
 jobs:
+  guard:
+    name: Check secret present
+    runs-on: ubuntu-latest
+    outputs:
+      has_key: ${{ steps.check.outputs.has_key }}
+    steps:
+      - id: check
+        env:
+          KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::OPENROUTER_API_KEY repo secret is not set — eval job skipped. A repo admin must add it under Settings → Secrets and variables → Actions."
+          fi
+
   eval:
     name: Run Evaluations
+    needs: guard
+    if: needs.guard.outputs.has_key == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Azure Developer CLI
-        uses: Azure/setup-azd@v2
-      - name: Install waza extension
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install waza
         run: |
-          azd config set alpha.extensions on
-          azd ext source add -n waza -t url -l https://raw.githubusercontent.com/microsoft/waza/main/registry.json
-          azd ext install microsoft.azd.waza
+          curl -fsSL https://raw.githubusercontent.com/microsoft/waza/main/install.sh | bash
+          waza --version
+
       - name: Run evaluations
-        run: azd waza run --output-dir ./results
+        run: bun .github/scripts/run-evals.ts --output-dir ./results
+
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
