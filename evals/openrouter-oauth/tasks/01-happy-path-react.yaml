@@ -65,6 +65,13 @@ graders:
         and a reason if satisfied, otherwise set_waza_grade_fail with the same
         description and a reason explaining what's missing.
 
+  - type: program
+    name: produced_code_parses
+    config:
+      command: "bun"
+      args: ["evals/_graders/verify-code-runs.ts"]
+      timeout: 60
+
 expected:
   outcomes:
     - type: task_completed
