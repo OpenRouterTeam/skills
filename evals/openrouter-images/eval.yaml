@@ -19,8 +19,7 @@ metrics:
 
 hooks:
   before_run:
-    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-images/ /Users/matt.apperson/.agents/skills/openrouter-images/"
-    - command: "cd /Users/matt.apperson/.agents/skills/openrouter-images/scripts && npm install --silent"
+    - command: "bun evals/_hooks/prepare-skill.ts openrouter-images"
 
 graders:
   - type: code

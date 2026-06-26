@@ -24,19 +24,15 @@ metrics:
     threshold: 0.8
     description: Did the agent pick the right script and produce a skill-faithful answer?
 
-# Install the skill's script deps once before any tasks run, so each task
-# doesn't pay a 20s+ npm install and we don't false-fail on missing tsx.
+# Sync each skill into ~/.agents/skills/ (and npm-install its bundled scripts)
+# before any tasks run. prepare-skill.ts is a single shell-less command — waza
+# runs hook `command:` entries WITHOUT a shell, so `cd && cmd` chaining fails.
+# Sync both skills the agent may route to: the models skill itself, and
+# openrouter-typescript-sdk (which carries the cross-skill cue pointing here).
 hooks:
   before_run:
-    # Sync both skills the agent may route to for model-related coding
-    # tasks: the models skill itself, and openrouter-typescript-sdk (which
-    # carries the cross-skill cue pointing at openrouter-models). Paths
-    # are absolute because working_directory defaults to the eval's own
-    # directory, not the repo root.
-    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-models/ /Users/matt.apperson/.agents/skills/openrouter-models/"
-    - command: "mkdir -p ~/.agents/skills/openrouter-typescript-sdk && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-typescript-sdk/ /Users/matt.apperson/.agents/skills/openrouter-typescript-sdk/"
-    # Install script deps once per run inside the synced location.
-    - command: "cd /Users/matt.apperson/.agents/skills/openrouter-models/scripts && npm install --silent"
+    - command: "bun evals/_hooks/prepare-skill.ts openrouter-models"
+    - command: "bun evals/_hooks/prepare-skill.ts openrouter-typescript-sdk"
 
 graders:
   # Universal: non-empty response.

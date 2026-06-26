@@ -23,7 +23,7 @@ metrics:
 # Keep the worktree skill content in sync with what the agent actually reads.
 hooks:
   before_run:
-    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-tts/ /Users/matt.apperson/.agents/skills/openrouter-tts/"
+    - command: "bun evals/_hooks/prepare-skill.ts openrouter-tts"
 
 graders:
   # Universal: non-empty response.
