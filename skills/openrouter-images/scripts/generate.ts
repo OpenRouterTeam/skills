@@ -5,6 +5,7 @@ import {
   postChatCompletion,
   saveImage,
   defaultOutputPath,
+  imageEntryToDataUrl,
 } from "./lib.js";
 
 const apiKey = requireApiKey();
@@ -44,7 +45,7 @@ if (message.content) {
   console.error(`Model: ${message.content}`);
 }
 
-const images: string[] = message.images ?? [];
+const images: unknown[] = message.images ?? [];
 if (images.length === 0) {
   console.error("Error: No images returned by model.");
   process.exit(1);
@@ -52,7 +53,11 @@ if (images.length === 0) {
 
 const saved: string[] = [];
 for (let i = 0; i < images.length; i++) {
-  const dataUrl = images[i].startsWith("data:") ? images[i] : `data:image/png;base64,${images[i]}`;
+  const dataUrl = imageEntryToDataUrl(images[i]);
+  if (!dataUrl) {
+    console.error("Error: Unexpected image shape in response.");
+    process.exit(1);
+  }
   let outPath: string;
   if (images.length === 1) {
     outPath = outputBase;
