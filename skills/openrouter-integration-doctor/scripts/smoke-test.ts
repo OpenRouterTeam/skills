@@ -51,10 +51,19 @@ const elapsed = Date.now() - started;
 
 const content = res.choices?.[0]?.message?.content ?? "";
 const finish = res.choices?.[0]?.finish_reason ?? "n/a";
-// An HTTP 200 with finish_reason:"error" is an in-band failure — the exact silent-failure
-// mode this skill teaches. Fail the exit code for it in BOTH output paths so a scripted
-// `--json` caller can't read success on a failed generation.
-const failed = finish === "error";
+// The skill's own thesis is "don't trust HTTP 200 alone." A 200 can still be a
+// non-success in several in-band shapes, so the smoke test — of all things — must be
+// strict about them and fail the exit code in BOTH output paths so a scripted `--json`
+// caller can't read success on a failed generation:
+//   - finish_reason:"error"  — the generation errored mid-flight.
+//   - empty/absent choices    — 200 with nothing generated.
+//   - empty message.content   — a choice came back but produced no text.
+const noChoices = !res.choices || res.choices.length === 0;
+const failed = finish === "error" || noChoices || content.length === 0;
+// finish_reason:"length" is not a hard failure (the call worked) but the completion was
+// truncated at max_tokens — surface it so a PASS with clipped output isn't mistaken for
+// a clean one.
+const truncated = finish === "length";
 
 if (args.has("json")) {
   console.log(JSON.stringify(res, null, 2));
@@ -85,9 +94,20 @@ console.log("");
 if (res.id) {
   console.log(`Tip: inspect this call with  npx tsx inspect-generation.ts ${res.id}`);
 }
-if (failed) {
+if (truncated && !failed) {
   console.log("");
-  console.log("! finish_reason == 'error': the pipe opened but this generation failed mid-flight.");
+  console.log("! finish_reason == 'length': the call succeeded but the completion was truncated");
+  console.log("  at max_tokens. Raise --max-tokens if you expected the full output.");
+}
+if (failed) {
+  const reason =
+    finish === "error"
+      ? "finish_reason == 'error': the pipe opened but this generation failed mid-flight."
+      : noChoices
+        ? "HTTP 200 but no choices were returned — nothing was generated."
+        : "HTTP 200 but the completion is empty — the model returned no text.";
+  console.log("");
+  console.log(`! ${reason}`);
   console.log("  Treat as a failure and retry/fallback — see references/error-taxonomy.md.");
   process.exit(1);
 }
