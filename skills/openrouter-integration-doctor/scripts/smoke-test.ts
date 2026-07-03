@@ -49,15 +49,23 @@ const res = await fetchApi<ChatCompletionResponse>("/chat/completions", {
 });
 const elapsed = Date.now() - started;
 
-if (args.has("json")) {
-  console.log(JSON.stringify(res, null, 2));
-  process.exit(0);
-}
-
 const content = res.choices?.[0]?.message?.content ?? "";
 const finish = res.choices?.[0]?.finish_reason ?? "n/a";
+// An HTTP 200 with finish_reason:"error" is an in-band failure — the exact silent-failure
+// mode this skill teaches. Fail the exit code for it in BOTH output paths so a scripted
+// `--json` caller can't read success on a failed generation.
+const failed = finish === "error";
 
-console.log("Smoke test: PASS — the integration is live end-to-end.");
+if (args.has("json")) {
+  console.log(JSON.stringify(res, null, 2));
+  process.exit(failed ? 1 : 0);
+}
+
+console.log(
+  failed
+    ? "Smoke test: FAIL — the pipe opened but this generation failed mid-flight."
+    : "Smoke test: PASS — the integration is live end-to-end."
+);
 console.log("");
 console.log("Requested model:", model);
 console.log("Served model:   ", res.model ?? "unknown");
@@ -77,7 +85,7 @@ console.log("");
 if (res.id) {
   console.log(`Tip: inspect this call with  npx tsx inspect-generation.ts ${res.id}`);
 }
-if (finish === "error") {
+if (failed) {
   console.log("");
   console.log("! finish_reason == 'error': the pipe opened but this generation failed mid-flight.");
   console.log("  Treat as a failure and retry/fallback — see references/error-taxonomy.md.");

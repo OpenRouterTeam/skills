@@ -67,13 +67,27 @@ provider-preference misconfigurations (offline — no API key required).
   process.exit(1);
 }
 
-let body: RequestBody;
+let parsed: unknown;
 try {
-  body = JSON.parse(rawText) as RequestBody;
+  parsed = JSON.parse(rawText);
 } catch (err) {
   console.error(`Input is not valid JSON: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 }
+
+// JSON.parse accepts `null`, arrays, numbers, strings, and booleans — none of which are a
+// request body. Guard here so pointing the probe at arbitrary input in a screen-share
+// yields a clean validation message instead of a `body.provider` TypeError.
+if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+  const kind = parsed === null ? "null" : Array.isArray(parsed) ? "an array" : `a ${typeof parsed}`;
+  console.error(
+    `Input is valid JSON but not a request body — expected a JSON object, got ${kind}.`
+  );
+  console.error("Pass the object you POST to /chat/completions (the one with `model`, `messages`, `provider`, …).");
+  process.exit(1);
+}
+
+const body = parsed as RequestBody;
 
 const findings: Finding[] = [];
 const p = body.provider ?? {};

@@ -16,8 +16,8 @@ Reliability on OpenRouter is architectural, not incidental. There are two layers
 
 ```json
 {
-  "model": "anthropic/claude-3.5-sonnet",
-  "models": ["openai/gpt-4o", "google/gemini-1.5-pro"],
+  "model": "anthropic/claude-sonnet-4.6",
+  "models": ["openai/gpt-4o", "google/gemini-2.5-pro"],
   "provider": { "allow_fallbacks": true }
 }
 ```
