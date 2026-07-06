@@ -65,16 +65,22 @@ const failed = finish === "error" || noChoices || content.length === 0;
 // a clean one.
 const truncated = finish === "length";
 
+// Derive the FAIL headline from the specific shape that tripped `failed`, so the first
+// line names the same cause the predicate keyed on (and the detail line below) instead of
+// always describing the finish_reason:"error" case.
+const failHeadline =
+  finish === "error"
+    ? "Smoke test: FAIL — the pipe opened but this generation failed mid-flight."
+    : noChoices
+      ? "Smoke test: FAIL — HTTP 200 but no choices were returned; nothing was generated."
+      : "Smoke test: FAIL — HTTP 200 but the completion is empty; the model returned no text.";
+
 if (args.has("json")) {
   console.log(JSON.stringify(res, null, 2));
   process.exit(failed ? 1 : 0);
 }
 
-console.log(
-  failed
-    ? "Smoke test: FAIL — the pipe opened but this generation failed mid-flight."
-    : "Smoke test: PASS — the integration is live end-to-end."
-);
+console.log(failed ? failHeadline : "Smoke test: PASS — the integration is live end-to-end.");
 console.log("");
 console.log("Requested model:", model);
 console.log("Served model:   ", res.model ?? "unknown");
