@@ -15,7 +15,7 @@ const prompt = args.get("_0") as string | undefined;
 if (!prompt) {
   console.error(
     'Usage: npx tsx generate.ts "prompt" [--model <id>] [--output <path>]\n' +
-      "  [--aspect-ratio <r>] [--resolution <1K|2K|4K>] [--size <s>] [--n <count>]\n" +
+      "  [--aspect-ratio <r>] [--resolution <512|1K|2K|4K>] [--size <s>] [--n <count>]\n" +
       "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg>]\n" +
       "  [--background <auto|transparent|opaque>] [--seed <int>]\n" +
       "  [--provider-options '<json>']\n\n" +
