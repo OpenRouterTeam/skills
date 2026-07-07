@@ -20,7 +20,7 @@ if (!imagePath || !prompt) {
     'Usage: npx tsx edit.ts <image-path> "prompt" [--model <id>] [--output <path>]\n' +
       "  [--aspect-ratio <r>] [--resolution <512|1K|2K|4K>] [--size <s>] [--n <count>]\n" +
       "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg>]\n" +
-      "  [--background <auto|transparent|opaque>] [--seed <int>]\n" +
+      "  [--background <auto|transparent|opaque>] [--output-compression <n>] [--seed <int>]\n" +
       "  [--provider-options '<json>']\n\n" +
       "Editing sends the source image as an image-to-image reference, so pick a model\n" +
       "whose input_modalities include \"image\". Run discover.ts <model> to check."
