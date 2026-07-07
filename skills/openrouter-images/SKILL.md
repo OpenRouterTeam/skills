@@ -29,7 +29,7 @@ Pick the right script based on what the user is asking:
 | Check the exact params a specific model accepts | `discover.ts <model>` | "Does seedream support 4K?" |
 | Generate an image from a text description | `generate.ts "prompt"` | "Create an image of a sunset over mountains" |
 | Generate with specific options | `generate.ts "prompt" --aspect-ratio 16:9` | "Make a wide landscape image of a forest" |
-| Generate with a different model | `generate.ts "prompt" --model <id>` | "Generate using gemini 2.5 flash image" |
+| Generate with a different model | `generate.ts "prompt" --model <id>` | "Generate using gemini 3.1 flash lite image" |
 | Edit or modify an existing image | `edit.ts path "prompt"` | "Make the sky purple in photo.png" |
 | Transform an image with instructions | `edit.ts path "prompt"` | "Add a party hat to the animal in this image" |
 
@@ -71,7 +71,7 @@ Create a new image from a text prompt:
 cd <skill-path>/scripts && npx tsx generate.ts "a red panda wearing sunglasses"
 cd <skill-path>/scripts && npx tsx generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9
 cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output dragon.png
-cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-2.5-flash-image --resolution 2K
+cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-3.1-flash-lite-image --resolution 1K
 ```
 
 ## Edit Image
@@ -81,7 +81,7 @@ Modify an existing image with a text prompt. The source image is sent as an imag
 ```bash
 cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
 cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
-cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor style" --model google/gemini-3.1-flash-image-preview
+cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor style" --model google/gemini-3.1-flash-lite-image
 ```
 
 Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
@@ -156,7 +156,7 @@ Images come back base64-encoded in a `data` array. For raster PNG output, `media
 
 ## Using a Different Model
 
-The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-2.5-flash-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
+The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-3.1-flash-lite-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
 
 ## Presenting Results
 
