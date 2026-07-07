@@ -136,6 +136,18 @@ Returns for each provider:
 |---|---|---|
 | `category` | `?category=programming` | Server-side category filter |
 | `supported_parameters` | `?supported_parameters=tools` | Only models supporting this parameter |
+| `sort` | `?sort=coding-high-to-low` | Server-side sort — see options below |
+| `q` | `?q=gpt-4` | Free-text search by model name or slug |
+| `context` | `?context=128000` | Minimum context length (tokens) |
+| `min_price` / `max_price` | `?max_price=10` | Prompt (input) price range in $/M tokens |
+| `min_output_price` / `max_output_price` | `?max_output_price=10` | Completion (output) price range in $/M tokens |
+| `min_age_days` / `max_age_days` | `?max_age_days=90` | Model age range in days since creation |
+| `min_intelligence_index` / `max_intelligence_index` | `?min_intelligence_index=50` | Artificial Analysis intelligence index range |
+| `min_coding_index` / `max_coding_index` | `?min_coding_index=50` | Artificial Analysis coding index range |
+| `min_agentic_index` / `max_agentic_index` | `?min_agentic_index=50` | Artificial Analysis agentic index range |
+| `min_tool_success_rate` / `max_tool_success_rate` | `?min_tool_success_rate=0.9` | Tool-calling success rate range, fraction in [0, 1] |
+
+**`sort` options:** `most-popular`, `newest`, `top-weekly`, `pricing-low-to-high`, `pricing-high-to-low`, `context-high-to-low`, `throughput-high-to-low`, `latency-low-to-high`, `intelligence-high-to-low`, `coding-high-to-low`, `agentic-high-to-low`, `design-arena-elo-high-to-low`. Models without a score for a benchmark sort are placed last. Prefer server-side `sort` over fetching the full list and sorting client-side.
 
 **Tips for working with the response:**
 
