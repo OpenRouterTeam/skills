@@ -154,6 +154,18 @@ Images come back base64-encoded in a `data` array. For raster PNG output, `media
 }
 ```
 
+### Streaming
+
+Endpoints with `supports_streaming` accept `"stream": true` on `POST /api/v1/images` and respond with SSE events:
+
+| Event | Payload |
+|---|---|
+| `image_generation.partial_image` | `partial_image_index`, `b64_json` — a partial raster image |
+| `image_generation.text_chunk` | `text`, `phase` — a text fragment for text-based formats (e.g. partial SVG markup). `phase` is `content`, `reasoning`, or `draft`; only `content` is renderable output |
+| `image_generation.completed` | Final `b64_json`, `media_type`, `created`, `usage` |
+
+The skill's scripts use non-streaming requests; streaming is useful when rendering output progressively (e.g. SVG as it's generated).
+
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-3.1-flash-lite-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
