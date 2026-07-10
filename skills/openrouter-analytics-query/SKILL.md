@@ -105,7 +105,7 @@ When `granularity` is set and no `order_by` is specified, results are ordered by
 
 ## Classifier Dimensions
 
-Classifier dimensions allow grouping by dynamic, user-defined classification labels (e.g., topic, sentiment, category) produced by a classifier attached to your account. They join the `generation_classifications` table.
+Classifier dimensions allow grouping by dynamic, user-defined classification labels (e.g., topic, sentiment, category) produced by a classifier attached to your account.
 
 ```json
 {
@@ -121,10 +121,10 @@ Classifier dimensions allow grouping by dynamic, user-defined classification lab
 |---|---|---|---|
 | `classifier_id` | `string` (UUID) | Yes | ID of the classifier (must belong to the caller's account) |
 | `dimension_names` | `string[]` | No | Specific dimension names to group by (max 10). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars). |
-| `include_nulls` | `boolean` | No | When `true`, unclassified rows are included (LEFT JOIN). Default `false` (INNER JOIN — only classified rows). |
+| `include_nulls` | `boolean` | No | When `true`, unclassified rows are included in results. Default `false` (only classified rows). |
 
 **Constraints:**
-- Forces the query to use the raw generations table (31-day time range limit)
+- Limits the query time range to 31 days
 - Single dimension name → result column is aliased to that name (e.g., `category`)
 - Multiple dimension names → result uses generic `clf_dimension_name` / `clf_dimension_value` columns
 
@@ -153,8 +153,8 @@ Classifier filters narrow results to generations matching specific classificatio
 | `filters[].value` | `string \| string[]` | Yes | Scalar for `eq`/`neq`, array for `in`/`not_in` |
 
 **Constraints:**
-- Forces the query to use the raw generations table (31-day time range limit)
-- Only equality/set operators supported (underlying value column is String — ordered comparisons would be lexicographic)
+- Limits the query time range to 31 days
+- Only equality/set operators supported (classification values are strings — ordered comparisons would be lexicographic)
 - All filter field names must be configured dimensions on the classifier
 
 ## Response Schema
@@ -334,10 +334,10 @@ Some metric/dimension combinations support time ranges up to **365 days** (with 
 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
-Classifier dimensions and classifier filters always force the 31-day limit (they require the raw generations table via a JOIN on `generation_classifications`).
+Classifier dimensions and classifier filters always force the 31-day time range limit.
 
 If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics
 - Removing per-generation dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)
-- Removing classifier dimensions/filters (they require expensive JOINs)
+- Removing classifier dimensions/filters (they are more expensive to compute)
