@@ -73,7 +73,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
-| `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
+| `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to the time-bucket column, e.g. `date__day` or `created_at__day`, based on granularity and the resolved table) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
 | `classifier_dimensions` | `object` | none | Group by dynamic classifier-produced dimensions. See [Classifier Dimensions](#classifier-dimensions) below. |
@@ -127,6 +127,7 @@ Classifier dimensions allow grouping by dynamic, user-defined classification lab
 - Limits the query time range to 31 days
 - Single dimension name → result column is aliased to that name (e.g., `category`)
 - Multiple dimension names → result uses generic `clf_dimension_name` / `clf_dimension_value` columns
+- With `granularity` set, the time-bucket key in result rows is `created_at__<granularity>` (buckets are computed from the generation's creation time)
 
 ## Classifier Filters
 
@@ -181,7 +182,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and a time-bucket key (when granularity is set): `date__<granularity>` for most queries, or `created_at__<granularity>` when the query resolves to raw generation data (31-day-limited metrics/dimensions and classifier queries). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
