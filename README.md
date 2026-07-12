@@ -74,6 +74,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | [openrouter-analytics-schema](skills/openrouter-analytics-schema/README.md) | Discovering the OpenRouter analytics schema — available metrics, dimensions, filter operators, and granularities, and mapping natural-language questions to query parameters |
 | [openrouter-analytics-query](skills/openrouter-analytics-query/README.md) | Constructing and executing analytics queries against the OpenRouter API — full parameter reference for metrics, dimensions, filters, time ranges, ordering, and pagination |
 | [openrouter-generations](skills/openrouter-generations/README.md) | Inspecting individual OpenRouter generations — request metadata (cost, latency, tokens, model, provider routing) and stored prompt/completion content |
+| [openrouter-integration-doctor](skills/openrouter-integration-doctor/README.md) | Diagnosing a whole OpenRouter integration — key/credit health, routing & fallback config, and a live end-to-end smoke test — with a symptom→diagnosis→native-fix playbook and runnable probes (complements openrouter-generations, which debugs a single request) |
 
 ## Environment
 
