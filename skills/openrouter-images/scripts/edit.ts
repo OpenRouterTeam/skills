@@ -2,11 +2,11 @@ import {
   DEFAULT_MODEL,
   requireApiKey,
   parseArgs,
-  postChatCompletion,
+  postImageGeneration,
   readImageAsDataUrl,
   saveImage,
+  buildImageParams,
   defaultOutputPath,
-  imageEntryToDataUrl,
 } from "./lib.js";
 
 const apiKey = requireApiKey();
@@ -16,49 +16,32 @@ const imagePath = args.get("_0") as string | undefined;
 const prompt = args.get("_1") as string | undefined;
 
 if (!imagePath || !prompt) {
-  console.error("Usage: npx tsx edit.ts <image-path> \"prompt\" [--model <id>] [--output <path>] [--aspect-ratio <r>] [--image-size <s>]");
+  console.error(
+    'Usage: npx tsx edit.ts <image-path> "prompt" [--model <id>] [--output <path>]\n' +
+      "  [--aspect-ratio <r>] [--resolution <512|1K|2K|4K>] [--size <s>] [--n <count>]\n" +
+      "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg>]\n" +
+      "  [--background <auto|transparent|opaque>] [--output-compression <n>] [--seed <int>]\n" +
+      "  [--provider-options '<json>']\n\n" +
+      "Editing sends the source image as an image-to-image reference, so pick a model\n" +
+      "whose input_modalities include \"image\". Run discover.ts <model> to check."
+  );
   process.exit(1);
 }
 
 const model = (args.get("model") as string) || DEFAULT_MODEL;
 const outputBase = (args.get("output") as string) || defaultOutputPath();
-const aspectRatio = args.get("aspect-ratio") as string | undefined;
-const imageSize = args.get("image-size") as string | undefined;
+const dataUrl = readImageAsDataUrl(imagePath);
 
-const dataUrl = readImageAsDataUrl(imagePath as string);
-
-const imageConfig: Record<string, string> = {};
-if (aspectRatio) imageConfig.aspect_ratio = aspectRatio;
-if (imageSize) imageConfig.image_size = imageSize;
-
-const body: any = {
+const body = {
   model,
-  messages: [
-    {
-      role: "user",
-      content: [
-        { type: "image_url", image_url: { url: dataUrl } },
-        { type: "text", text: prompt },
-      ],
-    },
-  ],
-  modalities: ["image", "text"],
-  ...(Object.keys(imageConfig).length > 0 ? { image_config: imageConfig } : {}),
+  prompt,
+  input_references: [{ type: "image_url", image_url: { url: dataUrl } }],
+  ...buildImageParams(args),
 };
 
-const json = await postChatCompletion(apiKey, body);
-const message = json.choices?.[0]?.message;
+const json = await postImageGeneration(apiKey, body);
+const images = json.data ?? [];
 
-if (!message) {
-  console.error("Error: No response from model.");
-  process.exit(1);
-}
-
-if (message.content) {
-  console.error(`Model: ${message.content}`);
-}
-
-const images: unknown[] = message.images ?? [];
 if (images.length === 0) {
   console.error("Error: No images returned by model.");
   process.exit(1);
@@ -66,22 +49,16 @@ if (images.length === 0) {
 
 const saved: string[] = [];
 for (let i = 0; i < images.length; i++) {
-  const img = imageEntryToDataUrl(images[i]);
-  if (!img) {
+  const b64 = images[i].b64_json;
+  if (!b64) {
     console.error("Error: Unexpected image shape in response.");
     process.exit(1);
   }
-  let outPath: string;
-  if (images.length === 1) {
-    outPath = outputBase;
-  } else {
-    const dotIdx = outputBase.lastIndexOf(".");
-    const base = dotIdx > 0 ? outputBase.slice(0, dotIdx) : outputBase;
-    const ext = dotIdx > 0 ? outputBase.slice(dotIdx) : ".png";
-    outPath = `${base}-${i + 1}${ext}`;
-  }
-  const abs = saveImage(img, outPath);
-  saved.push(abs);
+  saved.push(saveImage(b64, outputBase, images[i].media_type, i, images.length));
+}
+
+if (json.usage?.cost !== undefined) {
+  console.error(`Cost: $${json.usage.cost}`);
 }
 
 console.log(

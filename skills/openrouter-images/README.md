@@ -1,6 +1,6 @@
 # openrouter-images
 
-Generate images from text prompts and edit existing images via OpenRouter's chat completions API with image modalities.
+Generate images from text prompts and edit existing images via OpenRouter's dedicated Image API (`POST /api/v1/images`), with model and per-endpoint capability discovery.
 
 ## Install
 
@@ -22,7 +22,8 @@ The `OPENROUTER_API_KEY` environment variable must be set. Get a key at [openrou
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Text-to-image generation with aspect ratio and model overrides (`generate.ts`)
-- Editing and transforming existing images from a text prompt (`edit.ts`)
-- Selecting specific image models (e.g. `gemini-2.5-flash-image`)
-- Decision tree for picking between generate vs edit flows
+- Model and per-endpoint capability discovery (`discover.ts`) — see which models exist and which params each accepts before generating
+- Text-to-image generation with aspect ratio, resolution, quality, and provider-passthrough options (`generate.ts`)
+- Editing and transforming existing images via image-to-image references (`edit.ts`)
+- Selecting specific image models (e.g. `google/gemini-3.1-flash-lite-image`)
+- Decision tree for picking between discover, generate, and edit flows
