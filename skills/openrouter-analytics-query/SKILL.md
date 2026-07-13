@@ -74,8 +74,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
-| `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
-| `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
+| `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions (or `classifier_dimensions`) and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
+| `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + `dimensions` and/or `classifier_dimensions`), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when neither `dimensions` nor `classifier_dimensions` is specified. |
 | `classifier_dimensions` | `object` | none | Group by dynamic classifier-produced dimensions. See [Classifier Dimensions](#classifier-dimensions) below. |
 | `classifier_filters` | `object` | none | Filter on classifier-produced dimension values. See [Classifier Filters](#classifier-filters) below. |
 
