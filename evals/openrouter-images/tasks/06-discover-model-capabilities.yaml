@@ -1,0 +1,29 @@
+id: discover-model-capabilities-001
+name: Discover Model Capabilities
+description: |
+  A model capability question should use discover.ts with the model ID before
+  recommending unsupported generation options.
+tags:
+  - discovery
+  - model-selection
+
+inputs:
+  prompt: |
+    Before I generate anything, how would you check which parameters and
+    providers google/gemini-3.1-flash-image-preview supports? Show the exact
+    bundled command, but do not execute it.
+
+graders:
+  - type: code
+    name: uses_discovery_script
+    config:
+      language: python
+      assertions:
+        - '"discover.ts" in output'
+        - '"google/gemini-3.1-flash-image-preview" in output'
+        - '"generate.ts" not in output and "edit.ts" not in output'
+
+
+expected:
+  outcomes:
+    - type: task_completed

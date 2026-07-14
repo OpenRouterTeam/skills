@@ -1,0 +1,30 @@
+id: generate-aspect-ratio-001
+name: Generate With Aspect Ratio
+description: |
+  A specified landscape ratio should be passed through the bundled generate
+  script rather than only mentioned in prose.
+tags:
+  - happy-path
+  - generate
+  - aspect-ratio
+
+inputs:
+  prompt: |
+    Make a wide landscape image of a futuristic city at night, 16:9. Do not
+    execute it; show the exact bundled-script command.
+
+graders:
+  - type: code
+    name: aspect_ratio_flag
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in output'
+        - '"--aspect-ratio" in output'
+        - '"16:9" in output'
+        - '"city" in output.lower() and "night" in output.lower()'
+
+
+expected:
+  outcomes:
+    - type: task_completed
