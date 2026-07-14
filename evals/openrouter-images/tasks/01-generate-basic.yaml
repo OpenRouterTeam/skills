@@ -1,0 +1,46 @@
+id: generate-basic-001
+name: Generate Basic Image
+description: |
+  Decision tree says "generate from text" → generate.ts. Agent should
+  invoke it, not call the Responses API directly.
+tags:
+  - happy-path
+  - generate
+
+inputs:
+  prompt: |
+    Generate an image of a red panda wearing sunglasses and save it
+    somewhere reasonable.
+
+graders:
+  - type: code
+    name: invoked_generate_script
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"red panda" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower()'
+
+  - type: prompt
+    name: generate_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a basic image generation. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Used generate.ts: invoked the skill's generate.ts script
+           (not edit.ts, not a raw curl to /api/v1/responses).
+
+        2) Correct prompt: passed "a red panda wearing sunglasses" or
+           very close as the script's positional prompt argument.
+
+        3) Reports the result: tells the user the model used and where
+           the image was saved (per the skill's Presenting Results
+           guidance).
+
+expected:
+  outcomes:
+    - type: task_completed

@@ -1,0 +1,58 @@
+id: voice-selection-001
+name: Voice Selection
+description: |
+  User asks for a specific voice. The skill documents that voices are
+  provider-namespaced; the agent should either use a known-valid voice or
+  look it up via the models endpoint.
+tags:
+  - happy-path
+  - voice
+  - provider-specific
+
+inputs:
+  prompt: |
+    I want to generate speech with OpenRouter TTS using the "nova" voice.
+    Write a TypeScript script that does it and saves the output as
+    out.mp3. Include the complete script in your response.
+
+graders:
+  - type: code
+    name: uses_nova_voice
+    config:
+      language: python
+      assertions:
+        - '"nova" in output.lower()'
+        - '"/api/v1/audio/speech" in output.lower() or "audio.speech" in output.lower() or "audio/speech" in output.lower()'
+
+  - type: code
+    name: typescript_approach
+    config:
+      language: python
+      assertions:
+        - '"import" in output.lower() and ("openai" in output.lower() or "fetch" in output.lower())'
+        - '"out.mp3" in output'
+
+  - type: prompt
+    name: voice_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for TypeScript code using the "nova" voice. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Uses nova: passes voice: "nova" to the API.
+
+        2) Picks a compatible model: uses an OpenAI TTS model slug (e.g.
+           openai/gpt-4o-mini-tts-2025-12-15) — because nova is an OpenAI
+           voice and will not work on Voxtral/Kokoro. The skill explicitly
+           documents this.
+
+        3) Saves out.mp3 correctly: writes raw bytes to out.mp3 using the
+           OpenAI SDK (arrayBuffer → Buffer → writeFile) OR a direct fetch
+           that extracts the blob/arrayBuffer.
+
+expected:
+  outcomes:
+    - type: task_completed

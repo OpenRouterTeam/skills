@@ -1,0 +1,55 @@
+id: programmatic-key-001
+name: Programmatic API Key (No Button)
+description: |
+  User wants the API key but isn't building a UI-first flow.
+  The skill should provide the PKCE flow and skip the button/variants section.
+tags:
+  - happy-path
+  - programmatic
+  - no-ui
+
+inputs:
+  prompt: |
+    I need to obtain an OpenRouter API key from the browser for my app
+    programmatically — I'm not building a sign-in button component, just need
+    the OAuth flow to get back a usable key I can store. What do I do?
+
+graders:
+  # PKCE protocol must be complete; skill's "no client registration" claim matters.
+  - type: code
+    name: pkce_technical_claims
+    config:
+      language: python
+      assertions:
+        - "'sessionstorage' in output.lower()"
+        - "'S256' in output or 's256' in output.lower()"
+        - "'openrouter.ai/auth' in output.lower() or 'openrouter.ai/api/v1/auth/keys' in output.lower()"
+        - "'code_verifier' in output.lower() or 'verifier' in output.lower()"
+
+  - type: prompt
+    name: no_button_focus
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user explicitly asked for the OAuth flow only, no button UI.
+        Evaluate these criteria. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (3 total calls).
+
+        1) PKCE flow complete: covers verifier generation, S256 challenge,
+           redirect to https://openrouter.ai/auth, POST to
+           https://openrouter.ai/api/v1/auth/keys for the exchange, and
+           reading `key` from the response.
+
+        2) No unnecessary UI content: does NOT push a button component with
+           logo SVG, multiple style variants, or Tailwind class tables.
+           Button styling / variant guidance is explicitly out of scope for
+           this request. A minimal "call initiateOAuth() on click" mention is
+           fine; a full button taxonomy is not.
+
+        3) No fabricated requirements: does not claim a client_id, secret,
+           app registration, or backend is needed.
+
+expected:
+  outcomes:
+    - type: task_completed

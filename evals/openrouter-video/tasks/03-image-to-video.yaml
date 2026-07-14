@@ -1,0 +1,70 @@
+id: image-to-video-001
+name: Image-to-Video with frame_images
+description: |
+  User wants to animate an image. Skill documents that frame_images[]
+  carries {type: "image_url", image_url: {url}, frame_type: "first_frame"}.
+tags:
+  - happy-path
+  - image-to-video
+  - frame_images
+
+inputs:
+  prompt: |
+    I have a local image start.png. Animate it into a 4-second video using
+    google/veo-3.1 with the prompt "camera slowly zooms out". Save as
+    animation.mp4. Include the complete bash script.
+
+graders:
+  - type: code
+    name: frame_images_structure
+    config:
+      language: python
+      assertions:
+        - '"frame_images" in output.lower()'
+        - '"first_frame" in output.lower() or "frame_type" in output.lower()'
+        - '"image_url" in output.lower()'
+
+  - type: code
+    name: local_image_encoding
+    config:
+      language: python
+      assertions:
+        # Local image → base64 data URL
+        - '"base64" in output.lower() or "b64" in output.lower()'
+        - '"data:image" in output.lower() or "data:" in output'
+
+  - type: code
+    name: uses_specified_params
+    config:
+      language: python
+      assertions:
+        - '"google/veo-3.1" in output.lower()'
+        - '"animation.mp4" in output.lower()'
+        - '"zoom" in output.lower()'
+
+  - type: prompt
+    name: i2v_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants to animate start.png into animation.mp4 via
+        google/veo-3.1 with a zoom prompt. Call set_waza_grade_pass or
+        set_waza_grade_fail once per criterion (3 calls total).
+
+        1) Correct frame_images shape: POST body includes frame_images
+           as an array where each entry is
+           {type: "image_url", image_url: {url}, frame_type: "first_frame"}.
+           Does NOT use input_references (that's for reference-to-video
+           style guidance, not for animating an image directly).
+
+        2) Local image encoded correctly: converts start.png to a base64
+           data URL with a proper image MIME type prefix (data:image/png;
+           base64,...), NOT just raw base64 without the prefix.
+
+        3) Full async flow: submits with model, prompt, frame_images;
+           polls for completion; downloads final video as animation.mp4.
+
+expected:
+  outcomes:
+    - type: task_completed
