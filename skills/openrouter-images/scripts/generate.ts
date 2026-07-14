@@ -18,7 +18,7 @@ if (!prompt) {
       "  [--aspect-ratio <r>] [--resolution <512|1K|2K|4K>] [--size <s>] [--n <count>]\n" +
       "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg>]\n" +
       "  [--background <auto|transparent|opaque>] [--output-compression <n>] [--seed <int>]\n" +
-      "  [--provider-options '<json>']\n\n" +
+      "  [--provider '<json>'] [--provider-options '<json>']\n\n" +
       "Run discover.ts <model> first to see which parameters a model accepts."
   );
   process.exit(1);
