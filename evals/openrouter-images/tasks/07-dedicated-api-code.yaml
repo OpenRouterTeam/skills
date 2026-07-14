@@ -1,0 +1,32 @@
+id: dedicated-images-api-code-001
+name: Dedicated Images API Code
+description: |
+  A developer asking for direct API code should be taught the new dedicated
+  endpoint and response shape rather than legacy chat or responses formats.
+tags:
+  - api
+  - migration
+
+inputs:
+  prompt: |
+    Give me a minimal TypeScript fetch example for generating an image through
+    OpenRouter's new dedicated images endpoint. Include how to read the returned
+    base64 image, but do not send a real request.
+
+graders:
+  - type: code
+    name: dedicated_endpoint_shape
+    config:
+      language: python
+      assertions:
+        - '"/api/v1/images" in output'
+        - '"POST" in output.upper()'
+        - '"b64_json" in output'
+        - '"data" in output'
+        - '"/api/v1/chat/completions" not in output'
+        - '"choices" not in output or "not" in output.lower()'
+
+
+expected:
+  outcomes:
+    - type: task_completed

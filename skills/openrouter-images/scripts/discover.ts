@@ -11,10 +11,6 @@ if (model) {
   await listModels();
 }
 
-/**
- * List every image model with a compact capability summary. Use this to pick a
- * model and see, at a glance, which parameters it accepts.
- */
 async function listModels(): Promise<void> {
   const { data } = await getImageModels();
   const models = data ?? [];
@@ -30,10 +26,6 @@ async function listModels(): Promise<void> {
   console.log(JSON.stringify({ count: summary.length, models: summary }, null, 2));
 }
 
-/**
- * Show the definitive per-endpoint capabilities for one model: the exact
- * parameters each provider accepts, its passthrough allowlist, and pricing.
- */
 async function showEndpoints(modelSlug: string): Promise<void> {
   const { id, endpoints } = await getImageModelEndpoints(modelSlug);
   const rows = (endpoints ?? []).map((e: ImageEndpoint) => ({
@@ -48,10 +40,6 @@ async function showEndpoints(modelSlug: string): Promise<void> {
   console.log(JSON.stringify({ id, endpoints: rows }, null, 2));
 }
 
-/**
- * Flatten the typed capability descriptors into human-readable strings so the
- * output reads like "resolution: 1K | 2K | 4K" instead of nested objects.
- */
 function describeParameters(
   parameters: Record<string, CapabilityDescriptor> | undefined
 ): Record<string, string> {

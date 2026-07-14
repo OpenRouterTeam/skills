@@ -1,0 +1,30 @@
+id: indirect-trigger-blog-hero-001
+name: Indirect Trigger - Blog Hero Image
+description: |
+  A request for blog artwork should route to image generation even without the
+  phrase "generate an image", with an appropriate wide ratio.
+tags:
+  - happy-path
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    I am writing a blog post about remote work and need a hero image for the
+    top of the page: a quiet home office with good natural light. Do not execute
+    it; show the exact bundled-script command you would run.
+
+graders:
+  - type: code
+    name: hero_generation_command
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in output'
+        - '"home office" in output.lower() or "remote work" in output.lower()'
+        - '"--aspect-ratio" in output'
+        - '("16:9" in output or "21:9" in output or "3:1" in output or "2:1" in output)'
+
+
+expected:
+  outcomes:
+    - type: task_completed
