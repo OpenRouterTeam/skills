@@ -1,0 +1,25 @@
+id: generation-005
+name: Generate multiple variations
+description: >
+  User asks for several variations. The agent should use --n rather than
+  looping the script, and report every saved file (suffixes -1, -2, ...).
+
+tags:
+  - generation
+  - options
+  - advanced
+
+inputs:
+  prompt: "Give me 3 different variations of a minimalist logo for a coffee shop called 'Ember'."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "--n 3"
+    - "-1"
+    - "3 images"
+    - "three"
