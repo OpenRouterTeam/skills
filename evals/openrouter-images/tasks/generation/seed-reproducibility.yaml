@@ -1,0 +1,23 @@
+id: generation-007
+name: Deterministic generation with a seed
+description: >
+  User wants reproducible output. The agent should check that the chosen model
+  supports seeds and pass --seed, explaining that the same seed + prompt +
+  model yields the same image where supported.
+
+tags:
+  - generation
+  - options
+  - advanced
+
+inputs:
+  prompt: "Generate an isometric illustration of a tiny island, and make it reproducible so I can regenerate the exact same image later."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains:
+    - "seed"

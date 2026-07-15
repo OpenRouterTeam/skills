@@ -1,0 +1,27 @@
+id: editing-003
+name: Edit requires an image-input model
+description: >
+  User asks to edit with a specific model. The agent should verify the model's
+  input_modalities include image (via discover.ts) before editing, and switch
+  to or recommend a capable model if it does not.
+
+tags:
+  - editing
+  - capability-check
+  - advanced
+
+inputs:
+  prompt: "Convert sprite.webp to a watercolor style. I'd like to use the cheapest model that can actually do image-to-image editing — figure out which models support that first."
+  files:
+    - path: sprite.webp
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "input_modalities"
+    - "image-to-image"
+    - "image input"

@@ -1,0 +1,23 @@
+id: generation-003
+name: Generation with a non-default model
+description: >
+  User names a specific model informally. The agent should resolve it to a
+  valid model ID (verifying with discover.ts if unsure) and pass it via
+  --model instead of using the default.
+
+tags:
+  - generation
+  - options
+  - model-selection
+
+inputs:
+  prompt: "Generate a watercolor painting of a lighthouse using gemini 3.1 flash lite image, not the default model."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains:
+    - "gemini-3.1-flash-lite-image"

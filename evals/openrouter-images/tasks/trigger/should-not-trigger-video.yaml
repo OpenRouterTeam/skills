@@ -1,0 +1,16 @@
+id: trigger-005
+name: Should NOT trigger on video request
+description: >
+  Video generation is handled by a different skill (openrouter-video); the
+  images skill should not fire for video requests.
+
+tags:
+  - trigger
+  - negative
+
+inputs:
+  prompt: "Generate a 5-second video clip of waves crashing on a beach."
+
+expected:
+  outcomes:
+    - type: task_completed

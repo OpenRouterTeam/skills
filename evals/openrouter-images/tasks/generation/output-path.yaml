@@ -1,0 +1,21 @@
+id: generation-004
+name: Generation with explicit output path
+description: >
+  User specifies a file name for the result. The agent should pass --output
+  and confirm the file was written to the requested path.
+
+tags:
+  - generation
+  - options
+
+inputs:
+  prompt: "Generate pixel art of a small green dragon and save it as dragon.png in the current directory."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains:
+    - "dragon.png"
