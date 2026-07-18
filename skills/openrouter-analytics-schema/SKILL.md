@@ -119,12 +119,14 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 |---|---|
 | `api_key_id` | Key name/label |
 | `app` | App title or origin URL |
-| `user` | User name or email address |
+| `user` | Two fields per row: `user` (name) + `user_email` (email) — see note below |
 | `workspace` | Workspace name |
 
 All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
-> Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
+> **The `user` dimension is the exception.** Grouping by `user` returns **two** fields per row instead of one: `user` is the account's display name (`null` when the user has no name set), and `user_email` is their email (`null` when the user has no email on file). The raw Clerk user ID is never returned — use `user_email` to cross-reference users against your own records.
+
+> Rows where both `user` and `user_email` are `null` represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
 ### Dimension Categories
 
@@ -132,7 +134,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `model` — the OpenRouter model ID (permaslug)
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
-- `user` — the creator user ID (for org-level queries)
+- `user` — org member breakdown (returns a `user` name field + a `user_email` field; see Label Resolution)
 - `workspace` — workspace ID
 - `app` — application ID
 
