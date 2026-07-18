@@ -127,7 +127,7 @@ When interpreting results for the user:
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
 - **Throughput** (`avg_throughput`) is tokens per second
 - When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
-- **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows
+- **Label resolution**: dimensions `api_key_id`, `app`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, workspace name) directly in the data rows. The `user` dimension is special: each row carries two fields — `user` (display name, `null` if unset) and `user_email` (email, `null` if none on file); the raw user ID is never returned
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
 
 ### Cost Optimization Guidance
