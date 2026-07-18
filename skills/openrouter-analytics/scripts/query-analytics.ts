@@ -150,8 +150,9 @@ console.error(`Query: ${meta.row_count} rows in ${timeStr}ms${truncated}${cached
 
 // Emit data and metadata together on stdout. Agents parsing stdout
 // need metadata.truncated to know the result is partial.
-// Dimensions like api_key_id, user, app, workspace are already resolved
-// to human-readable names in the data rows.
+// Dimensions like api_key_id, app, workspace are already resolved to
+// human-readable names in the data rows; the user dimension returns a
+// user (name) field plus a separate user_email field.
 const out: Record<string, unknown> = {
   data: data.data,
   metadata: data.metadata,
