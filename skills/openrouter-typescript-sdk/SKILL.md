@@ -498,6 +498,93 @@ const manualTool = tool({
 });
 ```
 
+#### Server Tools
+OpenRouter provides built-in server tools that execute on OpenRouter's side — no client implementation needed. Use `serverTool()` to add them to the `tools` array alongside regular tools:
+
+```typescript
+import { serverTool } from '@openrouter/agent';
+
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Research the latest on quantum computing',
+  tools: [
+    serverTool({ type: 'openrouter:web_search' }),
+    serverTool({ type: 'openrouter:web_fetch' }),
+    serverTool({ type: 'openrouter:datetime', parameters: { timezone: 'UTC' } }),
+    serverTool({ type: 'openrouter:image_generation' }),
+    serverTool({ type: 'openrouter:advisor', parameters: { model: '~anthropic/claude-opus-latest' } }),
+  ]
+});
+```
+
+Available server tools: `openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`, `openrouter:image_generation`, `openrouter:advisor`. Docs: [openrouter.ai/docs/guides/features/server-tools](https://openrouter.ai/docs/guides/features/server-tools/overview).
+
+#### Advisor Tool
+
+The `openrouter:advisor` server tool lets a model consult a stronger advisor model mid-generation. The model invokes it with a `prompt` when it hits a decision point, is stuck, or wants validation before proceeding.
+
+```typescript
+// Basic — pin an advisor model
+serverTool({
+  type: 'openrouter:advisor',
+  parameters: { model: '~anthropic/claude-opus-latest' }
+})
+
+// With instructions and sub-agent tools
+serverTool({
+  type: 'openrouter:advisor',
+  parameters: {
+    model: '~anthropic/claude-opus-latest',
+    instructions: 'You are a senior staff engineer. Be decisive.',
+    tools: [{ type: 'openrouter:web_search' }],
+    forward_transcript: false,
+  }
+})
+
+// Named advisor profiles — the model selects by name per call
+serverTool({
+  type: 'openrouter:advisor',
+  parameters: {
+    advisors: [
+      {
+        name: 'reviewer',
+        model: '~anthropic/claude-opus-latest',
+        instructions: 'You are a critical code reviewer. Find the flaws.',
+      },
+      {
+        name: 'architect',
+        model: '~openai/gpt-latest',
+        instructions: 'You are a systems architect. Think about scale.',
+      },
+    ]
+  }
+})
+```
+
+**Parameters** (`parameters` object on the tool entry):
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `model` | Outer request model | Advisor model to consult (any OpenRouter model) |
+| `advisors` | None | Roster of named advisor profiles — model selects by `name` per call |
+| `instructions` | None | System instructions for the advisor |
+| `tools` | None | Tools available to the advisor sub-agent (e.g. `openrouter:web_search`) |
+| `forward_transcript` | `false` | Forward full parent conversation to the advisor |
+| `max_tool_calls` | Provider default | Max tool-calling steps for the advisor (1–25) |
+| `max_completion_tokens` | Provider default | Max output tokens for the advisor call |
+| `reasoning` | Provider default | Reasoning config (`{ effort, max_tokens }`) |
+| `temperature` | Provider default | Sampling temperature (0–2) |
+
+**Tool-call arguments** (passed by the model when invoking):
+
+| Argument | Description |
+|----------|-------------|
+| `prompt` | What the model wants advice on (required unless `forward_transcript` is `true`) |
+| `name` | Which named advisor profile to consult (only when `advisors` roster is configured) |
+| `model` | Advisor model override (only honored when neither the profile nor definition fixes one) |
+
+Docs: [openrouter.ai/docs/guides/features/server-tools/advisor](https://openrouter.ai/docs/guides/features/server-tools/advisor).
+
 ---
 
 ## Multi-Turn Conversations with Stop Conditions
