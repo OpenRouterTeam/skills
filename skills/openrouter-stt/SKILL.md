@@ -7,7 +7,10 @@ description: Transcribe speech to text using OpenRouter's speech-to-text API. Us
 
 Transcribe audio via `POST /api/v1/audio/transcriptions` using `curl`. Requires `OPENROUTER_API_KEY` (get one at https://openrouter.ai/keys). If unset, stop and ask.
 
-**This endpoint is not OpenAI-compatible.** The body is JSON with base64 audio under `input_audio: { data, format }` — not `multipart/form-data` with a `file` field the way OpenAI's `/v1/audio/transcriptions` works. Do not point the OpenAI SDK at this endpoint; it will send the wrong shape. Use `curl`, `fetch`, or `requests` directly.
+The endpoint accepts two request shapes:
+
+- **JSON** (preferred) — base64 audio under `input_audio: { data, format }`. Supports all parameters including `provider` passthrough, and handles large files via streaming offload.
+- **OpenAI-style `multipart/form-data`** — a `file` field plus `model`, the same shape OpenAI's `/v1/audio/transcriptions` uses. The official OpenAI SDKs work by pointing their base URL at `https://openrouter.ai/api/v1`. Capped at 25 MB; see below.
 
 ## One call, JSON back
 
@@ -77,6 +80,44 @@ fi
 jq -r '.text' "$BODY"
 rm -f "$BODY" "$PAYLOAD"
 ```
+
+## OpenAI-compatible multipart requests
+
+Clients built for OpenAI's transcription endpoint (including the official OpenAI SDKs) work as-is:
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+with open("audio.wav", "rb") as f:
+    result = client.audio.transcriptions.create(
+        model="openai/whisper-large-v3",
+        file=f,
+    )
+
+print(result.text)
+```
+
+```bash
+curl https://openrouter.ai/api/v1/audio/transcriptions \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -F file="@audio.wav" \
+  -F model="openai/whisper-large-v3"
+```
+
+Multipart specifics:
+
+- Supported fields: `file`, `model`, `language`, `temperature`. `prompt` and `timestamp_granularities` are accepted but ignored.
+- `response_format` may only be `json` (the default); `text`, `srt`, `vtt`, and `verbose_json` are rejected with a 400.
+- The audio format is derived from the filename extension or the file part's content type.
+- Uploads are capped at 25 MB (same as OpenAI). That's roughly 26 minutes of 128 kbps MP3 or about 13 minutes of 16 kHz mono WAV — prefer compressed formats for long recordings, or send larger files as base64 JSON via `input_audio`.
+- Provider passthrough (`provider.options.<slug>`) is JSON-only.
 
 ## Discovering STT models
 

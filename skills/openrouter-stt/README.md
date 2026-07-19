@@ -23,7 +23,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Why this endpoint is **not** OpenAI-compatible (base64 JSON body, not `multipart/form-data`)
+- Both request shapes: base64 JSON (`input_audio`) and OpenAI-style `multipart/form-data` (works with the official OpenAI SDKs)
 - A drop-in bash script that base64-encodes audio, posts JSON, and extracts the transcript
 - Discovering STT models via `/api/v1/models?output_modalities=transcription`
 - Audio format guidance (`wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, `aac`) and avoiding format/bytes mismatch
