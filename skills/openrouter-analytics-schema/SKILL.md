@@ -98,6 +98,8 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
 
+> **Accounting note:** Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
+
 ## Understanding Dimensions
 
 Each dimension has:
