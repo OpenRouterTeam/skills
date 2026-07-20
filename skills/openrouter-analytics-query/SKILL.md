@@ -188,7 +188,9 @@ Classifier filters narrow results to generations matching specific classificatio
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
 | `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). The query still executes normally; these inform the caller about filter resolution issues. |
 
-> **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
+> **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `blended_cost_per_million_tokens`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
+
+> **Accounting note:** Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
 
 > **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
 
