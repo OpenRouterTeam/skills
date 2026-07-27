@@ -19,11 +19,11 @@ Run these in order. Do not skip ahead on a failure.
 
    It installs to `~/.local/bin`, which is often not on PATH in a non-login shell. Re-check with `~/.local/bin/ori --version` before reporting failure.
 
-2. Auth: `~/.ori/credentials.json` must exist, or `OPENROUTER_API_KEY` must be set. If neither, STOP and hand it back to the user. `ori login` opens a browser and you cannot complete it. Tell them to run it themselves. In Claude Code, tell them to type `! ori login`.
+2. Auth: `~/.ori/credentials.json` must exist. It is created by `ori login` and scoped specifically to Ori; do not substitute a raw `OPENROUTER_API_KEY`. If it is missing, STOP and hand it back to the user. `ori login` opens a browser and you cannot complete it. Tell them to run it themselves. In Claude Code, tell them to type `! ori login`.
 
 3. `command -v bun`. Ori executes `*.eval.ts` through Bun.
 
-Never print, echo, or log the contents of `credentials.json`, the value of `OPENROUTER_API_KEY`, or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not what it is set to.
+Never print, echo, or log the contents of `credentials.json` or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not what it is set to.
 
 ## 2. Scope it before you spawn
 

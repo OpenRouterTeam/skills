@@ -17,7 +17,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 ## Prerequisites
 
 - `ori` on PATH — `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`
-- Ori auth — `~/.ori/credentials.json` (via `ori login`) or `OPENROUTER_API_KEY`
+- Ori auth — `~/.ori/credentials.json` (via `ori login`)
 - [Bun](https://bun.sh), which Ori uses to execute `*.eval.ts`
 
 ## What it covers
