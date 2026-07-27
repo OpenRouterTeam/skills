@@ -23,7 +23,7 @@ Run these in order. Do not skip ahead on a failure.
 
 3. `command -v bun`. Ori executes `*.eval.ts` through Bun.
 
-Never print, echo, or log the contents of `credentials.json`, the value of `OPENROUTER_API_KEY`, or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not the key itself.
+Never print, echo, or log the contents of `credentials.json`, the value of `OPENROUTER_API_KEY`, or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not what it is set to.
 
 ## 2. Scope it before you spawn
 
