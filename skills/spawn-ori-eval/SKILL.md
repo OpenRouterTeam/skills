@@ -23,7 +23,7 @@ Run these in order. Do not skip ahead on a failure.
 
 3. `command -v bun`. Ori executes `*.eval.ts` through Bun.
 
-Never print, echo, or log the contents of `credentials.json` or the value of `OPENROUTER_API_KEY`.
+Never print, echo, or log the contents of `credentials.json`, the value of `OPENROUTER_API_KEY`, or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not the key itself.
 
 ## 2. Scope it before you spawn
 
@@ -52,7 +52,7 @@ ori code -p "$(cat /tmp/ori-task.txt)" > /tmp/ori-run.log 2>&1 &
 
 ## 4. The task prompt
 
-Write this to a file and pass it with `-p`. Fill every angle-bracket slot.
+Write this to `/tmp/ori-task.txt` — the file section 3 cats — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path cats to an empty prompt and Ori does nothing.
 
 ```text
 Use the writing-evals skill.
