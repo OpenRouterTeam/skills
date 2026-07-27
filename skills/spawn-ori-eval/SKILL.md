@@ -5,7 +5,7 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 # Spawn Ori Eval
 
-You are not going to write this eval. You are going to install Ori if needed, scope the eval with the user, hand it to `ori code -p`, and relay what comes back.
+You are not going to write this eval. You are going to install Ori if needed, scope the eval with the user, hand it to a headless Ori run, and relay what comes back.
 
 That split is deliberate. Ori pins the harness and the model that author and grade the eval, so the bench is identical no matter which coding agent the user happens to be driving. An eval you author yourself is not reproducible, and a score change has to mean the user's agent changed, not the environment.
 
@@ -40,19 +40,22 @@ Tell the user these answers are frozen once the run starts.
 
 ## 3. Spawn it
 
+<!-- TODO(launch): placeholder — the headless invocation devex is not final. Replace this command block with the real one before launch. -->
+
 ```bash
-ori code -p "$(cat /tmp/ori-task.txt)" > /tmp/ori-run.log 2>&1 &
+# PLACEHOLDER — headless invocation command TBD, update before launch
+<ori-headless-invocation> "$(cat /tmp/ori-task.txt)" > /tmp/ori-run.log 2>&1 &
 ```
 
 - Background it. A real run outlasts most agents' foreground command timeout. Poll the log; do not block.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
-- One invocation. Do not loop `ori code` once per candidate model. Comparing models is `ori eval`'s job, not yours.
+- One invocation. Do not loop the headless run once per candidate model. Comparing models is `ori eval`'s job, not yours.
 - The first `ori` run on a machine creates `~/.ori/global` and fetches templates over the network. Expect a pause of roughly 30 seconds and do not treat it as a hang.
 
 ## 4. The task prompt
 
-Write this to `/tmp/ori-task.txt` — the file section 3 cats — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path cats to an empty prompt and Ori does nothing.
+Write this to `/tmp/ori-task.txt` — the file the section 3 command cats — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path cats to an empty prompt and Ori does nothing.
 
 ```text
 Use the writing-evals skill.
@@ -85,7 +88,7 @@ models.
 ## 5. Never do these
 
 - **Never spawn your own subagent to "do an eval."** It produces a plausible table with no pinned bench behind it, which is worse than no answer.
-- **Never write the eval yourself.** Ori's `writing-evals` skill fires automatically inside `ori code`.
+- **Never write the eval yourself.** Ori's `writing-evals` skill fires automatically inside the headless run.
 - **Never put the eval in the repo's existing test framework.** `ori eval` discovers `*.eval.ts` only. A pytest, vitest, or Go test file silently never runs, and silence reads as passing.
 - **Never hand-roll raw API calls and present the numbers as an Ori eval.** If you measure something another way, label it clearly as such.
 - **Never name model ids or prices from memory.** They go stale between releases.
@@ -94,7 +97,7 @@ models.
 ## 6. After the run
 
 - The `*.eval.ts` file is the durable artifact. Tell the user to commit it.
-- Re-runs do not need `ori code`. `ori eval evals/<feature>.eval.ts` is enough and much cheaper. This is what turns a one-off answer into a guardrail.
+- Re-runs do not need a full headless run. `ori eval evals/<feature>.eval.ts` is enough and much cheaper. This is what turns a one-off answer into a guardrail.
 - Offer to wire `ori eval` into CI so a worse agent fails the build.
 - Relay the full table, the ship or no-ship call, and the quoted failures. Do not summarize away the failure quotes; they are the most useful output.
 
