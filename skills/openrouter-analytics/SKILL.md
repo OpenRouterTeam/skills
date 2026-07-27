@@ -129,6 +129,7 @@ When interpreting results for the user:
 - **Throughput** (`avg_throughput`) is tokens per second
 - When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
 - **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows; `generation_id` and `session_id` return raw values
+- **Label fallbacks**: `app = -1` is `Unknown`, `api_key_id = -1` is `Chatroom`; user labels prefer the full name and fall back to email; app labels prefer the title, then origin URL, then `App #<id>`
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
 - **Accounting note**: Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
 

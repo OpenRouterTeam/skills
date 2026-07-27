@@ -186,13 +186,13 @@ Classifier filters narrow results to generations matching specific classificatio
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
-| `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). The query still executes normally; these inform the caller about filter resolution issues. |
+| `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). An unresolvable label filter becomes a no-match sentinel; the query still executes normally, and the warning explains the filter resolution issue. |
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `blended_cost_per_million_tokens`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
 > **Accounting note:** Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. `app = -1` is `Unknown`, `api_key_id = -1` is `Chatroom`; user labels prefer the full name and fall back to email; app labels prefer the title, then origin URL, then `App #<id>`.
 
 ## CLI Reference
 
@@ -226,7 +226,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 }
 ```
 
-A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
+A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only. The CLI stdout intentionally omits the endpoint's optional `cachedAt` and `warnings` fields; use the direct API response when those fields are needed.
 
 > **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
 
@@ -332,9 +332,9 @@ Combine up to 2 dimensions for cross-tabulation:
 
 ## Time Range Behavior
 
-Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
+Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
 
