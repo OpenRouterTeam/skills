@@ -127,7 +127,7 @@ When interpreting results for the user:
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
 - **Throughput** (`avg_throughput`) is tokens per second
 - When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
-- **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows
+- **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows; `generation_id` and `session_id` return raw values
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
 
 ### Cost Optimization Guidance
@@ -145,7 +145,7 @@ When the user asks "How can I spend less?" or similar:
 
 ## Drilling Down to Individual Generations
 
-To inspect specific generations from your analytics results, add `generation_id` as a dimension. This is a generations-only dimension (31-day limit) that returns the unique ID for each generation in the result set.
+To inspect specific generations or sessions from your analytics results, add `generation_id` or `session_id` as a dimension. Both are generations-only dimensions (31-day limit). `generation_id` returns the unique ID for each generation in the result set. `session_id` groups and filters sessionless requests as the literal `none`: the ClickHouse column defaults to an empty string, and the query builder coalesces it to `none`. Use `neq 'none'` to exclude sessionless requests; filtering on `''` matches nothing.
 
 ```bash
 npx tsx query-analytics.ts --metrics total_usage,tokens_total --dimensions generation_id --order-by total_usage --limit 10
