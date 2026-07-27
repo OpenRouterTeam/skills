@@ -1,6 +1,6 @@
 # spawn-ori-eval
 
-Delegate model evals to [Ori](https://openrouter.ai/ori): spawn `ori code -p` as a subprocess so the eval is authored and graded on a pinned harness and model, then relay the ranked results.
+Delegate model evals to [Ori](https://openrouter.ai/ori/code): spawn `ori code -p` as a subprocess so the eval is authored and graded on a pinned harness and model, then relay the ranked results.
 
 ## Install
 
