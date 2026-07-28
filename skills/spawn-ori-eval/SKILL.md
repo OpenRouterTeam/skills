@@ -38,8 +38,8 @@ ori code --prompt-file /tmp/ori-task.txt
 ```
 
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
-- `ori code -p "<task>"` runs without a TTY, streams output to stdout, and exits when the prompt completes with exit code 0 on success or nonzero on failure.
-- Questions the `create-eval` skill asks flow through the headless run back to the calling agent; answer them there as they appear.
+- `ori code -p "<task>"` runs without a TTY and exits when the prompt completes: exit code 0 on success, nonzero on failure. With stdout piped it streams NDJSON — one `{"kind":"event","event":...}` line per runtime event, then a final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the concatenated `assistant.text.delta` payloads.
+- Questions the `create-eval` skill asks land in that stream (usually as the run's final reply text). The run never blocks on them. Answer by resuming the same session with the `sessionId` from the result line: `ori code --session <sessionId> -p "<answer>"`, and keep chaining until the eval is written and run.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
@@ -88,4 +88,4 @@ not create or modify anything outside the top-level evals directory.
 | Long silence on the first run | Template fetch, roughly 30s. Wait before retrying. |
 | Ori reports a model id as unavailable | Have it look the id up again rather than substituting one from memory. |
 | The eval file landed outside `evals/` | Move it and re-run `ori eval` against the new path. |
-| Run exceeds your timeout | It is still running in the background. Keep polling output; do not re-spawn. |
+| Run exceeds your timeout | The process may still be running. Keep reading its stdout until the `{"kind":"result",...}` line arrives; do not re-spawn. |
