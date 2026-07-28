@@ -29,6 +29,8 @@ Never print, echo, or log the contents of `credentials.json` or any other value 
 
 `spawn-ori-eval` does not do the scoping interview. Ori's `create-eval` skill already asks which surface to eval, what it needs to be good at, what real data to use, the cost ceiling, and the baseline model. This skill just hands that request off.
 
+Do not ask the user anything before spawning — not even "what do you want to eval?". If the request is vague or empty, spawn anyway and pass through whatever the user said verbatim; `create-eval` asks its questions inside the Ori run.
+
 ## 3. Spawn it
 
 ```bash
