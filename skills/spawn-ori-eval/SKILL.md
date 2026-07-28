@@ -89,4 +89,4 @@ not create or modify anything outside the top-level evals directory.
 | Long silence on the first run | Template fetch, roughly 30s. Wait before retrying. |
 | Ori reports a model id as unavailable | Have it look the id up again rather than substituting one from memory. |
 | The eval file landed outside `evals/` | Move it and re-run `ori eval` against the new path. |
-| Run exceeds your timeout | It was backgrounded. Keep polling the log, do not re-spawn. |
+| Run exceeds your timeout | The run is still going in the terminal. Do not re-spawn. |
