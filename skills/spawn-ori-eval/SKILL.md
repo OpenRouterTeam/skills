@@ -5,7 +5,7 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 # Spawn Ori Eval
 
-You are not going to write this eval. You are going to install Ori if needed, scope the eval with the user, hand it to a headless Ori run, and relay what comes back.
+You are not going to write this eval. You are going to install Ori if needed, scope the eval with the user, hand it to an Ori run, and relay what comes back.
 
 That split is deliberate. Ori pins the harness and the model that author and grade the eval, so the bench is identical no matter which coding agent the user happens to be driving. An eval you author yourself is not reproducible, and a score change has to mean the user's agent changed, not the environment.
 
@@ -19,7 +19,7 @@ Run these in order. Do not skip ahead on a failure.
 
    It installs to `~/.local/bin`, which is often not on PATH in a non-login shell. Re-check with `~/.local/bin/ori --version` before reporting failure.
 
-2. Auth: `~/.ori/credentials.json` must exist. It is created by `ori login` and scoped specifically to Ori; do not substitute a raw `OPENROUTER_API_KEY`. If it is missing, STOP and hand it back to the user. `ori login` opens a browser and you cannot complete it. Tell them to run it themselves. In Claude Code, tell them to type `! ori login`.
+2. Auth: recommend `ori login`, which stores an Ori-scoped credential at `~/.ori/credentials.json`. Do not tell the user to export a raw `OPENROUTER_API_KEY`. If the credential is missing, STOP and hand it back to the user. `ori login` opens a browser and you cannot complete it. Tell them to run it themselves. In Claude Code, tell them to type `! ori login`.
 
 3. `command -v bun`. Ori executes `*.eval.ts` through Bun.
 
@@ -40,29 +40,31 @@ Tell the user these answers are frozen once the run starts.
 
 ## 3. Spawn it
 
-<!-- TODO(launch): placeholder — the headless invocation devex is not final. Replace this command block with the real one before launch. -->
-
 ```bash
-# PLACEHOLDER — headless invocation command TBD, update before launch
-<ori-headless-invocation> "$(cat /tmp/ori-task.txt)" > /tmp/ori-run.log 2>&1 &
+ori code -p "<task>"
+# For a long prompt:
+ori code --prompt-file /tmp/ori-task.txt
 ```
 
-- Background it. A real run outlasts most agents' foreground command timeout. Poll the log; do not block.
+- `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
+- `-p` is currently available only in the alpha channel. Stable `0.2.3` does not include it; update with `ori update --alpha` or run with `ORI_CHANNEL=alpha`.
+- `ori code` requires a TTY. Non-interactive stdout exits 1 with "`ori code` is interactive and needs a terminal"; this is tracked as ORI-814. Run it in a terminal/PTY until the non-interactive exit mode ships.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
-- One invocation. Do not loop the headless run once per candidate model. Comparing models is `ori eval`'s job, not yours.
+- One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
 - The first `ori` run on a machine creates `~/.ori/global` and fetches templates over the network. Expect a pause of roughly 30 seconds and do not treat it as a hang.
 
 ## 4. The task prompt
 
-Write this to `/tmp/ori-task.txt` — the file the section 3 command cats — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path cats to an empty prompt and Ori does nothing.
+Write this to `/tmp/ori-task.txt` — the file used by the section 3 command — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path produces an empty prompt and Ori does nothing.
 
 ```text
-Use the writing-evals skill.
+Use the create-eval skill.
 
 Feature under test: <feature name>
 Real prompt and call site: <paths>. Read these first and use the actual
 production prompt, not a paraphrase.
+The surface to eval is already chosen; do not ask which surface to eval.
 Model in production today: <model id> at <file:line>. Include it as the
 baseline row.
 
@@ -77,8 +79,8 @@ Cases must span: fully covered by context, partially covered, not covered at
 all, adversarial pressure for something the context does not support, and
 <domain-specific cases>.
 
-Write the eval to evals/<feature>.eval.ts and run it with ori eval. Do not
-create or modify anything outside the evals directory.
+Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
+not create or modify anything outside the top-level evals directory.
 
 Report a ranked table, state plainly whether anything beats the production model
 by enough to justify a swap, and quote 2 or 3 concrete failures from the losing
@@ -97,7 +99,11 @@ models.
 ## 6. After the run
 
 - The `*.eval.ts` file is the durable artifact. Tell the user to commit it.
-- Re-runs do not need a full headless run. `ori eval evals/<feature>.eval.ts` is enough and much cheaper. This is what turns a one-off answer into a guardrail.
+- Re-runs do not need a full Ori run. `ori eval evals/<feature>/<name>.eval.ts` is enough and much cheaper. This is what turns a one-off answer into a guardrail.
+- Use `ori eval --report <path>` for shareable Markdown reports.
+- Use `--baseline last|best|model:<slug>` to choose the comparison baseline; history is stored in `.ori/eval/history.jsonl`.
+- Use `run.toCostAtMost` and `run.toFinishWithin` for cost and time bounds.
+- Use `candidateModels` with `assertModelIsLive` to validate candidate availability, and `--list --allow-no-key` when listing models without authentication.
 - Offer to wire `ori eval` into CI so a worse agent fails the build.
 - Relay the full table, the ship or no-ship call, and the quoted failures. Do not summarize away the failure quotes; they are the most useful output.
 
