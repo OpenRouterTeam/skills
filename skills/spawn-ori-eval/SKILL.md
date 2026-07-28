@@ -40,7 +40,7 @@ ori code --prompt-file /tmp/ori-task.txt
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
 - `-p` is currently available only in the alpha channel. Stable `0.2.3` does not include it; update with `ori update --alpha` or run with `ORI_CHANNEL=alpha`.
 - `ori code` requires a TTY. Non-interactive stdout exits 1 with "`ori code` is interactive and needs a terminal"; this is tracked as ORI-814. Run it in a terminal/PTY until the non-interactive exit mode ships.
-- Interactive Q&A inside a headless run depends on ORI-814's headless mode exposing a question/answer channel; until then, `ori code` stays interactive-terminal only.
+- Interactive Q&A depends on ORI-814's headless mode exposing a question/answer channel; until then, `ori code` stays interactive-terminal only.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
@@ -63,7 +63,7 @@ not create or modify anything outside the top-level evals directory.
 ## 5. Never do these
 
 - **Never spawn your own subagent to "do an eval."** It produces a plausible table with no pinned bench behind it, which is worse than no answer.
-- **Never write the eval yourself.** Ori's `writing-evals` skill fires automatically inside the headless run.
+- **Never write the eval yourself.** Ori's `create-eval` skill fires automatically inside the Ori run.
 - **Never put the eval in the repo's existing test framework.** `ori eval` discovers `*.eval.ts` only. A pytest, vitest, or Go test file silently never runs, and silence reads as passing.
 - **Never hand-roll raw API calls and present the numbers as an Ori eval.** If you measure something another way, label it clearly as such.
 - **Never name model ids or prices from memory.** They go stale between releases.
@@ -76,7 +76,7 @@ not create or modify anything outside the top-level evals directory.
 - Use `ori eval --report <path>` for shareable Markdown reports.
 - Use `--baseline last|best|model:<slug>` to choose the comparison baseline; history is stored in `.ori/eval/history.jsonl`.
 - Use `run.toCostAtMost` and `run.toFinishWithin` for cost and time bounds.
-- Use `candidateModels` with `assertModelIsLive` to validate candidate availability, and `--list --allow-no-key` when listing models without authentication.
+- Use `candidateModels` with `assertModelIsLive` to validate candidate availability, and `--list --allow-no-key` to list discovered evals without an API key.
 - Offer to wire `ori eval` into CI so a worse agent fails the build.
 - Relay the full table, the ship or no-ship call, and the quoted failures. Do not summarize away the failure quotes; they are the most useful output.
 
