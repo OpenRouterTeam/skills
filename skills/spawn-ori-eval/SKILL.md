@@ -5,7 +5,7 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 # Spawn Ori Eval
 
-You are not going to write this eval. You are going to install Ori if needed, scope the eval with the user, hand it to an Ori run, and relay what comes back.
+You are not going to write this eval. You are going to install Ori if needed, hand the request to an Ori run, and relay what comes back.
 
 That split is deliberate. Ori pins the harness and the model that author and grade the eval, so the bench is identical no matter which coding agent the user happens to be driving. An eval you author yourself is not reproducible, and a score change has to mean the user's agent changed, not the environment.
 
@@ -25,18 +25,9 @@ Run these in order. Do not skip ahead on a failure.
 
 Never print, echo, or log the contents of `credentials.json` or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not what it is set to.
 
-## 2. Scope it before you spawn
+## 2. Keep the Q&A in `create-eval`
 
-Ori runs headless. Once it starts it cannot ask the user anything, so every decision has to be made now.
-
-1. Find every model call site in the repo. Search for `openrouter`, `anthropic`, `openai`, `chat.completions`, `messages.create`, `model=`, `MODEL`, and model ids in config files and `.env` keys.
-2. Report what you found, grouped by feature, with file and line.
-3. Ask the user to pick exactly ONE feature. A repo with a support bot, a summarizer, and a classifier needs three separate evals, not one blended score.
-4. Ask what the model needs to be good at, in their own words. Do not offer four canned options; the real answer is usually a sentence.
-5. Ask for a cost ceiling per call.
-6. Confirm which model is in production today. It becomes the baseline row.
-
-Tell the user these answers are frozen once the run starts.
+`spawn-ori-eval` does not do the scoping interview. Ori's `create-eval` skill already asks which surface to eval, what it needs to be good at, what real data to use, the cost ceiling, and the baseline model. This skill just hands that request off.
 
 ## 3. Spawn it
 
@@ -49,6 +40,7 @@ ori code --prompt-file /tmp/ori-task.txt
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
 - `-p` is currently available only in the alpha channel. Stable `0.2.3` does not include it; update with `ori update --alpha` or run with `ORI_CHANNEL=alpha`.
 - `ori code` requires a TTY. Non-interactive stdout exits 1 with "`ori code` is interactive and needs a terminal"; this is tracked as ORI-814. Run it in a terminal/PTY until the non-interactive exit mode ships.
+- Interactive Q&A inside a headless run depends on ORI-814's headless mode exposing a question/answer channel; until then, `ori code` stays interactive-terminal only.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
@@ -61,30 +53,11 @@ Write this to `/tmp/ori-task.txt` — the file used by the section 3 command —
 ```text
 Use the create-eval skill.
 
-Feature under test: <feature name>
-Real prompt and call site: <paths>. Read these first and use the actual
-production prompt, not a paraphrase.
-The surface to eval is already chosen; do not ask which surface to eval.
-Model in production today: <model id> at <file:line>. Include it as the
-baseline row.
-
-Rank primarily on: <the user's words, verbatim>
-Secondary axes, reported as tiebreakers: <axes>
-Hard gate: fail any model above <N> per call and mark it as a cost failure.
-
-Compare the production model plus 4 or 5 other currently available models. Look
-up real per-token pricing. Do not recall model ids from memory.
-
-Cases must span: fully covered by context, partially covered, not covered at
-all, adversarial pressure for something the context does not support, and
-<domain-specific cases>.
+User request: <verbatim request>
+Repo context pointers: <paths>. Read these first.
 
 Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
 not create or modify anything outside the top-level evals directory.
-
-Report a ranked table, state plainly whether anything beats the production model
-by enough to justify a swap, and quote 2 or 3 concrete failures from the losing
-models.
 ```
 
 ## 5. Never do these
