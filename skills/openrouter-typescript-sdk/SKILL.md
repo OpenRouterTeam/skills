@@ -20,6 +20,9 @@ The SDK is split into two packages:
 # For agent features (callModel, tools, stop conditions)
 npm install @openrouter/agent
 
+# For remote MCP tools
+npm install @openrouter/mcp
+
 # For platform features (models, credits, OAuth, API keys)
 npm install @openrouter/sdk
 ```
@@ -288,6 +291,22 @@ const text = await result.getText();
 - **Multiple consumption patterns** - text, streaming, structured data
 - **Automatic tool execution** with multi-turn support
 
+### Final response behavior
+
+After completed tool rounds, `callModel` tolerates an empty final output by
+default: it retries the follow-up once, then resolves with empty text.
+Set `strictFinalResponse: true` to restore the pre-0.8.0 behavior and throw
+when the final output is still empty:
+
+```typescript
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Look up the weather in Paris',
+  tools: [weatherTool],
+  strictFinalResponse: true,
+});
+```
+
 ---
 
 ## Input Formats
@@ -497,6 +516,45 @@ const manualTool = tool({
   execute: false
 });
 ```
+
+When unresolved manual tools pause a run, the conversation state uses
+`status: 'awaiting_client_tools'` and stores the calls in
+`pendingToolCalls`. Resume by calling `callModel` again with new input; manual
+tools are not resumed by approval or HITL call IDs.
+
+Persisted conversation state may include `version: 1`. Treat serialized state
+as opaque; use `serializeConversationState()` and
+`deserializeConversationState()` for typed validation and future migrations.
+The latter reports malformed payloads with `InvalidStateError` and unsupported
+versions with `UnsupportedStateVersionError`.
+
+### Remote MCP Tools
+
+The `@openrouter/mcp` package connects to remote MCP servers over Streamable
+HTTP or SSE and exposes their tools for `callModel`:
+
+```typescript
+import { createMCPTools } from '@openrouter/mcp';
+
+const mcp = await createMCPTools({
+  url: 'https://mcp.example.com/mcp',
+  auth: { kind: 'bearer', token: process.env.MCP_TOKEN },
+});
+
+const result = client.callModel({
+  model: 'openai/gpt-5-nano',
+  input: 'Summarize my latest issues',
+  tools: mcp.tools,
+});
+
+console.log(await result.getText());
+await mcp.close();
+```
+
+MCP tools can be mixed with local `tool()` definitions. Their execution
+results carry `source: 'mcp'` and are `unknown`; local tool results carry
+`source: 'client'` and remain typed from `outputSchema`. Use `isMcpTool()` to
+check the brand when needed.
 
 ---
 
@@ -842,11 +900,16 @@ After a tool completes execution:
 interface ToolExecutionResult {
   toolCallId: string;
   toolName: string;
-  result: unknown;                  // Validated against outputSchema
+  source: 'client' | 'mcp';
+  result: unknown;                  // Typed from outputSchema for client tools; unknown for MCP
   preliminaryResults?: unknown[];   // From generator tools
   error?: Error;
 }
 ```
+
+Streaming `tool.result` events carry the same `source` discriminant. Narrow on
+`source === 'client'` to recover local tool output types; validate MCP results
+before using them.
 
 ### Step Result (for Stop Conditions)
 
