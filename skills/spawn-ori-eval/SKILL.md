@@ -38,9 +38,8 @@ ori code --prompt-file /tmp/ori-task.txt
 ```
 
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
-- `-p` is currently available only in the alpha channel. Stable `0.2.3` does not include it; update with `ori update --alpha` or run with `ORI_CHANNEL=alpha`.
-- `ori code` requires a TTY. Non-interactive stdout exits 1 with "`ori code` is interactive and needs a terminal"; this is tracked as ORI-814. Run it in a terminal/PTY until the non-interactive exit mode ships.
-- Interactive Q&A depends on ORI-814's headless mode exposing a question/answer channel; until then, `ori code` stays interactive-terminal only.
+- `ori code -p "<task>"` runs without a TTY, streams output to stdout, and exits when the prompt completes with exit code 0 on success or nonzero on failure.
+- Questions the `create-eval` skill asks flow through the headless run back to the calling agent; answer them there as they appear.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
@@ -63,7 +62,7 @@ not create or modify anything outside the top-level evals directory.
 ## 5. Never do these
 
 - **Never spawn your own subagent to "do an eval."** It produces a plausible table with no pinned bench behind it, which is worse than no answer.
-- **Never write the eval yourself.** Ori's `create-eval` skill fires automatically inside the Ori run.
+- **Never write the eval yourself.** Ori's `create-eval` skill fires automatically inside the run.
 - **Never put the eval in the repo's existing test framework.** `ori eval` discovers `*.eval.ts` only. A pytest, vitest, or Go test file silently never runs, and silence reads as passing.
 - **Never hand-roll raw API calls and present the numbers as an Ori eval.** If you measure something another way, label it clearly as such.
 - **Never name model ids or prices from memory.** They go stale between releases.
@@ -89,4 +88,4 @@ not create or modify anything outside the top-level evals directory.
 | Long silence on the first run | Template fetch, roughly 30s. Wait before retrying. |
 | Ori reports a model id as unavailable | Have it look the id up again rather than substituting one from memory. |
 | The eval file landed outside `evals/` | Move it and re-run `ori eval` against the new path. |
-| Run exceeds your timeout | The run is still going in the terminal. Do not re-spawn. |
+| Run exceeds your timeout | It is still running in the background. Keep polling output; do not re-spawn. |
