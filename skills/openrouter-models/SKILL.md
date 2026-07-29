@@ -128,7 +128,7 @@ Returns for each provider:
 
 ## API Response Shapes
 
-`GET /api/v1/models` returns `{ data: Model[] }`. For full field reference, see the [Models reference](https://openrouter.ai/docs/guides/overview/models).
+`GET /api/v1/models` returns `{ data: Model[] }`. Tilde-latest alias rows may include `alias_target: { slug, name }`, where `slug` is the routable ID of the concrete model currently targeted by the alias. For full field reference, see the [Models reference](https://openrouter.ai/docs/guides/overview/models).
 
 **Query parameters** (all optional):
 
@@ -143,6 +143,7 @@ Returns for each provider:
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
+- `alias_target`, when present on a tilde-latest alias, identifies the concrete target; its `slug` matches that target model row's `id`.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
