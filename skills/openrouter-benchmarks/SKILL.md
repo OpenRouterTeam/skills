@@ -1,11 +1,11 @@
 ---
 name: openrouter-benchmarks
-description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores. Use when the user asks for benchmark-backed model selection, model rankings by coding/intelligence/agentic ability, Artificial Analysis or Design Arena ELO/win-rate results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
+description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores. Use when the user asks for benchmark-backed model selection, model rankings by coding/intelligence/agentic ability, Artificial Analysis or Design Arena ELO/win-rate results, OpenRouter GPQA or tau-bench results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
 ---
 
 # OpenRouter Benchmarks
 
-Use OpenRouter's unified benchmarks endpoint to answer benchmark-backed model ranking and model-selection questions. The endpoint aggregates Artificial Analysis and Design Arena data and returns citation metadata that should be preserved when reporting results.
+Use OpenRouter's unified benchmarks endpoint to answer benchmark-backed model ranking and model-selection questions. The endpoint aggregates Artificial Analysis, Design Arena, and OpenRouter's own GPQA and tau-bench data and returns citation metadata that should be preserved when reporting results.
 
 ## Prerequisites
 
@@ -24,6 +24,7 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 | Find best coding, intelligence, or agentic models | Use `task_type=coding`, `task_type=intelligence`, or `task_type=agentic` |
 | Query Artificial Analysis only | Use `source=artificial-analysis` |
 | Query Design Arena only | Use `source=design-arena`, plus `arena` and `category` when relevant |
+| Query OpenRouter GPQA or tau-bench results | Use `source=openrouter`; use `task_type=intelligence` for GPQA or `task_type=agentic` for tau-bench |
 | Get raw API-shaped data for integration work | Return the raw `data`/`meta` shape from the endpoint |
 | Understand all response fields or direct curl usage | Read `references/benchmarks-api.md` |
 
@@ -51,7 +52,7 @@ Query parameters:
 
 | Flag | Values | Notes |
 |---|---|---|
-| `source` | `artificial-analysis`, `design-arena` | Omitting it returns all sources. |
+| `source` | `artificial-analysis`, `design-arena`, `openrouter` | Omitting it returns all sources. |
 | `task_type` | `coding`, `intelligence`, `agentic` | Maps to source-specific indices/categories. |
 | `arena` | `models`, `builders`, `agents` | Design Arena only; defaults server-side to `models`. |
 | `category` | `codecategories`, `uicomponent`, `gamedev`, `3d`, `dataviz`, `image`, `video`, `svg`, etc. | Design Arena only. |
@@ -59,13 +60,14 @@ Query parameters:
 
 Always preserve `meta.citation`, `meta.source_url`, and `meta.as_of`; include attribution when republishing benchmark data.
 
-When results include both sources, do not present them as a single absolute leaderboard: Artificial Analysis indices and Design Arena ELO use different scales. Compare within each source, or rerun with `source=artificial-analysis` or `source=design-arena` for a source-specific ranking.
+When results include multiple sources, do not present them as a single absolute leaderboard: Artificial Analysis indices, Design Arena ELO, and OpenRouter accuracy scores use different scales and evaluation contracts. Compare within each source, or rerun with `source=artificial-analysis`, `source=design-arena`, or `source=openrouter` for a source-specific ranking.
 
 ## Interpreting Results
 
 - Artificial Analysis rows include `intelligence_index`, `coding_index`, and `agentic_index`; higher is better.
 - Design Arena rows include `elo`, `win_rate`, `avg_generation_time_ms`, `arena`, `category`, and `tournament_stats`; higher `elo`/`win_rate` is better, lower generation time is faster.
-- `pricing.prompt` and `pricing.completion` are USD per token as decimal strings. Multiply by 1,000,000 for per-million-token costs.
+- OpenRouter rows include `benchmark_type`, `accuracy`, `accuracy_stddev`, `avg_cost_per_task`, `total_tasks`, and `last_run_timestamp`; `accuracy` is a 0–1 score where higher is better. OpenRouter benchmark types are `gpqa_diamond` and `tau_bench_verified_airline`.
+- `pricing.prompt` and `pricing.completion` on Artificial Analysis and Design Arena rows are USD per token as decimal strings. Multiply by 1,000,000 for per-million-token costs; OpenRouter rows do not include a `pricing` field.
 - `model_permaslug` identifies the benchmarked model entry. Verify it against `GET /api/v1/models` before using it as a chat/completions model ID.
 - `meta.model_count` counts unique models in the response, which can differ from `data.length` when multiple Design Arena categories are returned.
 

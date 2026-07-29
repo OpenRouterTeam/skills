@@ -9,14 +9,14 @@ GET https://openrouter.ai/api/v1/benchmarks
 Authorization: Bearer <OPENROUTER_API_KEY>
 ```
 
-The endpoint aggregates Artificial Analysis and Design Arena benchmark scores. It is authenticated with any valid OpenRouter API key and rate-limited to 30 requests/minute per key and 500 requests/day per account.
+The endpoint aggregates Artificial Analysis, Design Arena, and OpenRouter's own GPQA and tau-bench benchmark scores. It is authenticated with any valid OpenRouter API key and rate-limited to 30 requests/minute per key and 500 requests/day per account.
 
 ## Query Parameters
 
 | Parameter | Values | Description |
 |---|---|---|
-| `source` | `artificial-analysis`, `design-arena` | Benchmark source. Omitting it returns all sources. The source determines row shape. |
-| `task_type` | `coding`, `intelligence`, `agentic` | Workload filter. For Artificial Analysis, maps to the corresponding index. For Design Arena, maps to the matching category. |
+| `source` | `artificial-analysis`, `design-arena`, `openrouter` | Benchmark source. Omitting it returns all sources. The source determines row shape. |
+| `task_type` | `coding`, `intelligence`, `agentic` | Workload filter. For Artificial Analysis, maps to the corresponding index. For Design Arena, maps to the matching category. For OpenRouter, `intelligence` maps to `gpqa_diamond` and `agentic` maps to `tau_bench_verified_airline`. |
 | `arena` | `models`, `builders`, `agents` | Design Arena only. Defaults to `models` when `source=design-arena`. |
 | `category` | string | Design Arena category such as `codecategories`, `uicomponent`, `gamedev`, `3d`, `dataviz`, `image`, `video`, or `svg`. Omitting it returns all categories. |
 | `max_results` | integer >= 1 | Maximum number of items to return. Omitting it returns all matching results. |
@@ -25,12 +25,12 @@ The endpoint aggregates Artificial Analysis and Design Arena benchmark scores. I
 
 ```ts
 type UnifiedBenchmarksResponse = {
-  data: Array<ArtificialAnalysisItem | DesignArenaItem>;
+  data: Array<ArtificialAnalysisItem | DesignArenaItem | OpenRouterItem>;
   meta: {
     as_of: string;
     citation: string | null;
     model_count: number;
-    source: "artificial-analysis" | "design-arena" | null;
+    source: "artificial-analysis" | "design-arena" | "openrouter" | null;
     source_url: string | null;
     task_type: string | null;
     version: "v1";
@@ -79,6 +79,24 @@ type DesignArenaItem = {
 
 Higher `elo` and `win_rate` are better. `avg_generation_time_ms` is performance context, not the ranking score.
 
+### OpenRouter Item
+
+```ts
+type OpenRouterItem = {
+  source: "openrouter";
+  model_permaslug: string;
+  display_name: string;
+  benchmark_type: "gpqa_diamond" | "tau_bench_verified_airline";
+  accuracy: number;
+  accuracy_stddev: number | null;
+  avg_cost_per_task: number | null;
+  total_tasks: number;
+  last_run_timestamp: string;
+};
+```
+
+`accuracy` is an aggregate score from 0 to 1; higher is better. OpenRouter rows do not include a `pricing` field.
+
 ## Errors
 
 | Status | Meaning | Recovery |
@@ -90,7 +108,7 @@ Higher `elo` and `win_rate` are better. `avg_generation_time_ms` is performance 
 
 ## Reporting Guidance
 
-When answering users, include the benchmark source, `meta.as_of`, and the citation/source URL if present. If results mix sources and `meta.citation` is null, attribute each row by its `source` discriminator.
+When answering users, include the benchmark source, `meta.as_of`, and the citation/source URL if present. For `source=openrouter`, `meta.citation` is `Source: OpenRouter evals (openrouter.ai) via OpenRouter (openrouter.ai/rankings).` and `meta.source_url` is `https://openrouter.ai/rankings`. If results mix sources and `meta.citation` is null, attribute each row by its `source` discriminator.
 
 ## Availability Caveat
 
