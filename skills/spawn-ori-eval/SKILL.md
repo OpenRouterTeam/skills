@@ -143,3 +143,13 @@ not create or modify anything outside the top-level evals directory.
 | Ori accepted the answer but acted as if nothing was chosen | The `content` keys did not match the request's field `name`s, so the accept carried no usable value. Re-read `payload.fields[].name` and use those keys verbatim. |
 | A question never arrives but the run looks stalled | Some questions land as plain prose and end the turn instead of pending. Read the final assistant text and answer by resuming the session. |
 | `--interactions` rejected as unknown | The installed `ori` predates the answer channel. `ori update`, then re-check `ori code --help`. |
+| `403 Key limit exceeded` or a 402 payment error in the stream | The user's OpenRouter key is out of credit. See below. |
+
+### When the key runs out of credit
+
+A run that dies within seconds with `403 Key limit exceeded (total limit)` or a 402 payment error is not a bug in Ori or in the eval — the OpenRouter credential behind `ori login` has hit its spend cap. Handle it as a conversation, not a failure report:
+
+1. Tell the user plainly: their OpenRouter key is out of credit, no eval was written, and this attempt spent nothing.
+2. Give them the exact `Manage it using <url>` link from the error message and ask whether they want to raise the limit or add credits.
+3. Tell them the dashboard fix is enough — the credential at `~/.ori/credentials.json` stays valid, so there is no need to run `ori login` again.
+4. When they confirm, re-run the same spawn command and continue where you left off. Do not abandon the task.
