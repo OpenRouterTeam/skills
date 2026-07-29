@@ -74,6 +74,8 @@ With `--interactions forward`, a question Ori asks stays **pending** — the run
 
 1. **Read it off the stream.** An `elicitation.requested` event carries `payload.message`, `payload.fields[]` (each with a `name`, a `type`, and often `options`), and a `correlationId`. A `permission.requested` event carries `payload.options`. Note the field **`name`** — you need it verbatim in step 3.
 2. **Put it to the user with your own question UI** (in Claude Code, `AskUserQuestion`). Preserve Ori's options one-for-one, keep "Other" as free text, and translate its wording into plain language. Do not show them the raw event, the `correlationId`, or the word "elicitation".
+
+   **Show the message, then the picker — both, in that order.** Ori's `payload.message` often carries context the option labels cannot (for the surface question it is a markdown table of surface / model today). Print that message as normal text in your reply first, then call your question UI right below it with just the short option names. The table explains; the picker collects. Collapsing the table into the option descriptions loses it, and skipping it leaves the user picking between bare labels.
 3. **Write the answer back to the run's stdin**, one JSON object per line, keyed by that `correlationId`:
 
    ```json
