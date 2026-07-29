@@ -32,14 +32,14 @@ Never print, echo, or log the contents of `credentials.json` or any other value 
 ## 3. Spawn it
 
 ```bash
-ori code -p "<task>"
+ori code -p "<task>" --output jsonl
 # For a long prompt:
-ori code --prompt-file /tmp/ori-task.txt
+ori code --prompt-file /tmp/ori-task.txt --output jsonl
 ```
 
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
-- `ori code -p "<task>"` runs without a TTY and exits when the prompt completes: exit code 0 on success, nonzero on failure. With stdout piped it streams NDJSON — one `{"kind":"event","event":...}` line per runtime event, then a final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the concatenated `assistant.text.delta` payloads.
-- Questions the `create-eval` skill asks land in that stream (usually as the run's final reply text). The run never blocks on them. Answer by resuming the same session with the `sessionId` from the result line: `ori code --session <sessionId> -p "<answer>"`, and keep chaining until the eval is written and run.
+- `ori code -p "<task>"` runs without a TTY and exits when the prompt completes: exit code 0 on success, nonzero on failure. A plain piped run streams Ori's reply as prose. Add `--output jsonl` for the structured stream — one `{"kind":"event","event":...}` line per runtime event, then a final `{"kind":"result","ok":...,"sessionId":"..."}` line; Ori's reply text is the concatenated `assistant.text.delta` payloads. Prefer `--output jsonl`: it is the only stream that carries the `sessionId`.
+- Questions the `create-eval` skill asks land in that stream (usually as the run's final reply text; with `--output jsonl`, also as `elicitation.requested` events, auto-declined so the run never blocks). Answer by resuming the same session with the `sessionId` from the result line: `ori code --session <sessionId> -p "<answer>" --output jsonl`, and keep chaining until the eval is written and run.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
