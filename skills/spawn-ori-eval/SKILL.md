@@ -72,13 +72,15 @@ ori code --prompt-file /tmp/ori-task.txt --output jsonl --interactions forward
 
 With `--interactions forward`, a question Ori asks stays **pending** — the run is genuinely waiting on you. Handle it:
 
-1. **Read it off the stream.** An `elicitation.requested` event carries `payload.message`, `payload.fields[].options`, and a `correlationId`. A `permission.requested` event carries `payload.options`.
+1. **Read it off the stream.** An `elicitation.requested` event carries `payload.message`, `payload.fields[]` (each with a `name`, a `type`, and often `options`), and a `correlationId`. A `permission.requested` event carries `payload.options`. Note the field **`name`** — you need it verbatim in step 3.
 2. **Put it to the user with your own question UI** (in Claude Code, `AskUserQuestion`). Preserve Ori's options one-for-one, keep "Other" as free text, and translate its wording into plain language. Do not show them the raw event, the `correlationId`, or the word "elicitation".
 3. **Write the answer back to the run's stdin**, one JSON object per line, keyed by that `correlationId`:
 
    ```json
-   {"kind":"respond","correlationId":"ixn-0","action":"accept","content":{"value":"1"}}
+   {"kind":"respond","correlationId":"ixn-0","action":"accept","content":{"<field-name>":"<the user's choice>"}}
    ```
+
+   **The keys in `content` are the field `name`s from the request**, not a fixed schema. If `payload.fields` is `[{"name":"surface", …}]`, send `"content":{"surface":"…"}`. Copying a `"value"` from an example when the request asked for `surface` produces a well-formed line that is accepted and then maps to nothing, which is worse than not answering: the run proceeds as if the user had chosen. Read the name off the event every time.
 
    Use `action` (`accept` / `decline` / `cancel`, with `content` carrying the fields on an accept) for a question form, and `optionKind` for a permission request. You send only the decision; which request it answers and which session it belongs to come from the request itself.
 
@@ -138,5 +140,6 @@ not create or modify anything outside the top-level evals directory.
 | Run exceeds your timeout | The process may still be running. Keep reading its stdout until the `{"kind":"result",...}` line arrives; do not re-spawn. |
 | Ori picked the eval's target itself | Its question timed out (or `--interactions forward` was missing). Re-run with the flag, and answer within `--interaction-timeout`. |
 | Your answer had no effect | Check the `correlationId` matches the request exactly, and that the line is on the run's **stdin**, not a new invocation. A resumed session starts a new turn; it cannot settle a pending request. |
+| Ori accepted the answer but acted as if nothing was chosen | The `content` keys did not match the request's field `name`s, so the accept carried no usable value. Re-read `payload.fields[].name` and use those keys verbatim. |
 | A question never arrives but the run looks stalled | Some questions land as plain prose and end the turn instead of pending. Read the final assistant text and answer by resuming the session. |
 | `--interactions` rejected as unknown | The installed `ori` predates the answer channel. `ori update`, then re-check `ori code --help`. |
