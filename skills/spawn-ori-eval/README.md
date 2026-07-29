@@ -25,8 +25,9 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - Preflight for the `ori` binary, auth, and Bun, including the `~/.local/bin` PATH gap
-- Scoping one feature, ranking axis, cost ceiling, and baseline model before spawning, because Ori runs headless
-- Backgrounding a single headless Ori invocation (command placeholder pending launch devex) without overriding the pinned harness or model
-- A fill-in-the-blanks task prompt that produces a reproducible `evals/<feature>.eval.ts`
-- Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework
+- Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
+- Backgrounding a single headless Ori invocation without overriding the pinned harness or model
+- Forwarding Ori's mid-run questions to the user with `--interactions forward` and sending their answers back, instead of letting Ori pick its own eval target
+- A fill-in-the-blanks task prompt that produces a reproducible `evals/<feature>/<name>.eval.ts`
+- Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
 - Turning the run into a guardrail with cheap `ori eval` re-runs in CI

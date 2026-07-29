@@ -5,9 +5,11 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 # Spawn Ori Eval
 
-You are not going to write this eval. You are going to install Ori if needed, hand the request to an Ori run, and relay what comes back.
+You are not going to write this eval. You are going to install Ori if needed, hand the request to an Ori run, keep the user in the loop while it works, and relay what comes back.
 
 That split is deliberate. Ori pins the harness and the model that author and grade the eval, so the bench is identical no matter which coding agent the user happens to be driving. An eval you author yourself is not reproducible, and a score change has to mean the user's agent changed, not the environment.
+
+Your job is the part Ori cannot do: you are the user's only connection to a run that is otherwise invisible. Explain what you started (section 3), carry Ori's questions to them and their answers back (section 5), and relay the result in full (section 8).
 
 ## 1. Preflight
 
@@ -25,31 +27,74 @@ Run these in order. Do not skip ahead on a failure.
 
 Never print, echo, or log the contents of `credentials.json` or any other value you read out of a `.env` file or config while searching. Name the key, never the value: `OPENAI_API_KEY at .env:4`, not what it is set to.
 
-## 2. Keep the Q&A in `create-eval`
+## 2. Keep the Q&A in `create-eval`, but relay it
 
 `spawn-ori-eval` does not do the scoping interview. Ori's `create-eval` skill already asks which surface to eval, what it needs to be good at, what real data to use, the cost ceiling, and the baseline model. This skill just hands that request off.
 
-Do not ask the user anything before spawning — not even "what do you want to eval?". If the request is vague or empty, spawn anyway and pass through whatever the user said verbatim; `create-eval` asks its questions inside the Ori run.
+Do not ask the user anything **before** spawning — not even "what do you want to eval?". If the request is vague or empty, spawn anyway and pass through whatever the user said verbatim; `create-eval` asks its questions inside the Ori run.
 
-## 3. Spawn it
+That is not a licence to stay silent for the whole run. When Ori asks a question mid-run, you MUST put it to the user and send back their answer (section 5). "Do not ask up front" and "relay Ori's questions" are both true: the interview belongs to Ori, and the user belongs to you.
+
+## 3. Say what is about to happen
+
+Before spawning, tell the user in plain language what they just set in motion. A wall of tool calls with no explanation is the single most common complaint about this skill.
+
+Cover, in your own words and without the jargon below:
+
+- **What Ori is.** A separate agent that writes and runs the eval, with its own pinned harness and model.
+- **What it will do.** Pick what to measure, write a `*.eval.ts` under `evals/`, and score models against it.
+- **What it costs.** Roughly 10–30 minutes and a few dollars of credits. Say this up front, not after.
+- **What they will get.** A scored table comparing the models.
+- **That it may ask them something.** Tell them you will bring any question to them. This is what makes the interruption in section 5 feel intentional rather than random.
+- **What got installed**, if you installed it: the `ori` binary, at `~/.local/bin/ori`.
+
+Never use this skill's internal vocabulary in anything the user reads. "Preflight", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", "stdout" are for you, not them. A user who sees "Preflight passes. Spawning Ori with your request verbatim" has been told nothing.
+
+While the run is going, relay progress from the stream — picked a target, wrote the eval, running model 2 of 3 — rather than reporting that it is "still running". A 25-minute silence is where trust dies.
+
+## 4. Spawn it
 
 ```bash
-ori code -p "<task>" --output jsonl
+ori code -p "<task>" --output jsonl --interactions forward
 # For a long prompt:
-ori code --prompt-file /tmp/ori-task.txt --output jsonl
+ori code --prompt-file /tmp/ori-task.txt --output jsonl --interactions forward
 ```
 
 - `-p` and `--prompt-file` are mutually exclusive. Positional prompts are rejected.
 - `ori code -p "<task>"` runs without a TTY and exits when the prompt completes: exit code 0 on success, nonzero on failure. A plain piped run streams Ori's reply as prose. Add `--output jsonl` for the structured stream — one `{"kind":"event","event":...}` line per runtime event, then a final `{"kind":"result","ok":...,"sessionId":"..."}` line; Ori's reply text is the concatenated `assistant.text.delta` payloads. Prefer `--output jsonl`: it is the only stream that carries the `sessionId`.
-- Questions the `create-eval` skill asks land in that stream (usually as the run's final reply text; with `--output jsonl`, also as `elicitation.requested` events, auto-declined so the run never blocks). Answer by resuming the same session with the `sessionId` from the result line: `ori code --session <sessionId> -p "<answer>" --output jsonl`, and keep chaining until the eval is written and run.
+- `--interactions forward` is what lets you answer Ori's mid-run questions; see section 5. Without it the run declines each question itself and picks for you, so the eval measures Ori's guess rather than what the user cares about.
 - Do NOT pass `--model` or `--harness`. Overriding the pin destroys the reproducibility that is the only reason to use Ori.
 - Run from the repo root so Ori can read the real prompts.
 - One invocation. Do not loop the run once per candidate model. Comparing models is `ori eval`'s job, not yours.
 - The first `ori` run on a machine creates `~/.ori/global` and fetches templates over the network. Expect a pause of roughly 30 seconds and do not treat it as a hang.
 
-## 4. The task prompt
+## 5. Answer Ori's questions
 
-Write this to `/tmp/ori-task.txt` — the file used by the section 3 command — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path produces an empty prompt and Ori does nothing.
+With `--interactions forward`, a question Ori asks stays **pending** — the run is genuinely waiting on you. Handle it:
+
+1. **Read it off the stream.** An `elicitation.requested` event carries `payload.message`, `payload.fields[]` (each with a `name`, a `type`, and often `options`), and a `correlationId`. A `permission.requested` event carries `payload.options`. Note the field **`name`** — you need it verbatim in step 3.
+2. **Put it to the user with your own question UI** (in Claude Code, `AskUserQuestion`). Preserve Ori's options one-for-one, keep "Other" as free text, and translate its wording into plain language. Do not show them the raw event, the `correlationId`, or the word "elicitation".
+3. **Write the answer back to the run's stdin**, one JSON object per line, keyed by that `correlationId`:
+
+   ```json
+   {"kind":"respond","correlationId":"ixn-0","action":"accept","content":{"<field-name>":"<the user's choice>"}}
+   ```
+
+   **The keys in `content` are the field `name`s from the request**, not a fixed schema. If `payload.fields` is `[{"name":"surface", …}]`, send `"content":{"surface":"…"}`. Copying a `"value"` from an example when the request asked for `surface` produces a well-formed line that is accepted and then maps to nothing, which is worse than not answering: the run proceeds as if the user had chosen. Read the name off the event every time.
+
+   Use `action` (`accept` / `decline` / `cancel`, with `content` carrying the fields on an accept) for a question form, and `optionKind` for a permission request. You send only the decision; which request it answers and which session it belongs to come from the request itself.
+
+Notes that matter:
+
+- **Answer promptly.** A forwarded question falls back to being declined after `--interaction-timeout` (default 300s), and then Ori picks for itself as before. If the user may be slow, raise it: `--interaction-timeout 900`.
+- **A malformed line is skipped**, not fatal — but the request then just sits until it times out, so get the shape right.
+- **Never invent an answer.** Forwarding exists so a human decides. If you cannot reach the user, let it time out rather than guessing on their behalf; a guessed target silently invalidates the whole eval.
+- **Never answer a permission request with a blanket allow** to keep things moving. Pass it to the user.
+- **A question in plain prose** (rather than a structured request) ends the turn instead of pending. Answer that by resuming: `ori code --session <sessionId> -p "<answer>" --output jsonl`, chaining until the eval is written and run.
+
+## 6. The task prompt
+
+Write this to `/tmp/ori-task.txt` — the file used by the section 4 command — and fill every angle-bracket slot. If you use a different path, use it in the spawn command too; an unwritten path produces an empty prompt and Ori does nothing.
 
 ```text
 Use the create-eval skill.
@@ -61,7 +106,7 @@ Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
 not create or modify anything outside the top-level evals directory.
 ```
 
-## 5. Never do these
+## 7. Never do these
 
 - **Never spawn your own subagent to "do an eval."** It produces a plausible table with no pinned bench behind it, which is worse than no answer.
 - **Never write the eval yourself.** Ori's `create-eval` skill fires automatically inside the run.
@@ -69,8 +114,10 @@ not create or modify anything outside the top-level evals directory.
 - **Never hand-roll raw API calls and present the numbers as an Ori eval.** If you measure something another way, label it clearly as such.
 - **Never name model ids or prices from memory.** They go stale between releases.
 - **Never report a winner without the production model in the table.** "No change" is a valid and useful result.
+- **Never answer Ori's questions on the user's behalf.** Forwarding exists so a human picks. Guessing the eval's target silently invalidates the result while looking exactly like a real answer.
+- **Never let the run go quiet.** A question waiting on you, or 25 minutes with no word, both read as a hang.
 
-## 6. After the run
+## 8. After the run
 
 - The `*.eval.ts` file is the durable artifact. Tell the user to commit it.
 - Re-runs do not need a full Ori run. `ori eval evals/<feature>/<name>.eval.ts` is enough and much cheaper. This is what turns a one-off answer into a guardrail.
@@ -81,7 +128,7 @@ not create or modify anything outside the top-level evals directory.
 - Offer to wire `ori eval` into CI so a worse agent fails the build.
 - Relay the full table, the ship or no-ship call, and the quoted failures. Do not summarize away the failure quotes; they are the most useful output.
 
-## 7. If something goes wrong
+## 9. If something goes wrong
 
 | Symptom | Do this |
 |---|---|
@@ -91,3 +138,8 @@ not create or modify anything outside the top-level evals directory.
 | Ori reports a model id as unavailable | Have it look the id up again rather than substituting one from memory. |
 | The eval file landed outside `evals/` | Move it and re-run `ori eval` against the new path. |
 | Run exceeds your timeout | The process may still be running. Keep reading its stdout until the `{"kind":"result",...}` line arrives; do not re-spawn. |
+| Ori picked the eval's target itself | Its question timed out (or `--interactions forward` was missing). Re-run with the flag, and answer within `--interaction-timeout`. |
+| Your answer had no effect | Check the `correlationId` matches the request exactly, and that the line is on the run's **stdin**, not a new invocation. A resumed session starts a new turn; it cannot settle a pending request. |
+| Ori accepted the answer but acted as if nothing was chosen | The `content` keys did not match the request's field `name`s, so the accept carried no usable value. Re-read `payload.fields[].name` and use those keys verbatim. |
+| A question never arrives but the run looks stalled | Some questions land as plain prose and end the turn instead of pending. Read the final assistant text and answer by resuming the session. |
+| `--interactions` rejected as unknown | The installed `ori` predates the answer channel. `ori update`, then re-check `ori code --help`. |
