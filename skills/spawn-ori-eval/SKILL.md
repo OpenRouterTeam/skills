@@ -137,7 +137,7 @@ With `--interactions forward`, a question from Ori stays **pending**. The run wa
 - The `*.eval.ts` file is the permanent product. Tell the user to commit it.
 - A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
 - Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts — read `ori eval -h`. For the eval-file API, the command `ori eval skill` prints the authoring guide. Do not copy this data into this skill or into text for the user. The CLI changes, and copies become incorrect.
+- For all other data about eval runs — reports, baselines, lists, timeouts — read `ori eval -h`. For the eval-file API, the command `ori skills get create-eval` prints the authoring guide. Do not copy this data into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
