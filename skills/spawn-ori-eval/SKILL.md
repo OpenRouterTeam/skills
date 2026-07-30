@@ -143,11 +143,11 @@ With `--interactions forward`, a question from Ori stays **pending**. The run wa
 
 These rules apply to all steps:
 
-- **Do not start your own subagent to "do an eval".** The subagent makes a table that looks correct but has no pinned bench. This is worse than no answer.
+- **Do not start your own subagent to "do an eval".** You must use Ori to run the eval. 
 - **Do not write the eval yourself.** Ori's `create-eval` skill starts automatically in the run.
 - **Do not put the eval in the repo's own test framework.** The `ori eval` command finds `*.eval.ts` files only. A pytest, vitest, or Go test file does not run, and no signal shows this. Silence looks like a pass.
 - **Do not make raw API calls and show the numbers as an Ori eval.** If you measure in a different way, label the result clearly.
-- **Do not give model ids or prices from memory.** They become incorrect between releases.
+- **Do not give model ids or prices from memory.** You must check live model prices on OpenRouter. 
 - **Do not answer Ori's questions for the user.** The forward flag exists so that a person selects. A guessed target makes the result invalid, and the guess looks like a real answer.
 - **Do not let the run become silent.** A question that waits for you, and 25 minutes with no report, both look like a stopped run.
 
@@ -170,7 +170,7 @@ These rules apply to all steps:
 
 ### When the key has no credit
 
-A run that stops in seconds with `403 Key limit exceeded (total limit)` or a 402 payment error is not a defect in Ori or in the eval. The OpenRouter credential behind `ori login` is at its spend limit. This is a conversation, not a failure report:
+A run that stops in seconds with `403 Key limit exceeded (total limit)` or a 402 payment error is not a defect in Ori or in the eval. The OpenRouter credential behind `ori login` is at its spend limit. Perform the following steps: 
 
 1. Tell the user directly: the OpenRouter key has no credit, no eval was written, and this attempt spent nothing.
 2. Give the user the exact `Manage it using <url>` link from the error message. Ask if the user wants to increase the limit or add credits.
