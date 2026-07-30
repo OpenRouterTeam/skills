@@ -84,9 +84,9 @@ ori opencode
 Use `--model` with any valid OpenRouter model id:
 
 ```sh
-ori claude --model anthropic/claude-sonnet-4
-ori codex --model openai/gpt-5
-ori hermes --model google/gemini-2.5-pro
+ori claude --model claude-opus-latest
+ori codex --model gpt-5.2
+ori hermes --model gemini-3-pro
 ```
 
 The model value is routed through OpenRouter. Keep the user's existing agent
