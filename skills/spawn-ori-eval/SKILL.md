@@ -46,7 +46,7 @@ Tell the user these points. Use your own words. Do not use the terms in the rule
 
 - **What Ori is.** A different agent that writes and runs the eval. It has its own pinned harness and model.
 - **What Ori will do.** Select what to measure, write a `*.eval.ts` file in `evals/`, and score the models.
-- **The cost.** Approximately 10 to 30 minutes. How much it costs depends on how extensive the eval run is and how large the codebase is. Say this before the run, not after. The entire run may exceed how much you've added to the API key credit you added when you authed. 
+- **The cost.** Approximately 10 to 30 minutes. How much it costs depends on how extensive the eval run is and how large the codebase is. Say this before the run, not after. The entire run may exceed how much you've added to the API key credit you added when you authed.
 - **The output.** A scored table that compares the models.
 - **Questions are possible.** Tell the user that you will bring each question to them. Then the interruption in step 5 is expected, not unexpected.
 - **What you installed.** If you installed the `ori` binary, tell the user its location: `~/.local/bin/ori`.
@@ -95,7 +95,7 @@ ori code --prompt-file /tmp/ori-task.txt --output jsonl --interactions forward
 
 ## Step 5: Monitor the run
 
-Report progress from the stream. Examples: Ori selected a target, Ori wrote the eval, Ori runs model 2 of 3. Do not report only "the run continues". If you are silent and don't give feedback, the user will get confused. Do not confuse the user. 
+Report progress from the stream. Examples: Ori selected a target, Ori wrote the eval, Ori runs model 2 of 3. Do not report only "the run continues". If you are silent and don't give feedback, the user will get confused. Do not confuse the user.
 
 With `--interactions forward`, a question from Ori stays **pending**. The run waits for you. Do this:
 
@@ -137,17 +137,17 @@ With `--interactions forward`, a question from Ori stays **pending**. The run wa
 - The `*.eval.ts` file is the permanent product. Tell the user to commit it.
 - A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
 - Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts — read `ori eval -h`. For the eval-file API, the command `ori eval skill` prints the authoring guide. Do not copy this data into this skill or into text for the user. The CLI changes, and copies become incorrect.
+- For all other data about eval runs — reports, baselines, lists, timeouts — read `ori eval -h`. For the eval-file API, the command `ori skills get create-eval` prints the authoring guide (newer builds also accept `ori eval skill`). Do not copy this data into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
 These rules apply to all steps:
 
-- **Do not start your own subagent to "do an eval".** You must use Ori to run the eval. 
+- **Do not start your own subagent to "do an eval".** You must use Ori to run the eval.
 - **Do not write the eval yourself.** Ori's `create-eval` skill starts automatically in the run.
 - **Do not put the eval in the repo's own test framework.** The `ori eval` command finds `*.eval.ts` files only. A pytest, vitest, or Go test file does not run, and no signal shows this. Silence looks like a pass.
 - **Do not make raw API calls and show the numbers as an Ori eval.** If you measure in a different way, label the result clearly.
-- **Do not give model ids or prices from memory.** You must check live model prices on OpenRouter. 
+- **Do not give model ids or prices from memory.** You must check live model prices on OpenRouter.
 - **Do not answer Ori's questions for the user.** The forward flag exists so that a person selects. A guessed target makes the result invalid, and the guess looks like a real answer.
 - **Do not let the run become silent.** A question that waits for you, and 25 minutes with no report, both look like a stopped run.
 
@@ -170,7 +170,7 @@ These rules apply to all steps:
 
 ### When the key has no credit
 
-A run that stops in seconds with `403 Key limit exceeded (total limit)` or a 402 payment error is not a defect in Ori or in the eval. The OpenRouter credential behind `ori login` is at its spend limit. Perform the following steps: 
+A run that stops in seconds with `403 Key limit exceeded (total limit)` or a 402 payment error is not a defect in Ori or in the eval. The OpenRouter credential behind `ori login` is at its spend limit. Perform the following steps:
 
 1. Tell the user directly: the OpenRouter key has no credit, no eval was written, and this attempt spent nothing.
 2. Give the user the exact `Manage it using <url>` link from the error message. Ask if the user wants to increase the limit or add credits.
