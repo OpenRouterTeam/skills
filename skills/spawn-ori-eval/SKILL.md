@@ -20,7 +20,7 @@ Do the steps in this sequence. Each step has a section below. The **Rules** in a
 3. **Write the task prompt file** — `/tmp/ori-task.txt`, with the user's request unchanged, the repo paths, and the `evals/` target.
 4. **Start one Ori run** — `ori code --prompt-file … --output jsonl --interactions forward`.
 5. **Monitor the run** — report progress; send Ori's questions to the user: 5a read the event, 5b ask the user, 5c write the answer to stdin.
-6. **Relay the result** — the full table, the ship or no-ship decision, the quoted failures, and the cost.
+6. **Relay the result** — the full table, the ship or no-ship decision, the quoted failures, and the cost and timing breakdown.
 7. **Keep the eval** — commit the `*.eval.ts` file, tell the user about `ori eval <file>` re-runs, offer CI setup.
 
 If there is a problem, refer to **Troubleshooting** at the end. The **Hard rules** section after the steps applies to all steps.
@@ -123,13 +123,26 @@ With `--interactions forward`, a question from Ori stays **pending**. The run wa
 ## Step 6: Relay the result
 
 - Relay the full table, the ship or no-ship decision, and the quoted failures. Do not remove the failure quotes from your summary. They are the most useful output.
-- **End with the cost.** Use one line with three parts: Ori's own session (read `usage.costUsd` from the final `turn.succeeded` event in the jsonl stream), the eval's model calls, and the judge (both from the report's Judging table or from `data.results`). The session cost is usually much larger than the eval cost. Say this. A re-run does not pay the session cost again:
+- **End with a cost and timing breakdown table.** Ori's reply ends with a table of its steps, durations, and costs. Relay that table in full. Do not compress it to one line. Then add the rows that only you can measure, from the jsonl stream:
+  - One row for each wait on a user question. The duration is the time from the `elicitation.requested` event to your `respond` line. The cost is "—".
+  - A total row. Read the session's total cost from `usage.costUsd` on the final `turn.succeeded` event. Compute the total duration from the first and last event timestamps.
+
+  If Ori's reply does not contain the table, build it yourself from the stream: one row for each turn, with the timestamp of `turn.started`, the duration to `turn.succeeded`, and the increase in `usage.costUsd`. Add the eval's model calls and judging from the report's Judging table or from `data.results`.
+
+  | Step | Start | Duration | Cost |
+  | -- | -- | -- | -- |
+  | Repo exploration | 20:26 | 2m 20s | $3.20 |
+  | Question 1 to you (pick target) | 20:29 | 39s | — |
+  | … |  |  |  |
+  | **Total** |  | **20m 50s** | **$20.03** |
+
+- **After the table, give the re-run cost in one line.** The session cost is usually much larger than the eval cost, and a re-run does not pay the session cost again:
 
   > This cost about $28.20 total: $27.69 for Ori's one-time authoring session, $0.46 for the eval's model calls, $0.05 for judging. Re-running the eval costs only ~$0.51.
 
 **Rules for this step:**
 
-- Do not invent a number. If the stream or the report does not contain a value, the value is "unmeasured". It is not $0.
+- Do not invent a number. If the stream or the report does not contain a value, the value is "unmeasured". It is not $0. Do not divide a session total across steps by estimation.
 - **Do not report a winner without the production model in the table.** "No change" is a valid and useful result.
 
 ## Step 7: Keep the eval
