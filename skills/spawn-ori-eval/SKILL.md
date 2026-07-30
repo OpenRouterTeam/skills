@@ -129,6 +129,11 @@ not create or modify anything outside the top-level evals directory.
 - Use `candidateModels` with `assertModelIsLive` to validate candidate availability, and `--list --allow-no-key` to list discovered evals without an API key.
 - Offer to wire `ori eval` into CI so a worse agent fails the build.
 - Relay the full table, the ship or no-ship call, and the quoted failures. Do not summarize away the failure quotes; they are the most useful output.
+- **Close with what the run cost.** One line, three parts: Ori's own session (read `usage.costUsd` off the final `turn.succeeded` event in the jsonl stream), the eval's model calls, and the judge (both from the report's Judging table or `data.results`). The authoring session usually dwarfs the eval — say so, because it is also the part a re-run never pays again:
+
+  > This cost about $28.20 total: $27.69 for Ori's one-time authoring session, $0.46 for the eval's model calls, $0.05 for judging. Re-running the eval costs only ~$0.51.
+
+  Never invent a figure — anything the stream or report did not carry is "unmeasured", not $0.
 
 ## 9. If something goes wrong
 
