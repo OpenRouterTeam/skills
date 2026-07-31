@@ -97,6 +97,8 @@ One `{"kind":"event","event":...}` line per runtime event, then one final `{"kin
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
+What you append afterwards is the question's full message in plain language plus the answer: the selected option and any free text for a form, the selected option for a permission request.
+
 ## Appendix E: cost and timing table
 
 Include one row for every run, including each run you stopped at a question, since a restart repeats repo exploration. The total row sums `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run, because each of those events reports one turn rather than the session. Build the table yourself if Ori's reply has no table, using each turn's `turn.started` timestamp, its duration to its terminal event, and that event's cost, plus the eval's model calls and judging from the report's Judging table or from `data.results`.
@@ -128,4 +130,4 @@ Follow it with one line, for example: this cost about $31.82 across two Ori runs
 | No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text and restart the same way. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
-A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again.
+A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
