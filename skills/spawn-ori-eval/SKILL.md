@@ -9,33 +9,33 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ## Steps
 
-Do these in order. One line, one action. Appendix letters point to the detail.
+Do these in order. One line, one action. Appendix letters point to the detail and run in step order, except the troubleshooting table, which is a lookup and comes last.
 
-1. Create the run directory and derive its path from the repo root (appendix G).
+1. Create the run directory and derive its path from the repo root (appendix A).
 2. Tell the user where the run directory is.
-3. Adopt `steps.txt` and jump to the first step not marked complete, when it exists for this same request with work outstanding (appendix G).
-4. Otherwise archive anything already in the directory and write a fresh `steps.txt`, one line per step below (appendix G).
-5. Run the lookup or install for the `ori` binary yourself (appendix A).
+3. Adopt `steps.txt` and jump to the first step not marked complete, when it exists for this same request with work outstanding (appendix A).
+4. Otherwise archive anything already in the directory and write a fresh `steps.txt`, one line per step below (appendix A).
+5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix F).
+7. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix G).
 8. Check for `bun` yourself, and stop if it is missing.
-9. Read the eval surface yourself, continuing even if the commands error (appendix A).
+9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
 11. Tell the user what the run will do, from what you read in step 9.
 12. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
 13. Tell the user they get a scored table and that a question can restart the run.
-14. Write the task prompt file (appendix B).
-15. Start one background run from the repo root and save the process ID (appendix C).
-16. Read the current run's output file as it grows (appendix D).
+14. Write the task prompt file (appendix C).
+15. Start one background run from the repo root and save the process ID (appendix D).
+16. Read the current run's output file as it grows (appendix E).
 17. Report each phase banner as a milestone.
-18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 23 if it finishes without one (appendix D).
+18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 23 if it finishes without one (appendix E).
 19. Show the user the question text as plain text.
 20. Ask the user with your own question UI, one option per Ori option.
-21. Append the question and the user's answer to the task prompt file (appendix D).
+21. Append the question and the user's answer to the task prompt file (appendix E).
 22. Restart over the whole prompt file with the next output file number, then return to step 16.
 23. Relay the result table, the ship or no-ship decision, and the quoted failures.
-24. Relay Ori's cost and timing table in full (appendix E).
-25. Add one row per run and a total row (appendix E).
+24. Relay Ori's cost and timing table in full (appendix F).
+25. Add one row per run and a total row (appendix F).
 26. Add one line on the cheaper cost of a re-run.
 27. Tell the user where Ori left the temporary workspace and that it is throwaway.
 28. Say they can move the eval into their repo if the numbers made them want to keep it.
@@ -67,84 +67,7 @@ These hold for the whole run.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
-## Appendix A: setup commands
-
-Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. It lands in `~/.local/bin`, which is frequently absent from PATH in a non-login shell, so try `~/.local/bin/ori --version` before reporting a failure. Bun is required because Ori executes `*.eval.ts` with it.
-
-Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
-
-## Appendix B: task prompt template
-
-Write this to `task.txt` in the run directory, filling in every angle-bracket field.
-
-```text
-Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, bakeoff, routing, close. There are exactly
-three user stopping points, tagged `workspace-context`, `narrowing`, and
-`next-step`.
-
-User request: <verbatim request>
-Repo context pointers: <paths>. Read these first.
-
-Keep the eval and any supporting files in a temporary workspace outside the
-user's repository. Run it with ori eval. Do not create or modify anything in
-the user's repository.
-```
-
-## Appendix C: start command
-
-Number each attempt one above the highest `output-<n>.jsonl` already in the run directory, and save the new process ID each time.
-
-```bash
-ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
-ori_pid=$!
-printf 'Ori process: %s\n' "$ori_pid"
-```
-
-## Appendix D: stream shape
-
-The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
-
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly three tagged elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
-
-Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
-
-What you append afterwards is the question's full message in plain language plus the single answer string, including the typed text when the user chose Other, or the selected option for a permission request.
-
-## Appendix E: cost and timing table
-
-Include one row for every run, including each run you stopped at a question, since a restart repeats repo exploration. The total row sums `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run, because each of those events reports one turn rather than the session. Build the table yourself if Ori's reply has no table, using each turn's `turn.started` timestamp, its duration to its terminal event, and that event's cost, plus the eval's model calls and judging from the report's Judging table or from `data.results`.
-
-| Step | Start | Duration | Cost |
-| -- | -- | -- | -- |
-| Repo exploration | 20:26 | 2m 20s | $3.20 |
-| Run stopped at question 1 | 20:29 | 39s | $0.42 |
-| Restart and repeated exploration | 20:30 | 15m 10s | $27.69 |
-| Eval model calls | 20:46 | 2m | $0.46 |
-| Judging | 20:48 | 1m | $0.05 |
-| … |  |  |  |
-| **Total** |  | **21m 09s** | **$31.82** |
-
-Follow it with one line, for example: this cost about $31.82 across two Ori runs, and re-running the eval costs only about $0.51.
-
-## Appendix F: troubleshooting
-
-| Symptom | Do this |
-|---|---|
-| `ori: command not found` after a good installation | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell. |
-| The credential is missing | Stop. Tell the user to run `ori login`, or `! ori login` in Claude Code. The command opens a browser, so you cannot do it. |
-| A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
-| Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
-| Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
-| The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| The run is longer than expected | Read the stream. If a question event is sitting there, kill the process now rather than waiting for the result line. |
-| Ori picked the target itself | The question event was missed or the run continued past it. Kill it, ask the user, append the answer, and restart from the full prompt file. |
-| No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text and restart the same way. |
-| `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
-
-A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
-
-## Appendix G: run directory and step tracker
+## Appendix A: run directory and step tracker
 
 Derive the directory from the repo root so a restart finds the same one, and re-derive it in each shell rather than relying on the variable surviving, because shell state usually does not persist between commands.
 
@@ -167,3 +90,80 @@ request: which model should we use for the support triage agent
 ```
 
 Adopt that file only when its first line matches the request you are working on and a step is still unfinished, which is the restart case. A different request in a repo you have evaluated before is a new run, so move the old files into `$run_dir/previous/` and start clean, which also keeps stale logs out of the output numbering.
+
+## Appendix B: setup commands
+
+Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. It lands in `~/.local/bin`, which is frequently absent from PATH in a non-login shell, so try `~/.local/bin/ori --version` before reporting a failure. Bun is required because Ori executes `*.eval.ts` with it.
+
+Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
+
+## Appendix C: task prompt template
+
+Write this to `task.txt` in the run directory, filling in every angle-bracket field.
+
+```text
+Use the create-eval skill. Follow its five phases in this order: workspace
+context, criteria and narrowing, bakeoff, routing, close. There are exactly
+three user stopping points, tagged `workspace-context`, `narrowing`, and
+`next-step`.
+
+User request: <verbatim request>
+Repo context pointers: <paths>. Read these first.
+
+Keep the eval and any supporting files in a temporary workspace outside the
+user's repository. Run it with ori eval. Do not create or modify anything in
+the user's repository.
+```
+
+## Appendix D: start command
+
+Number each attempt one above the highest `output-<n>.jsonl` already in the run directory, and save the new process ID each time.
+
+```bash
+ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
+ori_pid=$!
+printf 'Ori process: %s\n' "$ori_pid"
+```
+
+## Appendix E: stream shape
+
+The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
+
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly three tagged elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
+
+Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
+
+What you append afterwards is the question's full message in plain language plus the single answer string, including the typed text when the user chose Other, or the selected option for a permission request.
+
+## Appendix F: cost and timing table
+
+Include one row for every run, including each run you stopped at a question, since a restart repeats repo exploration. The total row sums `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run, because each of those events reports one turn rather than the session. Build the table yourself if Ori's reply has no table, using each turn's `turn.started` timestamp, its duration to its terminal event, and that event's cost, plus the eval's model calls and judging from the report's Judging table or from `data.results`.
+
+| Step | Start | Duration | Cost |
+| -- | -- | -- | -- |
+| Repo exploration | 20:26 | 2m 20s | $3.20 |
+| Run stopped at question 1 | 20:29 | 39s | $0.42 |
+| Restart and repeated exploration | 20:30 | 15m 10s | $27.69 |
+| Eval model calls | 20:46 | 2m | $0.46 |
+| Judging | 20:48 | 1m | $0.05 |
+| … |  |  |  |
+| **Total** |  | **21m 09s** | **$31.82** |
+
+Follow it with one line, for example: this cost about $31.82 across two Ori runs, and re-running the eval costs only about $0.51.
+
+## Appendix G: troubleshooting
+
+| Symptom | Do this |
+|---|---|
+| `ori: command not found` after a good installation | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell. |
+| The credential is missing | Stop. Tell the user to run `ori login`, or `! ori login` in Claude Code. The command opens a browser, so you cannot do it. |
+| A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
+| Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
+| Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
+| The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
+| The run is longer than expected | Read the stream. If a question event is sitting there, kill the process now rather than waiting for the result line. |
+| Ori picked the target itself | The question event was missed or the run continued past it. Kill it, ask the user, append the answer, and restart from the full prompt file. |
+| No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text and restart the same way. |
+| `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
+
+A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
