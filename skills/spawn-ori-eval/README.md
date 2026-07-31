@@ -30,5 +30,5 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Backgrounding a single headless Ori invocation without overriding the pinned harness or model
 - Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
 - A fill-in-the-blanks task prompt that keeps the throwaway eval in a temporary workspace outside the user's repository
-- Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf, and writing the throwaway eval into the repository
-- Reporting the temporary workspace so the user can move the eval into the repository if they decide to keep it
+- Anti-patterns: self-authored evals, subagent "evals", evals written into the user's repo, evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
+- Reporting the temporary workspace so the user can keep the eval if the numbers made them want it
