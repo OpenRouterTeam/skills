@@ -28,7 +28,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Reading the live eval help and the authoring guide before spawning, so the run is described from the current CLI rather than from memory
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Running one plain-text headless Ori invocation at a time without overriding the pinned harness or model
-- Waiting for each turn to finish, showing a tagged question to the user, and restarting from the full prompt file with the answer appended
+- Waiting for each turn to finish, showing one question with three options and free-text `Other`, and restarting from the full prompt file with the answer appended
 - A fill-in-the-blanks task prompt that keeps the throwaway eval in a temporary workspace outside the user's repository
 - Anti-patterns: self-authored evals, subagent "evals", evals written into the user's repo, evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
 - Reporting the temporary workspace so the user can keep the eval if the numbers made them want it

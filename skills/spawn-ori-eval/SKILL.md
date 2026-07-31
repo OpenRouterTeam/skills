@@ -27,9 +27,9 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. If the completed answer contains a tagged question anywhere, continue to step 18; if it ends with an untagged question, report the broken contract and stop; otherwise skip to step 22 for the final report (appendix E).
-18. Show the user the question text as plain text.
-19. Ask the user with your own question UI, one option per Ori option.
+17. If the completed answer contains a tagged question anywhere or ends with an untagged question, continue to step 18; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
+18. Show the first question text to the user as plain text.
+19. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 20. Append the question and the user's answer to the task prompt file (appendix E).
 21. Restart over the whole prompt file with the next attempt number, then return to step 16.
 22. Relay the result table, the ship or no-ship decision, and the quoted failures.
@@ -64,6 +64,8 @@ These hold for the whole run.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", and "harness".
+- Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
+- Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -117,9 +119,11 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, bakeoff, routing, close. There are exactly
-four user stopping points, tagged `workspace-context`, `narrowing`,
-`candidates`, and `next-step`.
+context, criteria and narrowing, bakeoff, routing, close. There are seven
+possible question tags in this order: `surface`, `workspace-files`,
+`workspace-data`, `criteria-priority`, `evaluation-constraint`, `candidates`,
+and `next-step`. The first two are mutually exclusive conditional questions,
+so each run asks five or six questions.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -151,9 +155,9 @@ If the operator's shell calls are cut off before a run ends, background the comm
 
 The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so read the answer file after it exits. Diagnostics go to the error log. There is no live progress source or question detection during the turn.
 
-A finished turn ends either on a tagged question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is a contract violation: report it to the user, tell them to update Ori, and stop rather than relaying it or restarting. Show the full tagged question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
+A finished turn ends either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
-Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
+Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep its three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
 What you append afterwards is the question's full text in plain language plus the single answer string, including the typed text when the user chose Other.
 
@@ -184,7 +188,7 @@ Follow it with one line, for example: the reported cost floor is $3.71. The two 
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ending in an untagged question is a broken contract. Tell the user to update Ori and stop rather than restarting. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
