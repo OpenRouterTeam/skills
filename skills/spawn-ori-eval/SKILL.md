@@ -1,6 +1,6 @@
 ---
 name: spawn-ori-eval
-description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare or bake off models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
+description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
 ---
 
 # Spawn Ori Eval
@@ -123,8 +123,8 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, bakeoff, routing, close. There are seven
-possible question tags in this order: `[surface]`, `[workspace-files]`,
+context, criteria and narrowing, model comparison, routing, close. There are
+seven possible question tags in this order: `[surface]`, `[workspace-files]`,
 `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`,
 `[candidates]`, and `[next-step]`. The first two are mutually exclusive
 conditional questions, so each run asks five or six questions.
