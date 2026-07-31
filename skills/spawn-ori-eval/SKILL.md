@@ -9,7 +9,7 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ### Step tracker
 
-Before step 1, create `/tmp/spawn-ori-eval-steps.txt`, outside the user's repository. Write one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this tracker records which phase the previous attempt reached and provides the recovery point.
+Before step 1, create a fresh run directory with `mktemp -d /tmp/spawn-ori-eval-run.XXXXXX`, tell the user where you put it, and create its `steps.txt` tracker outside the user's repository. Write one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this tracker records which phase the previous attempt reached and provides the recovery point.
 
 ## Steps
 
@@ -28,7 +28,7 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 11. Start one background run from the repo root and save the process ID (appendix C).
 12. Read the current run's output file as it grows (appendix D).
 13. Report each phase banner as a milestone.
-14. Kill the run the moment any question appears, whether it is a named elicitation, a permission request, or trailing prose, or skip to step 19 if it finishes without one (appendix D).
+14. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 19 if it finishes without one (appendix D).
 15. Show the user the question text as plain text.
 16. Ask the user with your own question UI, one option per Ori option.
 17. Append the question and the user's answer to the task prompt file (appendix D).
@@ -49,7 +49,7 @@ These hold for the whole run.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 1 to 5 yourself. Installing the binary when it is missing is expected, not a permission request. The credential check is the only human handoff because `ori login` opens a browser only the user can complete.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
-- Treat `/tmp/ori-task.txt` as the only state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
+- Treat `/tmp/ori-task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question or accept a permission request on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
 - Do not invent an approval gate before starting the run. Steps 8 and 9 disclose the time and cost, and the only user pauses are the questions detected in step 14.
@@ -78,7 +78,7 @@ Write this to `/tmp/ori-task.txt`, filling in every angle-bracket field.
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are exactly
-three user stopping points, named `workspace-context`, `narrowing`, and
+three user stopping points, tagged `workspace-context`, `narrowing`, and
 `next-step`.
 
 User request: <verbatim request>
@@ -102,7 +102,7 @@ printf 'Ori process: %s\n' "$ori_pid"
 
 The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` to show the user and a `requestedSchema` whose `title` is exactly one of the three named forms and whose `properties` record is keyed by the stable field names. A field's choices live on its property: `enum` is a list of plain strings, and `oneOf` is a list of richer options with `const` and `title`; for a multi-select array property, its `items` carry either an `enum` or an `anyOf` of those richer options. A `permission.requested` payload is separate and carries `options`. Expect exactly three named elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly three tagged elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
