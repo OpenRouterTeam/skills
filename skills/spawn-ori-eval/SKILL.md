@@ -13,9 +13,16 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 
 ### Run directory and step tracker
 
-Before step 1, derive a run directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`, and tell the user where you put it. Every file this run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each run's `output-<n>.jsonl` and `error-<n>.log`. The path is derived rather than random so a restart finds the same directory, and per repository rather than shared so two repos evaluated on one machine never read each other's prompt or progress.
+Before step 1, create the run directory and keep the variable for every later command. Tell the user where you put it.
 
-If `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so the tracker is what preserves which phase the previous attempt reached. Do not overwrite an existing tracker.
+```bash
+run_dir="/tmp/spawn-ori-eval-$(pwd | sha256sum | cut -c1-12)"
+mkdir -p "$run_dir"
+```
+
+Every file this run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `output-<n>.jsonl` and `error-<n>.log`. The path is derived rather than random so a restart finds the same directory, and it is per repository so two repos evaluated on one machine never read each other's prompt or progress. Re-derive it in each shell rather than relying on the variable surviving, because shell state usually does not persist between commands.
+
+Write the user's request on the first line of `steps.txt`, then one status line for every step below. Adopt an existing tracker only when its first line matches this request and a step is still incomplete, which is the restart case: reread it and continue at the first step not marked complete. Otherwise this is a new request in a repo you have evaluated before, so archive the old files to `$run_dir/previous/` and start clean, which also keeps the old logs from confusing the output numbering. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so the tracker is what preserves which phase the previous attempt reached.
 
 1. Run the lookup or install for the `ori` binary yourself (appendix A).
 2. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
@@ -94,7 +101,7 @@ the user's repository.
 
 ## Appendix C: start command
 
-Raise the output file number on each restart, and save the new process ID each time. `run_dir` is the directory from the step tracker section.
+Number each attempt one above the highest `output-<n>.jsonl` already in the run directory, and save the new process ID each time.
 
 ```bash
 ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
