@@ -163,7 +163,7 @@ Status updates the user sees must stay plain. Examples:
 | -- | -- |
 | Attempt 2 exited with a tagged question; see answer-2.txt. | Ori read your repo and has a question before it continues. |
 | Restarting ori code --prompt-file with n=3. | I sent your answer to Ori. It reads the project and the full story again, then continues from where it stopped. About 15 minutes. |
-| Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I check what it came back with. |
+| Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I am checking what it came back with. |
 | Process 48210 is running; error-1.log is empty. | The run continues. Silence is normal here. |
 | The run wrote no summary line. | The run stopped before it could report its time and cost. |
 
@@ -175,12 +175,12 @@ What you append afterwards is the question's full text in plain language plus th
 
 ## Appendix F: cost and timing table
 
-Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Each attempt's duration and cost come from the summary line at the end of its answer file, and the eval's own model calls and judging come from Ori's closing table in the final answer. Start times are the operator's observation, because the summary line reports duration only. An attempt whose answer file has no summary line reported nothing, so mark it "unmeasured", which is not zero, and report the total as a floor whenever any row is unmeasured.
+Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Each attempt's duration and cost come from the summary line at the end of its answer file, and the eval's own model calls and judging come from Ori's closing table in the final answer. Start times are the operator's observation, because the summary line reports duration only. An attempt whose answer file has no summary line reported nothing, so mark it "unmeasured", which is not zero, and report the total as a floor whenever any row is unmeasured. Label the rows in plain language, because the table goes to the user and the plain-language rule holds here too.
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
-| Attempt stopped at question 1 | observed 20:29 | 39s | $0.42 |
-| Restart and repeated exploration | observed 20:30 | 15m 10s | $3.20 |
+| Reading the project, stopped to ask you a question | observed 20:29 | 39s | $0.42 |
+| Reading the project again after your answer | observed 20:30 | 15m 10s | $3.20 |
 | Eval model calls | 20:46 | 2m | $0.46 |
 | Judging | 20:48 | 1m | $0.05 |
 | … |  |  |  |
