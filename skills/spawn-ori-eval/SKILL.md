@@ -124,6 +124,9 @@ possible question tags in this order: `surface`, `workspace-files`,
 `workspace-data`, `criteria-priority`, `evaluation-constraint`, `candidates`,
 and `next-step`. The first two are mutually exclusive conditional questions,
 so each run asks five or six questions.
+Ask exactly one question per turn and end the turn after asking it. Give each
+question three concrete options plus a free-text `Other` option. Never combine
+questions in one turn.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -167,15 +170,14 @@ Include one row for every attempt, including each attempt that ended at a questi
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
-| Repo exploration | 20:26 | 2m 20s | $3.20 |
 | Attempt stopped at question 1 | 20:29 | 39s | unmeasured |
-| Restart and repeated exploration | 20:30 | 15m 10s | unmeasured |
+| Restart and repeated exploration | 20:30 | 15m 10s | $3.20 |
 | Eval model calls | 20:46 | 2m | $0.46 |
 | Judging | 20:48 | 1m | $0.05 |
 | … |  |  |  |
 | **Reported floor** |  | **from Ori's table** | **at least $3.71** |
 
-Follow it with one line, for example: the reported cost floor is $3.71. The two question-stopped attempts have unmeasured cost, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
+Follow it with one line, for example: the reported cost floor is $3.71. The question-stopped attempt has unmeasured cost, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
 
 ## Appendix G: troubleshooting
 
