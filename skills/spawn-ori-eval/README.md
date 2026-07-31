@@ -17,18 +17,18 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 ## Prerequisites
 
 - `ori` on PATH — `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`
-- Ori auth — `~/.ori/credentials.json` (via `ori login`)
+- OpenRouter access — `OPENROUTER_API_KEY` exported in the environment
 - [Bun](https://bun.sh), which Ori uses to execute `*.eval.ts`
 
 ## What it covers
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Preflight for the `ori` binary, auth, and Bun, including the `~/.local/bin` PATH gap
+- Preflight for the `ori` binary, `OPENROUTER_API_KEY`, and Bun, including the `~/.local/bin` PATH gap
 - Reading the live eval help and the authoring guide before spawning, so the run is described from the current CLI rather than from memory
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
-- Backgrounding a single headless Ori invocation without overriding the pinned harness or model
-- Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
+- Running one plain-text headless Ori invocation at a time without overriding the pinned harness or model
+- Waiting for each turn to finish, showing a tagged question to the user, and restarting from the full prompt file with the answer appended
 - A fill-in-the-blanks task prompt that keeps the throwaway eval in a temporary workspace outside the user's repository
 - Anti-patterns: self-authored evals, subagent "evals", evals written into the user's repo, evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
 - Reporting the temporary workspace so the user can keep the eval if the numbers made them want it
