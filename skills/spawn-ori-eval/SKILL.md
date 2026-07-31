@@ -161,6 +161,7 @@ These rules apply to all steps:
 
 - **Do not start your own subagent to "do an eval".** You must use Ori to run the eval.
 - **Do not write the eval yourself.** Ori's `create-eval` skill starts automatically in the run.
+- **Do not write the eval into the user's repository.** The eval is a throwaway measuring instrument, not an artifact the user asked for. It stays in a temporary workspace. After the result, the user decides whether to keep it.
 - **Do not put the eval in the repo's own test framework.** The `ori eval` command finds `*.eval.ts` files only. A pytest, vitest, or Go test file does not run, and no signal shows this. Silence looks like a pass.
 - **Do not make raw API calls and show the numbers as an Ori eval.** If you measure in a different way, label the result clearly.
 - **Do not give model ids or prices from memory.** You must check live model prices on OpenRouter.
@@ -175,7 +176,7 @@ These rules apply to all steps:
 | The credential is missing | Stop. Tell the user to run `ori login`. |
 | A long pause on the first run | This is the template download. It takes approximately 30 seconds. Wait before you retry. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not give a different id from memory. |
-| The eval is inside the user's repository | Keep the eval and its supporting files in a temporary workspace outside the repository. |
+| The eval is inside the user's repository | Move the eval and its supporting files to a temporary workspace outside the repository. Run `ori eval` on the new path. |
 | The run is longer than expected | The process may still be running. Read the stream. If a question event appears, stop the process immediately. Do not wait for the final result line. |
 | Ori selected the eval's target itself, and the run produced an eval for a target nobody chose | The question event was missed in the stream, or the run was allowed to continue after it appeared. Stop the process as soon as `elicitation.requested` or `permission.requested` appears. Ask the user, append the question and the answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |
 | No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text. Append the question and the user's answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |
