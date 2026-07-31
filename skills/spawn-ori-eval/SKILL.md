@@ -18,7 +18,7 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 5. Read the eval surface, continuing even if the commands error (appendix A).
 6. Tell the user where the binary landed, if you installed it.
 7. Tell the user what the run will do, from what you read in step 5.
-8. Tell the user it takes 10 to 30 minutes and spends real money.
+8. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
 9. Tell the user they get a scored table and that a question can restart the run.
 10. Write the task prompt file (appendix B).
 11. Start one background run from the repo root and save the process ID (appendix C).
