@@ -142,6 +142,7 @@ while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
 ori code --prompt-file "$run_dir/task.txt" \
   > "$run_dir/answer-$n.txt" \
   2> "$run_dir/error-$n.log"
+printf 'attempt %s answer: %s\n' "$n" "$run_dir/answer-$n.txt"
 ```
 
 If the operator's shell calls are cut off before a run ends, background the command and poll it using the operator's own process-management tools.
