@@ -7,6 +7,13 @@ description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned
 
 Ori writes and grades the eval on a pinned harness and model, so the bench is identical for every coding agent. You run Ori, keep the user informed, and relay the result. An eval you write yourself is not reproducible, and a score change must come from the user's agent, not from the environment.
 
+## Pins
+
+These two values are fixed here and referenced by name everywhere below, so changing what a run costs is one edit in this section.
+
+- `RUN_MODEL` is `openai/gpt-5.6-terra`, the model the run itself uses.
+- `JUDGE_MODEL` is `openai/gpt-5.6-terra`, the model the eval judges with.
+
 ## Steps
 
 Do these in order. One line, one action. Appendix letters point to the detail and run in step order, except the troubleshooting table, which is a lookup and comes last.
@@ -45,7 +52,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 These hold for the whole run.
 
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
-- Always pass `--model openai/gpt-5.6-terra` and never pass `--harness`. That slug is the pin, so every coding agent runs the same bench. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
+- Always pass `--model <RUN_MODEL>` and never pass `--harness`. The pin is what makes every coding agent run the same bench. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
 - Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 4 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
@@ -58,7 +65,7 @@ These hold for the whole run.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
-- Never give model ids or prices from memory. Check live prices on OpenRouter. The run's own pinned slug is the one exception, because this skill fixes it.
+- Never give model ids or prices from memory. Check live prices on OpenRouter. The pins are the one exception, because this skill fixes them.
 - The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
@@ -112,7 +119,7 @@ Run `ori auth` before starting. It resolves the credential the CLI will use, inc
 
 ## Appendix C: task prompt template
 
-Write this to `task.txt` in the run directory, filling in every angle-bracket field.
+Write this to `task.txt` in the run directory, filling in every angle-bracket field, taking `<JUDGE_MODEL>` from the pins.
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
@@ -125,8 +132,8 @@ Ask exactly one question per turn and end the turn after asking it. Give each
 question three concrete options plus a free-text `Other` option. Never combine
 questions in one turn.
 
-Judge with openai/gpt-5.6-terra rather than the SDK's default judge model:
-pass it to setupJudge as its own agent.
+Judge with <JUDGE_MODEL> rather than the SDK's default judge model: pass it
+to setupJudge as its own agent.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
