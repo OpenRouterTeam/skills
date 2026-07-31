@@ -58,6 +58,7 @@ These hold for the whole run.
 - Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 4 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
 - Update `steps.txt` as you go: mark a step current before you do it and done before you start the next, and reread the file to decide what comes next instead of trusting memory. A restart replays the prompt file from the top, so this is the only record of how far the last attempt got.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
+- Do not tell the user internal pass labels such as `eval run pass 3`. Use plain progress language instead.
 - Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and keep one answer file and one error log per attempt.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
@@ -174,6 +175,7 @@ Status updates the user sees must stay plain. Examples:
 | Do not say | Say |
 | -- | -- |
 | Attempt 2 exited with a tagged question; see answer-2.txt. | Ori read your repo and has a question before it continues. |
+| eval run pass 3 completed. | Ori has finished reading. I am checking what it came back with. |
 | Restarting ori code --prompt-file with n=3. | I sent your answer to Ori. It reads the project and the full story again, then continues from where it stopped. About 15 minutes. |
 | Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I am checking what it came back with. |
 | Process 48210 is running; error-1.log is empty. | The run continues. Silence is normal here. |
