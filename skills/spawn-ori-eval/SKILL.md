@@ -73,6 +73,7 @@ These hold for the whole run.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", and "harness".
+- Never write "bakeoff" to the user. Ori's eval docs and its narration still use the word, so replace it with "model comparison" every time you relay, quote, or summarise them, and in your own status lines and command labels.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
@@ -177,6 +178,7 @@ Status updates the user sees must stay plain. Examples:
 | Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I am checking what it came back with. |
 | Process 48210 is running; error-1.log is empty. | The run continues. Silence is normal here. |
 | The run wrote no summary line. | The run stopped before it could report its time and cost. |
+| The bakeoff is launched. | The model comparison is running. |
 
 A finished turn ends its assistant text either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end of the assistant text is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
