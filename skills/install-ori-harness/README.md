@@ -22,4 +22,5 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Signing in with OpenRouter OAuth, including the headless browser flow
 - Running Claude Code, Codex, OpenCode, or Hermes through Ori
 - Forwarding normal agent arguments and selecting any OpenRouter model
-- Upgrading Ori and confirming a harmless agent request reaches OpenRouter
+- Upgrading Ori with `ori update`
+- Confirming a harmless agent request reaches OpenRouter
