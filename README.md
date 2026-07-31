@@ -75,6 +75,7 @@ Skills are contextual and auto-loaded based on your conversation. When a request
 | [openrouter-analytics-query](skills/openrouter-analytics-query/README.md) | Constructing and executing analytics queries against the OpenRouter API — full parameter reference for metrics, dimensions, filters, time ranges, ordering, and pagination |
 | [openrouter-generations](skills/openrouter-generations/README.md) | Inspecting individual OpenRouter generations — request metadata (cost, latency, tokens, model, provider routing) and stored prompt/completion content |
 | [spawn-ori-eval](skills/spawn-ori-eval/README.md) | Delegating model evals to [Ori](https://openrouter.ai/ori/code) — spawning a headless Ori run so the eval is authored and graded on a pinned harness and model, then relaying the ranked results |
+| [install-ori-harness](skills/install-ori-harness/README.md) | Installing Ori and running an existing coding agent through OpenRouter with OAuth, model selection, upgrades, and setup verification |
 
 ## Environment
 
