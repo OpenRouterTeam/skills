@@ -45,7 +45,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 These hold for the whole run.
 
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
-- Always pass `--model openai/gpt-5.6-terra` and never pass `--harness`. That slug is the pin, so every coding agent runs the same bench, and it costs roughly a fifth of what the binary's own default costs on the repo reading that dominates the bill. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
+- Always pass `--model openai/gpt-5.6-terra` and never pass `--harness`. That slug is the pin, so every coding agent runs the same bench. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
 - Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 4 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
