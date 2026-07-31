@@ -9,7 +9,7 @@ Do not write this eval yourself. Install Ori if it is not installed. Give the re
 
 This division of work is deliberate. Ori pins the harness and the model that write and grade the eval. Thus the bench is the same for every coding agent. An eval that you write yourself is not reproducible. A score change must show a change in the user's agent, not a change in the environment.
 
-Your task is the part that Ori cannot do. You are the user's only connection to the run. Tell the user what you started. Give Ori's questions to the user. Send the user's answers back to Ori. Relay the full result.
+Your task is the part that Ori cannot do. You are the user's only connection to the run. Tell the user what you started. Give Ori's questions to the user. Append the user's answers to the task file and restart the run. Relay the full result.
 
 ## Step summary
 
@@ -18,8 +18,8 @@ Do the steps in this sequence. Each step has a section below. The **Rules** in a
 1. **Do the pre-run checks** — 1a: the `ori` binary. 1b: login with `ori login`. 1c: the `bun` binary.
 2. **Tell the user what will occur** — what Ori is, the time and the cost, the output, and that Ori can ask questions.
 3. **Write the task prompt file** — `/tmp/ori-task.txt`, with the user's request unchanged, the repo paths, and the `evals/` target.
-4. **Start one Ori run** — `ori code --prompt-file … --output jsonl --interactions forward`.
-5. **Monitor the run** — report progress; send Ori's questions to the user: 5a read the event, 5b ask the user, 5c write the answer to stdin.
+4. **Start one Ori run** — `ori code --prompt-file … --output jsonl`.
+5. **Monitor the run** — report progress; stop at questions, ask the user, append the answer, and restart from the full prompt file.
 6. **Relay the result** — the full table, the ship or no-ship decision, the quoted failures, and the cost and timing breakdown.
 7. **Keep the eval** — commit the `*.eval.ts` file, tell the user about `ori eval <file>` re-runs, offer CI setup.
 
@@ -48,7 +48,7 @@ Tell the user these points. Use your own words. Do not use the terms in the rule
 - **What Ori will do.** Select what to measure, write a `*.eval.ts` file in `evals/`, and score the models.
 - **The cost.** Approximately 10 to 30 minutes. How much it costs depends on how extensive the eval run is and how large the codebase is. Say this before the run, not after. The entire run may exceed how much you've added to the API key credit you added when you authed.
 - **The output.** A scored table that compares the models.
-- **Questions are possible.** Tell the user that you will bring each question to them. Then the interruption in step 5 is expected, not unexpected.
+- **Questions are possible.** Tell the user that you will bring each question to them and may restart the run after they answer. Then the interruption in step 5 is expected, not unexpected.
 - **What you installed.** If you installed the `ori` binary, tell the user its location: `~/.local/bin/ori`.
 
 **Rules for this step:**
@@ -70,7 +70,7 @@ Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
 not create or modify anything outside the top-level evals directory.
 ```
 
-This file is the single state record for the run. When you must send more text to Ori later (step 5, plain-prose questions), append that text to this file. Then the file always contains the full instruction history, and a restarted run does not lose context.
+This file is the single state record for the run. When you must send more text to Ori later (step 5, any question), append that text to this file. Then the file always contains the full instruction history, and a restarted run does not lose context.
 
 **Rules for this step:**
 
@@ -79,12 +79,13 @@ This file is the single state record for the run. When you must send more text t
 ## Step 4: Start one Ori run
 
 ```bash
-ori code --prompt-file /tmp/ori-task.txt --output jsonl --interactions forward
+ori code --prompt-file /tmp/ori-task.txt --output jsonl > /tmp/ori-output-1.jsonl 2> /tmp/ori-error-1.log &
+ori_pid=$!
+printf 'Ori process: %s\n' "$ori_pid"
 ```
 
 - Always use `--prompt-file`. Do not use the `-p` flag. Ori rejects positional prompts. The prompt file is the central state for the run: you append to it across the run (step 5), and a one-time `-p` string cannot keep that state.
-- The run has no TTY. The run stops when the prompt is complete. The exit code is 0 for success and non-zero for failure. The `--output jsonl` flag gives the structured stream: one `{"kind":"event","event":...}` line for each runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. Use `--output jsonl`, not plain prose output. Only the jsonl stream contains the `sessionId`.
-- The `--interactions forward` flag lets you answer Ori's questions during the run (step 5). Without the flag, the run refuses each question and makes the decision itself. Then the eval measures Ori's guess, not the user's intent.
+- The run has no TTY. Keep the process ID. Read `/tmp/ori-output-1.jsonl` as it grows and follow step 5 when a question appears. The `--output jsonl` flag gives the structured stream: one `{"kind":"event","event":...}` line for each runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. Use `--output jsonl`, not plain prose output.
 
 **Rules for this step:**
 
@@ -97,48 +98,50 @@ ori code --prompt-file /tmp/ori-task.txt --output jsonl --interactions forward
 
 Report progress from the stream. Examples: Ori selected a target, Ori wrote the eval, Ori runs model 2 of 3. Do not report only "the run continues". If you are silent and don't give feedback, the user will get confused. Do not confuse the user.
 
-With `--interactions forward`, a question from Ori stays **pending**. The run waits for you. Do this:
+The default mode does not pause for a question. Ori emits the question event, settles it immediately, and keeps going. Watch the stream and stop the process as soon as a question event appears. This is urgent. If you wait, Ori can spend real money building an eval against a target it guessed.
 
-- **5a — Read the event from the stream.** An `elicitation.requested` event contains `payload.message`, `payload.fields[]`, and a `correlationId`. Each field has a `name`, a `type`, and frequently `options`. A `permission.requested` event contains `payload.options`. Record the field **`name`**. You need the exact name in step 5c.
+- **5a — Read the event from the stream.** Read the current run's output file while it grows. An `elicitation.requested` event contains `payload.message` and `payload.fields[]`. Each field has a `name`, a `type`, and frequently `options`. A `permission.requested` event contains `payload.options`. Terminate the process with the saved process ID immediately after you see either event. Do not wait for the final result line.
 - **5b — Ask the user with your own question UI.** For example, in Claude Code, use `AskUserQuestion`. Codex, Cursor CLI, etc, have their own built-in question-asking UI. Keep Ori's options one-for-one. Keep "Other" as free text the user can type in. Change Ori's words into simple language. **Show the message first. Show the picker second. Show both.** Ori's `payload.message` frequently contains context that the option labels do not contain. For the surface question, the message is a markdown table of surface and current model. Print the message as normal text in your reply. Then call your question UI below the message, with only the short option names. The table explains. The picker collects. If you compress the table into the option descriptions, the context is lost. If you remove the table, the user selects between labels with no context.
-- **5c — Write the answer to the run's stdin.** Write one JSON object on one line. Use the `correlationId` from the event:
+- **5c — Append the answer and restart.** Append both the question and the user's answer to `/tmp/ori-task.txt`. Keep the question's full message and the answer in plain language. For a form, include the selected option and any free-text answer. For a permission request, include the selected option. The file must remain the full instruction history. Start a fresh run from the repo root:
 
-  ```json
-  {"kind":"respond","correlationId":"ixn-0","action":"accept","content":{"<field-name>":"<the user's choice>"}}
+  ```bash
+  ori code --prompt-file /tmp/ori-task.txt --output jsonl > /tmp/ori-output-2.jsonl 2> /tmp/ori-error-2.log &
+  ori_pid=$!
+  printf 'Ori process: %s\n' "$ori_pid"
   ```
 
-  **The keys in `content` are the field `name`s from the request.** They are not a fixed schema. If `payload.fields` is `[{"name":"surface", …}]`, send `"content":{"surface":"…"}`. Do not copy a key such as `"value"` from an example. A line with a wrong key is accepted but has no effect. This is worse than no answer: the run continues as if the user made a choice. Read the name from the event each time.
-
-  For a question form, use `action` (`accept`, `decline`, or `cancel`); on an accept, `content` contains the fields. For a permission request, use `optionKind`. Send only the decision. The request itself identifies the question and the session.
+  Resend the whole prompt file every time. Save the new process ID. Give each run its own output file and raise the number each time. Step 6 needs every run's stream to report the full cost. This is a fresh run, not a live exchange. Repeat steps 5a through 5c if another question appears.
 
 **Rules for this step:**
 
-- Do not show the user the raw event, the `correlationId`, or the word "elicitation".
-- **Answer quickly.** A question that waits longer than `--interaction-timeout` (default: 300 seconds) is refused. Then Ori makes the decision itself. If the user can be slow, increase the timeout: `--interaction-timeout 900`.
-- **Ori ignores a malformed line.** The run does not stop. But the question then waits until the timeout. Make sure the shape of the line is correct.
-- **Do not invent an answer.** The forward flag exists so that a person decides. If you cannot contact the user, let the question time out. Do not guess. A guessed target makes the full eval invalid, and the result looks correct.
-- **Do not accept a permission request without the user** to keep the run in motion. Give the request to the user.
-- **A question in plain prose** ends the turn. It does not stay pending. To answer it: append the question and the user's answer to `/tmp/ori-task.txt`, write the answer alone to a new file such as `/tmp/ori-answer-1.txt`, and continue the session: `ori code --session <sessionId> --prompt-file /tmp/ori-answer-1.txt --output jsonl`. Continue in this way until the eval is written and run. The task file then contains the full history, and a restarted run can use it directly.
+- Do not show the user the raw event or the word "elicitation".
+- **Do not invent an answer.** If you cannot contact the user, stop the run and wait. Do not guess. A guessed target makes the full eval invalid, and the result looks correct.
+- **Do not accept a permission request without the user.** Stop the run, give the request to the user, append the decision, and restart from the full prompt file.
+- **A question in plain prose** also ends the turn. Append the question and the user's answer to `/tmp/ori-task.txt`, then restart with the full prompt file. Use the same restart path for structured question events. Do not split the history into answer files.
+- **Do not use `--session` for the restart.** A new run over the full prompt file makes the answer part of the task context before Ori continues. A resumed session can retain the earlier guessed decision and can hide the answer from the prompt that drives the next run.
 
 ## Step 6: Relay the result
 
 - Relay the full table, the ship or no-ship decision, and the quoted failures. Do not remove the failure quotes from your summary. They are the most useful output.
 - **End with a cost and timing breakdown table.** Ori's reply ends with a table of its steps, durations, and costs. Relay that table in full. Do not compress it to one line. Then add the rows that only you can measure, from the jsonl stream:
-  - One row for each wait on a user question. The duration is the time from the `elicitation.requested` event to your `respond` line. The cost is "—".
-  - A total row. A `turn.succeeded` event reports the cost of that one turn, not of the session. Sum `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in the run, including each continued session (step 5). A turn with no `usage.costUsd` is unmeasured — do not count it as 0; say that the total does not include it. Compute the total duration from the first and last event timestamps across all of the run's streams.
+  - One row for each restarted run. Include the run that stopped on a question and every fresh run after it. A restart repeats repo exploration, so include its cost and duration.
+  - A total row. A `turn.succeeded` event reports the cost of that one turn, not of the session. Sum `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run, including runs stopped at questions and all restarts. A turn with no `usage.costUsd` is unmeasured. Do not count it as 0. Say that the total does not include it. Compute the total duration across all runs.
 
   If Ori's reply does not contain the table, build it yourself from the stream: one row for each turn, with the timestamp of `turn.started`, the duration to the turn's terminal event, and that event's `usage.costUsd` (the cost of that one turn). Add the eval's model calls and judging from the report's Judging table or from `data.results`.
 
   | Step | Start | Duration | Cost |
   | -- | -- | -- | -- |
   | Repo exploration | 20:26 | 2m 20s | $3.20 |
-  | Question 1 to you (pick target) | 20:29 | 39s | — |
+  | Run stopped at question 1 | 20:29 | 39s | $0.42 |
+  | Restart and repeated exploration | 20:30 | 15m 10s | $27.69 |
+  | Eval model calls | 20:46 | 2m | $0.46 |
+  | Judging | 20:48 | 1m | $0.05 |
   | … |  |  |  |
-  | **Total** |  | **20m 50s** | **$20.03** |
+  | **Total** |  | **21m 09s** | **$31.82** |
 
-- **After the table, give the re-run cost in one line.** The session cost is usually much larger than the eval cost, and a re-run does not pay the session cost again:
+- **After the table, give the re-run cost in one line.** A restart repeats the repo exploration and adds to the cost. A later `ori eval` run is cheaper because it does not repeat the authoring run:
 
-  > This cost about $28.20 total: $27.69 for Ori's one-time authoring session, $0.46 for the eval's model calls, $0.05 for judging. Re-running the eval costs only ~$0.51.
+  > This cost about $31.82 total across two Ori runs: $31.31 for authoring and repeated exploration, $0.46 for the eval's model calls, and $0.05 for judging. Re-running the eval costs only ~$0.51.
 
 **Rules for this step:**
 
@@ -161,8 +164,8 @@ These rules apply to all steps:
 - **Do not put the eval in the repo's own test framework.** The `ori eval` command finds `*.eval.ts` files only. A pytest, vitest, or Go test file does not run, and no signal shows this. Silence looks like a pass.
 - **Do not make raw API calls and show the numbers as an Ori eval.** If you measure in a different way, label the result clearly.
 - **Do not give model ids or prices from memory.** You must check live model prices on OpenRouter.
-- **Do not answer Ori's questions for the user.** The forward flag exists so that a person selects. A guessed target makes the result invalid, and the guess looks like a real answer.
-- **Do not let the run become silent.** A question that waits for you, and 25 minutes with no report, both look like a stopped run.
+- **Do not answer Ori's questions for the user.** Stop the run, show the question, and wait for the person to select. A guessed target makes the result invalid, and the guess looks like a real answer.
+- **Do not let the run become silent.** An unreported question and 25 minutes with no progress report both look like a stopped run.
 
 ## Troubleshooting
 
@@ -173,12 +176,9 @@ These rules apply to all steps:
 | A long pause on the first run | This is the template download. It takes approximately 30 seconds. Wait before you retry. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not give a different id from memory. |
 | The eval file is outside `evals/` | Move the file. Run `ori eval` on the new path. |
-| The run is longer than your timeout | The process can still be in operation. Read its stdout until the `{"kind":"result",...}` line arrives. Do not start a new run. |
-| Ori selected the eval's target itself | The question timed out, or `--interactions forward` was missing. Start the run again with the flag. Answer within `--interaction-timeout`. |
-| Your answer had no effect | Make sure the `correlationId` is the same as in the request. Make sure the line went to the run's **stdin**, not to a new command. A continued session starts a new turn. It cannot answer a pending request. |
-| Ori accepted the answer but made no choice | The `content` keys were not the same as the request's field `name`s. The accept had no usable value. Read `payload.fields[].name` again. Use those exact keys. |
-| No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. They do not stay pending. Read the final assistant text. Answer with a continued session. |
-| Ori rejects `--interactions` as unknown | The installed `ori` is too old for the answer channel. Run `ori update`. Then examine `ori code --help` again. |
+| The run is longer than expected | The process may still be running. Read the stream. If a question event appears, stop the process immediately. Do not wait for the final result line. |
+| Ori selected the eval's target itself, and the run produced an eval for a target nobody chose | The question event was missed in the stream, or the run was allowed to continue after it appeared. Stop the process as soon as `elicitation.requested` or `permission.requested` appears. Ask the user, append the question and the answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |
+| No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text. Append the question and the user's answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |
 | `403 Key limit exceeded` or a 402 payment error in the stream | The user's OpenRouter key has no credit. Refer to the section below. |
 
 ### When the key has no credit

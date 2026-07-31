@@ -27,7 +27,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Preflight for the `ori` binary, auth, and Bun, including the `~/.local/bin` PATH gap
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Backgrounding a single headless Ori invocation without overriding the pinned harness or model
-- Forwarding Ori's mid-run questions to the user with `--interactions forward` and sending their answers back, instead of letting Ori pick its own eval target
+- Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
 - A fill-in-the-blanks task prompt that produces a reproducible `evals/<feature>/<name>.eval.ts`
 - Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
 - Turning the run into a guardrail with cheap `ori eval` re-runs in CI
