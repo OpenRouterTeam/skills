@@ -27,24 +27,24 @@ If there is a problem, refer to **Troubleshooting** at the end. The **Hard rules
 
 ## Step 1: Do the pre-run checks
 
-Do these checks in this sequence. If 1a, 1b or 1c fails, stop. Do not continue to the next check. Check 1d is the exception: it gathers context and never stops the task.
+Do these checks in this sequence. If 1a, 1b or 1c fails, stop. Do not continue to the next check. Check 1d never stops the task.
 
 - **1a — Binary.** Run `command -v ori`. If `ori` is not installed, run `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. The installer puts `ori` in `~/.local/bin`. This directory is frequently not on PATH in a non-login shell. Run `~/.local/bin/ori --version` before you report a failure.
 - **1b — Login.** Tell the user to run `ori login`. The command keeps an Ori credential in `~/.ori/credentials.json`. If the credential is missing, STOP. You cannot complete the login. The command opens a browser. Tell the user to run it. In Claude Code, tell the user to type `! ori login`.
 - **1c — Bun.** Run `command -v bun`. Ori runs `*.eval.ts` files with Bun.
-- **1d — The eval surface.** Run `ori eval -h` and `ori eval skill`. Read both before you start the run. The help prints the eval runner: what it discovers, how it reports, and which flags a re-run accepts. The guide prints the authoring instructions that Ori itself follows inside the run, so it tells you what Ori is about to do and which scope questions it will ask. Without these you cannot describe the run in step 2, recognize a question in step 5, or read the result in step 6, because you do not know what the run does. Neither command needs a credential, a workspace or a network call: both read what the binary ships. If `ori eval skill` errors, the binary predates it: run `ori skills get create-eval`, which prints the same text. If that also errors, continue to step 2 and tell the user that your description of the run comes from this skill and not from their installed version.
+- **1d — The eval surface.** Run `ori eval -h` and `ori eval skill`. Read both. The guide is what Ori follows inside the run, so it tells you what the run will do and which questions it will ask. If `ori eval skill` errors, run `ori skills get create-eval`. If both error, go to step 2 anyway.
 
 **Rules for this step:**
 
 - Do not tell the user to export a raw `OPENROUTER_API_KEY`. The `ori login` command is the supported procedure.
-- Read the two documents in 1d for your own understanding. Do not paste either one to the user. They are long, and the user asked for an eval, not for CLI documentation.
+- Do not paste 1d's output to the user. You read it, they did not ask for it.
 - Do not show, print, or log the contents of `credentials.json`. Do not show a value that you read from a `.env` file or a config file. Give the name of the key only. Example: say `OPENAI_API_KEY at .env:4`. Do not say the value.
 
 ## Step 2: Tell the user what will occur
 
 Before you start the run, tell the user what will occur. Use simple language. Many tool calls with no explanation is the most frequent complaint about this skill.
 
-Describe the run from what you read in 1d. That is why you read it. Everything you tell the user about the run, and everything you later read back out of it, must come from the current CLI and not from your memory of an earlier version.
+Describe the run from what you read in 1d, not from memory.
 
 Tell the user these points. Use your own words. Do not use the terms in the rule below.
 
@@ -157,7 +157,7 @@ The default mode does not pause for a question. Ori emits the question event, se
 - The `*.eval.ts` file is the permanent product. Tell the user to commit it.
 - A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
 - Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts — the help from 1d is the source. For the eval-file API, the authoring guide from 1d is the source. Read either again if the run raised a question it answers, using the same commands as 1d. Do not copy them into this skill or into text for the user. The CLI changes, and copies become incorrect.
+- For all other data about eval runs — reports, baselines, lists, timeouts, the eval-file API — re-read 1d. Do not copy it into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
