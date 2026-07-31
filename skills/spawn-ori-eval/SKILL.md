@@ -25,16 +25,16 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 12. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
 13. Tell the user they get a scored table and that a question can restart the run.
 14. Write the task prompt file (appendix C).
-15. Start one run from the repo root and capture its answer and error files (appendix D).
-16. Wait for the run to exit, then read the answer file (appendix E).
-17. If the turn ends on a tagged question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
+15. Start one detached run from the repo root and capture its answer and error files (appendix D).
+16. Poll for the run to exit, then read the answer file (appendix E).
+17. If the turn ends on a question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
 18. Show the user the question text as plain text.
 19. Ask the user with your own question UI, one option per Ori option.
 20. Append the question and the user's answer to the task prompt file (appendix E).
 21. Restart over the whole prompt file with the next attempt number, then return to step 16.
 22. Relay the result table, the ship or no-ship decision, and the quoted failures.
 23. Relay Ori's cost and timing table in full (appendix F).
-24. Add one row per attempt and a total row (appendix F).
+24. Add one row per attempt and report the measured cost floor (appendix F).
 25. Add one line on the cheaper cost of a re-run.
 26. Tell the user where Ori left the temporary workspace and that it is throwaway.
 27. Say they can move the eval into their repo if the numbers made them want to keep it.
@@ -130,7 +130,7 @@ the user's repository.
 
 ## Appendix D: start command
 
-Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Run it in the foreground and time it yourself.
+Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Start it detached, save its process ID, and time it yourself.
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
@@ -139,17 +139,16 @@ run_dir="/tmp/spawn-ori-eval-$run_hash"
 n=1
 while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
 start=$(date +%s)
-ori code --prompt-file "$run_dir/task.txt" > "$run_dir/answer-$n.txt" 2> "$run_dir/error-$n.log"
-status=$?
-duration=$(( $(date +%s) - start ))
-printf 'Ori attempt %s exited with status %s after %ss\n' "$n" "$status" "$duration"
+ori code --prompt-file "$run_dir/task.txt" > "$run_dir/answer-$n.txt" 2> "$run_dir/error-$n.log" &
+ori_pid=$!
+printf 'Ori attempt %s started as process %s at %ss\n' "$n" "$ori_pid" "$start"
 ```
 
 ## Appendix E: answer shape
 
-The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so wait for it to exit before reading it. There is no live progress source, no question detection during the turn, and nothing to kill.
+The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so poll the saved process ID until it exits before reading it. There is no live progress source, no question detection during the turn, and nothing to kill.
 
-A finished turn ends either on a tagged question or on the final report. A tagged question starts with exactly `[workspace-context]`, `[narrowing]`, or `[next-step]`. Show the full question and its options to the user. Ask with the operator's own question UI, one option per option Ori offered. Append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect.
+A finished turn ends either on a question or on the final report. A question may start with `[workspace-context]`, `[narrowing]`, or `[next-step]`, or it may be untagged prose at the end of the answer. Handle either form the same way: show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
 Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
@@ -181,9 +180,9 @@ Follow it with one line, for example: the measured cost floor is $3.71. The two 
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| The run is longer than expected | Wait for the process to exit. There is no live progress source or question detection during a turn. |
-| Ori picked the target itself | The question was not written as the last thing in the turn. Do not accept the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ends on a tagged question or the final report. |
+| The run is longer than expected | Poll the saved process ID until it exits. There is no live progress source or question detection during a turn, and nothing to kill. |
+| Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ending in an untagged question is handled like a tagged question. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
