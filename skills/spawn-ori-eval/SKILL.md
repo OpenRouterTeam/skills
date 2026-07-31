@@ -28,7 +28,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 15. Start one background run from the repo root and save the process ID (appendix D).
 16. Read the current run's output file as it grows (appendix E).
 17. Report each phase banner as a milestone.
-18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, a tagged plain-text question, or an untagged prose question, or skip to step 23 if it finishes without one (appendix E).
+18. Kill the run the moment a tagged elicitation, a permission request, or a tagged plain-text question appears, then continue to steps 19 to 22. If an untagged prose question appears, kill the run and report the broken contract to the user instead of continuing through steps 19 to 22, or skip to step 23 if it finishes without a question (appendix E).
 19. Show the user the question text as plain text.
 20. Ask the user with your own question UI, one option per Ori option.
 21. Append the question and the user's answer to the task prompt file (appendix E).
@@ -181,7 +181,7 @@ Follow it with one line, for example: this cost about $31.82 across two Ori runs
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | The run is longer than expected | Read the stream. If a question event is sitting there, kill the process now rather than waiting for the result line. |
 | Ori picked the target itself | The question event was missed or the run continued past it. Kill it, ask the user, append the answer, and restart from the full prompt file. |
-| No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text and restart the same way. |
+| No question arrives but the run looks stopped | A tagged plain-text question is a normal stopping point. Read it and restart the same way. An untagged prose question is a contract violation. Report it instead of restarting. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
