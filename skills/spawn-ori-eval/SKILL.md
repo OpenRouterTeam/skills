@@ -162,6 +162,20 @@ printf 'Ori attempt %s started as process %s at %s\n' "$n" "$ori_pid" "$start_cl
 The current run's answer file is `answer-<n>.txt` in the run directory. Read the saved process ID and poll it until it exits before reading the answer. Then read the saved exit status and calculate the duration from the saved start epoch. If the status file is missing, the process exited nonzero, or the answer file is empty, read the error log and report the failed attempt instead of treating it as a completed turn. There is no live progress source during the turn and nothing to kill.
 
 ```bash
+run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
+run_dir="/tmp/spawn-ori-eval-$run_hash"
+n=0
+for pid_file in "$run_dir"/pid-*.txt; do
+  [ -e "$pid_file" ] || continue
+  attempt=${pid_file##*/pid-}
+  attempt=${attempt%.txt}
+  case "$attempt" in
+    ''|*[!0-9]*) continue ;;
+  esac
+  [ "$attempt" -gt "$n" ] && n=$attempt
+done
+[ "$n" -gt 0 ] || { printf 'No started Ori attempt found\n' >&2; exit 1; }
 pid=$(cat "$run_dir/pid-$n.txt")
 while kill -0 "$pid" 2>/dev/null; do sleep 5; done
 start_epoch=$(cat "$run_dir/start-$n.epoch")
