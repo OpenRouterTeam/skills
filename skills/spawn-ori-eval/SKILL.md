@@ -17,7 +17,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Otherwise archive whatever is in the directory and write a fresh `steps.txt` covering step 5 onward (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Check that `OPENROUTER_API_KEY` is present in the environment yourself, and stop with export instructions if it is missing (appendix B).
+7. Check that the user has completed `ori login` yourself, and stop with login instructions if the stored credential is missing (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -25,8 +25,8 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 12. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
 13. Tell the user they get a scored table and that a question can restart the run.
 14. Write the task prompt file (appendix C).
-15. Start one detached run from the repo root and capture its answer and error files (appendix D).
-16. Poll for the run to exit, then read the answer file (appendix E).
+15. Start one run from the repo root and capture its answer and error files (appendix D).
+16. Wait for the run to exit, then read the answer file (appendix E).
 17. If the completed answer contains a tagged question anywhere, or ends with an untagged question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
 18. Show the user the question text as plain text.
 19. Ask the user with your own question UI, one option per Ori option.
@@ -34,7 +34,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 21. Restart over the whole prompt file with the next attempt number, then return to step 16.
 22. Relay the result table, the ship or no-ship decision, and the quoted failures.
 23. Relay Ori's cost and timing table in full (appendix F).
-24. Add one row per attempt and report the measured cost floor (appendix F).
+24. Add Ori's reported cost and timing rows for each attempt, naming question-stopped attempts unmeasured and reporting a floor (appendix F).
 25. Add one line on the cheaper cost of a re-run.
 26. Tell the user where Ori left the temporary workspace and that it is throwaway.
 27. Say they can move the eval into their repo if the numbers made them want to keep it.
@@ -54,16 +54,16 @@ These hold for the whole run.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
 - Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are tagged questions at the end of a completed turn.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
-- Never invent a number. Use Ori's closing table and the operator's measured wall clock. A missing cost or duration is unmeasured, not zero.
+- Never invent a number. Use Ori's closing table. An attempt stopped at a question has no reported cost, so name it unmeasured rather than zero.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter.
-- The setup check must confirm `OPENROUTER_API_KEY` is present in the environment. The stored login credential covers `ori code` but not `ori eval`, so tell the user to export the key when it is missing. The key belongs to the user, and only they can supply it.
+- The setup check must confirm that `ori login` has stored a credential. Tell the user to run `ori login` when it is missing.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
-- Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", and "stdout".
+- Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", and "harness".
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -109,7 +109,7 @@ Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | 
 
 Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
 
-Check that `OPENROUTER_API_KEY` is present in the environment before starting. The stored credential from `ori login` covers `ori code`, but `ori eval` reads only the environment variable. If it is missing, tell the user to export it and stop.
+Check that `ori login` has stored a credential before starting. If it is missing, tell the user to run `ori login` and stop. The current `ori eval` command still checks only `OPENROUTER_API_KEY` in the environment, so this supported login path requires the CLI to make that stored credential available to the eval process.
 
 ## Appendix C: task prompt template
 
@@ -130,98 +130,24 @@ the user's repository.
 
 ## Appendix D: start command
 
-Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Start it detached with stdin from `/dev/null`, save its process ID and start time in the run directory, and time it yourself.
+Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Run it in the foreground.
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
 run_dir="/tmp/spawn-ori-eval-$run_hash"
 n=1
-while [ -e "$run_dir/pid-$n.txt" ]; do n=$((n + 1)); done
-pid_file="$run_dir/pid-$n.txt"
-: > "$pid_file"
-ori_bin=$(command -v ori 2>/dev/null || true)
-if [ ! -x "$ori_bin" ] && [ -x "$HOME/.local/bin/ori" ]; then
-  ori_bin="$HOME/.local/bin/ori"
-fi
-[ -x "$ori_bin" ] || { printf 'Could not find the ori binary\n' >&2; exit 1; }
-start_epoch=$(date +%s)
-start_clock=$(date '+%H:%M:%S')
-status_file="$run_dir/status-$n.txt"
-nohup sh -c '
-  "$1" code --prompt-file "$2" > "$3" 2> "$4"
-  printf "%s\n" "$?" > "$5"
-' sh \
-  "$ori_bin" \
-  "$run_dir/task.txt" \
-  "$run_dir/answer-$n.txt" \
-  "$run_dir/error-$n.log" \
-  "$status_file" \
-  </dev/null >/dev/null 2>&1 &
-ori_pid=$!
-printf '%s\n' "$ori_pid" > "$pid_file"
-printf '%s\n' "$start_epoch" > "$run_dir/start-$n.epoch"
-printf '%s\n' "$start_clock" > "$run_dir/start-$n.clock"
-printf 'Ori attempt %s started as process %s at %s\n' "$n" "$ori_pid" "$start_clock"
+while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
+ori code --prompt-file "$run_dir/task.txt" \
+  > "$run_dir/answer-$n.txt" \
+  2> "$run_dir/error-$n.log"
 ```
+
+If the operator's shell calls are cut off before a run ends, background the command and poll it using the operator's own process-management tools.
 
 ## Appendix E: answer shape
 
-The current run's answer file is `answer-<n>.txt` in the run directory. Read the saved process ID and poll it until it exits before reading the answer. Give each polling shell a fresh 40-minute wait window anchored to when that poll starts. An expired window is a report to the user, not a verdict on the run, so resume polling from a later shell if needed. Calculate the total attempt duration from the saved start epoch. If the status file is missing, the process exited nonzero, or the answer file is empty, read the error log and report the failed attempt instead of treating it as a completed turn. There is no live progress source during the turn and nothing to kill.
-
-```bash
-run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
-run_dir="/tmp/spawn-ori-eval-$run_hash"
-n=0
-for pid_file in "$run_dir"/pid-*.txt; do
-  [ -e "$pid_file" ] || continue
-  attempt=${pid_file##*/pid-}
-  attempt=${attempt%.txt}
-  case "$attempt" in
-    ''|*[!0-9]*) continue ;;
-  esac
-  [ "$attempt" -gt "$n" ] && n=$attempt
-done
-[ "$n" -gt 0 ] || { printf 'No started Ori attempt found\n' >&2; exit 1; }
-pid=$(cat "$run_dir/pid-$n.txt")
-case "$pid" in
-  ''|*[!0-9]*) printf 'Ori attempt %s did not record a process id\n' "$n" >&2; exit 1 ;;
-esac
-start_epoch=$(cat "$run_dir/start-$n.epoch")
-start_clock=$(cat "$run_dir/start-$n.clock")
-poll_start_epoch=$(date +%s)
-deadline=$((poll_start_epoch + 40 * 60))
-timed_out=0
-last_notice=$poll_start_epoch
-status_file="$run_dir/status-$n.txt"
-while [ ! -f "$status_file" ] && kill -0 "$pid" 2>/dev/null; do
-  now=$(date +%s)
-  if [ "$now" -ge "$deadline" ]; then
-    printf 'Ori attempt %s exceeded this 40-minute polling window; this is wall-clock time, not run progress\n' "$n" >&2
-    timed_out=1
-    break
-  fi
-  if [ "$((now - last_notice))" -ge 60 ]; then
-    printf 'Ori attempt %s has been running for %ss; this is wall-clock time, not run progress\n' "$n" "$((now - start_epoch))"
-    last_notice=$now
-  fi
-  sleep 5
-done
-duration=$(( $(date +%s) - start_epoch ))
-status=$(cat "$run_dir/status-$n.txt" 2>/dev/null || printf 'missing')
-printf 'Ori attempt %s started at %s and lasted %ss\n' "$n" "$start_clock" "$duration"
-if [ "$timed_out" -eq 1 ]; then
-  printf 'Report that this polling window expired, not that the run failed. Do not read a partial answer or kill the process; resume polling it from a later shell if needed.\n' >&2
-  exit 1
-fi
-if [ "$status" = missing ] || [ "$status" != 0 ] || [ ! -s "$run_dir/answer-$n.txt" ]; then
-  printf 'Ori attempt %s failed. Error log: %s\n' "$n" "$run_dir/error-$n.log" >&2
-  cat "$run_dir/error-$n.log"
-  exit 1
-fi
-cat "$run_dir/answer-$n.txt"
-```
+The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so read the answer file after it exits. Diagnostics go to the error log. There is no live progress source or question detection during the turn.
 
 A finished turn ends either on a question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is handled the same way. Show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
@@ -231,7 +157,7 @@ What you append afterwards is the question's full text in plain language plus th
 
 ## Appendix F: cost and timing table
 
-Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Add the operator's measured wall clock for each attempt. Build no stream-derived totals. If a value is absent, write "unmeasured", which is not zero.
+Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Build no stream-derived totals. An attempt that ended at a question has no reported cost, so name it "unmeasured", which is not zero. Report a floor rather than adding unmeasured attempts into a total.
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
@@ -241,21 +167,20 @@ Include one row for every attempt, including each attempt that ended at a questi
 | Eval model calls | 20:46 | 2m | $0.46 |
 | Judging | 20:48 | 1m | $0.05 |
 | … |  |  |  |
-| **Measured floor** |  | **21m 09s** | **at least $3.71** |
+| **Reported floor** |  | **from Ori's table** | **at least $3.71** |
 
-Follow it with one line, for example: the measured cost floor is $3.71. The two question-stopped attempts have unmeasured cost, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
+Follow it with one line, for example: the reported cost floor is $3.71. The two question-stopped attempts have unmeasured cost, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
 
 ## Appendix G: troubleshooting
 
 | Symptom | Do this |
 |---|---|
 | `ori: command not found` after a good installation | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell. |
-| The credential is missing | Stop. Tell the user to export `OPENROUTER_API_KEY`. The stored `ori login` credential covers `ori code` but not `ori eval`. |
+| The credential is missing | Stop. Tell the user to run `ori login`. |
 | A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| The run is longer than expected | Poll the saved process ID until it exits. There is no live progress source or question detection during a turn, and nothing to kill. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ending in an untagged question is handled like a tagged question. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
