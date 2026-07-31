@@ -106,7 +106,7 @@ One `{"kind":"event","event":...}` line per runtime event, then one final `{"kin
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
-What you append afterwards is the question's full message in plain language plus the answer: the selected option and any free text for a form, the selected option for a permission request.
+What you append afterwards is the question's full message in plain language plus the single answer string, or the selected option for a permission request.
 
 ## Appendix E: cost and timing table
 
