@@ -66,7 +66,7 @@ These hold for the whole run.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
-- Relay one question per turn. Preserve Ori's four options one for one, render its `Other` option as free text, and never merge questions. If Ori emits two questions in one turn, relay only the first and report that the one-question contract was violated.
+- Relay one question per turn. For Ori's tagged interview questions, preserve the four options one for one, render `Other` as free text, and never merge questions. If Ori emits two questions in one turn, relay only the first and report that the one-question contract was violated.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
