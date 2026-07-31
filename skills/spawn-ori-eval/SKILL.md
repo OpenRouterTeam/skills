@@ -177,12 +177,37 @@ for pid_file in "$run_dir"/pid-*.txt; do
 done
 [ "$n" -gt 0 ] || { printf 'No started Ori attempt found\n' >&2; exit 1; }
 pid=$(cat "$run_dir/pid-$n.txt")
-while kill -0 "$pid" 2>/dev/null; do sleep 5; done
 start_epoch=$(cat "$run_dir/start-$n.epoch")
-duration=$(( $(date +%s) - start_epoch ))
 start_clock=$(cat "$run_dir/start-$n.clock")
+deadline=$((start_epoch + 40 * 60))
+timed_out=0
+last_notice=$start_epoch
+while kill -0 "$pid" 2>/dev/null; do
+  now=$(date +%s)
+  if [ "$now" -ge "$deadline" ]; then
+    printf 'Ori attempt %s exceeded the 40-minute wait deadline; this is wall-clock time, not run progress\n' "$n" >&2
+    timed_out=1
+    break
+  fi
+  if [ "$((now - last_notice))" -ge 60 ]; then
+    printf 'Ori attempt %s has been running for %ss; this is wall-clock time, not run progress\n' "$n" "$((now - start_epoch))"
+    last_notice=$now
+  fi
+  sleep 5
+done
+duration=$(( $(date +%s) - start_epoch ))
 status=$(cat "$run_dir/status-$n.txt" 2>/dev/null || printf 'missing')
 printf 'Ori attempt %s started at %s and lasted %ss\n' "$n" "$start_clock" "$duration"
+if [ "$timed_out" -eq 1 ]; then
+  printf 'Stop waiting and tell the user the run exceeded the documented envelope. Do not read a partial answer or kill the process; resume polling it from a later shell if needed.\n' >&2
+  exit 1
+fi
+if [ "$status" = missing ] || [ "$status" != 0 ] || [ ! -s "$run_dir/answer-$n.txt" ]; then
+  printf 'Ori attempt %s failed. Error log: %s\n' "$n" "$run_dir/error-$n.log" >&2
+  cat "$run_dir/error-$n.log"
+  exit 1
+fi
+cat "$run_dir/answer-$n.txt"
 ```
 
 A finished turn ends either on a question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is handled the same way. Show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
