@@ -27,7 +27,7 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 14. Kill the run the moment a question appears, or skip to step 19 if it finishes without one (appendix D).
 15. Show the user the question text as plain text.
 16. Ask the user with your own question UI, one option per Ori option.
-17. Append the question and the user's answer to the task prompt file.
+17. Append the question and the user's answer to the task prompt file (appendix D).
 18. Restart over the whole prompt file with the next output file number, then return to step 12.
 19. Relay the result table, the ship or no-ship decision, and the quoted failures.
 20. Relay Ori's cost and timing table in full (appendix E).
