@@ -71,16 +71,9 @@ These hold for the whole run.
 
 ## Appendix A: run directory and step tracker
 
-Derive the directory from the repo root, falling back to the working directory when there is no repo, so a restart from a subdirectory finds the same one. Re-derive it in every shell that needs it rather than relying on the variable surviving, because shell state usually does not persist between commands.
+What you need is one scratch directory outside the user's repository whose name is fixed by the repository being evaluated. Two properties matter. The same repository must always resolve to the same directory, including when the run is started from a subdirectory, so derive the name from the absolute path of the repository root and fall back to the working directory when there is no repository. Two different repositories must never resolve to the same directory, so whatever names it must vary with that path and must behave the same on Linux and macOS, where a tool present on only one of them would silently collapse every repository into one directory. Work the name out again in each shell that needs it rather than trusting a variable to survive, because shell state usually does not persist between commands.
 
-```bash
-run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
-run_dir="/tmp/spawn-ori-eval-$run_hash"
-mkdir -p "$run_dir"
-```
-
-The `shasum` fallback is there because `sha256sum` is GNU coreutils and absent on stock macOS, where the command would otherwise produce nothing and give every repository the same directory.
+Name it `spawn-ori-eval-<short hash of the repository root path>` in the system temporary directory. Keeping to that convention is what lets a later run of this skill find the same directory and see the earlier run at all.
 
 Every file the run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
 
@@ -103,16 +96,7 @@ Offer resuming only when the old tracker's first line matches the request you ar
 
 Resuming reuses what is there as it stands: mark up the same `steps.txt`, append to the same `task.txt`, and keep every earlier attempt in the cost table, because the user already paid for that work. Starting a new run archives the tracker, the prompt file, and every answer and error log, which drops the answers the user already gave Ori and pays for the repo exploration again. Stopping changes nothing and ends the task there, which is what the user wants when they would rather read the old files before anything moves. Say which one you are recommending and why, and let them decide.
 
-Archive into a timestamped directory rather than a single `previous/`, so a third run does not move an archive into itself or overwrite the one before it.
-
-```bash
-run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
-run_dir="/tmp/spawn-ori-eval-$run_hash"
-archive="$run_dir/previous/$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$archive"
-find "$run_dir" -maxdepth 1 -type f -exec mv {} "$archive"/ \;
-```
+Archiving means the old run's files end up under `previous/` inside the run directory, in their own subdirectory named after the time they were moved, and nothing is deleted. Two things go wrong without the timestamp: a later archive overwrites an earlier one, and the archive directory gets moved inside itself. So move the run's own files and leave `previous/` where it is.
 
 ## Appendix B: setup commands
 
@@ -145,23 +129,13 @@ user's repository. Run it with ori eval. Do not create or modify anything in
 the user's repository.
 ```
 
-## Appendix D: start command
+## Appendix D: starting a run
 
-Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Run it in the foreground.
+What you want at the end of this step is one `ori code` process, started from the repository root with the whole prompt file passed to it, whose assistant text and whose diagnostics have landed in two separate files in the run directory under the same attempt number.
 
-```bash
-run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
-run_dir="/tmp/spawn-ori-eval-$run_hash"
-n=1
-while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
-ori code --prompt-file "$run_dir/task.txt" \
-  > "$run_dir/answer-$n.txt" \
-  2> "$run_dir/error-$n.log"
-printf 'attempt %s answer: %s\n' "$n" "$run_dir/answer-$n.txt"
-```
+The attempt number is the first one not already used, never a fixed one, because the cost table is read back out of every attempt's files and an overwritten answer takes an attempt's cost with it. Keeping the two streams apart matters for the same reason: only the answer stream carries the assistant text and the summary line the cost table needs, and diagnostics mixed into it would corrupt both. Note which attempt number this run is using, since every later step refers to that attempt's files.
 
-If the operator's shell calls are cut off before a run ends, background the command and poll it using the operator's own process-management tools.
+Run it in the foreground. If the operator's shell calls are cut off before a run ends, background it instead and poll it with the operator's own process-management tools.
 
 ## Appendix E: answer shape
 
