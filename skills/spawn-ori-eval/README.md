@@ -29,7 +29,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Backgrounding a single headless Ori invocation without overriding the pinned harness or model
 - Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
-- Relaying one question per turn, preserving Ori's four options one for one and rendering its Other option as free text. The interview has five questions at minimum and six at most because the mutually exclusive surface and workspace-file questions are conditional on the scan
+- Relaying one question per turn, preserving Ori's four options one for one and rendering its Other option as free text. The interview has five questions at minimum and six at most because `[surface]` applies when the scan finds more than one call site, while `[workspace-files]` applies only when it finds no model call site and no material to mine
 - A fill-in-the-blanks task prompt that keeps the throwaway eval in a temporary workspace outside the user's repository
 - Anti-patterns: self-authored evals, subagent "evals", evals written into the user's repo, evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
 - Reporting the temporary workspace so the user can keep the eval if the numbers made them want it
