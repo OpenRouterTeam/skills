@@ -17,7 +17,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Otherwise archive whatever is in the directory and write a fresh `steps.txt` covering step 5 onward (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself and branch on its exit status: continue when access resolves, stop with login instructions when it does not, and tell the user to update Ori if the command is unknown (appendix B).
+7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user to update Ori if the command is unknown (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -109,7 +109,7 @@ Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | 
 
 Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
 
-Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Do not print its output or any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user to update Ori and stop, because that binary predates the change that makes the inner skill stop and ask instead of answering its own scoping question, producing an eval that looks correct but measures the wrong thing.
+Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Read its output to distinguish an unknown command from a missing credential, but do not show that output to the user or repeat any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user to update Ori and stop, because that binary predates the change that makes the inner skill stop and ask instead of answering its own scoping question, producing an eval that looks correct but measures the wrong thing.
 
 ## Appendix C: task prompt template
 
