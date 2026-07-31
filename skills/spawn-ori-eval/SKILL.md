@@ -27,7 +27,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one detached run from the repo root and capture its answer and error files (appendix D).
 16. Poll for the run to exit, then read the answer file (appendix E).
-17. If the turn ends on a question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
+17. If the completed answer contains a tagged question anywhere, or ends with an untagged question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
 18. Show the user the question text as plain text.
 19. Ask the user with your own question UI, one option per Ori option.
 20. Append the question and the user's answer to the task prompt file (appendix E).
@@ -138,20 +138,28 @@ run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; }
 run_dir="/tmp/spawn-ori-eval-$run_hash"
 n=1
 while [ -e "$run_dir/pid-$n.txt" ]; do n=$((n + 1)); done
+pid_file="$run_dir/pid-$n.txt"
+: > "$pid_file"
+ori_bin=$(command -v ori 2>/dev/null || true)
+if [ ! -x "$ori_bin" ] && [ -x "$HOME/.local/bin/ori" ]; then
+  ori_bin="$HOME/.local/bin/ori"
+fi
+[ -x "$ori_bin" ] || { printf 'Could not find the ori binary\n' >&2; exit 1; }
 start_epoch=$(date +%s)
 start_clock=$(date '+%H:%M:%S')
 status_file="$run_dir/status-$n.txt"
 nohup sh -c '
-  ori code --prompt-file "$1" > "$2" 2> "$3"
-  printf "%s\n" "$?" > "$4"
+  "$1" code --prompt-file "$2" > "$3" 2> "$4"
+  printf "%s\n" "$?" > "$5"
 ' sh \
+  "$ori_bin" \
   "$run_dir/task.txt" \
   "$run_dir/answer-$n.txt" \
   "$run_dir/error-$n.log" \
   "$status_file" \
   </dev/null >/dev/null 2>&1 &
 ori_pid=$!
-printf '%s\n' "$ori_pid" > "$run_dir/pid-$n.txt"
+printf '%s\n' "$ori_pid" > "$pid_file"
 printf '%s\n' "$start_epoch" > "$run_dir/start-$n.epoch"
 printf '%s\n' "$start_clock" > "$run_dir/start-$n.clock"
 printf 'Ori attempt %s started as process %s at %s\n' "$n" "$ori_pid" "$start_clock"
@@ -177,13 +185,17 @@ for pid_file in "$run_dir"/pid-*.txt; do
 done
 [ "$n" -gt 0 ] || { printf 'No started Ori attempt found\n' >&2; exit 1; }
 pid=$(cat "$run_dir/pid-$n.txt")
+case "$pid" in
+  ''|*[!0-9]*) printf 'Ori attempt %s did not record a process id\n' "$n" >&2; exit 1 ;;
+esac
 start_epoch=$(cat "$run_dir/start-$n.epoch")
 start_clock=$(cat "$run_dir/start-$n.clock")
 poll_start_epoch=$(date +%s)
 deadline=$((poll_start_epoch + 40 * 60))
 timed_out=0
 last_notice=$poll_start_epoch
-while kill -0 "$pid" 2>/dev/null; do
+status_file="$run_dir/status-$n.txt"
+while [ ! -f "$status_file" ] && kill -0 "$pid" 2>/dev/null; do
   now=$(date +%s)
   if [ "$now" -ge "$deadline" ]; then
     printf 'Ori attempt %s exceeded this 40-minute polling window; this is wall-clock time, not run progress\n' "$n" >&2
