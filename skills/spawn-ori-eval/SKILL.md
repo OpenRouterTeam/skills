@@ -77,7 +77,7 @@ What you need is one scratch directory outside the user's repository whose name 
 
 The name has to be reproducible to the byte, because a later run of this skill finds the earlier one by arriving at the same path rather than by searching. So it is `/tmp/spawn-ori-eval-<hash>`, where the hash is the first twelve characters of the hexadecimal SHA-256 of exactly the repository root path, with no trailing newline and nothing else fed in. Only that value is pinned, not how you compute it, but it is worth checking that whatever you reach for hashes those bytes and no others, since a trailing newline produces a different directory and hides an earlier run. `/tmp` rather than whatever the environment calls the temporary directory, since that varies between machines and would hide a run from the next session on the same one.
 
-Every file the run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
+Every file the outer run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The `ori/` subdirectory is reserved for Ori's tracker and every file the run writes itself. The scratch workspace is created elsewhere by `ori eval scratch`, so record its reported path in `ori/`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
 
 `steps.txt` carries the user's request on its first line and then one line for each step from 5 onward, each marked `todo`, `current`, or `done`. Steps 1 to 4 are not tracked, because they are what produce the file.
 
@@ -90,17 +90,17 @@ request: which model should we use for the support triage agent
 16 todo wait for it to exit and read the answer file
 ```
 
-A directory with no run files of its own needs no question, because there is nothing to decide about. That covers a directory that is empty and one that holds only an earlier archive, since archiving leaves `previous/` behind for good. Everything else goes to the user, whatever it holds. A tracker started for a different request, or one whose every step is done, is a reason to tell the user what they are looking at rather than a licence to clear it, because the answer files are the run they paid for and they may want to read them before anything moves.
+A directory with no run files of its own needs no question, because there is nothing to decide about. That means it is empty apart from `previous/` and has no `steps.txt`, `task.txt`, attempt files, or `ori/` subdirectory. This covers a directory that is empty and one that holds only an earlier archive, since archiving leaves `previous/` behind for good. Everything else goes to the user, whatever it holds. A tracker started for a different request, or one whose every step is done, is a reason to tell the user what they are looking at rather than a licence to clear it, because the answer files are the run they paid for and they may want to read them before anything moves.
 
 So read the directory and report it. Give the user what they need to decide without opening it themselves: the request the old tracker was started for, the step it stopped at in plain language, how many attempts ran, and how long ago the last one wrote anything. Then ask with the operator's own question UI and wait.
 
 Offer resuming only when the old tracker's first line matches the request you are working on and a step is unfinished. Resuming anything else would resend another request's prompt file to Ori. Starting a new run and stopping are always available, so the question has three answers at most and two at least.
 
-Resuming reuses what is there as it stands: mark up the same `steps.txt`, append to the same `task.txt`, and keep every earlier attempt in the cost table, because the user already paid for that work. Starting a new run archives the tracker, the prompt file, and every answer and error log, which drops the answers the user already gave Ori and pays for the repo exploration again. Stopping changes nothing and ends the task there, which is what the user wants when they would rather read the old files before anything moves. Say which one you are recommending and why, and let them decide.
+Resuming reuses what is there as it stands: mark up the same `steps.txt`, append to the same `task.txt`, keep every earlier attempt in the cost table, and keep the `ori/` directory with its recorded scratch workspace path, because the user already paid for that work. Starting a new run archives the tracker, the prompt file, every answer and error log, and the `ori/` directory, which drops the answers the user already gave Ori and pays for the repo exploration again. Stopping changes nothing and ends the task there, which is what the user wants when they would rather read the old files before anything moves. Say which one you are recommending and why, and let them decide.
 
 One thing to settle before resuming: a step left marked `current` means an attempt was started and its outcome is unknown. Establish whether that process is still running before starting another, and wait for it if it is, because two runs against the same prompt file break the one-process rule.
 
-Archiving means the old run's files end up under `previous/` inside the run directory, in their own subdirectory named after the time they were moved, and nothing is deleted. Two things go wrong without the timestamp: a later archive overwrites an earlier one, and the archive directory gets moved inside itself. So move the run's own files and leave `previous/` where it is.
+Archiving means the old run's files, including `ori/`, end up under `previous/` inside the run directory, in their own subdirectory named after the time they were moved, and nothing is deleted. Two things go wrong without the timestamp: a later archive overwrites an earlier one, and the archive directory gets moved inside itself. So move the run's own files and leave `previous/` where it is.
 
 ## Appendix B: setup commands
 
@@ -131,13 +131,14 @@ questions in one turn.
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
-The run directory is <absolute run directory>. It is the temporary workspace
-outside the user's repository. Keep the step tracker, scratch workspace, eval,
-supporting files, and everything else you write under that directory. Do not
-derive another path elsewhere, and do not adopt or resume a tracker or
-workspace outside it. Anything outside this directory belongs to a different
-session. Run the eval with ori eval. Do not create or modify anything in the
-user's repository.
+The Ori directory is <absolute run directory>/ori. Keep the step tracker and
+every file you write outside the scratch workspace under that directory.
+Record the scratch workspace path reported by `ori eval scratch` in the
+tracker directory. Do not derive another tracker path, and do not adopt or
+resume tracker state outside it. Use only the scratch workspace path reported
+by `ori eval scratch`. Anything else outside this directory belongs to a
+different session. Run the eval with ori eval. Do not create or modify anything
+in the user's repository.
 ```
 
 ## Appendix D: starting a run
@@ -206,7 +207,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly, then restart from the full prompt file, because the answers it carried forward belong to a different request. |
+| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly, archive the leftover Ori state, then restart from the full prompt file, because the answers it carried forward belong to a different request. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
