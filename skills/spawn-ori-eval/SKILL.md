@@ -13,8 +13,8 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 
 1. Create the run directory and derive its path from the repo root (appendix A).
 2. Tell the user where the run directory is.
-3. Look for a resumable run and, when there is one, tell the user what it stopped at and how old it is (appendix A).
-4. Ask the user whether to resume it or start over, then jump to the first unfinished step after 4 if they resume, or archive the directory and write a fresh `steps.txt` covering step 5 onward if they start over or there is nothing to resume (appendix A).
+3. Read whatever is already in the directory without changing it, and tell the user what is there and how old it is (appendix A).
+4. Ask the user what to do with it, then either reuse the existing `steps.txt` and jump to the first step after 4 that is not done, or archive the files and write a fresh `steps.txt` covering step 5 onward. Write the fresh tracker without asking only when the directory is empty (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
 7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user to update Ori and stop if the command is unknown (appendix B).
@@ -47,13 +47,13 @@ These hold for the whole run.
 - Never pass `--model` or `--harness`. They remove the pin, which is the only reason to use Ori.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
-- Never resume a previous run on your own judgement. A leftover directory is evidence that something stopped, not permission to continue it, and the earlier attempts already spent the user's credit. Resuming happens only after the user picks it in step 4.
+- Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Both paths out of step 4 need their answer first.
 - Update `steps.txt` as you go: mark a step current before you do it and done before you start the next, and reread the file to decide what comes next instead of trusting memory. A restart replays the prompt file from the top, so this is the only record of how far the last attempt got.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
 - Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and keep one answer file and one error log per attempt.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
-- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the resume choice in step 4 and the questions handled by step 17.
+- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the run directory choice in step 4 and the questions handled by step 17.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
@@ -95,20 +95,13 @@ request: which model should we use for the support triage agent
 16 todo wait for it to exit and read the answer file
 ```
 
-A file is resumable only when its first line matches the request you are working on and a step is still unfinished. A different request in a repo you have evaluated before is not resumable, and neither is a file whose every step is done, so there is no question to ask in either case: archive the old files and start clean, which also keeps stale logs out of the output numbering.
+An empty directory is the only case that needs no question, because there is nothing to decide about. Everything else goes to the user, whatever it holds. A tracker started for a different request, or one whose every step is done, is a reason to tell the user what they are looking at rather than a licence to clear it, because the answer files are the run they paid for and they may want to read them before anything moves.
 
-When the file is resumable, ask the user before touching it. Give them what they need to decide without reading the directory themselves: the request on the first line, the step it stopped at in plain language, how many attempts already ran, and how long ago the last one wrote anything. Ask with the operator's own question UI, offering resuming and starting over as the two options, and say which files starting over archives. Resuming keeps every earlier attempt's cost in the final table, because the user already paid for that work. Starting over drops the whole prompt state, including the answers they already gave, and pays for the repo exploration again. Wait for the answer rather than picking the cheaper path yourself, because only the user knows whether the stopped attempt is still what they want.
+So read the directory and report it. Give the user what they need to decide without opening it themselves: the request the old tracker was started for, the step it stopped at in plain language, how many attempts ran, and how long ago the last one wrote anything. Then ask with the operator's own question UI and wait.
 
-The state you need for that question is in the tracker and the answer files.
+Offer resuming only when the old tracker's first line matches the request you are working on and a step is unfinished. Resuming anything else would resend another request's prompt file to Ori. When resuming is not on the table, the choice is between starting a new run, which archives the old files, and stopping so the user can read them first.
 
-```bash
-run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
-run_dir="/tmp/spawn-ori-eval-$run_hash"
-head -1 "$run_dir/steps.txt"
-grep -E ' (current|todo) ' "$run_dir/steps.txt" | head -1
-ls -lt "$run_dir"/answer-*.txt 2>/dev/null
-```
+Resuming reuses what is there as it stands: mark up the same `steps.txt`, append to the same `task.txt`, and keep every earlier attempt in the cost table, because the user already paid for that work. Starting a new run archives the tracker, the prompt file, and every answer and error log, which drops the answers the user already gave Ori and pays for the repo exploration again. Say which of the two you are recommending and why, and let them decide.
 
 Archive into a timestamped directory rather than a single `previous/`, so a third run does not move an archive into itself or overwrite the one before it.
 
@@ -207,7 +200,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 
 | Symptom | Do this |
 |---|---|
-| The run directory already holds a stopped run for this same request | Ask the user whether to resume it or start over. Never continue it on your own. |
+| The run directory is not empty | Report what is in it and ask the user. Never continue it and never clear it on your own. |
 | `ori: command not found` after a good installation | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell. |
 | The credential is missing | Stop. Tell the user to run `ori login`. |
 | A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
