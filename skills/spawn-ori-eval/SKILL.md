@@ -7,6 +7,10 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 Ori writes and grades the eval on a pinned harness and model, so the bench is identical for every coding agent. You run Ori, keep the user informed, and relay the result. An eval you write yourself is not reproducible, and a score change must come from the user's agent, not from the environment.
 
+### Step tracker
+
+Before step 1, create `/tmp/spawn-ori-eval-steps.txt`, outside the user's repository. Write one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this tracker records which phase the previous attempt reached and provides the recovery point.
+
 ## Steps
 
 Do these in order. One line, one action. Appendix letters point to the detail.
@@ -98,7 +102,7 @@ printf 'Ori process: %s\n' "$ori_pid"
 
 The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form whose `requestedSchema.title` is exactly one of the three named forms, with properties keyed by the stable field names. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form whose `requestedSchema.title` is exactly one of the three named forms, with properties keyed by the stable field names. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
