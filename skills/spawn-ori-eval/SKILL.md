@@ -77,7 +77,7 @@ three user stopping points, named `workspace-context`, `narrowing`, and
 may end with a question in prose. The bakeoff uses exactly five catalog
 candidates, plus the incumbent when one exists, and reports model, outcome or
 pass rate, cost, latency, and judge score. It recommends one slug. Routing
-evaluates only that slug with bare, :nitro, and :floor.
+evaluates only that slug with bare, :nitro, :floor, and :exacto.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
