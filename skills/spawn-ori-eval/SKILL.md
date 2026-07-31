@@ -11,11 +11,11 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 Do these in order. One line, one action. Appendix letters point to the detail.
 
-1. Find or install the `ori` binary (appendix A).
-2. If it is still missing, try `~/.local/bin/ori`, and stop if that fails too.
-3. Confirm `~/.ori/credentials.json` exists, and stop if it does not (appendix F).
-4. Confirm `bun` exists, and stop if it does not.
-5. Read the eval surface, continuing even if the commands error (appendix A).
+1. Run the lookup or install for the `ori` binary yourself (appendix A).
+2. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
+3. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix F).
+4. Check for `bun` yourself, and stop if it is missing.
+5. Read the eval surface yourself, continuing even if the commands error (appendix A).
 6. Tell the user where the binary landed, if you installed it.
 7. Tell the user what the run will do, from what you read in step 5.
 8. Tell the user it takes 10 to 30 minutes and spends real money.
@@ -24,7 +24,7 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 11. Start one background run from the repo root and save the process ID (appendix C).
 12. Read the current run's output file as it grows (appendix D).
 13. Report each phase banner as a milestone.
-14. Kill the run the moment one of the three named questions appears, or skip to step 19 if it finishes without one (appendix D).
+14. Kill the run the moment any question appears, whether it is a named elicitation, a permission request, or trailing prose, or skip to step 19 if it finishes without one (appendix D).
 15. Show the user the question text as plain text.
 16. Ask the user with your own question UI, one option per Ori option.
 17. Append the question and the user's answer to the task prompt file (appendix D).
@@ -43,10 +43,12 @@ These hold for the whole run.
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
 - Never pass `--model` or `--harness`. They remove the pin, which is the only reason to use Ori.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
+- Run every command in steps 1 to 5 yourself. Installing the binary when it is missing is expected, not a permission request. The credential check is the only human handoff because `ori login` opens a browser only the user can complete.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
 - Treat `/tmp/ori-task.txt` as the only state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question or accept a permission request on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
+- Do not invent an approval gate before starting the run. Steps 8 and 9 disclose the time and cost, and the only user pauses are the questions detected in step 14.
 - Never go silent. An unreported question and 25 minutes without a progress report both look like a stopped run.
 - Never invent a number. A turn with no reported cost is unmeasured, not zero, and you say so rather than estimating.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
@@ -73,11 +75,7 @@ Write this to `/tmp/ori-task.txt`, filling in every angle-bracket field.
 Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are exactly
 three user stopping points, named `workspace-context`, `narrowing`, and
-`next-step`. Every question must be one of those named forms, and no phase
-may end with a question in prose. The bakeoff uses exactly five catalog
-candidates, plus the incumbent when one exists, and reports model, outcome or
-pass rate, cost, latency, and judge score. It recommends one slug. Routing
-evaluates only that slug with bare, :nitro, :floor, and :exacto.
+`next-step`.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -100,7 +98,7 @@ printf 'Ori process: %s\n' "$ori_pid"
 
 The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries one of the three named forms, with a `message` and `fields[]`, each field with a `name`, a `type`, and often `options`. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form whose `requestedSchema.title` is exactly one of the three named forms, with properties keyed by the stable field names. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
