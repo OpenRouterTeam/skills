@@ -27,7 +27,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. If the completed answer contains a tagged question anywhere, or ends with an untagged question, continue to step 18; otherwise skip to step 22 for the final report (appendix E).
+17. If the completed answer contains a tagged question anywhere, continue to step 18; if it ends with an untagged question, report the broken contract and stop; otherwise skip to step 22 for the final report (appendix E).
 18. Show the user the question text as plain text.
 19. Ask the user with your own question UI, one option per Ori option.
 20. Append the question and the user's answer to the task prompt file (appendix E).
@@ -117,8 +117,9 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, bakeoff, routing, close. The expected
-stopping points are tagged `workspace-context`, `narrowing`, and `next-step`.
+context, criteria and narrowing, bakeoff, routing, close. There are exactly
+four user stopping points, tagged `workspace-context`, `narrowing`,
+`candidates`, and `next-step`.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -149,7 +150,7 @@ If the operator's shell calls are cut off before a run ends, background the comm
 
 The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so read the answer file after it exits. Diagnostics go to the error log. There is no live progress source or question detection during the turn.
 
-A finished turn ends either on a question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is handled the same way. Show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
+A finished turn ends either on a tagged question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is a contract violation: report it to the user, tell them to update Ori, and stop rather than relaying it or restarting. Show the full tagged question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
 Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
@@ -182,7 +183,7 @@ Follow it with one line, for example: the reported cost floor is $3.71. The two 
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ending in an untagged question is handled like a tagged question. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. A completed turn ending in an untagged question is a broken contract. Tell the user to update Ori and stop rather than restarting. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
