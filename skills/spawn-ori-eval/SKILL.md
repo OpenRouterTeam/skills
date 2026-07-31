@@ -9,32 +9,32 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ## Steps
 
-Do these in order. Each one is a single action.
+Do these in order. One line, one action. Appendix letters point to the detail.
 
-1. Run `command -v ori`, and if it is missing run `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`.
-2. If the lookup still fails, run `~/.local/bin/ori --version`, and if that also fails, stop and report it.
-3. Confirm `~/.ori/credentials.json` exists, and if it does not, stop and tell the user to run `ori login`.
-4. Run `command -v bun`, and if it is missing, stop and tell the user to install Bun, which Ori uses to execute `*.eval.ts`.
-5. Read the eval surface by running `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors, and continue to step 6 even if both error.
-6. If you installed the binary, tell the user it is at `~/.local/bin/ori`.
-7. Tell the user that a separate agent will pick a target, write an eval file under `evals/`, and score the models, describing the run from what you read in step 5 rather than from memory.
-8. Tell the user it takes roughly 10 to 30 minutes and spends real money that may exceed the credit on their key.
-9. Tell the user they will get a scored table, that Ori may ask questions, and that answering one restarts the run.
-10. Write `/tmp/ori-task.txt` from the prompt template below.
-11. Start one background run from the repo root with the start command below, and save the process ID.
-12. Read the current run's output file, `/tmp/ori-output-<n>.jsonl`, as it grows.
-13. Report each milestone as it appears, such as target picked, eval written, model 2 of 3 running.
-14. Kill the saved process ID the moment a question appears, meaning an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and if the run instead finishes with no question, skip to step 19.
-15. Show the user the question's `payload.message` as plain text.
-16. Ask the user with your own question UI, one option per Ori option, with "Other" left as free text.
-17. Append the question and the user's answer to `/tmp/ori-task.txt`.
-18. Start a fresh run over the whole prompt file with the next output file number and a newly saved process ID, then return to step 12.
-19. Relay the full result table, the ship or no-ship decision, and the quoted failures.
-20. Relay Ori's cost and timing table in full.
-21. Add one row per run, including every run you stopped at a question, and a total row summing `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run.
-22. Add one line separating the one-time authoring cost from the cheaper re-run cost.
+1. Find or install the `ori` binary (appendix A).
+2. If it is still missing, try `~/.local/bin/ori`, and stop if that fails too.
+3. Confirm `~/.ori/credentials.json` exists, and stop if it does not (appendix F).
+4. Confirm `bun` exists, and stop if it does not.
+5. Read the eval surface, continuing even if the commands error (appendix A).
+6. Tell the user where the binary landed, if you installed it.
+7. Tell the user what the run will do, from what you read in step 5.
+8. Tell the user it takes 10 to 30 minutes and spends real money.
+9. Tell the user they get a scored table and that a question can restart the run.
+10. Write the task prompt file (appendix B).
+11. Start one background run from the repo root and save the process ID (appendix C).
+12. Read the current run's output file as it grows (appendix D).
+13. Report each milestone as it appears.
+14. Kill the run the moment a question appears, or skip to step 19 if it finishes without one (appendix D).
+15. Show the user the question text as plain text.
+16. Ask the user with your own question UI, one option per Ori option.
+17. Append the question and the user's answer to the task prompt file.
+18. Restart over the whole prompt file with the next output file number, then return to step 12.
+19. Relay the result table, the ship or no-ship decision, and the quoted failures.
+20. Relay Ori's cost and timing table in full (appendix E).
+21. Add one row per run and a total row (appendix E).
+22. Add one line on the cheaper cost of a re-run.
 23. Tell the user to commit the `*.eval.ts` file.
-24. Offer to add `ori eval evals/<feature>/<name>.eval.ts` to CI.
+24. Offer to add `ori eval <file>` to CI.
 
 ## Rules
 
@@ -59,11 +59,15 @@ These hold for the whole run.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
 - Never copy CLI details into this skill or into text for the user. Re-read what step 5 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
-## Reference
+## Appendix A: setup commands
 
-### Prompt template
+Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. It lands in `~/.local/bin`, which is frequently absent from PATH in a non-login shell, so try `~/.local/bin/ori --version` before reporting a failure. Bun is required because Ori executes `*.eval.ts` with it.
 
-Fill in every angle-bracket field.
+Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
+
+## Appendix B: task prompt template
+
+Write this to `/tmp/ori-task.txt`, filling in every angle-bracket field.
 
 ```text
 Use the create-eval skill.
@@ -75,9 +79,9 @@ Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
 not create or modify anything outside the top-level evals directory.
 ```
 
-### Start command
+## Appendix C: start command
 
-Raise the output file number on each restart.
+Raise the output file number on each restart, and save the new process ID each time.
 
 ```bash
 ori code --prompt-file /tmp/ori-task.txt --output jsonl > /tmp/ori-output-1.jsonl 2> /tmp/ori-error-1.log &
@@ -85,13 +89,17 @@ ori_pid=$!
 printf 'Ori process: %s\n' "$ori_pid"
 ```
 
-### Stream shape
+## Appendix D: stream shape
+
+The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Milestones worth reporting are things like target picked, eval written, and model 2 of 3 running. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
 One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a `message` and `fields[]`, each field with a `name`, a `type`, and often `options`. A `permission.requested` payload carries `options`.
 
-### Cost table
+Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
-Build this yourself if Ori's reply has no table, using each turn's `turn.started` timestamp, its duration to its terminal event, and that event's cost, plus the eval's model calls and judging from the report's Judging table or from `data.results`.
+## Appendix E: cost and timing table
+
+Include one row for every run, including each run you stopped at a question, since a restart repeats repo exploration. The total row sums `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in every run, because each of those events reports one turn rather than the session. Build the table yourself if Ori's reply has no table, using each turn's `turn.started` timestamp, its duration to its terminal event, and that event's cost, plus the eval's model calls and judging from the report's Judging table or from `data.results`.
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
@@ -105,7 +113,7 @@ Build this yourself if Ori's reply has no table, using each turn's `turn.started
 
 Follow it with one line, for example: this cost about $31.82 across two Ori runs, and re-running the eval costs only about $0.51.
 
-### Troubleshooting
+## Appendix F: troubleshooting
 
 | Symptom | Do this |
 |---|---|
