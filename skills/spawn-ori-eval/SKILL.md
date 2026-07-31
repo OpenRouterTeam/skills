@@ -1,6 +1,6 @@
 ---
 name: spawn-ori-eval
-description: Spawn Ori as a subprocess to run a model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare or bake off models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
+description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare or bake off models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
 ---
 
 # Spawn Ori Eval
@@ -17,11 +17,10 @@ Do the steps in this sequence. Each step has a section below. The **Rules** in a
 
 1. **Do the pre-run checks** — 1a: the `ori` binary. 1b: login with `ori login`. 1c: the `bun` binary. 1d: read the eval surface.
 2. **Tell the user what will occur** — what Ori is, the time and the cost, the output, and that Ori can ask questions.
-3. **Write the task prompt file** — `/tmp/ori-task.txt`, with the user's request unchanged, the repo paths, and the `evals/` target.
+3. **Write the task prompt file** — `/tmp/ori-task.txt`, with the user's request unchanged, the repo paths, and the instruction to keep the eval outside the repository.
 4. **Start one Ori run** — `ori code --prompt-file … --output jsonl`.
 5. **Monitor the run** — report progress; stop at questions, ask the user, append the answer, and restart from the full prompt file.
 6. **Relay the result** — the full table, the ship or no-ship decision, the quoted failures, and the cost and timing breakdown.
-7. **Keep the eval** — commit the `*.eval.ts` file, tell the user about `ori eval <file>` re-runs, offer CI setup.
 
 If there is a problem, refer to **Troubleshooting** at the end. The **Hard rules** section after the steps applies to all steps.
 
@@ -49,7 +48,7 @@ Describe the run from what you read in 1d, not from memory.
 Tell the user these points. Use your own words. Do not use the terms in the rule below.
 
 - **What Ori is.** A different agent that writes and runs the eval. It has its own pinned harness and model.
-- **What Ori will do.** Select what to measure, write a `*.eval.ts` file in `evals/`, and score the models.
+- **What Ori will do.** Select what to measure, write a `*.eval.ts` file in a temporary workspace outside the repository, and score the models.
 - **The cost.** Approximately 10 to 30 minutes. How much it costs depends on how extensive the eval run is and how large the codebase is. Say this before the run, not after. The entire run may exceed how much you've added to the API key credit you added when you authed.
 - **The output.** A scored table that compares the models.
 - **Questions are possible.** Tell the user that you will bring each question to them and may restart the run after they answer. Then the interruption in step 5 is expected, not unexpected.
@@ -70,8 +69,9 @@ Use the create-eval skill.
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
-Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
-not create or modify anything outside the top-level evals directory.
+Keep the eval and any supporting files in a temporary workspace outside the
+user's repository. Run it with ori eval. Do not create or modify anything in
+the user's repository.
 ```
 
 This file is the single state record for the run. When you must send more text to Ori later (step 5, any question), append that text to this file. Then the file always contains the full instruction history, and a restarted run does not lose context.
@@ -147,17 +147,13 @@ The default mode does not pause for a question. Ori emits the question event, se
 
   > This cost about $31.82 total across two Ori runs: $31.31 for authoring and repeated exploration, $0.46 for the eval's model calls, and $0.05 for judging. Re-running the eval costs only ~$0.51.
 
+- Tell the user where Ori left the temporary workspace. Explain that it is a throwaway workspace outside the repository. If they want to keep the eval after seeing the results, they can move it into the repository themselves.
+- For a later re-run, read `ori eval -h`. For the eval-file API, `ori skills get create-eval` prints the authoring guide. Do not copy CLI details into this skill. The CLI changes, and copied details become incorrect.
+
 **Rules for this step:**
 
 - Do not invent a number. If the stream or the report does not contain a value, the value is "unmeasured". It is not $0. Do not divide a session total across steps by estimation.
 - **Do not report a winner without the production model in the table.** "No change" is a valid and useful result.
-
-## Step 7: Keep the eval
-
-- The `*.eval.ts` file is the permanent product. Tell the user to commit it.
-- A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
-- Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts, the eval-file API — re-read 1d. Do not copy it into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
@@ -179,7 +175,7 @@ These rules apply to all steps:
 | The credential is missing | Stop. Tell the user to run `ori login`. |
 | A long pause on the first run | This is the template download. It takes approximately 30 seconds. Wait before you retry. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not give a different id from memory. |
-| The eval file is outside `evals/` | Move the file. Run `ori eval` on the new path. |
+| The eval is inside the user's repository | Keep the eval and its supporting files in a temporary workspace outside the repository. |
 | The run is longer than expected | The process may still be running. Read the stream. If a question event appears, stop the process immediately. Do not wait for the final result line. |
 | Ori selected the eval's target itself, and the run produced an eval for a target nobody chose | The question event was missed in the stream, or the run was allowed to continue after it appeared. Stop the process as soon as `elicitation.requested` or `permission.requested` appears. Ask the user, append the question and the answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |
 | No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text. Append the question and the user's answer to `/tmp/ori-task.txt`, then restart from the full prompt file. |

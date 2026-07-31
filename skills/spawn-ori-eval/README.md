@@ -29,6 +29,6 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Backgrounding a single headless Ori invocation without overriding the pinned harness or model
 - Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
-- A fill-in-the-blanks task prompt that produces a reproducible `evals/<feature>/<name>.eval.ts`
-- Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf
-- Turning the run into a guardrail with cheap `ori eval` re-runs in CI
+- A fill-in-the-blanks task prompt that keeps the throwaway eval in a temporary workspace outside the user's repository
+- Anti-patterns: self-authored evals, subagent "evals", evals hidden in the repo's own test framework, answering Ori's questions on the user's behalf, and writing the throwaway eval into the repository
+- Reporting the temporary workspace so the user can move the eval into the repository if they decide to keep it
