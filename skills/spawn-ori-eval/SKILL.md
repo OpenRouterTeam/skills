@@ -29,10 +29,10 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 16. Read the current run's output file as it grows (appendix E).
 17. Report each phase banner as a milestone.
 18. Kill the run at any question, tagged or not, then continue through steps 19 to 22, relaying only the first question when a turn carries more than one and reporting a contract violation when the turn is untagged or carries more than one. Skip to step 23 if it finishes without a question (appendix E).
-19. Show the user the question text as plain text.
-20. Ask the user with your own question UI, one option per Ori option.
+19. Show the user the first question text as plain text.
+20. Ask the user with your own question UI, preserving Ori's four options one for one and rendering Ori's `Other` option as free text.
 21. Append the question and the user's answer to the task prompt file (appendix E).
-22. Restart over the whole prompt file with the next output file number, then return to step 16.
+22. Restart over the whole prompt file with the next output file number, then return to step 16. Repeat this per question until the run finishes.
 23. Relay the result table, the ship or no-ship decision, and the quoted failures.
 24. Relay Ori's cost and timing table in full (appendix F).
 25. Add one row per run and a total row (appendix F).
@@ -65,6 +65,8 @@ These hold for the whole run.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
+- Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional when the scan finds nothing usable. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
+- Relay one question per turn. Preserve Ori's four options one for one, render its `Other` option as free text, and never merge questions. If Ori emits two questions in one turn, relay only the first and report that the one-question contract was violated.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -116,9 +118,14 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, bakeoff, routing, close. There are exactly
-four user stopping points, tagged `workspace-context`, `narrowing`,
-`candidates`, and `next-step`.
+context, criteria and narrowing, bakeoff, routing, close. Ask one question
+per turn, end the turn after the question, and wait for the answer before
+continuing. Never combine questions, tags, or follow-ups. There are five
+questions at minimum and six at most, in this order: `[surface]`,
+`[workspace-files]`, `[workspace-data]`, `[criteria-priority]`,
+`[evaluation-constraint]`, `[candidates]`, and `[next-step]`. The first two
+are conditional as the create-eval skill specifies. Each question must offer
+Ori's three concrete options plus a free-text `Other` option.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -147,9 +154,9 @@ printf 'Ori attempt %s, process %s\n' "$n" "$ori_pid"
 
 The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a tagged plain-text question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect five to six tagged questions across the run, depending on whether the two mutually exclusive conditional questions apply. A tagged or untagged plain-text question ending a turn is a stopping point. Treat either the same as a tagged elicitation: kill the process, relay the first question only, append the answer, and restart. If the turn contains a second question, report the one-question contract violation and still restart after relaying the first. If the question is untagged, report that contract violation and still relay, append, and restart. If no phase banners appear, report progress from whatever the stream does show rather than going silent.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect five to six tagged questions across the run, depending on whether the two mutually exclusive conditional questions apply. A tagged or untagged plain-text question ending a turn is a normal stopping point. Treat it the same as a tagged elicitation: kill the process, relay the first question only, append the answer, and restart. If the turn contains a second question, report the one-question contract violation and still restart after relaying the first. If the question is untagged, report that contract violation and still relay, append, and restart. If no phase banners appear, report progress from whatever the stream does show rather than going silent.
 
-Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
+Show the first question's `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's four options one for one, render its `Other` option as free text, and translate the wording into simple language. Never combine a second question from the same turn.
 
 What you append afterwards is the question's full message in plain language plus the single answer string, including the typed text when the user chose Other, or the selected option for a permission request.
 
