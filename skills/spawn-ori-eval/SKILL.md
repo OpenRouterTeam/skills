@@ -137,7 +137,7 @@ run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
 run_dir="/tmp/spawn-ori-eval-$run_hash"
 n=1
-while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
+while [ -e "$run_dir/pid-$n.txt" ]; do n=$((n + 1)); done
 start_epoch=$(date +%s)
 start_clock=$(date '+%H:%M:%S')
 status_file="$run_dir/status-$n.txt"
@@ -159,7 +159,7 @@ printf 'Ori attempt %s started as process %s at %s\n' "$n" "$ori_pid" "$start_cl
 
 ## Appendix E: answer shape
 
-The current run's answer file is `answer-<n>.txt` in the run directory. Read the saved process ID and poll it until it exits before reading the answer. Then read the saved exit status and calculate the duration from the saved start epoch. If the status file is missing, the process exited nonzero, or the answer file is empty, read the error log and report the failed attempt instead of treating it as a completed turn. There is no live progress source during the turn and nothing to kill.
+The current run's answer file is `answer-<n>.txt` in the run directory. Read the saved process ID and poll it until it exits before reading the answer. Give each polling shell a fresh 40-minute wait window anchored to when that poll starts. An expired window is a report to the user, not a verdict on the run, so resume polling from a later shell if needed. Calculate the total attempt duration from the saved start epoch. If the status file is missing, the process exited nonzero, or the answer file is empty, read the error log and report the failed attempt instead of treating it as a completed turn. There is no live progress source during the turn and nothing to kill.
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
@@ -179,13 +179,14 @@ done
 pid=$(cat "$run_dir/pid-$n.txt")
 start_epoch=$(cat "$run_dir/start-$n.epoch")
 start_clock=$(cat "$run_dir/start-$n.clock")
-deadline=$((start_epoch + 40 * 60))
+poll_start_epoch=$(date +%s)
+deadline=$((poll_start_epoch + 40 * 60))
 timed_out=0
-last_notice=$start_epoch
+last_notice=$poll_start_epoch
 while kill -0 "$pid" 2>/dev/null; do
   now=$(date +%s)
   if [ "$now" -ge "$deadline" ]; then
-    printf 'Ori attempt %s exceeded the 40-minute wait deadline; this is wall-clock time, not run progress\n' "$n" >&2
+    printf 'Ori attempt %s exceeded this 40-minute polling window; this is wall-clock time, not run progress\n' "$n" >&2
     timed_out=1
     break
   fi
@@ -199,7 +200,7 @@ duration=$(( $(date +%s) - start_epoch ))
 status=$(cat "$run_dir/status-$n.txt" 2>/dev/null || printf 'missing')
 printf 'Ori attempt %s started at %s and lasted %ss\n' "$n" "$start_clock" "$duration"
 if [ "$timed_out" -eq 1 ]; then
-  printf 'Stop waiting and tell the user the run exceeded the documented envelope. Do not read a partial answer or kill the process; resume polling it from a later shell if needed.\n' >&2
+  printf 'Report that this polling window expired, not that the run failed. Do not read a partial answer or kill the process; resume polling it from a later shell if needed.\n' >&2
   exit 1
 fi
 if [ "$status" = missing ] || [ "$status" != 0 ] || [ ! -s "$run_dir/answer-$n.txt" ]; then
