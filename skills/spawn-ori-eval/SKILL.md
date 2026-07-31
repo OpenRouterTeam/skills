@@ -7,6 +7,17 @@ description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned
 
 Ori writes and grades the eval on a pinned harness and model, so the bench is identical for every coding agent. You run Ori, keep the user informed, and relay the result. An eval you write yourself is not reproducible, and a score change must come from the user's agent, not from the environment.
 
+## Pins
+
+This section is the only place either model slug is written down. It works like a block of constants: the rest of this skill refers to these two names and never to a slug, and wherever you see `<RUN_MODEL>` or `<JUDGE_MODEL>` in a rule, a command, or the task prompt template, you substitute the exact slug below, character for character, with no prefix, suffix, or version added.
+
+- `RUN_MODEL` is `openai/gpt-5.6-terra`. Pass it to `ori code` as `--model` on every start and restart. It is the model Ori itself runs on while it reads the repository and writes the eval.
+- `JUDGE_MODEL` is `openai/gpt-5.6-terra`. Put it in the task prompt so the eval judges with it instead of the SDK's default. It is not one of the models under test.
+
+Neither value is yours to choose. Do not pick a different model because it seems better, cheaper, faster, or newer, do not ask the user which model to use, and do not let a model mentioned in the user's request replace either one. The models being compared inside the eval are a separate matter, chosen during the run, and they never change these two.
+
+Changing what a run costs is therefore one edit to the two lines above, and nothing else in this file needs to move.
+
 ## Steps
 
 Do these in order. One line, one action. Appendix letters point to the detail and run in step order, except the troubleshooting table, which is a lookup and comes last.
@@ -45,7 +56,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 These hold for the whole run.
 
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
-- Never pass `--model` or `--harness`. They remove the pin, which is the only reason to use Ori.
+- Always pass `--model <RUN_MODEL>` and never pass `--harness`. The pin is what makes every coding agent run the same bench. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
 - Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 4 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
@@ -58,7 +69,7 @@ These hold for the whole run.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
-- Never give model ids or prices from memory. Check live prices on OpenRouter.
+- Never give model ids or prices from memory. Check live prices on OpenRouter. The pins are the one exception, because this skill fixes them.
 - The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
@@ -112,7 +123,7 @@ Run `ori auth` before starting. It resolves the credential the CLI will use, inc
 
 ## Appendix C: task prompt template
 
-Write this to `task.txt` in the run directory, filling in every angle-bracket field.
+Write this to `task.txt` in the run directory, filling in every angle-bracket field, taking `<JUDGE_MODEL>` from the pins.
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
@@ -125,6 +136,9 @@ Ask exactly one question per turn and end the turn after asking it. Give each
 question three concrete options plus a free-text `Other` option. Never combine
 questions in one turn.
 
+Judge with <JUDGE_MODEL> rather than the SDK's default judge model: pass it
+to setupJudge as its own agent.
+
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
@@ -135,7 +149,7 @@ the user's repository.
 
 ## Appendix D: starting a run
 
-What you want at the end of this step is one `ori code` process, started from the repository root with the whole prompt file passed to it, whose assistant text and whose diagnostics have landed in two separate files in the run directory under the same attempt number.
+What you want at the end of this step is one `ori code` process, started from the repository root on the pinned model with the whole prompt file passed to it, whose assistant text and whose diagnostics have landed in two separate files in the run directory under the same attempt number.
 
 The attempt number is the first one not already used, never a fixed one, because the cost table is read back out of every attempt's files and an overwritten answer takes an attempt's cost with it. Keeping the two streams apart matters for the same reason: only the answer stream carries the assistant text and the summary line the cost table needs, and diagnostics mixed into it would corrupt both. Note which attempt number this run is using, since every later step refers to that attempt's files.
 
