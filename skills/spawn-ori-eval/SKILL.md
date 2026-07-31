@@ -125,9 +125,9 @@ With `--interactions forward`, a question from Ori stays **pending**. The run wa
 - Relay the full table, the ship or no-ship decision, and the quoted failures. Do not remove the failure quotes from your summary. They are the most useful output.
 - **End with a cost and timing breakdown table.** Ori's reply ends with a table of its steps, durations, and costs. Relay that table in full. Do not compress it to one line. Then add the rows that only you can measure, from the jsonl stream:
   - One row for each wait on a user question. The duration is the time from the `elicitation.requested` event to your `respond` line. The cost is "—".
-  - A total row. Read the session's total cost from `usage.costUsd` on the final `turn.succeeded` event. Compute the total duration from the first and last event timestamps.
+  - A total row. A `turn.succeeded` event reports the cost of that one turn, not of the session. Sum `usage.costUsd` across every `turn.succeeded` and `turn.failed` event in the run, including each continued session (step 5). A turn with no `usage.costUsd` is unmeasured — do not count it as 0; say that the total does not include it. Compute the total duration from the first and last event timestamps across all of the run's streams.
 
-  If Ori's reply does not contain the table, build it yourself from the stream: one row for each turn, with the timestamp of `turn.started`, the duration to `turn.succeeded`, and the increase in `usage.costUsd`. Add the eval's model calls and judging from the report's Judging table or from `data.results`.
+  If Ori's reply does not contain the table, build it yourself from the stream: one row for each turn, with the timestamp of `turn.started`, the duration to the turn's terminal event, and that event's `usage.costUsd` (the cost of that one turn). Add the eval's model calls and judging from the report's Judging table or from `data.results`.
 
   | Step | Start | Duration | Cost |
   | -- | -- | -- | -- |
