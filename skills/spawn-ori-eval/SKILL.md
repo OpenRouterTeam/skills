@@ -77,7 +77,7 @@ What you need is one scratch directory outside the user's repository whose name 
 
 The name has to be reproducible to the byte, because a later run of this skill finds the earlier one by arriving at the same path rather than by searching. So it is `/tmp/spawn-ori-eval-<hash>`, where the hash is the first twelve characters of the hexadecimal SHA-256 of exactly the repository root path, with no trailing newline and nothing else fed in. Only that value is pinned, not how you compute it, but it is worth checking that whatever you reach for hashes those bytes and no others, since a trailing newline produces a different directory and hides an earlier run. `/tmp` rather than whatever the environment calls the temporary directory, since that varies between machines and would hide a run from the next session on the same one.
 
-Every file the outer run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The `ori/` subdirectory is reserved for Ori's tracker and every file the run writes itself. The scratch workspace is created elsewhere by `ori eval scratch`, so record its reported path in `ori/`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
+Every file the outer run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The `ori/` subdirectory is reserved for Ori's tracker and every file the run writes itself. The scratch workspace is wherever create-eval's own surface puts it, so record the path Ori reports in `ori/`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
 
 `steps.txt` carries the user's request on its first line and then one line for each step from 5 onward, each marked `todo`, `current`, or `done`. Steps 1 to 4 are not tracked, because they are what produce the file.
 
@@ -133,12 +133,12 @@ Repo context pointers: <paths>. Read these first.
 
 The Ori directory is <absolute run directory>/ori. Keep the step tracker and
 every file you write outside the scratch workspace under that directory.
-Record the scratch workspace path reported by `ori eval scratch` in the
-tracker directory. Do not derive another tracker path, and do not adopt or
+Record the scratch workspace path Ori reports in the tracker directory. Do not
+derive another tracker path, and do not adopt or
 resume tracker state outside it. Use only the scratch workspace path reported
-by `ori eval scratch`. Anything else outside this directory belongs to a
-different session. Run the eval with ori eval. Do not create or modify anything
-in the user's repository.
+by create-eval's own surface. Anything else outside this directory belongs to
+a different session. Run the eval with ori eval. Do not create or modify
+anything in the user's repository.
 ```
 
 ## Appendix D: starting a run
@@ -207,7 +207,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly, archive the leftover Ori state, then restart from the full prompt file, because the answers it carried forward belong to a different request. |
+| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user what Ori found and where it is, then use step 4 to ask what to do before moving anything. Restart only after the user chooses. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
