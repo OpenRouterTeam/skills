@@ -23,8 +23,8 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 10. Write the task prompt file (appendix B).
 11. Start one background run from the repo root and save the process ID (appendix C).
 12. Read the current run's output file as it grows (appendix D).
-13. Report each milestone as it appears.
-14. Kill the run the moment a question appears, or skip to step 19 if it finishes without one (appendix D).
+13. Report each phase banner as a milestone.
+14. Kill the run the moment one of the three named questions appears, or skip to step 19 if it finishes without one (appendix D).
 15. Show the user the question text as plain text.
 16. Ask the user with your own question UI, one option per Ori option.
 17. Append the question and the user's answer to the task prompt file (appendix D).
@@ -70,7 +70,14 @@ Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `
 Write this to `/tmp/ori-task.txt`, filling in every angle-bracket field.
 
 ```text
-Use the create-eval skill.
+Use the create-eval skill. Follow its five phases in this order: workspace
+context, criteria and narrowing, bakeoff, routing, close. There are exactly
+three user stopping points, named `workspace-context`, `narrowing`, and
+`next-step`. Every question must be one of those named forms, and no phase
+may end with a question in prose. The bakeoff uses exactly five catalog
+candidates, plus the incumbent when one exists, and reports model, outcome or
+pass rate, cost, latency, and judge score. It recommends one slug. Routing
+evaluates only that slug with bare, :nitro, and :floor.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -93,7 +100,7 @@ printf 'Ori process: %s\n' "$ori_pid"
 
 The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Milestones worth reporting are things like target picked, eval written, and model 2 of 3 running. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a `message` and `fields[]`, each field with a `name`, a `type`, and often `options`. A `permission.requested` payload carries `options`.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries one of the three named forms, with a `message` and `fields[]`, each field with a `name`, a `type`, and often `options`. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run and report the five phase banners as milestones. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
