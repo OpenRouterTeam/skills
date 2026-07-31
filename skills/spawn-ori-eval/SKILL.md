@@ -36,7 +36,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 16. Wait for the run to exit, then read the answer file (appendix E).
 17. Show the user Ori's narration lines from the answer file in plain language, before the question or the result (appendix E).
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
-19. Show the first question text to the user as plain text.
+19. Put the question's full text, including its context table, inside the question UI itself (appendix E).
 20. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 21. Append the question and the user's answer to the task prompt file (appendix E).
 22. Restart over the whole prompt file with the next attempt number, then return to step 16.
@@ -76,6 +76,7 @@ These hold for the whole run.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
+- Never put content the user must see in text, or in a file, before a question-UI call in the same turn. Some hosts do not show it, and the user answers without the evidence. This applies to every question, including `[next-step]`, and to the results tables. Appendix E gives the two safe placements.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -179,7 +180,12 @@ Status updates the user sees must stay plain. Examples:
 
 A finished turn ends its assistant text either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end of the assistant text is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
-Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep its three options one for one, keep `Other` as free text, and translate the wording into simple language.
+A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Two placements are safe:
+
+1. Put the question's full text, including its table, inside the question UI: in the question text, or in option previews when the UI has them.
+2. If your question UI cannot carry the table, end your turn with the table as the final text and say the question comes next. Ask with the question UI in your next turn.
+
+Keep the three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
 What you append afterwards is the question's full text in plain language plus the single answer string, including the typed text when the user chose Other.
 
