@@ -27,7 +27,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. If the completed answer contains a tagged question anywhere or ends with an untagged question, continue to step 18; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
+17. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 18; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
 18. Show the first question text to the user as plain text.
 19. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 20. Append the question and the user's answer to the task prompt file (appendix E).
