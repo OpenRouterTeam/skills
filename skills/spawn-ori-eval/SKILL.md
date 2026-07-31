@@ -98,7 +98,7 @@ printf 'Ori process: %s\n' "$ori_pid"
 
 ## Appendix D: stream shape
 
-The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Milestones worth reporting are things like target picked, eval written, and model 2 of 3 running. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
+The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
 One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries one of the three named forms, with a `message` and `fields[]`, each field with a `name`, a `type`, and often `options`. A `permission.requested` payload carries `options`. Expect exactly three named elicitations across the run and report the five phase banners as milestones. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
