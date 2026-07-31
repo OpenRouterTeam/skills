@@ -9,10 +9,10 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ## Pins
 
-These two slugs are written down only here, and everywhere else in this skill `<RUN_MODEL>` and `<JUDGE_MODEL>` stand in for them exactly as written, so swapping a model is an edit to the two lines below and nothing else.
+This section gives the two models. The other sections use the names `<RUN_MODEL>` and `<JUDGE_MODEL>`. Replace each name with the model that this section gives. To change a model, change only the two lines that follow.
 
-- `RUN_MODEL` is `openai/gpt-5.6-terra`, the model the run itself uses.
-- `JUDGE_MODEL` is `openai/gpt-5.6-terra`, the model the eval judges with.
+- `RUN_MODEL` is `openai/gpt-5.6-terra`. The run uses this model.
+- `JUDGE_MODEL` is `openai/gpt-5.6-terra`. The eval judge uses this model.
 
 ## Steps
 
