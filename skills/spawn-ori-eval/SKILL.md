@@ -28,7 +28,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 15. Start one background run from the repo root and save the process ID (appendix D).
 16. Read the current run's output file as it grows (appendix E).
 17. Report each phase banner as a milestone.
-18. Kill the run the moment a tagged elicitation, a permission request, or a tagged plain-text question appears, then continue to steps 19 to 22. If the run finishes without a question, skip to step 23. If an untagged prose question appears, kill the run and report the broken contract to the user instead of continuing through steps 19 to 22 (appendix E).
+18. Kill the run the moment a tagged elicitation, a permission request, or a tagged plain-text question appears, then continue to steps 19 to 22. If the run finishes without a question, skip to step 23. If an untagged prose question appears, kill the run, report the broken contract to the user, and stop and wait for their direction instead of continuing through steps 19 to 22. The recovery is to update Ori and restart from the full prompt file (appendix G).
 19. Show the user the question text as plain text.
 20. Ask the user with your own question UI, one option per Ori option.
 21. Append the question and the user's answer to the task prompt file (appendix E).
