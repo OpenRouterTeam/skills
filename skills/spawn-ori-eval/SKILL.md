@@ -122,8 +122,8 @@ Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are seven
 possible question tags in this order: `[surface]`, `[workspace-files]`,
 `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`,
-`[candidates]`, and `[next-step]`. The first two are mutually exclusive conditional questions,
-so each run asks five or six questions.
+`[candidates]`, and `[next-step]`. The first two are mutually exclusive
+conditional questions, so each run asks five or six questions.
 Ask exactly one question per turn and end the turn after asking it. Give each
 question three concrete options plus a free-text `Other` option. Never combine
 questions in one turn.
@@ -168,7 +168,7 @@ What you append afterwards is the question's full text in plain language plus th
 
 Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Build no stream-derived totals. For an attempt that ended at a question, the operator may report the observed wall-clock start and duration, but its cost is unavailable because Ori produced no closing table. Mark only the cost "unmeasured", which is not zero. Report a floor rather than adding unmeasured costs into a total.
 
-| Step | Operator start | Operator duration | Cost |
+| Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
 | Attempt stopped at question 1 | observed 20:29 | observed 39s | unmeasured |
 | Restart and repeated exploration | 20:30 | 15m 10s | $3.20 |
