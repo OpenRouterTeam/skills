@@ -1,6 +1,6 @@
 ---
 name: spawn-ori-eval
-description: Spawn Ori as a subprocess to run a model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare or bake off models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
+description: Spawn Ori as a subprocess to run a throwaway model eval on a pinned harness and model, then relay the results. Use when the user asks which model they should use, wants to compare or bake off models, wants to measure whether their agent or prompt does the right thing, wants to catch regressions in agent behavior, or asks how good their current model is. Applies to any codebase in any language. Do not use for plain unit tests that involve no model, and do not use to re-run an eval that already exists (run `ori eval <file>` directly).
 ---
 
 # Spawn Ori Eval
@@ -33,8 +33,8 @@ Do these in order. One line, one action. Appendix letters point to the detail.
 20. Relay Ori's cost and timing table in full (appendix E).
 21. Add one row per run and a total row (appendix E).
 22. Add one line on the cheaper cost of a re-run.
-23. Tell the user to commit the `*.eval.ts` file.
-24. Offer to add `ori eval <file>` to CI.
+23. Tell the user where Ori left the temporary workspace and that it is throwaway.
+24. Say they can move the eval into their repo if the numbers made them want to keep it.
 
 ## Rules
 
@@ -54,7 +54,8 @@ These hold for the whole run.
 - Never tell the user to export a raw `OPENROUTER_API_KEY`. The `ori login` command is the supported path.
 - Never paste step 5's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
-- Never put the eval outside the top-level `evals/` directory or inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
+- Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
+- Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
 - Never copy CLI details into this skill or into text for the user. Re-read what step 5 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
@@ -75,8 +76,9 @@ Use the create-eval skill.
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
-Write the eval to evals/<feature>/<name>.eval.ts and run it with ori eval. Do
-not create or modify anything outside the top-level evals directory.
+Keep the eval and any supporting files in a temporary workspace outside the
+user's repository. Run it with ori eval. Do not create or modify anything in
+the user's repository.
 ```
 
 ## Appendix C: start command
@@ -124,7 +126,7 @@ Follow it with one line, for example: this cost about $31.82 across two Ori runs
 | A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
-| The eval file is outside `evals/` | Move the file and run `ori eval` on the new path. |
+| The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | The run is longer than expected | Read the stream. If a question event is sitting there, kill the process now rather than waiting for the result line. |
 | Ori picked the target itself | The question event was missed or the run continued past it. Kill it, ask the user, append the answer, and restart from the full prompt file. |
 | No question arrives but the run looks stopped | Some questions come as plain prose and end the turn. Read the final assistant text and restart the same way. |
