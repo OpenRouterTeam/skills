@@ -28,7 +28,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 15. Start one background run from the repo root and save the process ID (appendix D).
 16. Read the current run's output file as it grows (appendix E).
 17. Report each phase banner as a milestone.
-18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 23 if it finishes without one (appendix E).
+18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or a tagged plain-text question, or skip to step 23 if it finishes without one (appendix E).
 19. Show the user the question text as plain text.
 20. Ask the user with your own question UI, one option per Ori option.
 21. Append the question and the user's answer to the task prompt file (appendix E).
@@ -117,8 +117,8 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are exactly
-three user stopping points, tagged `workspace-context`, `narrowing`, and
-`next-step`.
+four user stopping points, tagged `workspace-context`, `narrowing`,
+`candidates`, and `next-step`.
 
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
@@ -145,9 +145,9 @@ printf 'Ori attempt %s, process %s\n' "$n" "$ori_pid"
 
 ## Appendix E: stream shape
 
-The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
+The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a tagged plain-text question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
-One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly three tagged elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
+One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, `[candidates]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly four tagged elicitations across the run. A tagged plain-text question ending a turn is a normal stopping point when elicitation is unavailable. Treat it the same as a tagged elicitation: kill the process, relay the question, append the answer, and restart. Only an untagged prose question is a contract violation. If no phase banners appear, report progress from whatever the stream does show rather than going silent.
 
 Show the `message` first and the picker second, because the message carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
