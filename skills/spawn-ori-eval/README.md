@@ -25,6 +25,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - Preflight for the `ori` binary, auth, and Bun, including the `~/.local/bin` PATH gap
+- Reading the live eval help and the authoring guide before spawning, so the run is described and read back from the current CLI rather than from memory
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Backgrounding a single headless Ori invocation without overriding the pinned harness or model
 - Stopping Ori when it asks a question, showing it to the user, and restarting from the full prompt file with the answer appended
