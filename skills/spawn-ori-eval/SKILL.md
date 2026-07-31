@@ -11,9 +11,11 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 Do these in order. One line, one action. Appendix letters point to the detail.
 
-### Step tracker
+### Run directory and step tracker
 
-Before step 1, derive a tracker directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`. Tell the user where you put it. If its `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this deterministic path and adoption rule preserve which phase the previous attempt reached and provide the recovery point without collisions between repositories. Do not overwrite an existing tracker.
+Before step 1, derive a run directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`, and tell the user where you put it. Every file this run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each run's `output-<n>.jsonl` and `error-<n>.log`. The path is derived rather than random so a restart finds the same directory, and per repository rather than shared so two repos evaluated on one machine never read each other's prompt or progress.
+
+If `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so the tracker is what preserves which phase the previous attempt reached. Do not overwrite an existing tracker.
 
 1. Run the lookup or install for the `ori` binary yourself (appendix A).
 2. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
@@ -49,7 +51,7 @@ These hold for the whole run.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
 - Run every command in steps 1 to 5 yourself. Installing the binary when it is missing is expected, not a permission request. The credential check is the only human handoff because `ori login` opens a browser only the user can complete.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
-- Treat `/tmp/ori-task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
+- Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question or accept a permission request on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
 - Do not invent an approval gate before starting the run. Steps 8 and 9 disclose the time and cost, and the only user pauses are the questions detected in step 14.
@@ -74,7 +76,7 @@ Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `
 
 ## Appendix B: task prompt template
 
-Write this to `/tmp/ori-task.txt`, filling in every angle-bracket field.
+Write this to `task.txt` in the run directory, filling in every angle-bracket field.
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
@@ -92,17 +94,17 @@ the user's repository.
 
 ## Appendix C: start command
 
-Raise the output file number on each restart, and save the new process ID each time.
+Raise the output file number on each restart, and save the new process ID each time. `run_dir` is the directory from the step tracker section.
 
 ```bash
-ori code --prompt-file /tmp/ori-task.txt --output jsonl > /tmp/ori-output-1.jsonl 2> /tmp/ori-error-1.log &
+ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
 ori_pid=$!
 printf 'Ori process: %s\n' "$ori_pid"
 ```
 
 ## Appendix D: stream shape
 
-The current run's output file is `/tmp/ori-output-<n>.jsonl`, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
+The current run's output file is `output-<n>.jsonl` in the run directory, where `<n>` is the number you gave the run you last started. Report each literal phase banner matching `Phase N/5: <phase name>` as a milestone. A question means an `elicitation.requested` event, a `permission.requested` event, or a turn that ends on a prose question, and you kill the saved process ID as soon as one appears rather than waiting for the result line.
 
 One `{"kind":"event","event":...}` line per runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. An `elicitation.requested` payload carries a form with a top-level `message` whose first characters are exactly one of `[workspace-context]`, `[narrowing]`, or `[next-step]`, plus a `requestedSchema` with one projection-defined property whose choices are the options. Match the tag at the start of `message`, not a schema title or property name. A `permission.requested` payload is separate and carries `options`. Expect exactly three tagged elicitations across the run. If no phase banners appear, report progress from whatever the stream does show rather than going silent. If Ori asks a trailing prose question, stop and bring it to the user, but report it as a contract violation rather than treating it as a normal stopping point.
 
