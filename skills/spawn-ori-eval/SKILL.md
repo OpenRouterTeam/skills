@@ -73,9 +73,12 @@ Derive the directory from the repo root, falling back to the working directory w
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_dir="/tmp/spawn-ori-eval-$(printf '%s' "$run_root" | sha256sum | cut -c1-12)"
+run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
+run_dir="/tmp/spawn-ori-eval-$run_hash"
 mkdir -p "$run_dir"
 ```
+
+The `shasum` fallback is there because `sha256sum` is GNU coreutils and absent on stock macOS, where the command would otherwise produce nothing and give every repository the same directory.
 
 Every file the run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `output-<n>.jsonl` and `error-<n>.log`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or progress.
 
@@ -90,7 +93,13 @@ request: which model should we use for the support triage agent
 16 todo read the output file as it grows
 ```
 
-Adopt that file only when its first line matches the request you are working on and a step is still unfinished, which is the restart case. A different request in a repo you have evaluated before is a new run, so move the old files into `$run_dir/previous/` and start clean, which also keeps stale logs out of the output numbering.
+Adopt that file only when its first line matches the request you are working on and a step is still unfinished, which is the restart case. A different request in a repo you have evaluated before is a new run, so archive the old files and start clean, which also keeps stale logs out of the output numbering. Archive into a timestamped directory rather than a single `previous/`, so a third run does not move an archive into itself or overwrite the one before it.
+
+```bash
+archive="$run_dir/previous/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$archive"
+find "$run_dir" -maxdepth 1 -type f -exec mv {} "$archive"/ \;
+```
 
 ## Appendix B: setup commands
 
@@ -118,14 +127,17 @@ the user's repository.
 
 ## Appendix D: start command
 
-Number each attempt one above the highest `output-<n>.jsonl` already in the run directory, and save the new process ID each time.
+Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the stream and error log the cost table is built from. Save the new process ID each time.
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-run_dir="/tmp/spawn-ori-eval-$(printf '%s' "$run_root" | sha256sum | cut -c1-12)"
-ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
+run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
+run_dir="/tmp/spawn-ori-eval-$run_hash"
+n=1
+while [ -e "$run_dir/output-$n.jsonl" ]; do n=$((n + 1)); done
+ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-$n.jsonl" 2> "$run_dir/error-$n.log" &
 ori_pid=$!
-printf 'Ori process: %s\n' "$ori_pid"
+printf 'Ori attempt %s, process %s\n' "$n" "$ori_pid"
 ```
 
 ## Appendix E: stream shape
