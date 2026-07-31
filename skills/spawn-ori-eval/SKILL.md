@@ -69,10 +69,11 @@ These hold for the whole run.
 
 ## Appendix A: run directory and step tracker
 
-Derive the directory from the repo root so a restart finds the same one, and re-derive it in each shell rather than relying on the variable surviving, because shell state usually does not persist between commands.
+Derive the directory from the repo root, falling back to the working directory when there is no repo, so a restart from a subdirectory finds the same one. Re-derive it in every shell that needs it rather than relying on the variable surviving, because shell state usually does not persist between commands.
 
 ```bash
-run_dir="/tmp/spawn-ori-eval-$(pwd | sha256sum | cut -c1-12)"
+run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+run_dir="/tmp/spawn-ori-eval-$(printf '%s' "$run_root" | sha256sum | cut -c1-12)"
 mkdir -p "$run_dir"
 ```
 
@@ -120,6 +121,8 @@ the user's repository.
 Number each attempt one above the highest `output-<n>.jsonl` already in the run directory, and save the new process ID each time.
 
 ```bash
+run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+run_dir="/tmp/spawn-ori-eval-$(printf '%s' "$run_root" | sha256sum | cut -c1-12)"
 ori code --prompt-file "$run_dir/task.txt" --output jsonl > "$run_dir/output-1.jsonl" 2> "$run_dir/error-1.log" &
 ori_pid=$!
 printf 'Ori process: %s\n' "$ori_pid"
