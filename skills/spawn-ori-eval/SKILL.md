@@ -11,43 +11,34 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 Do these in order. One line, one action. Appendix letters point to the detail.
 
-### Run directory and step tracker
-
-Before step 1, create the run directory and keep the variable for every later command. Tell the user where you put it.
-
-```bash
-run_dir="/tmp/spawn-ori-eval-$(pwd | sha256sum | cut -c1-12)"
-mkdir -p "$run_dir"
-```
-
-Every file this run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `output-<n>.jsonl` and `error-<n>.log`. The path is derived rather than random so a restart finds the same directory, and it is per repository so two repos evaluated on one machine never read each other's prompt or progress. Re-derive it in each shell rather than relying on the variable surviving, because shell state usually does not persist between commands.
-
-Write the user's request on the first line of `steps.txt`, then one status line for every step below. Adopt an existing tracker only when its first line matches this request and a step is still incomplete, which is the restart case: reread it and continue at the first step not marked complete. Otherwise this is a new request in a repo you have evaluated before, so archive the old files to `$run_dir/previous/` and start clean, which also keeps the old logs from confusing the output numbering. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so the tracker is what preserves which phase the previous attempt reached.
-
-1. Run the lookup or install for the `ori` binary yourself (appendix A).
-2. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-3. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix F).
-4. Check for `bun` yourself, and stop if it is missing.
-5. Read the eval surface yourself, continuing even if the commands error (appendix A).
-6. Tell the user where the binary landed, if you installed it.
-7. Tell the user what the run will do, from what you read in step 5.
-8. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
-9. Tell the user they get a scored table and that a question can restart the run.
-10. Write the task prompt file (appendix B).
-11. Start one background run from the repo root and save the process ID (appendix C).
-12. Read the current run's output file as it grows (appendix D).
-13. Report each phase banner as a milestone.
-14. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 19 if it finishes without one (appendix D).
-15. Show the user the question text as plain text.
-16. Ask the user with your own question UI, one option per Ori option.
-17. Append the question and the user's answer to the task prompt file (appendix D).
-18. Restart over the whole prompt file with the next output file number, then return to step 12.
-19. Relay the result table, the ship or no-ship decision, and the quoted failures.
-20. Relay Ori's cost and timing table in full (appendix E).
-21. Add one row per run and a total row (appendix E).
-22. Add one line on the cheaper cost of a re-run.
-23. Tell the user where Ori left the temporary workspace and that it is throwaway.
-24. Say they can move the eval into their repo if the numbers made them want to keep it.
+1. Create the run directory and derive its path from the repo root (appendix G).
+2. Tell the user where the run directory is.
+3. Adopt `steps.txt` and jump to the first step not marked complete, when it exists for this same request with work outstanding (appendix G).
+4. Otherwise archive anything already in the directory and write a fresh `steps.txt`, one line per step below (appendix G).
+5. Run the lookup or install for the `ori` binary yourself (appendix A).
+6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
+7. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix F).
+8. Check for `bun` yourself, and stop if it is missing.
+9. Read the eval surface yourself, continuing even if the commands error (appendix A).
+10. Tell the user where the binary landed, if you installed it.
+11. Tell the user what the run will do, from what you read in step 9.
+12. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
+13. Tell the user they get a scored table and that a question can restart the run.
+14. Write the task prompt file (appendix B).
+15. Start one background run from the repo root and save the process ID (appendix C).
+16. Read the current run's output file as it grows (appendix D).
+17. Report each phase banner as a milestone.
+18. Kill the run the moment any question appears, whether it is a tagged elicitation, a permission request, or trailing prose, or skip to step 23 if it finishes without one (appendix D).
+19. Show the user the question text as plain text.
+20. Ask the user with your own question UI, one option per Ori option.
+21. Append the question and the user's answer to the task prompt file (appendix D).
+22. Restart over the whole prompt file with the next output file number, then return to step 16.
+23. Relay the result table, the ship or no-ship decision, and the quoted failures.
+24. Relay Ori's cost and timing table in full (appendix E).
+25. Add one row per run and a total row (appendix E).
+26. Add one line on the cheaper cost of a re-run.
+27. Tell the user where Ori left the temporary workspace and that it is throwaway.
+28. Say they can move the eval into their repo if the numbers made them want to keep it.
 
 ## Rules
 
@@ -56,24 +47,25 @@ These hold for the whole run.
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
 - Never pass `--model` or `--harness`. They remove the pin, which is the only reason to use Ori.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
-- Run every command in steps 1 to 5 yourself. Installing the binary when it is missing is expected, not a permission request. The credential check is the only human handoff because `ori login` opens a browser only the user can complete.
+- Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected, not a permission request. The credential check is the only human handoff because `ori login` opens a browser only the user can complete.
+- Update `steps.txt` as you go: mark a step current before you do it and done before you start the next, and reread the file to decide what comes next instead of trusting memory. A restart replays the prompt file from the top, so this is the only record of how far the last attempt got.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
 - Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and never split the history into separate answer files.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question or accept a permission request on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
-- Do not invent an approval gate before starting the run. Steps 8 and 9 disclose the time and cost, and the only user pauses are the questions detected in step 14.
+- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the questions detected in step 18.
 - Never go silent. An unreported question and 25 minutes without a progress report both look like a stopped run.
 - Never invent a number. A turn with no reported cost is unmeasured, not zero, and you say so rather than estimating.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter.
 - Never tell the user to export a raw `OPENROUTER_API_KEY`. The `ori login` command is the supported path.
-- Never paste step 5's output to the user. You read it, they did not ask for it.
+- Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
 - Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", "elicitation", "correlationId", "the result line", and "stdout".
-- Never copy CLI details into this skill or into text for the user. Re-read what step 5 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
+- Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: setup commands
 
@@ -151,3 +143,27 @@ Follow it with one line, for example: this cost about $31.82 across two Ori runs
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
+
+## Appendix G: run directory and step tracker
+
+Derive the directory from the repo root so a restart finds the same one, and re-derive it in each shell rather than relying on the variable surviving, because shell state usually does not persist between commands.
+
+```bash
+run_dir="/tmp/spawn-ori-eval-$(pwd | sha256sum | cut -c1-12)"
+mkdir -p "$run_dir"
+```
+
+Every file the run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `output-<n>.jsonl` and `error-<n>.log`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or progress.
+
+`steps.txt` carries the user's request on its first line and then one line per step, each marked `todo`, `current`, or `done`.
+
+```text
+request: which model should we use for the support triage agent
+1 done create the run directory
+2 done tell the user where it is
+...
+15 current start one background run
+16 todo read the output file as it grows
+```
+
+Adopt that file only when its first line matches the request you are working on and a step is still unfinished, which is the restart case. A different request in a repo you have evaluated before is a new run, so move the old files into `$run_dir/previous/` and start clean, which also keeps stale logs out of the output numbering.
