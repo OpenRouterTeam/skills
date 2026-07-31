@@ -7,13 +7,13 @@ description: Spawn Ori as a subprocess to run a model eval on a pinned harness a
 
 Ori writes and grades the eval on a pinned harness and model, so the bench is identical for every coding agent. You run Ori, keep the user informed, and relay the result. An eval you write yourself is not reproducible, and a score change must come from the user's agent, not from the environment.
 
-### Step tracker
-
-Before step 1, derive a tracker directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`. Tell the user where you put it. If its `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this deterministic path and adoption rule preserve which phase the previous attempt reached and provide the recovery point without collisions between repositories. Do not overwrite an existing tracker.
-
 ## Steps
 
 Do these in order. One line, one action. Appendix letters point to the detail.
+
+### Step tracker
+
+Before step 1, derive a tracker directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`. Tell the user where you put it. If its `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this deterministic path and adoption rule preserve which phase the previous attempt reached and provide the recovery point without collisions between repositories. Do not overwrite an existing tracker.
 
 1. Run the lookup or install for the `ori` binary yourself (appendix A).
 2. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
