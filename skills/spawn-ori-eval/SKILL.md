@@ -9,7 +9,7 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ### Step tracker
 
-Before step 1, create a fresh run directory with `mktemp -d /tmp/spawn-ori-eval-run.XXXXXX`, tell the user where you put it, and create its `steps.txt` tracker outside the user's repository. Write one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this tracker records which phase the previous attempt reached and provides the recovery point.
+Before step 1, derive a tracker directory outside the user's repository from a stable hash of the repo root's absolute path, such as `/tmp/spawn-ori-eval-<workspace-hash>`. Tell the user where you put it. If its `steps.txt` already exists, adopt it, reread it, and continue at the first step not marked complete. Otherwise create it with one status line for every step below. Mark one step current, mark it complete before starting the next, and reread the tracker to decide what to do next instead of trusting memory. A restart replays the whole prompt file from the top, so this deterministic path and adoption rule preserve which phase the previous attempt reached and provide the recovery point without collisions between repositories. Do not overwrite an existing tracker.
 
 ## Steps
 
