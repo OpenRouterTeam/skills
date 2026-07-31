@@ -57,7 +57,7 @@ These hold for the whole run.
 - Never invent a number. Use Ori's closing table. An attempt stopped at a question has no reported cost, so name it unmeasured rather than zero.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter.
-- The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not.
+- The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
@@ -109,7 +109,7 @@ Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | 
 
 Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
 
-Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Do not print its output or any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user to update Ori and stop.
+Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Do not print its output or any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user to update Ori and stop, because that binary predates the change that makes the inner skill stop and ask instead of answering its own scoping question, producing an eval that looks correct but measures the wrong thing.
 
 ## Appendix C: task prompt template
 
