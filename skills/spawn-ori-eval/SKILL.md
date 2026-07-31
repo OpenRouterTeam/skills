@@ -114,6 +114,9 @@ Run `ori auth` before starting. It resolves the credential the CLI will use, inc
 
 Write this to `task.txt` in the run directory, filling in every angle-bracket field.
 
+Pass the run directory into the prompt so the outer run can archive every
+file it owns and still start the next session cleanly.
+
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are seven
@@ -128,9 +131,13 @@ questions in one turn.
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
-Keep the eval and any supporting files in a temporary workspace outside the
-user's repository. Run it with ori eval. Do not create or modify anything in
-the user's repository.
+The run directory is <absolute run directory>. It is the temporary workspace
+outside the user's repository. Keep the step tracker, scratch workspace, eval,
+supporting files, and everything else you write under that directory. Do not
+derive another path elsewhere, and do not adopt or resume a tracker or
+workspace outside it. Anything outside this directory belongs to a different
+session. Run the eval with ori eval. Do not create or modify anything in the
+user's repository.
 ```
 
 ## Appendix D: starting a run
@@ -199,6 +206,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
+| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly, then restart from the full prompt file, because the answers it carried forward belong to a different request. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
