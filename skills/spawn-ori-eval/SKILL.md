@@ -157,7 +157,7 @@ The default mode does not pause for a question. Ori emits the question event, se
 - The `*.eval.ts` file is the permanent product. Tell the user to commit it.
 - A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
 - Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts — the help from 1d is the source. For the eval-file API, the authoring guide from 1d is the source (`ori eval skill`). Read either again if the run raised a question it answers. Do not copy them into this skill or into text for the user. The CLI changes, and copies become incorrect.
+- For all other data about eval runs — reports, baselines, lists, timeouts — the help from 1d is the source. For the eval-file API, the authoring guide from 1d is the source. Read either again if the run raised a question it answers, using the same commands as 1d. Do not copy them into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
