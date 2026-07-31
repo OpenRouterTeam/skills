@@ -15,7 +15,7 @@ Your task is the part that Ori cannot do. You are the user's only connection to 
 
 Do the steps in this sequence. Each step has a section below. The **Rules** in a section are limits that apply during that step. They are not more steps.
 
-1. **Do the pre-run checks** — 1a: the `ori` binary. 1b: login with `ori login`. 1c: the `bun` binary.
+1. **Do the pre-run checks** — 1a: the `ori` binary. 1b: login with `ori login`. 1c: the `bun` binary. 1d: read the eval surface.
 2. **Tell the user what will occur** — what Ori is, the time and the cost, the output, and that Ori can ask questions.
 3. **Write the task prompt file** — `/tmp/ori-task.txt`, with the user's request unchanged, the repo paths, and the `evals/` target.
 4. **Start one Ori run** — `ori code --prompt-file … --output jsonl`.
@@ -27,20 +27,24 @@ If there is a problem, refer to **Troubleshooting** at the end. The **Hard rules
 
 ## Step 1: Do the pre-run checks
 
-Do these checks in this sequence. If a check fails, stop. Do not continue to the next check.
+Do these checks in this sequence. If 1a, 1b or 1c fails, stop. Do not continue to the next check. Check 1d never stops the task.
 
 - **1a — Binary.** Run `command -v ori`. If `ori` is not installed, run `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. The installer puts `ori` in `~/.local/bin`. This directory is frequently not on PATH in a non-login shell. Run `~/.local/bin/ori --version` before you report a failure.
 - **1b — Login.** Tell the user to run `ori login`. The command keeps an Ori credential in `~/.ori/credentials.json`. If the credential is missing, STOP. You cannot complete the login. The command opens a browser. Tell the user to run it. In Claude Code, tell the user to type `! ori login`.
 - **1c — Bun.** Run `command -v bun`. Ori runs `*.eval.ts` files with Bun.
+- **1d — The eval surface.** Run `ori eval -h` and `ori eval skill`. Read both. The guide is what Ori follows inside the run, so it tells you what the run will do and which questions it will ask. If `ori eval skill` errors, run `ori skills get create-eval`. If both error, go to step 2 anyway.
 
 **Rules for this step:**
 
 - Do not tell the user to export a raw `OPENROUTER_API_KEY`. The `ori login` command is the supported procedure.
+- Do not paste 1d's output to the user. You read it, they did not ask for it.
 - Do not show, print, or log the contents of `credentials.json`. Do not show a value that you read from a `.env` file or a config file. Give the name of the key only. Example: say `OPENAI_API_KEY at .env:4`. Do not say the value.
 
 ## Step 2: Tell the user what will occur
 
 Before you start the run, tell the user what will occur. Use simple language. Many tool calls with no explanation is the most frequent complaint about this skill.
+
+Describe the run from what you read in 1d, not from memory.
 
 Tell the user these points. Use your own words. Do not use the terms in the rule below.
 
@@ -84,7 +88,7 @@ ori_pid=$!
 printf 'Ori process: %s\n' "$ori_pid"
 ```
 
-- Always use `--prompt-file`. Do not use the `-p` flag. Ori rejects positional prompts. The prompt file is the central state for the run: you append to it across the run (step 5), and a one-time `-p` string cannot keep that state.
+- Always use `--prompt-file`. The `-p` flag exists and works, but do not use it here. The prompt file is the central state for the run: you append to it across the run (step 5), and a one-time `-p` string cannot keep that state. A bare positional prompt with no flag is rejected.
 - The run has no TTY. Keep the process ID. Read `/tmp/ori-output-1.jsonl` as it grows and follow step 5 when a question appears. The `--output jsonl` flag gives the structured stream: one `{"kind":"event","event":...}` line for each runtime event, then one final `{"kind":"result","ok":...,"sessionId":"..."}` line. Ori's reply text is the sequence of `assistant.text.delta` payloads. Use `--output jsonl`, not plain prose output.
 
 **Rules for this step:**
@@ -153,7 +157,7 @@ The default mode does not pause for a question. Ori emits the question event, se
 - The `*.eval.ts` file is the permanent product. Tell the user to commit it.
 - A re-run does not need a full Ori run. The command `ori eval evals/<feature>/<name>.eval.ts` is sufficient and much less costly. This changes a one-time answer into a guardrail.
 - Offer to add `ori eval` to CI. Then a worse agent causes a failed build.
-- For all other data about eval runs — reports, baselines, lists, timeouts — read `ori eval -h`. For the eval-file API, the command `ori skills get create-eval` prints the authoring guide. Do not copy this data into this skill or into text for the user. The CLI changes, and copies become incorrect.
+- For all other data about eval runs — reports, baselines, lists, timeouts, the eval-file API — re-read 1d. Do not copy it into this skill or into text for the user. The CLI changes, and copies become incorrect.
 
 ## Hard rules
 
