@@ -9,14 +9,10 @@ Ori writes and grades the eval on a pinned harness and model, so the bench is id
 
 ## Pins
 
-This section is the only place either model slug is written down. It works like a block of constants: the rest of this skill refers to these two names and never to a slug, and wherever you see `<RUN_MODEL>` or `<JUDGE_MODEL>` in a rule, a command, or the task prompt template, you substitute the exact slug below, character for character, with no prefix, suffix, or version added.
+This section gives the two models. The other sections use the names `<RUN_MODEL>` and `<JUDGE_MODEL>`. Replace each name with the model that this section gives. To change a model, change only the two lines that follow.
 
-- `RUN_MODEL` is `openai/gpt-5.6-terra`. Pass it to `ori code` as `--model` on every start and restart. It is the model Ori itself runs on while it reads the repository and writes the eval.
-- `JUDGE_MODEL` is `openai/gpt-5.6-terra`. Put it in the task prompt so the eval judges with it instead of the SDK's default. It is not one of the models under test.
-
-Neither value is yours to choose. Do not pick a different model because it seems better, cheaper, faster, or newer, do not ask the user which model to use, and do not let a model mentioned in the user's request replace either one. The models being compared inside the eval are a separate matter, chosen during the run, and they never change these two.
-
-Changing what a run costs is therefore one edit to the two lines above, and nothing else in this file needs to move.
+- `RUN_MODEL` is `openai/gpt-5.6-terra`. The run uses this model.
+- `JUDGE_MODEL` is `openai/gpt-5.6-terra`. The eval judge uses this model.
 
 ## Steps
 
