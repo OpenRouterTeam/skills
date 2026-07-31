@@ -27,14 +27,14 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. If the completed answer contains a tagged question anywhere or ends with an untagged question, continue to step 18; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
+17. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 18; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
 18. Show the first question text to the user as plain text.
 19. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 20. Append the question and the user's answer to the task prompt file (appendix E).
 21. Restart over the whole prompt file with the next attempt number, then return to step 16.
 22. Relay the result table, the ship or no-ship decision, and the quoted failures.
 23. Relay Ori's cost and timing table in full (appendix F).
-24. Add Ori's reported cost and timing rows for each attempt, naming question-stopped attempts unmeasured and reporting a floor (appendix F).
+24. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
 25. Add one line on the cheaper cost of a re-run.
 26. Tell the user where Ori left the temporary workspace and that it is throwaway.
 27. Say they can move the eval into their repo if the numbers made them want to keep it.
@@ -54,7 +54,7 @@ These hold for the whole run.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
 - Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the questions handled by step 17.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
-- Never invent a number. Use Ori's closing table. An attempt stopped at a question has no reported cost, so name it unmeasured rather than zero.
+- Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter.
 - The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check.
@@ -158,7 +158,15 @@ If the operator's shell calls are cut off before a run ends, background the comm
 
 The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so read the answer file after it exits. Diagnostics go to the error log. There is no live progress source or question detection during the turn.
 
-A finished turn ends either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
+The last line of the answer file is Ori's own summary line rather than part of the answer, and it looks like this.
+
+```text
+summary  model=served/model  duration=200ms  input=100 tok  output=25 tok  context=90 tok  $0.012346
+```
+
+Every attempt writes it, including one that stopped at a question, so it is where that attempt's duration and cost come from. A turn that died before finishing writes none. Read the question from the assistant text above it, since the summary line is what actually ends the file.
+
+A finished turn ends its assistant text either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end of the assistant text is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
 Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep its three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
@@ -166,18 +174,18 @@ What you append afterwards is the question's full text in plain language plus th
 
 ## Appendix F: cost and timing table
 
-Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Build no stream-derived totals. For an attempt that ended at a question, the operator may report the observed wall-clock start and duration, but its cost is unavailable because Ori produced no closing table. Mark only the cost "unmeasured", which is not zero. Report a floor rather than adding unmeasured costs into a total.
+Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Each attempt's duration and cost come from the summary line at the end of its answer file, and the eval's own model calls and judging come from Ori's closing table in the final answer. Start times are the operator's observation, because the summary line reports duration only. An attempt whose answer file has no summary line reported nothing, so mark it "unmeasured", which is not zero, and report the total as a floor whenever any row is unmeasured.
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
-| Attempt stopped at question 1 | observed 20:29 | observed 39s | unmeasured |
-| Restart and repeated exploration | 20:30 | 15m 10s | $3.20 |
+| Attempt stopped at question 1 | observed 20:29 | 39s | $0.42 |
+| Restart and repeated exploration | observed 20:30 | 15m 10s | $3.20 |
 | Eval model calls | 20:46 | 2m | $0.46 |
 | Judging | 20:48 | 1m | $0.05 |
 | … |  |  |  |
-| **Reported floor** |  | **from Ori's table** | **at least $3.71** |
+| **Total** |  |  | **$4.13** |
 
-Follow it with one line, for example: the reported cost floor is $3.71. The question-stopped attempt's timing is the operator's observation, while its cost is unmeasured, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
+Follow it with one line, for example: the run cost $4.13 in total, and a rerun costs only the amount shown in Ori's closing table.
 
 ## Appendix G: troubleshooting
 
