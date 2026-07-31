@@ -27,12 +27,12 @@ If there is a problem, refer to **Troubleshooting** at the end. The **Hard rules
 
 ## Step 1: Do the pre-run checks
 
-Do these checks in this sequence. If a check fails, stop. Do not continue to the next check.
+Do these checks in this sequence. If 1a, 1b or 1c fails, stop. Do not continue to the next check. Check 1d is the exception: it gathers context and never stops the task.
 
 - **1a — Binary.** Run `command -v ori`. If `ori` is not installed, run `curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh`. The installer puts `ori` in `~/.local/bin`. This directory is frequently not on PATH in a non-login shell. Run `~/.local/bin/ori --version` before you report a failure.
 - **1b — Login.** Tell the user to run `ori login`. The command keeps an Ori credential in `~/.ori/credentials.json`. If the credential is missing, STOP. You cannot complete the login. The command opens a browser. Tell the user to run it. In Claude Code, tell the user to type `! ori login`.
 - **1c — Bun.** Run `command -v bun`. Ori runs `*.eval.ts` files with Bun.
-- **1d — The eval surface.** Run `ori eval -h` and `ori skills get create-eval`. Read both before you start the run. The help prints the eval runner: what it discovers, how it reports, and which flags a re-run accepts. The guide prints the authoring instructions that Ori itself follows inside the run, so it tells you what Ori is about to do and which scope questions it will ask. Without these you cannot describe the run in step 2, recognize a question in step 5, or read the result in step 6, because you do not know what the run does. This is the one check that does not stop the task. If either command errors, an older binary may name it differently: try `ori eval skill` for the guide. If it still errors, continue to step 2 and tell the user that your description of the run comes from the skill and not from their installed version.
+- **1d — The eval surface.** Run `ori eval -h` and `ori skills get create-eval`. Read both before you start the run. The help prints the eval runner: what it discovers, how it reports, and which flags a re-run accepts. The guide prints the authoring instructions that Ori itself follows inside the run, so it tells you what Ori is about to do and which scope questions it will ask. Without these you cannot describe the run in step 2, recognize a question in step 5, or read the result in step 6, because you do not know what the run does. If either command errors, an older binary may name it differently: try `ori eval skill` for the guide. If it still errors, continue to step 2 and tell the user that your description of the run comes from this skill and not from their installed version.
 
 **Rules for this step:**
 
