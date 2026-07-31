@@ -16,7 +16,7 @@ Ori.
 Run the official installer:
 
 ```sh
-curl -fsSL https://openrouter.ai/labs/ori/install.sh | sh
+curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash
 ```
 
 The installer puts the `ori` executable in the user's local install location.
