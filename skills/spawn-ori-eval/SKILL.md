@@ -34,7 +34,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. Show the user Ori's narration lines from the answer file in plain language, before the question or the result (appendix E).
+17. Show the user Ori's narration lines from the answer file in plain language, and use a safe placement when a question follows (appendix E).
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
 19. Put the question's full text, including its context table, inside the question UI itself (appendix E).
 20. Ask the user with your own question UI, preserving the three options and free-text `Other`.
@@ -76,7 +76,7 @@ These hold for the whole run.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
-- Never put content the user must see in text, or in a file, before a question-UI call in the same turn. Some hosts do not show it, and the user answers without the evidence. This applies to every question, including `[next-step]`, and to the results tables. Appendix E gives the two safe placements.
+- Never put any content in text, or in a file, before a question-UI call in the same turn. Some hosts show none of it — narration and evidence alike — and the user answers without it. This applies to every question, including `[next-step]`, to the results tables, and to step 17's narration lines. Appendix E gives the two safe placements.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -182,8 +182,8 @@ A finished turn ends its assistant text either on a question or on the final rep
 
 A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Two placements are safe:
 
-1. Put the question's full text, including its table, inside the question UI: in the question text, or in option previews when the UI has them.
-2. If your question UI cannot carry the table, end your turn with the table as the final text and say the question comes next. Ask with the question UI in your next turn.
+1. Put the question's full text, including its table, inside the question UI: in the question text, or in option previews when the UI has them. Put step 17's narration lines there too, ahead of the question text.
+2. If your question UI cannot carry the table, end your turn with the narration and the table as the final text and say the question comes next. Ask with the question UI in your next turn.
 
 Keep the three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
