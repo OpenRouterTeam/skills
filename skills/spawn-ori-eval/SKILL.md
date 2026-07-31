@@ -13,8 +13,8 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 
 1. Create the run directory and derive its path from the repo root (appendix A).
 2. Tell the user where the run directory is.
-3. Adopt `steps.txt` and jump to the first step not marked complete, when it exists for this same request with work outstanding (appendix A).
-4. Otherwise archive anything already in the directory and write a fresh `steps.txt`, one line per step below (appendix A).
+3. Adopt `steps.txt` when it exists for this same request with work outstanding, and jump to the first step after 4 that is not done (appendix A).
+4. Otherwise archive whatever is in the directory and write a fresh `steps.txt` covering step 5 onward (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
 7. Check `~/.ori/credentials.json` yourself, and stop if it does not exist because `ori login` opens a browser only the user can complete (appendix G).
@@ -82,12 +82,12 @@ The `shasum` fallback is there because `sha256sum` is GNU coreutils and absent o
 
 Every file the run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `output-<n>.jsonl` and `error-<n>.log`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or progress.
 
-`steps.txt` carries the user's request on its first line and then one line per step, each marked `todo`, `current`, or `done`.
+`steps.txt` carries the user's request on its first line and then one line for each step from 5 onward, each marked `todo`, `current`, or `done`. Steps 1 to 4 are not tracked, because they are what produce the file.
 
 ```text
 request: which model should we use for the support triage agent
-1 done create the run directory
-2 done tell the user where it is
+5 done look up the ori binary
+6 done fallback lookup not needed
 ...
 15 current start one background run
 16 todo read the output file as it grows
@@ -96,6 +96,9 @@ request: which model should we use for the support triage agent
 Adopt that file only when its first line matches the request you are working on and a step is still unfinished, which is the restart case. A different request in a repo you have evaluated before is a new run, so archive the old files and start clean, which also keeps stale logs out of the output numbering. Archive into a timestamped directory rather than a single `previous/`, so a third run does not move an archive into itself or overwrite the one before it.
 
 ```bash
+run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-12)
+run_dir="/tmp/spawn-ori-eval-$run_hash"
 archive="$run_dir/previous/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$archive"
 find "$run_dir" -maxdepth 1 -type f -exec mv {} "$archive"/ \;
