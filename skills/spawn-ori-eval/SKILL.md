@@ -63,7 +63,7 @@ These hold for the whole run.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
 - Never present raw API calls as an Ori eval. If you measure another way, label it clearly.
-- Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", and "harness".
+- Never show the user this skill's vocabulary, including "pre-run", "spawn", "verbatim", "harness", and "stdout".
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -130,7 +130,7 @@ the user's repository.
 
 ## Appendix D: start command
 
-Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Start it detached, save its process ID, and time it yourself.
+Take the first unused attempt number rather than a fixed one, so a restart does not overwrite the answer and error log used for the cost table. Start it detached with stdin from `/dev/null`, save its process ID and start time in the run directory, and time it yourself.
 
 ```bash
 run_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
@@ -138,17 +138,40 @@ run_hash=$(printf '%s' "$run_root" | { sha256sum 2>/dev/null || shasum -a 256; }
 run_dir="/tmp/spawn-ori-eval-$run_hash"
 n=1
 while [ -e "$run_dir/answer-$n.txt" ]; do n=$((n + 1)); done
-start=$(date +%s)
-ori code --prompt-file "$run_dir/task.txt" > "$run_dir/answer-$n.txt" 2> "$run_dir/error-$n.log" &
+start_epoch=$(date +%s)
+start_clock=$(date '+%H:%M:%S')
+status_file="$run_dir/status-$n.txt"
+nohup sh -c '
+  ori code --prompt-file "$1" > "$2" 2> "$3"
+  printf "%s\n" "$?" > "$4"
+' sh \
+  "$run_dir/task.txt" \
+  "$run_dir/answer-$n.txt" \
+  "$run_dir/error-$n.log" \
+  "$status_file" \
+  </dev/null >/dev/null 2>&1 &
 ori_pid=$!
-printf 'Ori attempt %s started as process %s at %ss\n' "$n" "$ori_pid" "$start"
+printf '%s\n' "$ori_pid" > "$run_dir/pid-$n.txt"
+printf '%s\n' "$start_epoch" > "$run_dir/start-$n.epoch"
+printf '%s\n' "$start_clock" > "$run_dir/start-$n.clock"
+printf 'Ori attempt %s started as process %s at %s\n' "$n" "$ori_pid" "$start_clock"
 ```
 
 ## Appendix E: answer shape
 
-The current run's answer file is `answer-<n>.txt` in the run directory. The process writes the complete assistant answer when the turn settles, so poll the saved process ID until it exits before reading it. There is no live progress source, no question detection during the turn, and nothing to kill.
+The current run's answer file is `answer-<n>.txt` in the run directory. Read the saved process ID and poll it until it exits before reading the answer. Then read the saved exit status and calculate the duration from the saved start epoch. If the status file is missing, the process exited nonzero, or the answer file is empty, read the error log and report the failed attempt instead of treating it as a completed turn. There is no live progress source during the turn and nothing to kill.
 
-A finished turn ends either on a question or on the final report. A question may start with `[workspace-context]`, `[narrowing]`, or `[next-step]`, or it may be untagged prose at the end of the answer. Handle either form the same way: show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
+```bash
+pid=$(cat "$run_dir/pid-$n.txt")
+while kill -0 "$pid" 2>/dev/null; do sleep 5; done
+start_epoch=$(cat "$run_dir/start-$n.epoch")
+duration=$(( $(date +%s) - start_epoch ))
+start_clock=$(cat "$run_dir/start-$n.clock")
+status=$(cat "$run_dir/status-$n.txt" 2>/dev/null || printf 'missing')
+printf 'Ori attempt %s started at %s and lasted %ss\n' "$n" "$start_clock" "$duration"
+```
+
+A finished turn ends either on a question or on the final report. Find a tagged question anywhere in the completed answer, and treat any narration after it as noise rather than evidence that the turn continued past the question. An untagged question at the end of the answer is handled the same way. Show the full question and its options to the user, ask with the operator's own question UI, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. Do not treat an extra tagged question as a defect. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
 Show the question first and the picker second, because the question carries context the labels do not, such as the markdown table of surface and current model. Keep Ori's options one for one, keep "Other" as free text, and translate the wording into simple language.
 
