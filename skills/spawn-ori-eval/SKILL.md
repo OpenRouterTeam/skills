@@ -131,13 +131,15 @@ questions in one turn.
 User request: <verbatim request>
 Repo context pointers: <paths>. Read these first.
 
-The Ori directory is <absolute run directory>/ori. Keep the step tracker and
-every file you write outside the scratch workspace under that directory.
-Record the scratch workspace path Ori reports in the tracker directory. Do not
-derive another tracker path, and do not adopt or
-resume tracker state outside it. Use only the scratch workspace path reported
-by create-eval's own surface. Anything else outside this directory belongs to
-a different session. Run the eval with ori eval. Do not create or modify
+The Ori directory is <absolute run directory>/ori. Create it if it is absent.
+Keep the step tracker and every file you write outside the scratch workspace
+under that directory. Record the scratch workspace path you report in the
+tracker directory. Do not derive another tracker path, and do not adopt or
+resume tracker state outside it. The scratch workspace path you report is the
+only other location this run may use for its eval and supporting files. Any
+other tracker or state files outside these locations belong to a different
+session. Keep the eval and supporting files in that scratch workspace outside
+the user's repository. Run the eval with ori eval. Do not create or modify
 anything in the user's repository.
 ```
 
@@ -207,7 +209,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
 | Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
-| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user what Ori found and where it is, then use step 4 to ask what to do before moving anything. Restart only after the user chooses. |
+| Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly that Ori resumed state from an earlier session, and ask before anything moves. When they agree, move only the leftover `ori/` state under `previous/<timestamp>/`, leave the current tracker, prompt file, and cost table intact, then restart from the full prompt file with the next attempt number. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
