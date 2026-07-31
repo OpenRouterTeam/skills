@@ -123,9 +123,8 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
-context, criteria and narrowing, model comparison, routing, close.
-There are seven
-possible question tags in this order: `[surface]`, `[workspace-files]`,
+context, criteria and narrowing, model comparison, routing, close. There are
+seven possible question tags in this order: `[surface]`, `[workspace-files]`,
 `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`,
 `[candidates]`, and `[next-step]`. The first two are mutually exclusive
 conditional questions, so each run asks five or six questions.
