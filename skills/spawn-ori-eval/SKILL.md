@@ -17,7 +17,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Otherwise archive whatever is in the directory and write a fresh `steps.txt` covering step 5 onward (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user to update Ori if the command is unknown (appendix B).
+7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user to update Ori and stop if the command is unknown (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -52,7 +52,7 @@ These hold for the whole run.
 - Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and keep one answer file and one error log per attempt.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
-- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are tagged questions at the end of a completed turn.
+- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the questions handled by step 17.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Use Ori's closing table. An attempt stopped at a question has no reported cost, so name it unmeasured rather than zero.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
@@ -120,10 +120,10 @@ Write this to `task.txt` in the run directory, filling in every angle-bracket fi
 ```text
 Use the create-eval skill. Follow its five phases in this order: workspace
 context, criteria and narrowing, bakeoff, routing, close. There are seven
-possible question tags in this order: `surface`, `workspace-files`,
-`workspace-data`, `criteria-priority`, `evaluation-constraint`, `candidates`,
-and `next-step`. The first two are mutually exclusive conditional questions,
-so each run asks five or six questions.
+possible question tags in this order: `[surface]`, `[workspace-files]`,
+`[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`,
+`[candidates]`, and `[next-step]`. The first two are mutually exclusive
+conditional questions, so each run asks five or six questions.
 Ask exactly one question per turn and end the turn after asking it. Give each
 question three concrete options plus a free-text `Other` option. Never combine
 questions in one turn.
@@ -166,18 +166,18 @@ What you append afterwards is the question's full text in plain language plus th
 
 ## Appendix F: cost and timing table
 
-Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Build no stream-derived totals. An attempt that ended at a question has no reported cost, so name it "unmeasured", which is not zero. Report a floor rather than adding unmeasured attempts into a total.
+Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Copy Ori's cost and timing table from the final answer. Build no stream-derived totals. For an attempt that ended at a question, the operator may report the observed wall-clock start and duration, but its cost is unavailable because Ori produced no closing table. Mark only the cost "unmeasured", which is not zero. Report a floor rather than adding unmeasured costs into a total.
 
 | Step | Start | Duration | Cost |
 | -- | -- | -- | -- |
-| Attempt stopped at question 1 | 20:29 | 39s | unmeasured |
+| Attempt stopped at question 1 | observed 20:29 | observed 39s | unmeasured |
 | Restart and repeated exploration | 20:30 | 15m 10s | $3.20 |
 | Eval model calls | 20:46 | 2m | $0.46 |
 | Judging | 20:48 | 1m | $0.05 |
 | … |  |  |  |
 | **Reported floor** |  | **from Ori's table** | **at least $3.71** |
 
-Follow it with one line, for example: the reported cost floor is $3.71. The question-stopped attempt has unmeasured cost, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
+Follow it with one line, for example: the reported cost floor is $3.71. The question-stopped attempt's timing is the operator's observation, while its cost is unmeasured, so the complete total is unknown. A rerun costs only the amount shown in Ori's closing table.
 
 ## Appendix G: troubleshooting
 
