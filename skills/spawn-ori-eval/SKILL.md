@@ -219,7 +219,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
-| The user says they never saw the table | This host drops context that sits directly against the question picker. Make the print step the last thing in the turn and ask in the next turn. |
+| The user says they never saw the table, even with the tracker write between it and the picker | This host drops the context anyway. Fall back to two turns: end the turn on the context message, say the question comes next, and ask in the following turn. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
