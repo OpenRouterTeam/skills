@@ -36,7 +36,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 16. Wait for the run to exit, then read the answer file (appendix E).
 17. Show the user Ori's narration lines from the answer file in plain language. When a question follows, end this turn with the full context, including any table, as the final assistant text, say the question comes next, and make no tool call after it (appendix E).
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
-19. In the next turn, keep the question body minimal: one short sentence for the question, the three short option labels, and free-text `Other`. Do not restate the table or compress it into a summary. The table stays in the conversation above the picker, not inside it, and the user needs to send the next answer before the picker can appear (appendix E).
+19. In the next turn, keep the question body minimal: one short sentence for the question, the three short option labels, and free-text `Other`. Do not restate the table or compress it into a summary. The table stays in the conversation above the picker, not inside it, and the user has to reply to your turn before the picker can appear (appendix E).
 20. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 21. Append the question and the user's answer to the task prompt file (appendix E).
 22. Restart over the whole prompt file with the next attempt number, then return to step 16.
@@ -186,7 +186,7 @@ A finished turn ends its assistant text either on a question or on the final rep
 
 A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Use one placement for every question: end the turn that precedes the picker with the narration and the full context, including any table, as the final assistant text, say the question comes next, and make no tool call after it.
 
-Then ask in the next turn with a minimal question UI that carries only the short question text, the three option labels, and free-text `Other`. The question body renders plain wrapped text only, so a table there turns into raw pipes and is unreadable. No markdown table ever goes inside a question body.
+Then ask in the next turn with a minimal question UI that carries only the short question text, the three option labels, and free-text `Other`. The question body renders plain wrapped text only, so a table there turns into raw pipes and is unreadable. No markdown table ever goes inside a question body. Keep the three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
 What you append afterwards is the question's full text in plain language plus the single answer string, including the typed text when the user chose Other.
 
