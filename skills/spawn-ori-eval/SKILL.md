@@ -34,18 +34,19 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. Show the user Ori's narration lines from the answer file in plain language, and use a safe placement when a question follows (appendix E).
+17. Show the user Ori's narration lines from the answer file in plain language.
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
-19. Put the question's full text, including its context table, inside the question UI itself; for `[next-step]`, use placement 2 instead (appendix E).
-20. Ask the user with your own question UI, preserving the three options and free-text `Other`.
-21. Append the question and the user's answer to the task prompt file (appendix E).
-22. Restart over the whole prompt file with the next attempt number, then return to step 16.
-23. Relay the result table, the ship or no-ship decision, and the quoted failures.
-24. Relay Ori's cost and timing table in full (appendix F).
-25. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
-26. Add one line on the cheaper cost of a re-run.
-27. Tell the user where Ori left the temporary workspace and that it is throwaway.
-28. Say they can move the eval into their repo if the numbers made them want to keep it.
+19. Print Ori's full context for the first question in an ordinary message, including any table. Do nothing else in this step (appendix E).
+20. Update `steps.txt` here, between the context message and the question, so the printed context does not sit directly against the question-UI call, which is what the host drops (appendix E).
+21. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
+22. Append the question and the user's answer to the task prompt file (appendix E).
+23. Restart over the whole prompt file with the next attempt number, then return to step 16.
+24. Relay the result table, the ship or no-ship decision, and the quoted failures.
+25. Relay Ori's cost and timing table in full (appendix F).
+26. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
+27. Add one line on the cheaper cost of a re-run.
+28. Tell the user where Ori left the temporary workspace and that it is throwaway.
+29. Say they can move the eval into their repo if the numbers made them want to keep it.
 
 ## Rules
 
@@ -62,7 +63,7 @@ These hold for the whole run.
 - Treat the run directory's `task.txt` as the only task prompt state. Append every later message to it, resend the whole file on every restart, never use `--session`, and keep one answer file and one error log per attempt.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
-- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the run directory choice in step 4 and the questions handled by step 18.
+- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the run directory choice in step 4 and the questions handled by step 21.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
@@ -78,7 +79,7 @@ These hold for the whole run.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
-- Never put any content in text, or in a file, before a question-UI call in the same turn. Some hosts show none of it — narration and evidence alike — and the user answers without it. This applies to every question, including `[next-step]`, to the results tables, and to step 17's narration lines. Appendix E gives the two safe placements. For `[next-step]`, placement 2 is mandatory, so the full results tables stand above the question.
+- The host drops assistant text that sits immediately against a question-UI call, not assistant text in general. Print the full context in an ordinary message, including any table, then write the step tracker before asking. The tracker write keeps the context away from the picker, so the user sees the context and it stays in the conversation. This applies to every question, including `[next-step]`. Print the full results and cost tables above the question rather than compressing them into it. Never put a markdown table inside a question body because the body renders plain wrapped text and turns a table into raw pipes. Appendix E gives the single placement.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -194,14 +195,9 @@ Status updates the user sees must stay plain. Examples:
 
 A finished turn ends its assistant text either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end of the assistant text is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
-A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Two placements are safe:
+A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. The host drops assistant text that sits immediately against a question-UI call, not assistant text in general. Print the narration and the full context in an ordinary message, including any table, then write the step tracker before asking in the same turn. The tracker write keeps the printed context away from the picker, so it stays in the conversation. This applies to every question, including `[next-step]`. Print the full results and cost tables above the question rather than compressing them into it.
 
-1. Put the question's full text, including its table, inside the question UI: in the question text, or in option previews when the UI has them. Put step 17's narration lines there too, ahead of the question text.
-2. If your question UI cannot carry the table, end your turn with the narration and the table as the final text and say the question comes next. Ask with the question UI in your next turn.
-
-For `[next-step]`, use placement 2 even when the question UI can carry a table. The full results table and the cost table are the report the user paid for. They must stand in the conversation above the question, not compressed into a picker.
-
-Keep the three options one for one, keep `Other` as free text, and translate the wording into simple language.
+Ask with a minimal question UI that carries only one short sentence, the three short option labels, and free-text `Other`. Never put a markdown table in the question body. It renders plain wrapped text, so a table there turns into raw pipes and is unreadable. Keep the three options one for one, keep `Other` as free text, and translate the wording into simple language.
 
 What you append afterwards is the question's full text in plain language plus the single answer string, including the typed text when the user chose Other.
 
@@ -234,6 +230,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly that Ori resumed state from an earlier session, and ask before anything moves. When they agree, move only the leftover `ori/` state under `previous/<timestamp>/`, leave the current tracker, prompt file, and cost table intact, then restart from the full prompt file with the next attempt number. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
+| The user says they never saw the table, even with the tracker write between it and the picker | This host drops the context anyway. Fall back to two turns: end the turn on the context message, say the question comes next, and ask in the following turn. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
