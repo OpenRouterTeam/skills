@@ -24,7 +24,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Ask the user what to do with it, then reuse the existing `steps.txt` and jump to the first step after 4 that is not done, or archive the files and write a fresh `steps.txt` covering step 5 onward, or stop and leave everything untouched. Write the fresh tracker without asking only when the directory holds no run files of its own (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user the installed Ori predates the headless run support this skill requires and needs 0.3.0 or newer if the command is unknown (appendix B).
+7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and stop with instructions to use 0.3.0 or newer when the command is unknown because the installed Ori predates the headless run support this skill requires (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -231,6 +231,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
 | The user says they cannot read the table | Print the context again in an ordinary message. Never put the markdown table inside the question body, because it renders as raw pipes. |
+| `ori code` refuses a redirected run because it needs a terminal | Stop. The attempt spent nothing, and the run cannot proceed on this binary. Tell the user to use Ori 0.3.0 or newer. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
