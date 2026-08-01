@@ -34,9 +34,9 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 14. Write the task prompt file (appendix C).
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
-17. Show the user Ori's narration lines from the answer file in plain language. When a question follows, end this turn with the full context, including any table, as the final assistant text and make no tool call after it (appendix E).
+17. Show the user Ori's narration lines from the answer file in plain language. When a question follows, end this turn with the full context, including any table, as the final assistant text, say the question comes next, and make no tool call after it (appendix E).
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
-19. In the next turn, keep the question body minimal: one short sentence for the question, the three short option labels, and free-text `Other`. Do not restate the table or compress it into a summary. The table stays in the conversation above the picker, not inside it (appendix E).
+19. In the next turn, keep the question body minimal: one short sentence for the question, the three short option labels, and free-text `Other`. Do not restate the table or compress it into a summary. The table stays in the conversation above the picker, not inside it, and the user needs to send the next answer before the picker can appear (appendix E).
 20. Ask the user with your own question UI, preserving the three options and free-text `Other`.
 21. Append the question and the user's answer to the task prompt file (appendix E).
 22. Restart over the whole prompt file with the next attempt number, then return to step 16.
@@ -78,7 +78,7 @@ These hold for the whole run.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
-- Never put any content in text, or in a file, before a question-UI call in the same turn. Some hosts show none of it, and the user answers without it. This applies to every question, including `[next-step]`, to the results tables, and to step 17's narration lines. Any load-bearing context goes in the turn-final assistant text and never inside the picker. Appendix E gives the single safe placement.
+- Never put any content in text, or in a file, before a question-UI call in the same turn. Some hosts show none of it, including narration and evidence, and the user answers without it. This applies to every question, including `[next-step]`, to the results tables, and to step 17's narration lines. Any load-bearing context goes in the turn-final assistant text and never inside the picker. Appendix E gives the single safe placement.
 - Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
@@ -172,19 +172,21 @@ A restart is not a retry. Ori cannot hold a live conversation, so each answer st
 
 Status updates the user sees must stay plain. Examples:
 
-| Do not say                                                                                     | Say                                                                                                                               |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Attempt 2 exited with a tagged question; see answer-2.txt.                                     | Ori read your repo and has a question before it continues.                                                                        |
-| eval run pass 3 completed.                                                                     | Ori has finished reading. I am checking what it came back with.                                                                   |
-| Restarting ori code --prompt-file with n=3.                                                    | I sent your answer to Ori. It reads the project and the full story again, then continues from where it stopped. About 15 minutes. |
-| Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I am checking what it came back with.                                                                   |
-| Process 48210 is running; error-1.log is empty.                                                | The run continues. Silence is normal here.                                                                                        |
-| The run wrote no summary line.                                                                 | The run stopped before it could report its time and cost.                                                                         |
-| The bakeoff is launched.                                                                       | The model comparison is running.                                                                                                  |
+| Do not say | Say |
+| -- | -- |
+| Attempt 2 exited with a tagged question; see answer-2.txt. | Ori read your repo and has a question before it continues. |
+| eval run pass 3 completed. | Ori has finished reading. I am checking what it came back with. |
+| Restarting ori code --prompt-file with n=3. | I sent your answer to Ori. It reads the project and the full story again, then continues from where it stopped. About 15 minutes. |
+| Background command "Restart Ori run as attempt 4 with priority answer" completed (exit code 0) | Ori has finished reading. I am checking what it came back with. |
+| Process 48210 is running; error-1.log is empty. | The run continues. Silence is normal here. |
+| The run wrote no summary line. | The run stopped before it could report its time and cost. |
+| The bakeoff is launched. | The model comparison is running. |
 
 A finished turn ends its assistant text either on a question or on the final report. Find question tags anywhere in the completed answer text, and treat any narration after the first question as noise rather than evidence that the turn continued past it. Relay only the first question when a turn contains more than one, report the one-question contract violation, append the first answer, and restart. An untagged question at the end of the assistant text is also relayed, appended, and followed by a restart, with the contract violation reported alongside it. Show the first question and its three options to the user, ask with the operator's own question UI, keep `Other` as free text, append the question and the answer to `task.txt`, then restart with the next attempt number. Do not answer the question yourself. If Ori answered its own scoping question instead, discard that attempt rather than relaying it as a result, ask the user, append the answer, and restart.
 
-A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Use one placement for every question: end the turn that precedes the picker with the narration and the full context, including any table, as the final assistant text. Then ask in the next turn with a minimal question UI that carries only the short question text, the three option labels, and free-text `Other`. Do not restate a markdown table in the question body. The question body renders plain wrapped text only, so any table there turns into raw pipes and is unreadable. No markdown table ever goes inside a question body.
+A question is not only its labels. It carries context the labels do not, such as the markdown table of surface and current model, and the user must see that context at answer time. Text or files sent before a question-UI call in the same turn can be dropped by the host and never reach the user. Use one placement for every question: end the turn that precedes the picker with the narration and the full context, including any table, as the final assistant text, say the question comes next, and make no tool call after it.
+
+Then ask in the next turn with a minimal question UI that carries only the short question text, the three option labels, and free-text `Other`. The question body renders plain wrapped text only, so a table there turns into raw pipes and is unreadable. No markdown table ever goes inside a question body.
 
 What you append afterwards is the question's full text in plain language plus the single answer string, including the typed text when the user chose Other.
 
@@ -192,30 +194,30 @@ What you append afterwards is the question's full text in plain language plus th
 
 Include one row for every attempt, including each attempt that ended at a question, since a restart repeats repo exploration. Each attempt's duration and cost come from the summary line at the end of its answer file, and the eval's own model calls and judging come from Ori's closing table in the final answer. Start times are the operator's observation, because the summary line reports duration only. An attempt whose answer file has no summary line reported nothing, so mark it "unmeasured", which is not zero, and report the total as a floor whenever any row is unmeasured. Label the rows in plain language, because the table goes to the user and the plain-language rule holds here too.
 
-| Step                                               | Start          | Duration | Cost      |
-| -------------------------------------------------- | -------------- | -------- | --------- |
-| Reading the project, stopped to ask you a question | observed 20:29 | 39s      | $0.42     |
-| Reading the project again after your answer        | observed 20:30 | 15m 10s  | $3.20     |
-| Eval model calls                                   | 20:46          | 2m       | $0.46     |
-| Judging                                            | 20:48          | 1m       | $0.05     |
-| …                                                  |                |          |           |
-| **Total**                                          |                |          | **$4.13** |
+| Step | Start | Duration | Cost |
+| -- | -- | -- | -- |
+| Reading the project, stopped to ask you a question | observed 20:29 | 39s | $0.42 |
+| Reading the project again after your answer | observed 20:30 | 15m 10s | $3.20 |
+| Eval model calls | 20:46 | 2m | $0.46 |
+| Judging | 20:48 | 1m | $0.05 |
+| … |  |  |  |
+| **Total** |  |  | **$4.13** |
 
 Follow it with one line, for example: the run cost $4.13 in total, and a rerun costs only the amount shown in Ori's closing table.
 
 ## Appendix G: troubleshooting
 
-| Symptom                                                     | Do this                                                                                                                               |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| The run directory holds run files already                   | Report what is in it and ask the user. Never continue it and never clear it on your own.                                              |
-| `ori: command not found` after a good installation          | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell.                                              |
-| The credential is missing                                   | Stop. Tell the user to run `ori login`.                                                                                               |
-| A long pause on the first run                               | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run.                    |
-| Ori does nothing and the prompt looks empty                 | The path in the start command does not match the file you wrote.                                                                      |
-| Ori reports that a model id is not available                | Tell Ori to find the id again. Do not supply one from memory.                                                                         |
-| The eval file is inside the user's repository               | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path.                                         |
-| Ori picked the target itself                                | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart.                     |
-| `403 Key limit exceeded` or a 402 payment error             | The key is at its spend limit. See below.                                                                                             |
+| Symptom | Do this |
+|---|---|
+| The run directory holds run files already | Report what is in it and ask the user. Never continue it and never clear it on your own. |
+| `ori: command not found` after a good installation | Run `~/.local/bin/ori`. The installer's PATH change does not apply to the current shell. |
+| The credential is missing | Stop. Tell the user to run `ori login`. |
+| A long pause on the first run | The first run creates `~/.ori/global` and downloads templates. It takes about 30 seconds and is not a stopped run. |
+| Ori does nothing and the prompt looks empty | The path in the start command does not match the file you wrote. |
+| Ori reports that a model id is not available | Tell Ori to find the id again. Do not supply one from memory. |
+| The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
+| Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
+| `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.
