@@ -24,7 +24,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Ask the user what to do with it, then reuse the existing `steps.txt` and jump to the first step after 4 that is not done, or archive the files and write a fresh `steps.txt` covering step 5 onward, or stop and leave everything untouched. Write the fresh tracker without asking only when the directory holds no run files of its own (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user the installed Ori predates the headless run support this skill requires and needs a build newer than 0.2.4 if the command is unknown (appendix B).
+7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and tell the user the installed Ori predates the headless run support this skill requires and needs 0.3.0 or newer if the command is unknown (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -37,7 +37,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 17. Show the user Ori's narration lines from the answer file in plain language.
 18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
 19. Print Ori's full context for the first question in an ordinary message, including any table. Do nothing else in this step (appendix E).
-20. Update `steps.txt` here, between the context message and the question, as required by the numbered flow (appendix E).
+20. Update `steps.txt` here, between the context message and the question (appendix E).
 21. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
 22. Append the question and the user's answer to the task prompt file (appendix E).
 23. Restart over the whole prompt file with the next attempt number, then return to step 16.
@@ -68,7 +68,7 @@ These hold for the whole run.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter. The pins are the one exception, because this skill fixes them.
-- The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check. An unknown `ori auth` command means the installed Ori predates the headless run support this skill requires, so tell the user they need a build newer than 0.2.4 and stop.
+- The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check. An unknown `ori auth` command means the installed Ori predates the headless run support this skill requires, so tell the user they need 0.3.0 or newer and stop.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
@@ -119,7 +119,7 @@ Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | 
 
 Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
 
-Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Read its output to distinguish an unknown command from a missing credential, but do not show that output to the user or repeat any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user that the installed Ori predates the headless run support this skill requires, that they need a build newer than 0.2.4, and stop.
+Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Read its output to distinguish an unknown command from a missing credential, but do not show that output to the user or repeat any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user that the installed Ori predates the headless run support this skill requires, that they need 0.3.0 or newer, and stop.
 
 ## Appendix C: task prompt template
 
