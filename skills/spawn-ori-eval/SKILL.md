@@ -50,7 +50,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 
 ## Claude Code hook
 
-This plugin includes a Claude Code hook for the question UI. It denies a question call when the current turn has no assistant text, so the operator prints the context and retries. Other hosts do not run this hook and rely on the written steps and rules.
+This plugin includes a Claude Code hook for the question UI during `spawn-ori-eval` runs. It denies a question call when the current turn has no assistant text, so the operator prints the context and retries. Other hosts do not run this hook and rely on the written steps and rules.
 
 ## Rules
 

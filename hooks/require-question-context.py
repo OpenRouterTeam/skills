@@ -9,6 +9,13 @@ from pathlib import Path
 from typing import Any
 
 
+RUN_DIRECTORY_PREFIX = "/tmp/spawn-ori-eval-"
+
+
+def has_spawn_eval_marker(records: list[dict[str, Any]]) -> bool:
+    return RUN_DIRECTORY_PREFIX in json.dumps(records)
+
+
 def is_tool_result(record: dict[str, Any]) -> bool:
     message = record.get("message")
     if not isinstance(message, dict) or message.get("role") != "user":
@@ -77,6 +84,9 @@ def main() -> int:
     try:
         records = load_records(Path(transcript_path))
     except OSError:
+        return 0
+
+    if not has_spawn_eval_marker(records):
         return 0
 
     turn_start = len(records)
