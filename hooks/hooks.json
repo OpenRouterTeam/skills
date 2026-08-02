@@ -1,0 +1,17 @@
+{
+  "description": "Require context text before the question UI",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/require-question-context.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

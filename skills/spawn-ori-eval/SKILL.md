@@ -48,6 +48,10 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 28. Tell the user where Ori left the temporary workspace and that it is throwaway.
 29. Say they can move the eval into their repo if the numbers made them want to keep it.
 
+## Claude Code hook
+
+This plugin includes a Claude Code hook for the question UI. It denies a question call when the current turn has no assistant text, so the operator prints the context and retries. Other hosts do not run this hook and rely on the written steps and rules.
+
 ## Rules
 
 These hold for the whole run.
