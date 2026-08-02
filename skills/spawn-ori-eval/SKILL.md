@@ -41,7 +41,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 21. Update `steps.txt` here, between the context message and the question, recording what was actually printed: quote the table header row that was printed when the answer carried a table, or record that it carried no table (appendix E).
 22. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
 23. Append the question and the user's own reply to the task prompt file, or, when the reply does not answer the question, append nothing, ask the same question again through the question UI, and do this step again on the next reply (appendix E).
-24. Restart over the whole prompt file with the next attempt number and return to step 16, but only when step 23 appended an answer (appendix E).
+24. Restart over the whole prompt file with the next attempt number and return to step 17, but only when step 23 appended an answer (appendix E).
 25. Relay the result table, the ship or no-ship decision, and the quoted failures.
 26. Relay Ori's cost and timing table in full (appendix F).
 27. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
