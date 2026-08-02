@@ -89,7 +89,7 @@ def main() -> int:
     if not has_spawn_eval_marker(records):
         return 0
 
-    turn_start = len(records)
+    turn_start = 0
     for index in range(len(records) - 1, -1, -1):
         if is_user_turn_start(records[index]):
             turn_start = index
