@@ -18,36 +18,36 @@ This section gives the two models. The other sections use the names `<RUN_MODEL>
 
 Do these in order. One line, one action. Appendix letters point to the detail and run in step order, except the troubleshooting table, which is a lookup and comes last.
 
-1. Create the run directory and derive its path from the repo root (appendix A).
-2. Tell the user where the run directory is.
-3. Read whatever is already in the directory without changing it, and tell the user what is there and how old it is (appendix A).
-4. Ask the user what to do with it, then reuse the existing `steps.txt` and jump to the first step after 4 that is not done, or archive the files and write a fresh `steps.txt` covering step 5 onward, or stop and leave everything untouched. Write the fresh tracker without asking only when the directory holds no run files of its own (appendix A).
-5. Run the lookup or install for the `ori` binary yourself (appendix B).
-6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and stop with instructions to use 0.3.0 or newer when the command is unknown because the installed Ori predates the headless run support this skill requires (appendix B).
-8. Check for `bun` yourself, and stop if it is missing.
-9. Read the eval surface yourself, continuing even if the commands error (appendix B).
-10. Tell the user where the binary landed, if you installed it.
-11. Tell the user what the run will do, from what you read in step 9.
-12. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
-13. Tell the user they get a scored table and that a question can restart the run.
-14. Write the task prompt file (appendix C).
-15. Start one run from the repo root and capture its answer and error files (appendix D).
-16. Wait for the run to exit, then read the answer file (appendix E).
-17. Show the user Ori's narration lines from the answer file in plain language.
-18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still relaying it (appendix E).
-19. Print Ori's full context for the first question in an ordinary message, including any table. Do nothing else in this step (appendix E).
-20. Update `steps.txt` here, between the context message and the question, recording what was actually printed: quote the table header row that was printed when the answer carried a table, or record that it carried no table (appendix E).
-21. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
-22. Append the question and the user's own reply to the task prompt file, or, when the reply does not answer the question, append nothing, ask the same question again through the question UI, and do this step again on the next reply (appendix E).
-23. Restart over the whole prompt file with the next attempt number and return to step 16, but only when step 22 appended an answer (appendix E).
-24. Relay the result table, the ship or no-ship decision, and the quoted failures.
-25. Relay Ori's cost and timing table in full (appendix F).
-26. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
-27. Add one line on the cheaper cost of a re-run.
-28. Tell the user where Ori left the temporary workspace and that it is throwaway.
-29. Say they can move the eval into their repo if the numbers made them want to keep it.
-
+1. Explain in at least two simple sentences that Ori writes a small test of several models against the user's code and grades their answers, so the user can choose a model instead of guessing (appendix A).
+2. Create the run directory and derive its path from the repo root (appendix A).
+3. Tell the user where the run directory is.
+4. Read whatever is already in the directory without changing it, and tell the user what is there and how old it is (appendix A).
+5. Ask the user what to do with it, then reuse the existing `steps.txt` and jump to the first step after 5 that is not done, or archive the files and write a fresh `steps.txt` covering step 6 onward, or stop and leave everything untouched. Write the fresh tracker without asking only when the directory holds no run files of its own (appendix A).
+6. Run the lookup or install for the `ori` binary yourself (appendix B).
+7. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
+8. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and stop with instructions to use 0.3.0 or newer when the command is unknown because the installed Ori predates the headless run support this skill requires (appendix B).
+9. Check for `bun` yourself, and stop if it is missing.
+10. Read the eval surface yourself, continuing even if the commands error (appendix B).
+11. Tell the user where the binary landed, if you installed it.
+12. Tell the user what the run will do, from what you read in step 10.
+13. Tell the user it takes 10 to 30 minutes and can spend more than the credit on their key.
+14. Tell the user they get a scored table and that a question can restart the run.
+15. Write the task prompt file (appendix C).
+16. Start one run from the repo root and capture its answer and error files (appendix D).
+17. Wait for the run to exit, then read the answer file (appendix E).
+18. Show the user Ori's narration lines from the answer file in plain language.
+19. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 20; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still relaying it (appendix E).
+20. Print Ori's full context for the first question in an ordinary message, including any table. Do nothing else in this step (appendix E).
+21. Update `steps.txt` here, between the context message and the question, recording what was actually printed: quote the table header row that was printed when the answer carried a table, or record that it carried no table (appendix E).
+22. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
+23. Append the question and the user's own reply to the task prompt file, or, when the reply does not answer the question, append nothing, ask the same question again through the question UI, and do this step again on the next reply (appendix E).
+24. Restart over the whole prompt file with the next attempt number and return to step 16, but only when step 23 appended an answer (appendix E).
+25. Relay the result table, the ship or no-ship decision, and the quoted failures.
+26. Relay Ori's cost and timing table in full (appendix F).
+27. Add each attempt's own duration and cost from the summary line at the end of its answer file (appendix F).
+28. Add one line on the cheaper cost of a re-run.
+29. Tell the user where Ori left the temporary workspace and that it is throwaway.
+30. Say they can move the eval into their repo if the numbers made them want to keep it.
 ## Rules
 
 These hold for the whole run.
@@ -55,8 +55,8 @@ These hold for the whole run.
 - Never write the eval yourself and never delegate it to your own subagent. Ori's `create-eval` skill runs automatically inside the run.
 - Always pass `--model <RUN_MODEL>` and never pass `--harness`. The pin is what makes every coding agent run the same bench. Never substitute another slug and never leave the flag off, because either one hands the run to whatever default the user's install happens to carry.
 - Always pass `--prompt-file`. The `-p` flag works but never use it here, because a one-time string cannot carry state across a restart, and a bare positional prompt is rejected outright.
-- Run every command in steps 5 to 9 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
-- Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 4 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
+- Run every command in steps 6 to 10 yourself. Installing the binary when it is missing is expected. The credential check is the only setup handoff.
+- Never resume and never clear a previous run on your own judgement. The skill is loaded and run inside one session, so anything already in the directory came from a different one, and it is the only record of work the user paid for. Every path out of step 5 needs their answer first, apart from the fresh start on a directory that holds no run files of its own.
 - Update `steps.txt` as you go: mark a step current before you do it and done before you start the next, and reread the file to decide what comes next instead of trusting memory. A restart replays the prompt file from the top, so this is the only record of how far the last attempt got.
 - Mark a step whose action is a message to the user done only after that message exists in the conversation. Reading the content in a tool result is not showing it.
 - Run one Ori process at a time, never one per candidate model. `ori eval` is what compares models.
@@ -65,13 +65,13 @@ These hold for the whole run.
 - Never ask the user what to eval before the run. Ori's interview covers the surface, success criteria, real data, cost limit, and baseline model. Pass a vague or empty request through unchanged.
 - Never answer Ori's question on the user's behalf. If you cannot reach the user, stop and wait. A guessed target produces an invalid eval that looks correct.
 - Append only the user's reply to the question currently open. A clarification request or complaint is not an answer, so append nothing, respond to what the user actually said, and ask that same question again through the question UI. A later reply answers the question open at that time and never backfills an earlier gate.
-- Do not invent an approval gate before starting the run. Steps 12 and 13 disclose the time and cost, and the only user pauses are the run directory choice in step 4 and the questions handled by step 21.
+- Do not invent an approval gate before starting the run. Steps 13 and 14 disclose the time and cost, and the only user pauses are the run directory choice in step 5 and the questions handled by step 22.
 - Each turn is silent from start to finish. Say that plainly before starting it. Do not report phase banners as milestones because they arrive only when the turn ends.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter. The pins are the one exception, because this skill fixes them.
 - The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check. An unknown `ori auth` command means the installed Ori predates the headless run support this skill requires, so tell the user they need 0.3.0 or newer and stop.
-- Never paste step 9's output to the user. You read it, they did not ask for it.
+- Never paste step 10's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
 - Never put the eval inside the repo's own test framework. `ori eval` finds `*.eval.ts` files only, so a pytest, vitest, or Go test file silently never runs.
@@ -81,11 +81,13 @@ These hold for the whole run.
 - Write each status update in plain language. Do not show attempt numbers, file paths, process IDs, command flags, or exit codes to the user. This rule also applies when a run fails. Appendix E gives examples.
 - Ori's interview has seven tags in this order: `[surface]`, `[workspace-files]`, `[workspace-data]`, `[criteria-priority]`, `[evaluation-constraint]`, `[candidates]`, and `[next-step]`. `[surface]` is conditional when the scan finds more than one call site. `[workspace-files]` is conditional only when the scan finds no model call site and no material to mine. The two conditional questions are mutually exclusive. The other five are always asked, so there are five questions at minimum and six at most.
 - Relay one question per turn. Preserve each question's three concrete options one for one and render `Other` as free text. If Ori emits two questions in one turn, relay only the first and report the one-question contract violation.
-- Ask every question through the question UI, including after an interruption or an out-of-band exchange. Ordinary prose that asks a question does not satisfy step 21.
+- Ask every question through the question UI, including after an interruption or an out-of-band exchange. Ordinary prose that asks a question does not satisfy step 22.
 - Print the full context in an ordinary message, including any table, before asking. This gives the user a readable table in the transcript that remains there after the answer. Update the step tracker between the context message and the question. This applies to every question, including `[next-step]`. Print the full results and cost tables above the question rather than compressing them into it. Never put a markdown table inside a question body because the body renders plain wrapped text and turns a table into raw pipes. Appendix E gives the single placement.
-- Never copy CLI details into this skill or into text for the user. Re-read what step 9 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
+- Never copy CLI details into this skill or into text for the user. Re-read what step 10 printed for run options, reports, baselines, timeouts, and the eval-file API, because the CLI changes and copies go stale.
 
 ## Appendix A: run directory and step tracker
+
+Step 1 is the opening message. Write at least two short sentences in plain English. Explain that Ori writes a small test of several models against the user's code and grades their answers, and that the purpose is to help the user choose a model instead of guessing. Use your own sentences. Do not paste a canned string.
 
 What you need is one scratch directory outside the user's repository whose name is fixed by the repository being evaluated. Two properties matter. The same repository must always resolve to the same directory, including when the run is started from a subdirectory, so derive the name from the absolute path of the repository root and fall back to the working directory when there is no repository. Two different repositories must never resolve to the same directory, so the name varies with that path, and whatever produces it has to work on Linux and macOS alike, because a step that quietly produces nothing on one of them collapses every repository into a single directory. Work the name out again in each shell that needs it rather than trusting a variable to survive, because shell state usually does not persist between commands.
 
@@ -93,15 +95,15 @@ The name has to be reproducible to the byte, because a later run of this skill f
 
 Every file the outer run produces lives there and nowhere else: `steps.txt`, `task.txt`, and each attempt's `answer-<n>.txt` and `error-<n>.log`. The `ori/` subdirectory is reserved for Ori's tracker and every file the run writes itself. The scratch workspace is wherever create-eval's own surface puts it, so record the path Ori reports in `ori/`. The directory is per repository, so two repos evaluated on one machine never read each other's prompt or answer.
 
-`steps.txt` carries the user's request on its first line and then one line for each step from 5 onward, each marked `todo`, `current`, or `done`. Steps 1 to 4 are not tracked, because they are what produce the file.
+`steps.txt` carries the user's request on its first line and then one line for each step from 6 onward, each marked `todo`, `current`, or `done`. Steps 1 to 5 are not tracked, because they are what produce the file.
 
 ```text
 request: which model should we use for the support triage agent
-5 done look up the ori binary
-6 done fallback lookup not needed
+6 done look up the ori binary
+7 done fallback lookup not needed
 ...
-15 current start one run
-16 todo wait for it to exit and read the answer file
+16 current start one run
+17 todo wait for it to exit and read the answer file
 ```
 
 A directory with no run files of its own needs no question, because there is nothing to decide about. That means it is empty apart from `previous/` and has no `steps.txt`, `task.txt`, attempt files, or `ori/` subdirectory. This covers a directory that is empty and one that holds only an earlier archive, since archiving leaves `previous/` behind for good. Everything else goes to the user, whatever it holds. A tracker started for a different request, or one whose every step is done, is a reason to tell the user what they are looking at rather than a licence to clear it, because the answer files are the run they paid for and they may want to read them before anything moves.
@@ -112,7 +114,7 @@ Offer resuming only when the old tracker's first line matches the request you ar
 
 Resuming reuses what is there as it stands: mark up the same `steps.txt`, append to the same `task.txt`, keep every earlier attempt in the cost table, and keep the `ori/` directory with its recorded scratch workspace path, because the user already paid for that work. Starting a new run archives the tracker, the prompt file, every answer and error log, and the `ori/` directory, which drops the answers the user already gave Ori and pays for the repo exploration again. Stopping changes nothing and ends the task there, which is what the user wants when they would rather read the old files before anything moves. Say which one you are recommending and why, and let them decide.
 
-One thing to settle before resuming: step 15 or 16 left marked `current` means an attempt was started and its outcome is unknown. Establish whether that process is still running before starting another, and wait for it if it is, because two runs against the same prompt file break the one-process rule. Any other step left `current` was interrupted rather than started, including step 22, which stays `current` while it waits for a reply that answers the question.
+One thing to settle before resuming: step 16 or 17 left marked `current` means an attempt was started and its outcome is unknown. Establish whether that process is still running before starting another, and wait for it if it is, because two runs against the same prompt file break the one-process rule. Any other step left `current` was interrupted rather than started, including step 23, which stays `current` while it waits for a reply that answers the question.
 
 Archiving means the old run's files, including `ori/`, end up under `previous/` inside the run directory, in their own subdirectory named after the time they were moved, and nothing is deleted. Two things go wrong without the timestamp: a later archive overwrites an earlier one, and the archive directory gets moved inside itself. So move the run's own files and leave `previous/` where it is.
 
@@ -232,7 +234,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly that Ori resumed state from an earlier session, and ask before anything moves. When they agree, move only the leftover `ori/` state under `previous/<timestamp>/`, leave the current tracker, prompt file, and cost table intact, then restart from the full prompt file with the next attempt number. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, and carry on from step 19. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, and carry on from step 20. |
 | The user says they cannot read the table | Print the context again in an ordinary message. Never put the markdown table inside the question body, because it renders as raw pipes. |
 | `ori code` refuses a redirected run because it needs a terminal | Stop. The attempt spent nothing, and the run cannot proceed on this binary. Tell the user to use Ori 0.3.0 or newer. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
