@@ -18,7 +18,7 @@ This section gives the two models. The other sections use the names `<RUN_MODEL>
 
 Do these in order. One line, one action. Appendix letters point to the detail and run in step order, except the troubleshooting table, which is a lookup and comes last.
 
-1. Explain in at least two simple sentences that Ori writes a small test of several models against the user's code and grades their answers, so the user can choose a model instead of guessing (appendix A).
+1. Explain in at least two simple sentences that model choice is often based on guesses or general advice, that no model is best for every project, and that Ori Eval measures models on the user's code to help choose one (appendix A).
 2. Create the run directory and derive its path from the repo root (appendix A).
 3. Tell the user where the run directory is.
 4. Read whatever is already in the directory without changing it, and tell the user what is there and how old it is (appendix A).
@@ -87,7 +87,7 @@ These hold for the whole run.
 
 ## Appendix A: run directory and step tracker
 
-Step 1 is the opening message. Write at least two short sentences in plain English. Explain that Ori writes a small test of several models against the user's code and grades their answers, and that the purpose is to help the user choose a model instead of guessing. Use your own sentences. Do not paste a canned string.
+Step 1 is the opening message. Write at least two short sentences in plain English. Explain that many applications use AI models, but people often choose models from guesses or general advice. Explain that no model is best for every project and that Ori Eval measures models on the user's code to help choose one. Use your own sentences. Do not paste a canned string.
 
 What you need is one scratch directory outside the user's repository whose name is fixed by the repository being evaluated. Two properties matter. The same repository must always resolve to the same directory, including when the run is started from a subdirectory, so derive the name from the absolute path of the repository root and fall back to the working directory when there is no repository. Two different repositories must never resolve to the same directory, so the name varies with that path, and whatever produces it has to work on Linux and macOS alike, because a step that quietly produces nothing on one of them collapses every repository into a single directory. Work the name out again in each shell that needs it rather than trusting a variable to survive, because shell state usually does not persist between commands.
 
