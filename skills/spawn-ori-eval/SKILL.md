@@ -35,7 +35,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 15. Start one run from the repo root and capture its answer and error files (appendix D).
 16. Wait for the run to exit, then read the answer file (appendix E).
 17. Show the user Ori's narration lines from the answer file in plain language.
-18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still restarting (appendix E).
+18. If the completed answer contains a tagged question anywhere or its assistant text, above the summary line, ends on an untagged question, continue to step 19; relay only the first question, report a broken one-question contract if another appears, and report an untagged question as a violation while still relaying it (appendix E).
 19. Print Ori's full context for the first question in an ordinary message, including any table. Do nothing else in this step (appendix E).
 20. Update `steps.txt` here, between the context message and the question, recording what was actually printed: quote the table header row that was printed when the answer carried a table, or record that it carried no table (appendix E).
 21. Ask the user with your own question UI, preserving the three short options and free-text `Other`. Keep the question to one short sentence and do not restate or summarize the context table (appendix E).
@@ -232,7 +232,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | The eval file is inside the user's repository | Move it and its supporting files to a temporary workspace and run `ori eval` on the new path. |
 | Ori resumed a tracker of its own from an earlier session | Discard that attempt rather than relaying it. Tell the user plainly that Ori resumed state from an earlier session, and ask before anything moves. When they agree, move only the leftover `ori/` state under `previous/<timestamp>/`, leave the current tracker, prompt file, and cost table intact, then restart from the full prompt file with the next attempt number. |
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
-| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, append the answer, and restart. |
+| The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, and carry on from step 19. |
 | The user says they cannot read the table | Print the context again in an ordinary message. Never put the markdown table inside the question body, because it renders as raw pipes. |
 | `ori code` refuses a redirected run because it needs a terminal | Stop. The attempt spent nothing, and the run cannot proceed on this binary. Tell the user to use Ori 0.3.0 or newer. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
