@@ -93,8 +93,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
   - `workspace` — workspace UUID, not the workspace name shown in results; filtering or grouping by the account's default workspace also covers activity recorded before workspace resolution existed, which is attributed to that default workspace.
   - `app` — numeric app ID, not the app title shown in results.
   - `model` — permaslug (e.g. `openai/gpt-4o`); both the filter value and returned value are the permaslug, not a display name.
-- `data_region` — region where the request was served (`global`, `europe`, or `us`). This is a generations-only dimension with a 31-day limit; rows predating region attribution report as `global`.
-- Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
+- Other dimensions (`provider`, `origin`, `country`, `data_region`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
+- `data_region` values are `global`, `europe`, or `us`. It is a generations-only dimension (31-day limit), and rows predating region attribution report as `global`.
 
 ### Order By
 
