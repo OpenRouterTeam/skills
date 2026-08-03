@@ -133,7 +133,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
-- `workspace` — workspace ID
+- `workspace` — workspace ID. Filtering or grouping by the account default workspace UUID also covers activity recorded before workspace resolution existed, whose legacy all-zero UUID is folded into the default workspace; grouping never returns the all-zero UUID as a separate group.
 - `app` — application ID
 
 **Limited to 31-day time ranges:**
@@ -229,7 +229,7 @@ Several dimensions are **label-resolved** in query results — the response show
 |---|---|---|
 | `api_key_id` | Numeric ID **or** 64-char SHA-256 hash | Numeric ID: generation metadata (`api_key_id` field). Hash: `GET /api/v1/keys` (`key_hash` field). Hashes are auto-resolved server-side. If a hash can't be resolved, a sentinel value returns zero rows (no error). |
 | `user` | Clerk user ID (e.g. `user_abc123`) | User settings or org member list — not the display name/email shown in results. |
-| `workspace` | Workspace UUID | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
+| `workspace` | Workspace UUID | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. Filtering or grouping by the account default workspace UUID also covers activity recorded before workspace resolution existed, whose legacy all-zero UUID is folded into the default workspace; grouping never returns the all-zero UUID as a separate group. |
 | `app` | Numeric app ID | Generation metadata (`app_id` field) or app settings — not the app title shown in results. |
 | `model` | Permaslug (e.g. `openai/gpt-4o`) | Model page URL or `GET /api/v1/models` — not the display name. |
 
