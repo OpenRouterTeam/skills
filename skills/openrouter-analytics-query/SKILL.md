@@ -90,9 +90,10 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
-  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results; filtering or grouping by the account's default workspace also covers activity recorded before workspace resolution existed, which is attributed to that default workspace.
   - `app` — numeric app ID, not the app title shown in results.
-  - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
+  - `model` — permaslug (e.g. `openai/gpt-4o`); both the filter value and returned value are the permaslug, not a display name.
+- `data_region` — region where the request was served (`global`, `europe`, or `us`). This is a generations-only dimension with a 31-day limit; rows predating region attribution report as `global`.
 - Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
 
 ### Order By
@@ -181,7 +182,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and a source-dependent time-bucket field — `date__<granularity>` for MV-backed queries or `created_at__<granularity>` for raw generations/classification queries (detect either prefix). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
@@ -337,6 +338,8 @@ Some metric/dimension combinations support time ranges up to **367 days** (with 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
+
+A filter on a dimension not carried by the materialized views (for example, `data_region`) forces the query onto raw generations, so the 31-day limit applies even when the requested metrics and grouped dimensions would otherwise allow the longer daily-MV range.
 
 If a query times out, try:
 - Narrowing the time range
