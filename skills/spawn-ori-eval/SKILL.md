@@ -24,7 +24,7 @@ Do these in order. One line, one action. Appendix letters point to the detail an
 4. Ask the user what to do with it, then reuse the existing `steps.txt` and jump to the first step after 4 that is not done, or archive the files and write a fresh `steps.txt` covering step 5 onward, or stop and leave everything untouched. Write the fresh tracker without asking only when the directory holds no run files of its own (appendix A).
 5. Run the lookup or install for the `ori` binary yourself (appendix B).
 6. If it is still missing, run the `~/.local/bin/ori` fallback yourself, and stop if that fails too.
-7. Run `ori auth` yourself, read its output, and branch on the exit status and message: continue when access resolves, stop with login instructions when no credential resolves, and stop with instructions to use 0.3.0 or newer when the command is unknown because the installed Ori predates the headless run support this skill requires (appendix B).
+7. Check the version yourself and upgrade it if it is below 0.3.0, then run `ori auth` yourself: continue when access resolves, stop with login instructions when no credential resolves (appendix B).
 8. Check for `bun` yourself, and stop if it is missing.
 9. Read the eval surface yourself, continuing even if the commands error (appendix B).
 10. Tell the user where the binary landed, if you installed it.
@@ -70,7 +70,7 @@ These hold for the whole run.
 - Never invent a number. Every attempt reports its own duration and cost on the summary line that ends its answer file, and the eval's own model calls come from Ori's closing table. Name a figure unmeasured only when the attempt wrote no summary line at all.
 - Never name a winner unless the production model is in the table. "No change" is a valid result.
 - Never give model ids or prices from memory. Check live prices on OpenRouter. The pins are the one exception, because this skill fixes them.
-- The setup check must confirm that OpenRouter access resolves through `ori auth`. Tell the user to run `ori login` when it does not; never tell the user to export a raw key. An already inherited key may satisfy the check. An unknown `ori auth` command means the installed Ori predates the headless run support this skill requires, so tell the user they need 0.3.0 or newer and stop.
+- The setup check must confirm that Ori is 0.3.0 or newer and that OpenRouter access resolves through `ori auth` (appendix B). Tell the user to run `ori login` when no credential resolves; never tell the user to export a raw key. An already inherited key may satisfy the check.
 - Never paste step 9's output to the user. You read it, they did not ask for it.
 - Never print a secret value from `credentials.json`, a `.env` file, or a config file. Name the key and its location only, such as `OPENAI_API_KEY at .env:4`.
 - Never write the eval into the user's repository. It is a throwaway measuring instrument, not something they asked to keep, and the decision to keep it is theirs to make after they see the numbers.
@@ -120,9 +120,11 @@ Archiving means the old run's files, including `ori/`, end up under `previous/` 
 
 Install the binary with `curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash`. It lands in `~/.local/bin`, which is frequently absent from PATH in a non-login shell, so try `~/.local/bin/ori --version` before reporting a failure. Bun is required because Ori executes `*.eval.ts` with it.
 
+This skill needs 0.3.0 or newer. Take the first `<major>.<minor>.<patch>` out of `ori --version` and compare those three numbers, ignoring anything after them. Below the floor, or with no version to read, re-run the installer above, then check again and stop only if it is still too low. `ori auth` is not a version signal.
+
 Read the eval surface with `ori eval -h` and `ori eval skill`, falling back to `ori skills get create-eval` if the second errors. This is what Ori itself follows inside the run, so it tells you what the run will do and which questions it will ask. It never blocks the task: if both commands error, carry on.
 
-Run `ori auth` before starting. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Read its output to distinguish an unknown command from a missing credential, but do not show that output to the user or repeat any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop. If the binary reports that `auth` is an unknown command, tell the user that the installed Ori predates the headless run support this skill requires, that they need 0.3.0 or newer, and stop.
+Run `ori auth` after the version is settled. It resolves the credential the CLI will use, including an inherited environment key, and exits zero when access is available. Do not show its output to the user or repeat any credential value. If it exits non-zero because no credential resolves, tell the user to run `ori login` and stop.
 
 ## Appendix C: task prompt template
 
@@ -234,7 +236,7 @@ Follow it with one line, for example: the run cost $4.13 in total, and a rerun c
 | Ori picked the target itself | Discard the attempt rather than accepting the guessed target. Ask the user, append the answer, and restart from the full prompt file. |
 | The answer has no tagged question but the run looks stopped | Read the final answer. Relay an untagged question, report the contract violation, and carry on from step 19. |
 | The user says they cannot read the table | Print the context again in an ordinary message. Never put the markdown table inside the question body, because it renders as raw pipes. |
-| `ori code` refuses a redirected run because it needs a terminal | Stop. The attempt spent nothing, and the run cannot proceed on this binary. Tell the user to use Ori 0.3.0 or newer. |
+| `ori code` refuses a redirected run because it needs a terminal | The attempt spent nothing. Re-run the installer and start the attempt again. |
 | `403 Key limit exceeded` or a 402 payment error | The key is at its spend limit. See below. |
 
 A run that dies within seconds on a key limit or payment error is not a defect in Ori or in the eval. Tell the user plainly that the key has no credit, no eval was written, and the attempt spent nothing. Give them the exact `Manage it using <url>` link from the error and ask whether to raise the limit or add credits. The dashboard change is enough, since the credential stays valid and a new `ori login` is not needed. When they confirm, start the same run again and continue the task from the same point, since the error is a recoverable pause rather than a terminal failure.

@@ -16,7 +16,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## Prerequisites
 
-- `ori` on PATH — `curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash`
+- `ori` 0.3.0 or newer on PATH — `curl -fsSL https://openrouter.ai/labs/ori/install.sh | bash`, which also upgrades an older build in place
 - OpenRouter access resolved by `ori auth`; sign in with `ori login` if needed
 - [Bun](https://bun.sh), which Ori uses to execute `*.eval.ts`
 
@@ -24,7 +24,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Preflight for the `ori` binary, `ori auth`, and Bun, including the `~/.local/bin` PATH gap
+- Preflight for the `ori` binary, its version floor, `ori auth`, and Bun, including the `~/.local/bin` PATH gap
 - Reading the live eval help and the authoring guide before spawning, so the run is described from the current CLI rather than from memory
 - Telling the user in plain language what was installed, what is running, what it costs, and what they will get back
 - Running one plain-text headless Ori invocation at a time on the model this skill pins, for both the run itself and the judge
