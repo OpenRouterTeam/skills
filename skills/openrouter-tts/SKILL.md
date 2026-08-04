@@ -75,10 +75,10 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `model`           | yes      | TTS model slug (e.g. `openai/gpt-4o-mini-tts-2025-12-15`, `mistralai/voxtral-mini-tts-2603`).                     |
 | `input`           | yes      | The text to synthesize.                                                                                           |
-| `voice`           | no*      | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
+| `voice`           | no       | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally followed by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints with `supports_voice_cloning`. |
+| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally accompanied by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints with `supports_voice_cloning`. |
 | `provider`        | no       | Provider passthrough — see below.                                                                                 |
 
 ### Voice cloning
@@ -110,7 +110,7 @@ curl -sS -X POST https://openrouter.ai/api/v1/audio/speech \
   --output cloned-voice.mp3
 ```
 
-The audio `data` may be raw base64 or a data URI. `format` is optional; most providers detect it from the audio bytes. Reference audio is limited to 20 MiB of base64 (15 MiB decoded), and `input_references` requires exactly one `input_audio` part plus at most one transcript part.
+The audio `data` may be raw base64 or a data URI. `format` is optional; most providers detect it from the audio bytes. Reference audio is limited to 20 MiB of base64 (15 MiB decoded), and `input_references` requires one `input_audio` part plus at most one transcript part.
 
 ### Picking a format
 
