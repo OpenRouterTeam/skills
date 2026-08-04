@@ -55,16 +55,23 @@ echo "Saved $(realpath "$OUTPUT") (generation_id=${gen_id:-unknown})"
 
 ## Discovering TTS models and voices
 
-Filter the models endpoint by output modality to list speech models. Each model carries a `supported_voices` array with the exact voice IDs that provider accepts. For voice cloning, also check `supports_voice_cloning`: send reference-audio requests only to endpoints that advertise it.
+Filter the models endpoint by output modality to list speech models. Each model carries a `supported_voices` array with the exact voice IDs that provider accepts.
 
 ```bash
 # Models + voices in one shot
 curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
-  | jq '.data[] | {id, name, supported_voices, supports_voice_cloning, pricing}'
+  | jq '.data[] | {id, name, supported_voices, pricing}'
 
 # Just the voices for a specific model
 curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
   | jq -r '.data[] | select(.id=="openai/gpt-4o-mini-tts-2025-12-15") | .supported_voices[]'
+```
+
+Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`:
+
+```bash
+curl -sS "https://openrouter.ai/api/v1/models/fish-audio/s1/endpoints" \
+  | jq '.data.endpoints[] | {provider_name, model_id, supports_voice_cloning}'
 ```
 
 Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtral encodes language + persona + emotion (`en_paul_happy`), Kokoro prefixes with language/gender (`af_bella` = American female Bella).
@@ -78,7 +85,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `voice`           | no       | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally accompanied by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints with `supports_voice_cloning`. |
+| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally accompanied by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints whose `supports_voice_cloning` capability is `true`. |
 | `provider`        | no       | Provider passthrough — see below.                                                                                 |
 
 ### Voice cloning
