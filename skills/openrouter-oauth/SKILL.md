@@ -71,8 +71,7 @@ Content-Type: application/json
 
 Authorization codes expire 10 minutes after issuance. If the exchange returns
 `403 Authorization code expired`, restart the OAuth flow and exchange the new
-code promptly. Treat authorization codes as short-lived, one-time values and
-do not persist or retry an expired code.
+code promptly.
 
 Remove the verifier from `sessionStorage` before or after the exchange.
 
