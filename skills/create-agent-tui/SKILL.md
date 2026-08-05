@@ -42,8 +42,9 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 | Web Search | `openrouter:web_search` | ON | engine, max_results, domain filtering |
 | Datetime | `openrouter:datetime` | ON | timezone |
 | Image Generation | `openrouter:image_generation` | OFF | model, quality, size, format |
+| Shell | `openrouter:shell` | OFF | sandbox engine, container environment |
 
-Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
+Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them. `openrouter:shell` is available through the `serverTool(...)` path on Responses and Messages, but not Chat Completions; it always runs in the OpenRouter sandbox. `openrouter:bash` with `engine: 'openrouter'` is supported on Messages only, so use `openrouter:shell` for sandbox execution on Responses or Chat Completions.
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
