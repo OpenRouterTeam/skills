@@ -139,7 +139,7 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | View Image | off | Read local images as base64 |
 | Custom Tool Template | on | Empty skeleton for your domain |
 
-`openrouter:shell` is available through the `serverTool(...)` path on Responses and Messages, but not Chat Completions; it always runs in the OpenRouter sandbox. `openrouter:bash` with `engine: 'openrouter'` is supported on Messages only, so use `openrouter:shell` for sandbox execution on Responses or Chat Completions.
+`openrouter:shell` runs in the OpenRouter sandbox; use it for sandbox execution on Responses, while `openrouter:bash` with `engine: 'openrouter'` is Messages-only.
 
 ### Harness modules (architectural components)
 
