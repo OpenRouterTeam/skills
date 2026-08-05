@@ -82,11 +82,17 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 ### Filter Object Shape
 
 ```json
-{ "field": "<dimension_name>", "operator": "<op>", "value": "<value>" }
+{
+  "field": "<dimension_name>",
+  "operator": "<op>",
+  "value": "<value>",
+  "include_unset": true
+}
 ```
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- `include_unset: true` includes rows where the dimension has no value. It is supported only with `in` and `not_in`, and only for dimensions that have an unset bucket.
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
