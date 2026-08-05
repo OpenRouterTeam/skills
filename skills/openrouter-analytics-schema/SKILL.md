@@ -183,7 +183,7 @@ For dimensions with an unset bucket, `in` and `not_in` filters may set
 public `/api/v1/analytics/meta` response lists dimension names and labels but
 does not indicate which dimensions have an unset bucket. If `include_unset`
 is used for an unsupported dimension, validation reports
-`Dimension "${filter.field}" has no unset bucket`.
+`Dimension "<field>" has no unset bucket`.
 
 ## Understanding Granularities
 
