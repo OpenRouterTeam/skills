@@ -128,7 +128,7 @@ my-agent/
     agent.test.ts           Example test (bun:test)
 ```
 
-Server tools (`openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`, `openrouter:shell`) are wired in `tools/index.ts` and execute on OpenRouter's side — no client code. `openrouter:shell` is available through the `serverTool(...)` path on Responses and Messages, but not Chat Completions; it always runs in the OpenRouter sandbox. `openrouter:bash` with `engine: 'openrouter'` is supported on Messages only, so use `openrouter:shell` for sandbox execution on Responses or Chat Completions.
+Server tools (`openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`, `openrouter:shell`) are wired in `tools/index.ts` and execute on OpenRouter's side — no client code. `openrouter:shell` runs in the OpenRouter sandbox; use it for sandbox execution on Responses, while `openrouter:bash` with `engine: 'openrouter'` is Messages-only.
 
 ## Sample
 
