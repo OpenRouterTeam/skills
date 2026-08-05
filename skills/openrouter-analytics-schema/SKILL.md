@@ -178,6 +178,13 @@ Filter operators for the `filters` array in query requests:
 | `in` | array | In list |
 | `not_in` | array | Not in list |
 
+For dimensions with an unset bucket, `in` and `not_in` filters may set
+`include_unset: true` to include rows where the dimension has no value. The
+public `/api/v1/analytics/meta` response lists dimension names and labels but
+does not indicate which dimensions have an unset bucket. If `include_unset`
+is used for an unsupported dimension, validation reports
+`Dimension "<field>" has no unset bucket`.
+
 ## Understanding Granularities
 
 Time bucketing for time-series queries:
