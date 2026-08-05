@@ -47,8 +47,9 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 | Web Fetch | `openrouter:web_fetch` | ON |
 | Datetime | `openrouter:datetime` | ON |
 | Image Generation | `openrouter:image_generation` | OFF |
+| Shell | `openrouter:shell` | OFF |
 
-Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them. Docs: [openrouter.ai/docs/guides/features/server-tools](https://openrouter.ai/docs/guides/features/server-tools/overview).
+Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them. `openrouter:shell` is available through the `serverTool(...)` path on Responses and Messages, but not Chat Completions; it always runs in the OpenRouter sandbox. `openrouter:bash` with `engine: 'openrouter'` is supported on Messages only, so use `openrouter:shell` for sandbox execution on Responses or Chat Completions. Docs: [openrouter.ai/docs/guides/features/server-tools](https://openrouter.ai/docs/guides/features/server-tools/overview).
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
