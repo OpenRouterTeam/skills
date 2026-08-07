@@ -1,8 +1,8 @@
 ---
 name: openrouter-oauth
-description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add OpenRouter login, authentication, sign-in buttons, OAuth, or AI model inference API keys for browser-based apps. No client registration, no backend, no secrets required.
-version: 2.0.0
-compatibility: browser (requires Web Crypto API, localStorage, sessionStorage)
+description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add OpenRouter login, authentication, sign-in buttons, OAuth, or AI model inference API keys for browser apps, CLI tools, or remote environments. No client registration, no backend, no secrets required.
+version: 2.1.0
+compatibility: browser, CLI, or Node.js (requires Web Crypto API; browser flows also use localStorage and sessionStorage)
 ---
 
 # Sign In with OpenRouter
@@ -16,7 +16,7 @@ Live demo: [openrouterteam.github.io/sign-in-with-openrouter](https://openrouter
 | User wants to… | Do this |
 |---|---|
 | Add sign-in / login to a web app | Follow the full PKCE flow + button guidance below |
-| Get an API key programmatically (no UI) | Just implement the PKCE flow — skip the button section |
+| Get an API key programmatically (no UI) | Use the headless / no-callback flow below |
 | Use the OpenRouter SDK after auth | Do PKCE here for the key, then see `openrouter-typescript-sdk` skill for `callModel`/streaming |
 
 ---
@@ -47,6 +47,25 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 | `callback_url` | Your app's URL (where the user returns after auth) |
 | `code_challenge` | The S256 challenge from Step 1 |
 | `code_challenge_method` | Always `S256` |
+
+### Headless / no-callback flow
+
+For SSH sessions, remote development boxes, containers, and other environments where a localhost callback cannot be reached, omit `callback_url` entirely. After the user authorizes, OpenRouter displays the authorization code on screen for them to paste into the app.
+
+```
+https://openrouter.ai/auth?code_challenge={challenge}&code_challenge_method=S256&key_label={label}
+```
+
+| Param | Value |
+|---|---|
+| `code_challenge` | The S256 challenge from Step 1 (required) |
+| `code_challenge_method` | `S256` (required; `plain` is rejected) |
+| `key_label` | Optional app title on the approval screen; defaults to `A command-line app` |
+
+- Do not include `callback_url` or `oauth_client_id`. A no-callback request with `oauth_client_id`, a missing `code_challenge`, or a `plain` challenge method is rejected and redirected to the OpenRouter home page instead of showing a code.
+- Keep the `code_verifier` in the process until the user pastes the displayed code. `sessionStorage` and `localStorage` from the browser auth module do not apply in a CLI or Node.js context.
+- The displayed code is single-use and expires 10 minutes after issuance.
+- After the user pastes the code, continue with Step 4. The `POST /api/v1/auth/keys` exchange is unchanged.
 
 ### Step 3: Handle the redirect back
 
