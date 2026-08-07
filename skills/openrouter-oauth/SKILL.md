@@ -67,6 +67,37 @@ https://openrouter.ai/auth?code_challenge={challenge}&code_challenge_method=S256
 - The displayed code is single-use and expires 10 minutes after issuance.
 - After the user pastes the code, continue with Step 4. The `POST /api/v1/auth/keys` exchange is unchanged.
 
+Minimal Node.js example:
+
+```js
+import { createHash, randomBytes } from "node:crypto";
+import { createInterface } from "node:readline/promises";
+
+const base64url = (bytes) => Buffer.from(bytes).toString("base64url");
+const code_verifier = base64url(randomBytes(32));
+const code_challenge = base64url(createHash("sha256").update(code_verifier).digest());
+const authorizeUrl = new URL("https://openrouter.ai/auth");
+authorizeUrl.searchParams.set("code_challenge", code_challenge);
+authorizeUrl.searchParams.set("code_challenge_method", "S256");
+authorizeUrl.searchParams.set("key_label", "My command-line app");
+console.log(`Open this URL, authorize, then paste the code below:\n${authorizeUrl}`);
+
+const readline = createInterface({ input: process.stdin, output: process.stdout });
+const code = (await readline.question("Authorization code: ")).trim();
+readline.close();
+const response = await fetch("https://openrouter.ai/api/v1/auth/keys", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ code, code_verifier, code_challenge_method: "S256" }),
+});
+if (!response.ok) {
+  console.error(`Key exchange failed (${response.status}): ${await response.text()}`);
+  process.exitCode = 1;
+} else {
+  console.log(await response.json());
+}
+```
+
 ### Step 3: Handle the redirect back
 
 User returns to your `callback_url` with `?code=` appended. Extract the `code` query parameter.
