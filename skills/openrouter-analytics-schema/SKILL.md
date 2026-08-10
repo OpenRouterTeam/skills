@@ -60,7 +60,7 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `data_region`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `session_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -95,6 +95,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 
 **Efficiency metrics** (how well):
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
+- `blended_cost_per_million_tokens` — total spend, including BYOK inference, divided by prompt plus completion tokens and multiplied by 1M. Currency rate metric in USD per 1M tokens (up to 365 days). NULL when there are no tokens.
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
 
@@ -122,7 +123,7 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+The `api_key_id` value `-1` resolves to `Chatroom`, `app` value `-1` resolves to `Unknown`, and the nil workspace UUID resolves to `Unattributed`. All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
@@ -133,7 +134,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `variant` — model variant (e.g., standard, extended)
 - `api_key_id` — which API key made the request
 - `user` — the creator user ID (for org-level queries)
-- `workspace` — workspace ID
+- `workspace` — workspace ID. Filtering or grouping by the account default workspace also covers activity recorded before workspace resolution existed, which is folded from the legacy all-zero UUID. Grouping does not return the all-zero UUID as a separate group.
 - `app` — application ID
 
 **Limited to 31-day time ranges:**
@@ -141,9 +142,11 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `provider` — upstream provider name
 - `origin` — request origin/source
 - `country` — request country
+- `data_region` — request data region (`global`, `europe`, or `us`). Rows predating the default are reported as `global`.
 - `finish_reason` — why the generation ended (stop, length, etc.)
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
+- `session_id` — session ID. Sessionless requests are returned as the literal `none`.
 
 ## Classifier Dimensions
 
@@ -178,6 +181,8 @@ Filter operators for the `filters` array in query requests:
 | `in` | array | In list |
 | `not_in` | array | Not in list |
 
+The optional `include_unset` flag is supported only with `in` and `not_in`. It is valid for `api_key_id` with sentinel `-1`, `app` with sentinel `-1`, and `user` with sentinel empty string. With `in`, it adds unset rows to the matched set. With `not_in`, unset rows are excluded along with the listed values. An empty array with `in` matches only unset rows. Other dimensions fail validation with `Dimension "<field>" has no unset bucket`. The `/meta` response does not indicate which dimensions have an unset bucket.
+
 ## Understanding Granularities
 
 Time bucketing for time-series queries:
@@ -204,6 +209,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "How many tokens?" | `tokens_total` | — | Use `tokens_prompt` / `tokens_completion` for split |
 | "Which provider is fastest?" | `avg_latency`, `p90_latency` | `provider` | 31-day limit |
 | "What's my cache hit rate?" | `cache_hit_rate` | `model` | Rate metric — shows per-model caching |
+| "What's my effective cost per million tokens?" | `blended_cost_per_million_tokens` | `model` | Rate metric in USD per 1M tokens. Includes BYOK inference spend and is NULL when there are no tokens. |
 | "Which API key uses the most?" | `request_count`, `total_usage` | `api_key_id` | — |
 | "Usage over time" | `request_count` or `total_usage` | — | Set `granularity: "day"` |
 | "Latency trends" | `p90_latency` | — | Set `granularity: "hour"`, 31d limit |
@@ -229,7 +235,7 @@ Several dimensions are **label-resolved** in query results — the response show
 |---|---|---|
 | `api_key_id` | Numeric ID **or** 64-char SHA-256 hash | Numeric ID: generation metadata (`api_key_id` field). Hash: `GET /api/v1/keys` (`key_hash` field). Hashes are auto-resolved server-side. If a hash can't be resolved, a sentinel value returns zero rows (no error). |
 | `user` | Clerk user ID (e.g. `user_abc123`) | User settings or org member list — not the display name/email shown in results. |
-| `workspace` | Workspace UUID | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
+| `workspace` | Workspace UUID | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. The account default workspace also matches legacy all-zero UUID rows, which are folded into that workspace for grouping. |
 | `app` | Numeric app ID | Generation metadata (`app_id` field) or app settings — not the app title shown in results. |
 | `model` | Permaslug (e.g. `openai/gpt-4o`) | Model page URL or `GET /api/v1/models` — not the display name. |
 

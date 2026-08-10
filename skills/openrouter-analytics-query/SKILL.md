@@ -82,15 +82,16 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 ### Filter Object Shape
 
 ```json
-{ "field": "<dimension_name>", "operator": "<op>", "value": "<value>" }
+{ "field": "<dimension_name>", "operator": "<op>", "value": "<value>", "include_unset": true }
 ```
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- `include_unset` is optional and applies only to `in` and `not_in` filters on dimensions with an unset bucket: `api_key_id` (`-1`), `app` (`-1`), and `user` (empty string). With `in`, unset rows are included with the listed values. With `not_in`, unset rows are excluded along with the listed values. An empty `value` array with `in` matches only unset rows. Other dimensions return the validation error `Dimension "<field>" has no unset bucket`.
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
-  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results. Filtering or grouping by the account default workspace also covers activity recorded before workspace resolution existed, which is folded from the legacy all-zero UUID.
   - `app` — numeric app ID, not the app title shown in results.
   - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
 - Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
@@ -190,7 +191,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. The unset buckets `api_key_id = -1` and `app = -1` resolve to `Chatroom` and `Unknown`. The nil workspace UUID resolves to `Unattributed`.
 
 ## CLI Reference
 
@@ -339,5 +340,5 @@ Classifier dimensions and classifier filters always force the 31-day time range 
 If a query times out, try:
 - Narrowing the time range
 - Removing latency/throughput metrics
-- Removing per-generation dimensions (`provider`, `origin`, `country`, `finish_reason`, etc.)
+- Removing per-generation dimensions (`provider`, `origin`, `country`, `data_region`, `finish_reason`, etc.)
 - Removing classifier dimensions/filters (they are more expensive to compute)
