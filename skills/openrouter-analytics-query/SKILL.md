@@ -191,7 +191,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. The unset buckets `api_key_id = -1` and `app = -1` resolve to `Chatroom` and `Unknown`. The nil workspace UUID resolves to `Unattributed`.
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. The unset buckets `api_key_id = -1` and `app = -1` resolve to `Chatroom` and `Unknown`. The unresolved-workspace sentinel `ffffffff-ffff-ffff-ffff-ffffffffffff` resolves to `Unattributed` (a different value from the legacy all-zero UUID, which is folded into the default workspace).
 
 ## CLI Reference
 

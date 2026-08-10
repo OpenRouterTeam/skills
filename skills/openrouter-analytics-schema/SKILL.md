@@ -123,7 +123,7 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 | `user` | User name or email address |
 | `workspace` | Workspace name |
 
-The `api_key_id` value `-1` resolves to `Chatroom`, `app` value `-1` resolves to `Unknown`, and the nil workspace UUID resolves to `Unattributed`. All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
+The `api_key_id` value `-1` resolves to `Chatroom`, `app` value `-1` resolves to `Unknown`, and the unresolved-workspace sentinel `ffffffff-ffff-ffff-ffff-ffffffffffff` resolves to `Unattributed` (distinct from the legacy all-zero UUID, which is folded into the default workspace). All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
 
