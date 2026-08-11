@@ -83,6 +83,12 @@ Required: `model`, `prompt`. Common optional fields:
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
 
+### Input-modality validation
+
+Before dispatch, every `input_references`/`frame_images` modality must be accepted by the model, and the selected adapter must accept that input form. Models may also require a modality: video-to-video models require a `video_url` reference, required text is satisfied by a non-empty `prompt`, and required image is satisfied by an `image_url` reference or `frame_images` entry. These checks all return HTTP 400 as `{ "error": { "message": "..." } }`; the video models endpoint does not expose requirement metadata, so the error message is the source of truth.
+
+On this kind of 400, fix the payload by adding the required reference, removing the unsupported input, or switching model/provider rather than retrying. Reference URL syntax/SSRF validation and `callback_url` validation also return 400 separately after modality checks.
+
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
 ## Provider passthrough
