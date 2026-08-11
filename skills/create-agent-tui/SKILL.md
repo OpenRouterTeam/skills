@@ -45,7 +45,7 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 
 Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
 
-`mode` selects the engine-native search depth, and its valid values depend on the engine: Exa accepts `instant`, `fast`, `auto` (default), `deep-lite`, `deep`, and `deep-reasoning`; Parallel accepts `turbo` (default), `basic`, and `advanced`. Set `engine` explicitly whenever setting `mode` — a mode the selected engine does not support is ignored and the engine's default applies. Deeper modes cost more per request.
+`mode` selects the engine-native search depth, and its valid values depend on the engine: Exa accepts `instant`, `fast`, `auto` (default), `deep-lite`, `deep`, and `deep-reasoning`; Parallel accepts `basic` (default), `turbo`, and `advanced`. Set `engine` explicitly whenever setting `mode` — a mode the selected engine does not support is ignored and the engine's default applies. Deeper modes cost more per request.
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
