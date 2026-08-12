@@ -1,7 +1,6 @@
 /**
  * Retrieve the stored prompt and completion content for a generation.
- * Returns input messages/prompt and output completion/reasoning text.
- * Content is unavailable if Zero Data Retention (ZDR) was enabled.
+ * Returns input messages/prompt, output completion/reasoning text, and stored errors.
  */
 import { requireApiKey, fetchGenerationContent, parseArgs } from "./lib.js";
 
@@ -18,6 +17,7 @@ Usage: npx tsx get-generation-content.ts <generation-id> [--json]
 Returns the stored prompt and completion content:
   - Input: original prompt text and messages array
   - Output: completion text and reasoning (if available)
+  - Error: stored client/provider error and previous failed attempts (if available)
 
 Note: Content is only available if the generation was not
 made with Zero Data Retention (ZDR) enabled.
@@ -49,6 +49,19 @@ if (json) {
   const output = rawData.output as
     | { completion?: string; reasoning?: string }
     | undefined;
+  const error = rawData.error as
+    | {
+        status?: number | null;
+        message?: string | null;
+        provider_name?: string | null;
+        previous_errors?: Array<{
+          code: number;
+          message: string;
+          provider_name: string | null;
+        }>;
+      }
+    | null
+    | undefined;
 
   console.log("Generation:", generationId);
   console.log("");
@@ -61,6 +74,7 @@ if (json) {
   const hasOutput = Boolean(
     output && (output.completion != null || output.reasoning != null)
   );
+  const hasError = error != null;
 
   if (hasInput && input) {
     console.log("=== INPUT ===");
@@ -91,7 +105,23 @@ if (json) {
     }
   }
 
-  if (!hasInput && !hasOutput) {
+  if (hasError && error) {
+    console.log("=== ERROR ===");
+    console.log("Status:", error.status ?? null);
+    console.log("Message:", error.message ?? null);
+    console.log("Provider:", error.provider_name ?? null);
+    if (error.previous_errors && error.previous_errors.length > 0) {
+      console.log("Previous attempts:");
+      for (const attempt of error.previous_errors) {
+        console.log(
+          `  [${attempt.code}] ${attempt.message} (${attempt.provider_name ?? "unknown"})`
+        );
+      }
+    }
+    console.log("");
+  }
+
+  if (!hasInput && !hasOutput && !hasError) {
     console.log("No content available for this generation.");
     console.log(
       "This may be because Zero Data Retention (ZDR) was enabled."
