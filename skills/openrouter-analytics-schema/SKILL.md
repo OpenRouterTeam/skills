@@ -100,7 +100,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
 - `possible_cache_hit_rate` — possible cached tokens as a ratio of prompt tokens; the caching opportunity (possible-cache metric)
-- `cache_capture_rate` — how much of that opportunity was actually captured: matched cached tokens over possible cached tokens, bounded to 0–1 (possible-cache metric)
+- `cache_capture_rate` — how much of that opportunity was actually captured: matched cached tokens over possible cached tokens (possible-cache metric)
 
 ### Possible-Cache Metrics
 
