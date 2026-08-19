@@ -160,6 +160,7 @@ Beyond the standard dimensions above, you can group by **classifier dimensions**
 | Question pattern | Request fields | Notes |
 |---|---|---|
 | "Spend by topic" | `classifier_dimensions: { classifier_id, dimension_names: ["topic"] }` + `metrics: ["total_usage"]` | Single dimension → column aliased to `topic` |
+| "Spend by topic and sentiment" | `classifier_dimensions: { classifier_id, dimension_names: ["topic", "sentiment"] }` + `metrics: ["total_usage"]` | Two dimensions → cross-grouped, one named column each (`topic`, `sentiment`); at most 2 names per query |
 | "Only billing-related requests" | `classifier_filters: { classifier_id, filters: [{ field: "category", operator: "eq", value: "billing" }] }` | Filters support `eq`, `neq`, `in`, `not_in` only |
 | "Sentiment breakdown including unclassified" | `classifier_dimensions: { classifier_id, dimension_names: ["sentiment"], include_nulls: true }` | Includes rows without classification |
 
