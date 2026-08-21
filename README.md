@@ -6,7 +6,7 @@ A collection of [Agent Skills](https://agentskills.io/home) for building with [O
 
 These skills work with any agent that supports the Agent Skills standard, including Claude Code, Cursor, OpenCode, OpenAI Codex, and Pi.
 
-For agents that support plugins, installing via the native plugin system is recommended as skills will auto-update.
+For agents that support plugins, installing via the native plugin system is recommended because skills will auto-update.
 
 ### Claude Code
 
