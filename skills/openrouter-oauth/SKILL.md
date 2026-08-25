@@ -160,6 +160,17 @@ Build a button component that calls `initiateOAuth()` on click. Include the Open
 </svg>
 ```
 
+`fill="currentColor"` inherits the button's text color. To use the official brand colors instead, apply the light-mode purple and dark-mode lime:
+
+```html
+<svg viewBox="0 0 401.4 293.7" class="fill-[#7624F4] dark:fill-[#C8FF00]">...</svg>
+```
+
+| Mode | Fill |
+|---|---|
+| Light backgrounds | `#7624F4` |
+| Dark backgrounds | `#C8FF00` |
+
 ### Variants (Tailwind)
 
 Recommended classes for visual consistency with the reference implementation:
