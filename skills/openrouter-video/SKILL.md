@@ -85,6 +85,8 @@ Required: `model`, `prompt`. Common optional fields:
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
+The request body is capped at 50 MiB, checked against `Content-Length` before the body is read, so an oversized submission returns `413` rather than a job. Base64 inflates bytes by ~33% — for larger reference images, pass an `https://` URL instead of a data URL.
+
 ## Provider passthrough
 
 Provider-specific params go under `provider.options.<slug>.parameters`. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
