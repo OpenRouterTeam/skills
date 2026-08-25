@@ -192,7 +192,7 @@ print(res.json()["text"])
 
 **400 with a `ZodError`** — a required field is missing or the wrong type. The body looks like `{"success":false,"error":{"name":"ZodError","message":"[...]"}}` — the nested `message` JSON string names the bad path (commonly `input_audio.data` or `input_audio.format`).
 
-**413 / request too large** — base64 inflates bytes by ~33%, so a large raw file becomes an even larger JSON payload. Use a smaller source file (compressed format, lower sample rate, or trimmed clip).
+**413 / request too large** — the JSON request body is capped at 50 MiB, checked against `Content-Length` at the edge, so an oversized request is rejected before any audio is read. Base64 inflates bytes by ~33%, so plan for a raw file of roughly 37 MB or less. Use a smaller source file (compressed format, lower sample rate, or trimmed clip).
 
 **Model not found** — use the full slug from `/api/v1/models?output_modalities=transcription` (`google/chirp-3`, not `chirp-3`).
 
