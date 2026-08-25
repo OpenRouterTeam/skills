@@ -155,13 +155,21 @@ Build a button component that calls `initiateOAuth()` on click. Include the Open
 ### OpenRouter Logo SVG
 
 ```svg
-<svg viewBox="0 0 512 512" fill="currentColor" stroke="currentColor">
-  <path d="M3 248.945C18 248.945 76 236 106 219C136 202 136 202 198 158C276.497 102.293 332 120.945 423 120.945" stroke-width="90"/>
-  <path d="M511 121.5L357.25 210.268L357.25 32.7324L511 121.5Z"/>
-  <path d="M0 249C15 249 73 261.945 103 278.945C133 295.945 133 295.945 195 339.945C273.497 395.652 329 377 420 377" stroke-width="90"/>
-  <path d="M508 376.445L354.25 287.678L354.25 465.213L508 376.445Z"/>
+<svg viewBox="0 0 401.4 293.7" fill="currentColor">
+  <path d="M303.9475,17.19926c42.79734,0,77.48933,34.69327,77.48933,77.48933s-34.69199,77.48933-77.48933,77.48933l76.86166,76.86244c9.76367,9.76313,2.84903,26.45667-10.95697,26.45667h-220.88335c-71.32686,0-129.14889-57.82202-129.14889-129.14889S77.64197,17.19926,148.96884,17.19926h154.97866ZM148.96884,68.85881c-42.79607,0-77.48933,34.69327-77.48933,77.48933s34.69327,77.48933,77.48933,77.48933,77.48933-34.69327,77.48933-77.48933-34.69327-77.48933-77.48933-77.48933Z"/>
 </svg>
 ```
+
+`fill="currentColor"` inherits the button's text color. To use the official brand colors instead, apply the light-mode purple and dark-mode lime:
+
+```html
+<svg viewBox="0 0 401.4 293.7" class="fill-[#7624F4] dark:fill-[#C8FF00]">...</svg>
+```
+
+| Mode | Fill |
+|---|---|
+| Light backgrounds | `#7624F4` |
+| Dark backgrounds | `#C8FF00` |
 
 ### Variants (Tailwind)
 
