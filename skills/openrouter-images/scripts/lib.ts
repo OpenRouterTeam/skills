@@ -59,13 +59,41 @@ function reportHttpError(status: number, statusText: string, body: string): neve
   process.exit(1);
 }
 
+async function fetchOk(url: string, init?: RequestInit): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    console.error(
+      `Network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    reportHttpError(res.status, res.statusText, text);
+  }
+  return res;
+}
+
+async function parseJsonResponse<T>(res: Response): Promise<T> {
+  try {
+    return (await res.json()) as T;
+  } catch (err) {
+    console.error(
+      `Invalid JSON in response (status ${res.status}): ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
+}
+
 /**
  * Generate images via the dedicated Image API (`POST /api/v1/images`). This is
  * the canonical image path — image generation is no longer routed through chat
  * completions.
  */
 export async function postImageGeneration(apiKey: string, body: unknown): Promise<ImageGenerationResponse> {
-  const res = await fetch(IMAGES_ENDPOINT, {
+  const res = await fetchOk(IMAGES_ENDPOINT, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -73,13 +101,7 @@ export async function postImageGeneration(apiKey: string, body: unknown): Promis
     },
     body: JSON.stringify(body),
   });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    reportHttpError(res.status, res.statusText, text);
-  }
-
-  return res.json() as Promise<ImageGenerationResponse>;
+  return parseJsonResponse<ImageGenerationResponse>(res);
 }
 
 /**
@@ -87,12 +109,8 @@ export async function postImageGeneration(apiKey: string, body: unknown): Promis
  * Discovery is public and needs no API key.
  */
 export async function getImageModels(): Promise<ImageModelsListResponse> {
-  const res = await fetch(IMAGE_MODELS_ENDPOINT);
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    reportHttpError(res.status, res.statusText, text);
-  }
-  return res.json() as Promise<ImageModelsListResponse>;
+  const res = await fetchOk(IMAGE_MODELS_ENDPOINT);
+  return parseJsonResponse<ImageModelsListResponse>(res);
 }
 
 /**
@@ -106,12 +124,8 @@ export async function getImageModelEndpoints(model: string): Promise<ImageModelE
     process.exit(1);
   }
   const url = `${IMAGE_MODELS_ENDPOINT}/${encodeURIComponent(author)}/${encodeURIComponent(slug)}/endpoints`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    reportHttpError(res.status, res.statusText, text);
-  }
-  return res.json() as Promise<ImageModelEndpointsResponse>;
+  const res = await fetchOk(url);
+  return parseJsonResponse<ImageModelEndpointsResponse>(res);
 }
 
 const MIME_MAP: Record<string, string> = {
@@ -130,7 +144,15 @@ export function readImageAsDataUrl(filePath: string): string {
     console.error(`Error: Unsupported image format "${ext}". Use .png, .jpg, .jpeg, .webp, or .gif`);
     process.exit(1);
   }
-  const data = readFileSync(abs);
+  let data: Buffer;
+  try {
+    data = readFileSync(abs);
+  } catch (err) {
+    console.error(
+      `Error: Could not read image file "${abs}": ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
   return `data:${mime};base64,${data.toString("base64")}`;
 }
 
@@ -153,7 +175,14 @@ export function saveImage(b64: string, outputBase: string, mediaType: string | u
   const ext = (mediaType && MEDIA_TYPE_EXTENSIONS[mediaType]) || requestedExt;
   const path = total === 1 ? `${stem}${ext}` : `${stem}-${index + 1}${ext}`;
   const abs = resolve(path);
-  writeFileSync(abs, Buffer.from(b64, "base64"));
+  try {
+    writeFileSync(abs, Buffer.from(b64, "base64"));
+  } catch (err) {
+    console.error(
+      `Error: Could not write image file "${abs}": ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
   return abs;
 }
 
