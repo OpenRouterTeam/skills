@@ -1,6 +1,6 @@
 # openrouter-generations
 
-Inspect individual OpenRouter generations — get request metadata (cost, latency, tokens, model, provider routing) and stored prompt/completion content.
+Inspect individual OpenRouter generations — get request metadata (cost, latency, tokens, model, provider routing) and stored prompt/completion content or failure errors.
 
 ## Install
 
@@ -34,7 +34,7 @@ rm -rf /tmp/or-skills
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - Fetching generation metadata (tokens, cost, latency, model, provider, routing)
-- Retrieving stored prompt and completion content
+- Retrieving stored prompt and completion content or failure errors
 - Debugging failed or unexpected generations
 - Understanding provider fallback chains
 - Tracing multi-generation sessions
@@ -45,7 +45,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 | Script | Purpose |
 |--------|---------|
 | `get-generation.ts` | Get metadata for a generation (cost, tokens, latency, provider) |
-| `get-generation-content.ts` | Get stored prompt and completion text |
+| `get-generation-content.ts` | Get stored prompt, completion, and failure error |
 
 ## Quick start
 
