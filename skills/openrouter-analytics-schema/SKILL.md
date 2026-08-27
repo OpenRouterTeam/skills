@@ -60,7 +60,7 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `skin`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -144,6 +144,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `finish_reason` — why the generation ended (stop, length, etc.)
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
+- `skin` — API skin the request used, derived from the request path: `chat-completions`, `responses`, `anthropic-messages`, `completions`, or `other`
 
 ## Classifier Dimensions
 
@@ -160,6 +161,7 @@ Beyond the standard dimensions above, you can group by **classifier dimensions**
 | Question pattern | Request fields | Notes |
 |---|---|---|
 | "Spend by topic" | `classifier_dimensions: { classifier_id, dimension_names: ["topic"] }` + `metrics: ["total_usage"]` | Single dimension → column aliased to `topic` |
+| "Spend by topic and sentiment" | `classifier_dimensions: { classifier_id, dimension_names: ["topic", "sentiment"] }` + `metrics: ["total_usage"]` | Two dimensions → cross-grouped, one named column each (`topic`, `sentiment`); at most 2 names per query |
 | "Only billing-related requests" | `classifier_filters: { classifier_id, filters: [{ field: "category", operator: "eq", value: "billing" }] }` | Filters support `eq`, `neq`, `in`, `not_in` only |
 | "Sentiment breakdown including unclassified" | `classifier_dimensions: { classifier_id, dimension_names: ["sentiment"], include_nulls: true }` | Includes rows without classification |
 
@@ -220,6 +222,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
+| "Usage by API format?" | `request_count`, `cache_hit_rate` | `skin` | 31-day limit. Values: `chat-completions`, `responses`, `anthropic-messages`, `completions`, `other` |
 
 ## Filter Value Reference
 
@@ -239,7 +242,7 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 
 - Maximum 2 dimensions per query
 - Maximum 20 filters per query
-- Maximum 10 classifier dimensions per query
+- Maximum 2 classifier dimension names per query
 - Maximum 10 classifier filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
