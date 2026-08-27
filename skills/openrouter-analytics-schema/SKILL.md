@@ -242,7 +242,7 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Maximum 10 classifier dimensions per query
 - Maximum 10 classifier filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
-- `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
+- `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions or classifier dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
 - Most volume/cost metrics: up to 365 days with daily granularity
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
 - Classifier dimensions/filters: always limited to 31 days
