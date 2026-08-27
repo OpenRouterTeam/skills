@@ -42,8 +42,11 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 | Web Search | `openrouter:web_search` | ON | engine, max_results, domain filtering |
 | Datetime | `openrouter:datetime` | ON | timezone |
 | Image Generation | `openrouter:image_generation` | OFF | model, quality, size, format |
+| Advisor | `openrouter:advisor` | OFF | model, instructions, tools, forward_transcript, named advisors |
 
 Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
+
+**Advisor** lets the agent consult a stronger model mid-generation — before committing to an approach, when stuck, or before declaring done. Pass `parameters.model` to pin an advisor model, or let the executor choose per call. Supports `instructions`, `forward_transcript`, sub-agent `tools`, and named advisor profiles via `parameters.advisors`. Docs: [openrouter.ai/docs/guides/features/server-tools/advisor](https://openrouter.ai/docs/guides/features/server-tools/advisor).
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
@@ -347,6 +350,9 @@ export const tools = [
   // Server tools — executed by OpenRouter, no client implementation needed
   serverTool({ type: 'openrouter:web_search' }),
   serverTool({ type: 'openrouter:datetime', parameters: { timezone: 'UTC' } }),
+
+  // Advisor — consult a stronger model mid-generation (off by default, add when needed)
+  // serverTool({ type: 'openrouter:advisor', parameters: { model: '~anthropic/claude-opus-latest' } }),
 ];
 ```
 

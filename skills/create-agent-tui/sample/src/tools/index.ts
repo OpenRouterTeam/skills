@@ -18,4 +18,7 @@ export const tools = [
 
   serverTool({ type: 'openrouter:web_search' }),
   serverTool({ type: 'openrouter:datetime', parameters: { timezone: 'UTC' } }),
+
+  // Advisor — consult a stronger model mid-generation (uncomment to enable)
+  // serverTool({ type: 'openrouter:advisor', parameters: { model: '~anthropic/claude-opus-latest' } }),
 ];
