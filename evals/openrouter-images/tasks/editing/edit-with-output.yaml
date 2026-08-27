@@ -1,0 +1,23 @@
+id: editing-002
+name: Edit preserving the original file
+description: >
+  User wants the edit saved as a new file so the original is untouched. The
+  agent should use edit.ts with --output and confirm both files exist.
+
+tags:
+  - editing
+  - options
+
+inputs:
+  prompt: "Add a party hat to avatar.jpg, but don't overwrite my original — save the result as avatar-hat.png."
+  files:
+    - path: avatar.jpg
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains:
+    - "avatar-hat.png"

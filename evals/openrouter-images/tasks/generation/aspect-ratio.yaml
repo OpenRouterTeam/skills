@@ -1,0 +1,24 @@
+id: generation-002
+name: Generation with aspect ratio
+description: >
+  User asks for a wide/landscape image. The agent should translate the intent
+  into --aspect-ratio 16:9 (or similar wide ratio) rather than ignoring it or
+  inventing an unsupported flag.
+
+tags:
+  - generation
+  - options
+  - happy-path
+
+inputs:
+  prompt: "Make me a wide landscape wallpaper of a misty pine forest at dawn. It should be in 16:9 format."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "16:9"
+    - "aspect"

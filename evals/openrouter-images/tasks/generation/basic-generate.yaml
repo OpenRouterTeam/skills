@@ -1,0 +1,29 @@
+id: generation-001
+name: Basic text-to-image generation
+description: >
+  Simple happy-path generation request with no options. The agent should call
+  generate.ts with the prompt, use the default model, and report where the
+  image was saved.
+
+tags:
+  - generation
+  - basic
+  - happy-path
+  - golden
+
+golden: true
+
+inputs:
+  prompt: "Create an image of a red panda wearing sunglasses."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+    max_tool_calls: 6
+  output_contains_any:
+    - "saved"
+    - ".png"
+    - "images_saved"

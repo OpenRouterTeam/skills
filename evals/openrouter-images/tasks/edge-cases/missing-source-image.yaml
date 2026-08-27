@@ -1,0 +1,24 @@
+id: edge-002
+name: Missing source image
+description: >
+  User asks to edit a file that doesn't exist in the workspace. The agent
+  should notice the file is missing and ask for it or report the problem
+  clearly, not fabricate a result or generate a new image instead.
+
+tags:
+  - edge-case
+  - negative
+
+inputs:
+  prompt: "Remove the background from holiday-photo.png."
+
+expected:
+  outcomes:
+    - type: task_completed
+  output_contains_any:
+    - "not found"
+    - "doesn't exist"
+    - "does not exist"
+    - "couldn't find"
+    - "could not find"
+    - "no file"

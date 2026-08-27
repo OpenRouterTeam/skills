@@ -1,0 +1,25 @@
+id: discovery-003
+name: Discover provider passthrough options
+description: >
+  User asks how to control provider-specific knobs (steps/guidance) for a FLUX
+  model. The agent should inspect the model's endpoints with discover.ts and
+  explain allowed_passthrough_parameters and the --provider-options flag keyed
+  by provider_slug.
+
+tags:
+  - discovery
+  - advanced
+
+inputs:
+  prompt: "I want to tune the number of diffusion steps and guidance for black-forest-labs/flux.2-pro image generation. How do I do that and what values are allowed?"
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "provider-options"
+    - "provider_options"
+    - "passthrough"

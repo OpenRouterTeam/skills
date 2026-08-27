@@ -1,0 +1,18 @@
+id: trigger-001
+name: Should trigger on generation request
+description: >
+  A plain image-creation request should cause the agent to invoke the
+  openrouter-images skill without the skill body being pre-injected.
+
+tags:
+  - trigger
+  - positive
+
+inputs:
+  prompt: "Create an illustration of a fox reading a book under a tree."
+
+expected:
+  outcomes:
+    - type: task_completed
+    - type: tool_called
+      tool_name: skill

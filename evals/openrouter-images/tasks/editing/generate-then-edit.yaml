@@ -1,0 +1,27 @@
+id: editing-004
+name: Multi-turn generate then edit
+description: >
+  Multi-turn workflow. The agent first generates an image, then edits the file
+  it just created in a follow-up turn. Tests that it tracks the saved path
+  from generate.ts output and feeds it to edit.ts.
+
+tags:
+  - editing
+  - generation
+  - multi-turn
+  - advanced
+
+inputs:
+  prompt: "Generate an image of a corgi sitting in a park."
+  follow_up_prompts:
+    - "Nice — now add a rainbow in the background of that image you just made."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "rainbow"
+    - "edit"
