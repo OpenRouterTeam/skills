@@ -1,0 +1,57 @@
+id: long-input-001
+name: Long Input - Chunk and Concat
+description: |
+  Tests the skill's Long-Inputs guidance: split at sentence/paragraph
+  boundaries, same model+voice per chunk, concatenate audio. Agent should
+  recognize this isn't a single-call scenario.
+tags:
+  - happy-path
+  - long-input
+  - chunking
+
+inputs:
+  prompt: |
+    I have a 15,000-character article I want to narrate end-to-end with
+    OpenRouter TTS. What's the right approach? Show me the code and
+    explain your strategy inline in the response.
+
+graders:
+  - type: code
+    name: recognizes_chunking_need
+    config:
+      language: python
+      assertions:
+        - '"split" in output.lower() or "chunk" in output.lower() or "paragraph" in output.lower() or "sentence" in output.lower()'
+
+  - type: code
+    name: mentions_concatenation
+    config:
+      language: python
+      assertions:
+        - '"concat" in output.lower() or "ffmpeg" in output.lower() or "combine" in output.lower() or "merge" in output.lower()'
+
+  - type: prompt
+    name: long_input_strategy
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user has a 15k-character article to narrate via TTS. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Recognizes per-request limits: explains or implies TTS has a
+           per-request character limit and that the full article must be
+           split, not sent in one call.
+
+        2) Correct splitting strategy: splits at sentence or paragraph
+           boundaries, not mid-word. Keeps model + voice consistent across
+           chunks for prosody continuity.
+
+        3) Concatenation path: describes or implements concatenating the
+           resulting audio (e.g., ffmpeg concat, or collecting buffers and
+           writing them in order). Does NOT skip the concat step.
+
+expected:
+  outcomes:
+    - type: task_completed

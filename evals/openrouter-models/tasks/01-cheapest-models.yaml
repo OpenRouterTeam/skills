@@ -1,0 +1,57 @@
+id: cheapest-models-001
+name: Find Cheapest Models
+description: |
+  Tests the decision-tree mapping "cheapest models" → list-models.ts --sort price.
+  Also validates the skill's "Presenting Results" guidance: convert pricing to
+  per-million-tokens format.
+tags:
+  - happy-path
+  - list-models
+  - sort
+
+inputs:
+  prompt: |
+    What are the five cheapest models available on OpenRouter right now?
+
+graders:
+  # Join all bash commands into one searchable string for substring checks.
+  # tool_calls[i] has keys: name, arguments, result, success.
+  - type: code
+    name: invoked_list_models_sort_price
+    config:
+      language: python
+      assertions:
+        - '"list-models.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"--sort price" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "--sort=price" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: code
+    name: per_million_tokens_formatting
+    config:
+      language: python
+      assertions:
+        - '"/m" in output.lower() or "per million" in output.lower() or "/1m" in output.lower() or "1,000,000" in output'
+
+  - type: prompt
+    name: answer_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for the five cheapest OpenRouter models. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Correct tool chosen: the agent ran list-models.ts with a
+           price-sort flag (not a wrong script like compare-models,
+           not a guess without running the script).
+
+        2) Five models returned: the response names about five specific
+           models with their provider/id.
+
+        3) Presentation correct: pricing is shown in per-million-tokens
+           format ("$X/M input", "$X per million", etc.) rather than raw
+           per-token values, per the skill's Presenting Results guidance.
+
+expected:
+  outcomes:
+    - type: task_completed

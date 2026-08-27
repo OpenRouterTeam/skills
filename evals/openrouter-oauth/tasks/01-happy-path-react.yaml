@@ -1,0 +1,70 @@
+id: happy-path-react-001
+name: Happy Path - React App
+description: |
+  Standard request to add Sign In with OpenRouter to a React app.
+  Exercises the full PKCE flow and the sign-in button section of the skill.
+tags:
+  - happy-path
+  - react
+  - full-flow
+
+inputs:
+  prompt: |
+    I have a React app and I want to add "Sign in with OpenRouter" so users
+    can authorize and my app can make inference calls with their API key.
+    Walk me through the implementation and show me the code I need.
+
+graders:
+  # Full PKCE rubric + structural claims — this task is expected to cover
+  # the whole skill surface.
+  - type: code
+    name: pkce_technical_claims
+    config:
+      language: python
+      assertions:
+        - "'sessionstorage' in output.lower()"
+        - "'S256' in output or 's256' in output.lower()"
+        - "'openrouter.ai/auth' in output.lower() or 'openrouter.ai/api/v1/auth/keys' in output.lower()"
+        - "'code_verifier' in output.lower() or 'verifier' in output.lower()"
+        - "'code_challenge' in output.lower() or 'challenge' in output.lower()"
+
+  - type: prompt
+    name: skill_faithful_rubric
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        You are grading an agent's response to a user who asked for
+        "Sign in with OpenRouter" in a React app. The OpenRouter OAuth flow
+        is documented as PKCE with no client registration and no backend.
+
+        Evaluate these four criteria INDEPENDENTLY. Call set_waza_grade_pass
+        or set_waza_grade_fail once for EACH criterion (4 total calls).
+
+        1) Correct PKCE initiation: response describes generating a
+           code_verifier (32 random bytes, base64url encoded), computing an
+           S256 challenge, and redirecting to https://openrouter.ai/auth with
+           callback_url, code_challenge, and code_challenge_method=S256.
+           No invented client_id, client_secret, or app registration.
+
+        2) Correct storage model: code_verifier in sessionStorage (NOT
+           localStorage), final API key in localStorage, and a guard
+           (hasOAuthCallbackPending or equivalent) that checks the verifier
+           exists before processing ?code= params.
+
+        3) Correct key exchange: POST to
+           https://openrouter.ai/api/v1/auth/keys with JSON body containing
+           `code`, `code_verifier`, and `code_challenge_method: "S256"`, then
+           read `key` from the JSON response. No backend proxy claimed.
+
+        4) No fabricated details: does not introduce client_id/secret/app
+           registration/backend as requirements. Does not require installing
+           the OpenRouter SDK specifically for auth (the flow is plain fetch).
+
+        For each criterion: set_waza_grade_pass with description="criterion N: <name>"
+        and a reason if satisfied, otherwise set_waza_grade_fail with the same
+        description and a reason explaining what's missing.
+
+expected:
+  outcomes:
+    - type: task_completed

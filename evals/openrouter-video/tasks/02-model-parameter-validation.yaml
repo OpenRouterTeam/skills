@@ -1,0 +1,60 @@
+id: model-parameter-validation-001
+name: Parameter Validation Against Models Endpoint
+description: |
+  User asks for specific video params (duration, aspect ratio). The skill
+  says to fetch model capabilities first and only send values from the
+  returned sets — guessing causes 400s.
+tags:
+  - happy-path
+  - parameters
+  - validation
+
+inputs:
+  prompt: |
+    I want to generate a 6-second vertical (9:16) video with google/veo-3.1
+    from the prompt "a sunrise over the ocean". Write the bash to submit
+    the job. Show me the script inline.
+
+graders:
+  - type: code
+    name: checks_model_capabilities
+    config:
+      language: python
+      assertions:
+        - '"videos/models" in output.lower() or "supported_resolutions" in output.lower() or "supported_aspect_ratios" in output.lower() or "supported_durations" in output.lower()'
+
+  - type: code
+    name: passes_correct_params
+    config:
+      language: python
+      assertions:
+        - '"duration" in output.lower() and "6" in output'
+        - '"9:16" in output or "aspect_ratio" in output.lower()'
+        - '"google/veo-3.1" in output.lower()'
+
+  - type: prompt
+    name: validation_approach
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a 6s, 9:16 video with google/veo-3.1. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Validates first OR uses known-good values: either fetches
+           /api/v1/videos/models to check supported_durations contains 6
+           and supported_aspect_ratios contains "9:16" before submitting,
+           OR notes the skill's "don't guess" guidance and uses values
+           straight from the model's documented capability set.
+
+        2) Submits with correct params: POST body includes
+           duration: 6, aspect_ratio: "9:16" (or size), model:
+           "google/veo-3.1", prompt: (user's text).
+
+        3) Async-aware: does not expect the POST to return video bytes,
+           either polls or explains the next step is polling.
+
+expected:
+  outcomes:
+    - type: task_completed

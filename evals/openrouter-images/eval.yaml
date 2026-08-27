@@ -1,0 +1,33 @@
+name: openrouter-images-eval
+description: |
+  Evaluation suite for the openrouter-images skill. Validates that the
+  agent picks the right bundled script (generate.ts for new images,
+  edit.ts for modifications) and invokes it with correct flags.
+skill: openrouter-images
+version: "1.0"
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-opus-4.7
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.8
+    description: Did the agent pick the right script and flags?
+
+hooks:
+  before_run:
+    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-images/ /Users/matt.apperson/.agents/skills/openrouter-images/"
+    - command: "cd /Users/matt.apperson/.agents/skills/openrouter-images/scripts && npm install --silent"
+
+graders:
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 50"
+
+tasks:
+  - "tasks/*.yaml"

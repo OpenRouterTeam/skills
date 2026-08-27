@@ -1,0 +1,75 @@
+id: happy-path-curl-001
+name: Happy Path - Simple TTS via curl
+description: |
+  Standard request: generate an MP3 from a short phrase. Agent should produce
+  a shell/curl approach that hits /api/v1/audio/speech with the right body
+  fields and saves the raw bytes to an .mp3 file.
+tags:
+  - happy-path
+  - curl
+  - bash
+
+inputs:
+  prompt: |
+    Write a bash script that uses OpenRouter to generate an MP3 file saying
+    "Hello world, this is a test" and saves it to speech.mp3. Show me the
+    complete script in your response so I can see it.
+
+graders:
+  - type: code
+    name: endpoint_and_auth
+    config:
+      language: python
+      assertions:
+        - '"/api/v1/audio/speech" in output.lower()'
+        - '"authorization" in output.lower() or "bearer" in output.lower()'
+        - '"openrouter_api_key" in output.lower() or "$OPENROUTER_API_KEY" in output'
+
+  - type: code
+    name: body_shape
+    config:
+      language: python
+      assertions:
+        - '"model" in output.lower() and "input" in output.lower()'
+        - '"voice" in output.lower()'
+        - '"response_format" in output.lower() or "format" in output.lower()'
+
+  - type: code
+    name: format_extension_match
+    config:
+      language: python
+      assertions:
+        # If the script sets response_format: mp3, output file must also be .mp3.
+        - '("mp3" in output.lower() and "speech.mp3" in output) or ("pcm" not in output.lower())'
+
+  - type: prompt
+    name: correctness_rubric
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a bash script that calls OpenRouter's TTS API and
+        saves the result as speech.mp3. Evaluate the agent's response on
+        these criteria. Call set_waza_grade_pass or set_waza_grade_fail once
+        per criterion (4 calls total).
+
+        1) Correct endpoint + method: POST to
+           https://openrouter.ai/api/v1/audio/speech with JSON body.
+
+        2) Correct body fields: JSON body includes model (a real TTS model
+           slug like openai/gpt-4o-mini-tts-2025-12-15), input (the user's
+           text), voice (a real voice like alloy/nova), and
+           response_format set to "mp3".
+
+        3) Raw-bytes handling: the script treats the response body as raw
+           audio bytes, NOT as JSON. It writes bytes to speech.mp3 via
+           --output/-o or equivalent. Does not try to jq-parse the 200
+           response body.
+
+        4) Auth + API key: uses Authorization: Bearer $OPENROUTER_API_KEY
+           from environment. Does not hardcode a key or use the wrong
+           header name.
+
+expected:
+  outcomes:
+    - type: task_completed

@@ -1,0 +1,57 @@
+id: typescript-fetch-001
+name: TypeScript Transcription via fetch
+description: |
+  TypeScript flow using native fetch. Tests the skill's documented
+  TypeScript example is reproducible by the agent.
+tags:
+  - happy-path
+  - typescript
+  - fetch
+
+inputs:
+  prompt: |
+    Write a TypeScript function that transcribes a local audio file using
+    OpenRouter's STT and returns the transcript as a string. Include the
+    complete code in your response.
+
+graders:
+  - type: code
+    name: ts_shape
+    config:
+      language: python
+      assertions:
+        - '"fetch" in output.lower()'
+        - '"/api/v1/audio/transcriptions" in output.lower()'
+        - '"input_audio" in output.lower()'
+
+  - type: code
+    name: avoids_openai_sdk
+    config:
+      language: python
+      assertions:
+        - '"new openai(" not in output.lower() and "openai.audio.transcriptions" not in output.lower()'
+
+  - type: prompt
+    name: ts_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a TypeScript transcription function. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Correct endpoint + method: POST to
+           https://openrouter.ai/api/v1/audio/transcriptions with
+           Authorization: Bearer from OPENROUTER_API_KEY env var.
+
+        2) Correct body: JSON body with model (real slug), input_audio:
+           {data, format} where data is base64-encoded file bytes (no
+           data: URI prefix).
+
+        3) Returns transcript: on success returns result.text as a
+           string. Throws or handles non-ok responses clearly.
+
+expected:
+  outcomes:
+    - type: task_completed

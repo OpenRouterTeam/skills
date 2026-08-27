@@ -1,0 +1,75 @@
+id: full-async-flow-001
+name: Happy Path - Full 3-Step Video Generation
+description: |
+  Standard request. Agent should write a bash script covering all three
+  steps: POST /api/v1/videos, poll the polling_url until status=completed
+  (handling failed/cancelled/expired terminal states), then GET the content.
+tags:
+  - happy-path
+  - bash
+  - async-flow
+
+inputs:
+  prompt: |
+    Write a bash script that generates a short video from this prompt:
+    "a golden retriever playing fetch on a sunny beach". Save the final
+    MP4 to video.mp4. Show me the complete script in your response.
+
+graders:
+  - type: code
+    name: submit_step
+    config:
+      language: python
+      assertions:
+        - '"POST" in output or "-X POST" in output or "method: \"POST\"" in output.lower()'
+        - '"/videos" in output.lower()'
+        - '"prompt" in output.lower() and "model" in output.lower()'
+
+  - type: code
+    name: poll_step
+    config:
+      language: python
+      assertions:
+        - '"polling_url" in output.lower() or "poll" in output.lower()'
+        - '"status" in output.lower() and "completed" in output.lower()'
+        - '"failed" in output.lower() and ("cancelled" in output.lower() or "canceled" in output.lower() or "expired" in output.lower())'
+
+  - type: code
+    name: download_step
+    config:
+      language: python
+      assertions:
+        - '"video.mp4" in output.lower()'
+        - '"authorization" in output.lower() or "bearer" in output.lower()'
+
+  - type: prompt
+    name: async_flow_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a bash script that generates a video from a
+        prompt using OpenRouter's async video API. Call set_waza_grade_pass
+        or set_waza_grade_fail once per criterion (4 calls total).
+
+        1) Submit step: POST to https://openrouter.ai/api/v1/videos with
+           JSON body containing model (real slug like google/veo-3.1) and
+           prompt. Auth via Authorization: Bearer $OPENROUTER_API_KEY.
+
+        2) Poll step: polls the polling_url returned from submit (with
+           the auth header) at a reasonable interval (30s or so), breaks
+           on status="completed", exits with an error on "failed",
+           "cancelled", or "expired" and prints the .error field.
+
+        3) Download step: downloads the MP4 from the completed response
+           (unsigned_urls[0] or /api/v1/videos/{id}/content) WITH the
+           Authorization header, saves to video.mp4. Does NOT try to
+           stream output without auth.
+
+        4) Correct overall: recognizes video generation is async and
+           does NOT expect the POST to return video bytes directly.
+           Explains the delay to the user or handles it gracefully.
+
+expected:
+  outcomes:
+    - type: task_completed

@@ -1,0 +1,60 @@
+id: python-sdk-001
+name: Python TTS via OpenAI SDK
+description: |
+  Tests the OpenAI-SDK-compatible path. Agent should use the OpenAI Python
+  SDK with base_url override, per the skill's documented pattern.
+tags:
+  - happy-path
+  - python
+  - sdk
+
+inputs:
+  prompt: |
+    I'm working in a Python project. Show me how to use OpenRouter's TTS
+    to narrate the first paragraph of a blog post and save it as
+    narration.mp3. Use the OpenAI Python SDK — I'd rather not shell out.
+    Include the full code in your response.
+
+graders:
+  - type: code
+    name: openai_sdk_with_base_url
+    config:
+      language: python
+      assertions:
+        - '"from openai import openai" in output.lower() or "import openai" in output.lower()'
+        - '"base_url" in output.lower() and "openrouter.ai/api/v1" in output.lower()'
+
+  - type: code
+    name: audio_speech_call
+    config:
+      language: python
+      assertions:
+        - '"audio.speech" in output.lower() or "audio/speech" in output.lower()'
+        - '"stream_to_file" in output.lower() or "write" in output.lower() or "arraybuffer" in output.lower() or "iter_bytes" in output.lower()'
+
+  - type: prompt
+    name: python_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a Python-SDK-based TTS implementation. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Correct SDK usage: uses the OpenAI Python SDK (not a custom HTTP
+           call), initializes the client with base_url pointing at
+           https://openrouter.ai/api/v1 and api_key from
+           os.environ["OPENROUTER_API_KEY"].
+
+        2) Correct TTS call: calls client.audio.speech.create or equivalent
+           with model (real OpenRouter TTS slug), input (the paragraph),
+           voice, and response_format="mp3".
+
+        3) Saves as narration.mp3: the code writes the response bytes to
+           narration.mp3, using streaming or arrayBuffer — not trying to
+           parse the body as JSON on success.
+
+expected:
+  outcomes:
+    - type: task_completed

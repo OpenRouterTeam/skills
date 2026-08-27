@@ -1,0 +1,37 @@
+name: openrouter-tts-eval
+description: |
+  Evaluation suite for the openrouter-tts skill. Validates that the agent
+  produces code that correctly calls OpenRouter's /api/v1/audio/speech
+  endpoint with proper auth, body shape, response-format handling, and
+  file-extension matching.
+
+  Graders are PER-TASK (task-level graders are additive in waza).
+skill: openrouter-tts
+version: "1.0"
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-opus-4.7
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.8
+    description: Did the agent write correct TTS code?
+
+# Keep the worktree skill content in sync with what the agent actually reads.
+hooks:
+  before_run:
+    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-tts/ /Users/matt.apperson/.agents/skills/openrouter-tts/"
+
+graders:
+  # Universal: non-empty response.
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 100"
+
+tasks:
+  - "tasks/*.yaml"

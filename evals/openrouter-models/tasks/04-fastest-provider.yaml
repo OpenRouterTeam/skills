@@ -1,0 +1,49 @@
+id: fastest-provider-001
+name: Fastest Provider for a Model
+description: |
+  Tests get-endpoints.ts for provider-performance questions. Skill guidance
+  says to highlight fastest (lowest p50 latency) and most reliable (highest
+  uptime).
+tags:
+  - happy-path
+  - get-endpoints
+  - provider-performance
+
+inputs:
+  prompt: |
+    Which provider is currently fastest for anthropic/claude-sonnet-4?
+
+graders:
+  - type: code
+    name: invoked_get_endpoints
+    config:
+      language: python
+      assertions:
+        - '"get-endpoints.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"anthropic/claude-sonnet-4" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"--sort throughput" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "--sort=throughput" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "--sort latency" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "--sort=latency" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: prompt
+    name: provider_answer_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked which provider is fastest for claude-sonnet-4. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Correct tool: agent ran get-endpoints.ts for
+           anthropic/claude-sonnet-4 (not list-models, not a guess).
+
+        2) Names a specific provider: response identifies a specific
+           provider (Anthropic, Google Vertex, AWS Bedrock, etc.) as the
+           fastest, with supporting numbers (p50 latency or throughput).
+
+        3) Includes context: response mentions uptime or reliability for
+           the recommended provider, per the skill's guidance to call out
+           reliable providers.
+
+expected:
+  outcomes:
+    - type: task_completed

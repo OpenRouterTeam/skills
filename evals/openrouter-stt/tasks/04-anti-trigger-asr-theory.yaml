@@ -1,0 +1,53 @@
+id: anti-trigger-asr-theory-001
+name: Anti-Trigger - ASR Theory Question
+description: |
+  Negative test: conceptual question about ASR/STT. Shares keywords
+  ("STT", "speech-to-text", "ASR") with the skill but is not a
+  transcription request. The skill should not activate into code
+  generation.
+tags:
+  - anti-trigger
+  - negative-test
+  - trigger-specificity
+
+inputs:
+  prompt: |
+    Can you explain how modern speech-to-text models like Whisper handle
+    multi-speaker audio? I want to understand if they do speaker
+    diarization out of the box or if that's a separate step.
+
+graders:
+  - type: code
+    name: no_openrouter_api_call
+    config:
+      language: python
+      assertions:
+        - "'openrouter.ai/api/v1/audio/transcriptions' not in output.lower()"
+        - "'input_audio' not in output.lower() or output.lower().count('input_audio') <= 1"
+        - "'$openrouter_api_key' not in output.lower() and 'os.environ[\"openrouter_api_key\"]' not in output.lower()"
+
+  - type: prompt
+    name: stays_educational
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked a conceptual question about ASR and speaker
+        diarization. Call set_waza_grade_pass or set_waza_grade_fail once
+        per criterion (2 calls total).
+
+        1) Answers the actual question: explains how Whisper handles
+           multi-speaker input, and clarifies whether speaker diarization
+           is built-in vs a separate step (correct answer: Whisper does
+           NOT do speaker diarization natively — that's a separate task,
+           typically handled with pyannote or similar).
+
+        2) No OpenRouter contamination: does NOT produce curl commands,
+           does NOT write a transcription script, does NOT insert code
+           that calls /api/v1/audio/transcriptions. A brief mention of
+           OpenRouter models is okay; generating an STT client script
+           is not.
+
+expected:
+  outcomes:
+    - type: task_completed
