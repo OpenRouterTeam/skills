@@ -120,13 +120,15 @@ Classifier dimensions allow grouping by dynamic, user-defined classification lab
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `classifier_id` | `string` (UUID) | Yes | ID of the classifier (must belong to the caller's account) |
-| `dimension_names` | `string[]` | No | Specific dimension names to group by (max 10). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars). |
+| `dimension_names` | `string[]` | No | Specific dimension names to group by (max 2). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars), must be unique, and must not collide with a built-in metric or dimension alias. |
 | `include_nulls` | `boolean` | No | When `true`, unclassified rows are included in results. Default `false` (only classified rows). |
 
 **Constraints:**
 - Limits the query time range to 31 days
 - Single dimension name → result column is aliased to that name (e.g., `category`)
-- Multiple dimension names → result uses generic `clf_dimension_name` / `clf_dimension_value` columns
+- Two dimension names → results are cross-grouped by both dimensions, each value projected as its own named column (e.g., `category` and `sentiment` on the same row)
+- Omitted → result uses generic `clf_dimension_name` / `clf_dimension_value` columns, one row per dimension/value pair
+- Requesting more than 2 names, duplicate names, or a name colliding with a reserved alias returns `400`
 
 ## Classifier Filters
 
@@ -181,7 +183,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries, each requested dimension name becomes its own column (e.g., `category`, or `category` + `sentiment` when two are requested). With no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns instead. |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
