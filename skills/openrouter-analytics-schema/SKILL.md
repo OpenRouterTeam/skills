@@ -60,7 +60,7 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `data_region`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -141,6 +141,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `provider` — upstream provider name
 - `origin` — request origin/source
 - `country` — request country
+- `data_region` — region the request was served from (`global`, `europe`, `us`); rows predating the region default are reported as `global`
 - `finish_reason` — why the generation ended (stop, length, etc.)
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
