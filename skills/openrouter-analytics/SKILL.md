@@ -122,13 +122,16 @@ The query endpoint returns an array of data rows. Each row is a flat object with
 
 When interpreting results for the user:
 - **Spend metrics** (`total_usage`, `credits_usage`, `openrouter_usage`, `byok_usage`, `byok_fees`, `usage_upstream`, `usage_cache`, `usage_web`, `usage_upstream_web`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, `usage_upstream_web_fetch`) are in USD. `total_usage` includes BYOK inference cost. `usage_data` is typically negative (a data logging discount)
+- **Blended cost** (`blended_cost_per_million_tokens`) is the blended inference cost per 1M tokens, including applicable BYOK inference usage
 - **Token counts** (`tokens_total`, `tokens_prompt`, `tokens_completion`) are in native model tokens
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds
 - **Rates** (`cache_hit_rate`) are 0–1 ratios
 - **Throughput** (`avg_throughput`) is tokens per second
-- When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
+- When `granularity` is set, rows include a source-dependent time-bucket field: `date__<granularity>` for MV-backed queries or `created_at__<granularity>` for raw generations/classification queries (detect either prefix)
 - **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows; `generation_id` and `session_id` return raw values
+- **Label fallbacks**: `app = -1` is `Unknown`, `api_key_id = -1` is `Chatroom`; user labels prefer the full name and fall back to email; app labels prefer the title, then origin URL, then `App #<id>`
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
+- **Accounting note**: Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
 
 ### Cost Optimization Guidance
 
@@ -146,6 +149,8 @@ When the user asks "How can I spend less?" or similar:
 ## Drilling Down to Individual Generations
 
 To inspect specific generations or sessions from your analytics results, add `generation_id` or `session_id` as a dimension. Both are generations-only dimensions (31-day limit). `generation_id` returns the unique ID for each generation in the result set. `session_id` groups and filters sessionless requests as the literal `none`: the ClickHouse column defaults to an empty string, and the query builder coalesces it to `none`. Use `neq 'none'` to exclude sessionless requests; filtering on `''` matches nothing.
+
+To break down requests by serving region, add `data_region` as a dimension. Values are `global`, `europe`, or `us`; it is generations-only (31-day limit), and rows predating region attribution report as `global`.
 
 ```bash
 npx tsx query-analytics.ts --metrics total_usage,tokens_total --dimensions generation_id --order-by total_usage --limit 10

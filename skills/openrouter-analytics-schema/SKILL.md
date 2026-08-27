@@ -60,30 +60,30 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Most volume and cost metrics support time ranges up to **367 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
 **Volume metrics** (how much):
-- `request_count` — number of API requests (up to 365 days)
-- `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts (up to 365 days)
-- `reasoning_tokens` — tokens used for extended thinking (up to 365 days)
-- `cached_tokens` — tokens served from cache (up to 365 days)
-- `byok_request_count` — number of BYOK requests (up to 365 days)
+- `request_count` — number of API requests (up to 367 days)
+- `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts (up to 367 days)
+- `reasoning_tokens` — tokens used for extended thinking (up to 367 days)
+- `cached_tokens` — tokens served from cache (up to 367 days)
+- `byok_request_count` — number of BYOK requests (up to 367 days)
 - `guardrail_invoked_count` — count of requests that triggered guardrails (31-day limit)
 - `response_cached_count` — count of responses served from cache (31-day limit)
 
 **Cost metrics** (how much money):
-- `total_usage` — total cost in USD, including BYOK inference cost (up to 365 days). Computed as `sum(usage) + sum(byok_usage_inference)` so it reflects true spend for both credits and BYOK users.
-- `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 365 days)
-- `credits_usage` — all charges billed to OpenRouter credits in USD, including BYOK platform fees (up to 365 days)
+- `total_usage` — total cost in USD, including BYOK inference cost (up to 367 days). Computed as `sum(usage) + sum(byok_usage_inference)` so it reflects true spend for both credits and BYOK users.
+- `byok_usage` — BYOK (bring your own key) inference cost in USD (up to 367 days)
+- `credits_usage` — all charges billed to OpenRouter credits in USD, including BYOK platform fees (up to 367 days)
 - `openrouter_usage` — non-BYOK inference spend in USD; excludes requests made with user-provided keys (31-day limit)
 - `byok_fees` — BYOK platform fees in USD; the platform fee portion of `credits_usage` charged on BYOK requests (31-day limit). `credits_usage` includes both non-BYOK inference charges and these BYOK platform fees.
-- `usage_upstream` — provider-side (upstream) cost in USD (up to 365 days)
-- `usage_cache` — cache cost component in USD (up to 365 days)
-- `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 365 days)
-- `usage_web` — web search cost in USD (up to 365 days)
-- `usage_upstream_web` — provider-side web search cost in USD (up to 365 days)
+- `usage_upstream` — provider-side (upstream) cost in USD (up to 367 days)
+- `usage_cache` — cache cost component in USD (up to 367 days)
+- `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 367 days)
+- `usage_web` — web search cost in USD (up to 367 days)
+- `usage_upstream_web` — provider-side web search cost in USD (up to 367 days)
 - `usage_file` — file processing cost in USD (31-day limit)
 - `usage_upstream_file` — provider-side file processing cost in USD (31-day limit)
 - `usage_web_fetch` — web fetch cost in USD (31-day limit)
@@ -97,6 +97,8 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
+
+> **Accounting note:** Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
 
 ## Understanding Dimensions
 
@@ -125,6 +127,8 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
+
+> Label fallbacks: `app = -1` is returned as `Unknown`, `api_key_id = -1` as `Chatroom`; user labels prefer the full name and fall back to email; app labels prefer the title, then origin URL, then `App #<id>`.
 
 ### Dimension Categories
 
@@ -210,14 +214,14 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Usage by country" | `request_count` | `country` | 31-day limit |
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
 | "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | 31-day limit. Use returned IDs with `openrouter-generations` skill for full metadata and content |
-| "How much BYOK spend?" | `byok_usage` | `model` | Up to 365 days |
-| "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | Both up to 365 days |
+| "How much BYOK spend?" | `byok_usage` | `model` | Up to 367 days |
+| "BYOK vs credits split?" | `byok_usage`, `credits_usage` | — | Both up to 367 days |
 | "BYOK platform fees?" | `byok_fees` | `model` | 31-day limit |
 | "Non-BYOK inference spend?" | `openrouter_usage` | `model` | 31-day limit |
 | "How many guardrail triggers?" | `guardrail_invoked_count`, `guardrail_invoked_rate` | `model` | 31-day limit |
 | "How many cached responses?" | `response_cached_count`, `response_cached_rate` | `model` | 31-day limit |
-| "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 365 days) |
-| "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
+| "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 367 days) |
+| "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 367 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
 
@@ -243,7 +247,7 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Maximum 10 classifier filters per query
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
-- Most volume/cost metrics: up to 365 days with daily granularity
+- Most volume/cost metrics: up to 367 days with daily granularity
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
 - Classifier dimensions/filters: always limited to 31 days
 - Minute granularity: only available when the time window is ≤ 3 hours

@@ -90,10 +90,11 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
-  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results; filtering or grouping by the account's default workspace also covers activity recorded before workspace resolution existed, which is attributed to that default workspace.
   - `app` — numeric app ID, not the app title shown in results.
-  - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
-- Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
+  - `model` — permaslug (e.g. `openai/gpt-4o`); both the filter value and returned value are the permaslug, not a display name.
+- Other dimensions (`provider`, `origin`, `country`, `data_region`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
+- `data_region` values are `global`, `europe`, or `us`. It is a generations-only dimension (31-day limit), and rows predating region attribution report as `global`.
 
 ### Order By
 
@@ -181,16 +182,18 @@ Classifier filters narrow results to generations matching specific classificatio
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and a source-dependent time-bucket field — `date__<granularity>` for MV-backed queries or `created_at__<granularity>` for raw generations/classification queries (detect either prefix). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
 | `data.cachedAt` | Unix timestamp (ms) when the result was cached. Present when the response was served from cache |
-| `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). The query still executes normally; these inform the caller about filter resolution issues. |
+| `data.warnings` | Optional array of non-fatal warnings (e.g., unresolvable api_key_id hashes). An unresolvable label filter becomes a no-match sentinel; the query still executes normally, and the warning explains the filter resolution issue. |
 
-> **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
+> **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `blended_cost_per_million_tokens`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Accounting note:** Server-tool billing rows are included in `total_usage` but excluded from `request_count`, request-based rates, and classification/dedup counts. Spend-per-request can therefore look inconsistent.
+
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. `app = -1` is `Unknown`, `api_key_id = -1` is `Chatroom`; user labels prefer the full name and fall back to email; app labels prefer the title, then origin URL, then `App #<id>`.
 
 ## CLI Reference
 
@@ -224,7 +227,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 }
 ```
 
-A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
+A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only. The CLI stdout intentionally omits the endpoint's optional `cachedAt` and `warnings` fields; use the direct API response when those fields are needed.
 
 > **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
 
@@ -330,11 +333,13 @@ Combine up to 2 dimensions for cross-tabulation:
 
 ## Time Range Behavior
 
-Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
+Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
+
+A filter on a dimension not carried by the materialized views (for example, `data_region`) forces the query onto raw generations, so the 31-day limit applies even when the requested metrics and grouped dimensions would otherwise allow the longer daily-MV range.
 
 If a query times out, try:
 - Narrowing the time range
