@@ -1121,10 +1121,33 @@ try {
 |------|---------|--------|
 | 400 | Bad request | Check request parameters |
 | 401 | Unauthorized | Verify API key |
-| 402 | Payment required | Add credits |
-| 429 | Rate limited | Implement exponential backoff |
+| 402 | Payment required | Inspect `error.error.metadata` when present, then add credits or raise/remove the API-key limit as indicated |
+| 429 | Rate limited | Inspect `error.error.metadata` when present, then follow its remedy hint and implement exponential backoff |
 | 500 | Server error | Retry with backoff |
 | 503 | Service unavailable | Try alternative model |
+
+### Machine-readable limit metadata
+
+The JSON body of a classified `402` or `429` response may include `limit_source` and `remedy_hint` under `error.metadata`. In the generated SDK error classes, access the response payload as `error.error.metadata`; `error.metadata` is not the SDK accessor. The base error's `body` property contains the raw response body.
+
+```typescript
+type LimitErrorMetadata = {
+  limit_source:
+    | 'openrouter_free_tier_daily'
+    | 'openrouter_free_tier_per_minute'
+    | 'openrouter_account'
+    | 'openrouter_new_account'
+    | 'openrouter_shared_capacity'
+    | 'openrouter_limiter_unavailable'
+    | 'upstream_provider_account'
+    | 'upstream_provider_shared_pool'
+    | 'openrouter_credits'
+    | 'openrouter_key_limit';
+  remedy_hint: string;
+};
+```
+
+`limit_source` identifies which OpenRouter, provider, credit, or API-key limit produced the response. `remedy_hint` is a human-readable next step. Treat these fields as optional because some errors cannot be classified.
 
 ---
 
