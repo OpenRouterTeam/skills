@@ -88,6 +88,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `usage_upstream_file` — provider-side file processing cost in USD (31-day limit)
 - `usage_web_fetch` — web fetch cost in USD (31-day limit)
 - `usage_upstream_web_fetch` — provider-side web fetch cost in USD (31-day limit)
+- `blended_cost_per_million_tokens` — blended inference cost per 1M tokens: `(sum(usage) + sum(byok_usage_inference)) / (prompt_tokens + completion_tokens) * 1e6` (up to 365 days). A rate metric (`is_rate: true`, `display_format: currency`) — averaged across the range, not summed.
 
 **Performance metrics** (how fast):
 - `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
