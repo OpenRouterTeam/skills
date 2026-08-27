@@ -67,6 +67,13 @@ curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
   | jq -r '.data[] | select(.id=="openai/gpt-4o-mini-tts-2025-12-15") | .supported_voices[]'
 ```
 
+Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`:
+
+```bash
+curl -sS "https://openrouter.ai/api/v1/models/fish-audio/s1/endpoints" \
+  | jq '.data.endpoints[] | {provider_name, model_id, supports_voice_cloning}'
+```
+
 Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtral encodes language + persona + emotion (`en_paul_happy`), Kokoro prefixes with language/gender (`af_bella` = American female Bella).
 
 ## Parameters
@@ -75,10 +82,42 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `model`           | yes      | TTS model slug (e.g. `openai/gpt-4o-mini-tts-2025-12-15`, `mistralai/voxtral-mini-tts-2603`).                     |
 | `input`           | yes      | The text to synthesize.                                                                                           |
-| `voice`           | yes      | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
+| `voice`           | no       | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
+| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally accompanied by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints whose `supports_voice_cloning` capability is `true`. |
 | `provider`        | no       | Provider passthrough — see below.                                                                                 |
+
+### Voice cloning
+
+Pass one reference-audio part, optionally accompanied by its transcript:
+
+```bash
+curl -sS -X POST https://openrouter.ai/api/v1/audio/speech \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "fish-audio/s1",
+    "input": "Welcome to the show.",
+    "input_references": [
+      {
+        "type": "input_audio",
+        "input_audio": {
+          "data": "data:audio/wav;base64,<base64-audio>",
+          "format": "wav"
+        }
+      },
+      {
+        "type": "text",
+        "text": "Welcome to the show."
+      }
+    ],
+    "response_format": "mp3"
+  }' \
+  --output cloned-voice.mp3
+```
+
+The audio `data` may be raw base64 or a data URI. `format` is optional; most providers detect it from the audio bytes. Reference audio is limited to 20 MiB of base64 (15 MiB decoded), and `input_references` requires one `input_audio` part plus at most one transcript part.
 
 ### Picking a format
 
