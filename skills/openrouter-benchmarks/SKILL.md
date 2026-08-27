@@ -1,11 +1,11 @@
 ---
 name: openrouter-benchmarks
-description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores. Use when the user asks for benchmark-backed model selection, model rankings by coding/intelligence/agentic ability, Artificial Analysis or Design Arena ELO/win-rate results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
+description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores, including OpenRouter search benchmarks. Use when the user asks for benchmark-backed model selection, model rankings by coding/intelligence/agentic ability, Artificial Analysis or Design Arena ELO/win-rate results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
 ---
 
 # OpenRouter Benchmarks
 
-Use OpenRouter's unified benchmarks endpoint to answer benchmark-backed model ranking and model-selection questions. The endpoint aggregates Artificial Analysis and Design Arena data and returns citation metadata that should be preserved when reporting results.
+Use OpenRouter's unified benchmarks endpoint to answer benchmark-backed model ranking and model-selection questions. The endpoint aggregates Artificial Analysis, Design Arena, and OpenRouter search benchmark data and returns citation metadata that should be preserved when reporting results.
 
 ## Prerequisites
 
@@ -22,8 +22,10 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 | See benchmark-ranked models across sources | Call `GET /api/v1/benchmarks` and preserve source/citation metadata |
 | Choose a model for an app/use case | Check whether Artificial Analysis or Design Arena contains a relevant signal; say when no direct benchmark exists |
 | Find best coding, intelligence, or agentic models | Use `task_type=coding`, `task_type=intelligence`, or `task_type=agentic` |
+| Find best search models or compare search evaluations | Use `task_type=search` or a `search_*` `benchmark_type`; optionally filter by `search_engine` or `search_surface` |
 | Query Artificial Analysis only | Use `source=artificial-analysis` |
 | Query Design Arena only | Use `source=design-arena`, plus `arena` and `category` when relevant |
+| Query OpenRouter search benchmarks only | Use `source=openrouter`, plus `benchmark_type=search_*`, `task_type=search`, `search_engine`, or `search_surface` |
 | Get raw API-shaped data for integration work | Return the raw `data`/`meta` shape from the endpoint |
 | Understand all response fields or direct curl usage | Read `references/benchmarks-api.md` |
 
@@ -51,8 +53,12 @@ Query parameters:
 
 | Flag | Values | Notes |
 |---|---|---|
-| `source` | `artificial-analysis`, `design-arena` | Omitting it returns all sources. |
-| `task_type` | `coding`, `intelligence`, `agentic` | Maps to source-specific indices/categories. |
+| `source` | `artificial-analysis`, `design-arena`, `openrouter` | Omitting it returns all sources. |
+| `task_type` | `coding`, `intelligence`, `agentic`, `search` | Maps to source-specific indices/categories; `search` scopes to OpenRouter search benchmarks. |
+| `benchmark_type` | `gpqa_diamond`, `tau_bench_verified_airline`, `search_browsecomp`, `search_hle`, `search_dsqa`, `search_widesearch` | OpenRouter benchmark filter; `search_*` values scope to search results. |
+| `include_run_config` | `true`, `false` | Search benchmarks only; defaults to `false`. |
+| `search_engine` | string | Search benchmarks only. |
+| `search_surface` | `server-tool`, `plugin` | Search benchmarks only. |
 | `arena` | `models`, `builders`, `agents` | Design Arena only; defaults server-side to `models`. |
 | `category` | `codecategories`, `uicomponent`, `gamedev`, `3d`, `dataviz`, `image`, `video`, `svg`, etc. | Design Arena only. |
 | `max_results` | positive integer | Maximum number of rows returned by the API. |
@@ -65,7 +71,8 @@ When results include both sources, do not present them as a single absolute lead
 
 - Artificial Analysis rows include `intelligence_index`, `coding_index`, and `agentic_index`; higher is better.
 - Design Arena rows include `elo`, `win_rate`, `avg_generation_time_ms`, `arena`, `category`, and `tournament_stats`; higher `elo`/`win_rate` is better, lower generation time is faster.
-- `pricing.prompt` and `pricing.completion` are USD per token as decimal strings. Multiply by 1,000,000 for per-million-token costs.
+- Search rows include `primary_metric` and `primary_score`; `primary_metric` is `f1_by_item` only for WideSearch and `accuracy` otherwise, and higher scores are better. Search scores are not comparable to Artificial Analysis indices or Design Arena ELO.
+- `pricing.prompt` and `pricing.completion` are USD per token as decimal strings for Artificial Analysis and Design Arena rows. Search rows do not include a `pricing` field. Multiply by 1,000,000 for per-million-token costs.
 - `model_permaslug` identifies the benchmarked model entry. Verify it against `GET /api/v1/models` before using it as a chat/completions model ID.
 - `meta.model_count` counts unique models in the response, which can differ from `data.length` when multiple Design Arena categories are returned.
 
