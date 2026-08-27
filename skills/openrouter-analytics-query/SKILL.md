@@ -82,11 +82,17 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 ### Filter Object Shape
 
 ```json
-{ "field": "<dimension_name>", "operator": "<op>", "value": "<value>" }
+{
+  "field": "<dimension_name>",
+  "operator": "<op>",
+  "value": "<value>",
+  "include_unset": true
+}
 ```
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- `include_unset: true` includes rows where the dimension has no value. It is supported only with `in` and `not_in`, and only for dimensions that have an unset bucket.
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
@@ -321,7 +327,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
+| 400 | Invalid query (bad metric name, too many dimensions, invalid time range, incompatible possible-cache combination) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. The error body names the incompatible field when possible-cache metrics are involved. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
@@ -335,6 +341,8 @@ Some metric/dimension combinations support time ranges up to **365 days** (with 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
+
+The possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read the hourly possible-cache rollup, so they are capped at **31 days** regardless of granularity, and can only be combined with `tokens_prompt`, `cached_tokens`, `cache_hit_rate`, `model`/`provider` grouping and filters, and `hour` granularity or coarser. Anything else — another metric, another dimension or filter field, `minute` granularity, classifier dimensions or filters — returns 400 naming the incompatible parts instead of falling back to another source.
 
 If a query times out, try:
 - Narrowing the time range
