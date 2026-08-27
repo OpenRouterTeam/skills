@@ -73,7 +73,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
-| `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
+| `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a **requested** metric (or `request_count`, which may be ordered by even when it is not in `metrics`), a **requested** dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
 | `group_limit` | `integer` | auto-computed | Maximum rows per distinct dimension combination (ClickHouse LIMIT n BY). When omitted on time-series queries (granularity + dimensions), auto-computed from the time range to guarantee full time-window coverage per group. Explicit values override the default. Ignored when no dimensions are specified. |
 | `classifier_dimensions` | `object` | none | Group by dynamic classifier-produced dimensions. See [Classifier Dimensions](#classifier-dimensions) below. |
@@ -102,6 +102,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 ```
 
 When `granularity` is set and no `order_by` is specified, results are ordered by time descending.
+
+`field` must be a **requested** metric, a **requested** dimension, or `"date"`. The one exception is `request_count`: it may be used as the order field even when it is not included in `metrics` — handy for ranking top-N groups by request volume while displaying a different metric. Ordering by a dimension that is not in `dimensions` is rejected with a 400.
 
 ## Classifier Dimensions
 
@@ -190,7 +192,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `api_key_id`, `app`, and `workspace` return human-readable labels in data rows (key names, app titles, workspace names), not raw IDs. The `user` dimension is special: each row carries **two** fields — `user` (display name, `null` if unset) and `user_email` (email, `null` if none on file); the raw user ID is never returned.
 
 ## CLI Reference
 
@@ -226,7 +228,7 @@ The CLI prints a single JSON object to **stdout** with two keys — `data` (the 
 
 A human-readable stats line (row count, query time, truncation/cache flags) is written to **stderr** for terminal use only.
 
-> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `user`, `app`, and `workspace` are already resolved to human-readable names in the data rows.
+> **When parsing output programmatically, always check `metadata.truncated`.** If `true`, the result was capped at `--limit` and is a *partial* dataset — increase `--limit` or paginate before reporting totals/rankings. Dimensions `api_key_id`, `app`, and `workspace` are already resolved to human-readable names in the data rows; the `user` dimension returns `user` (name) plus a separate `user_email` field.
 
 **Multi-filter queries:** the CLI builds a multi-element `filters` array (ANDed together) from the unindexed base flag (`--filter-field`/`--filter-op`/`--filter-value`) plus the indexed `--filter-field-N`/`--filter-op-N`/`--filter-value-N` flags. Each filter must supply all three parts (field, op, value); a partial triplet is rejected. Up to **20 filters** total (the base flag plus indices 1–19), matching the API cap. Indices may be sparse (e.g. base + `-2` with `-1` omitted is fine — gaps are skipped, not silently dropped). For a query like `model = X AND provider = Y`:
 
