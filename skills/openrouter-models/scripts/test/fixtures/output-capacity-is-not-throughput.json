@@ -63,15 +63,7 @@
             "quantization": "unknown",
             "supports_implicit_caching": false,
             "supported_parameters": ["max_tokens"]
-          }
-        ]
-      }
-    },
-    "example/small-output-fast": {
-      "data": {
-        "id": "example/small-output-fast",
-        "name": "Small Output, Fast Generation",
-        "endpoints": [
+          },
           {
             "provider_name": "Speed Provider",
             "tag": "speed-provider",
@@ -79,9 +71,9 @@
             "uptime_last_30m": 99.9,
             "latency_last_30m": { "p50": 300, "p75": 400, "p90": 500, "p99": 700 },
             "throughput_last_30m": { "p50": 120, "p75": 130, "p90": 140, "p99": 160 },
-            "context_length": 32768,
+            "context_length": 262144,
             "max_completion_tokens": 4096,
-            "max_prompt_tokens": 32768,
+            "max_prompt_tokens": 262144,
             "pricing": { "prompt": "0.000001", "completion": "0.000002" },
             "quantization": "unknown",
             "supports_implicit_caching": false,

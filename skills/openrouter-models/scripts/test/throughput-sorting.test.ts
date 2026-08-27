@@ -71,30 +71,25 @@ test("compare-models help routes throughput comparisons to live endpoints", () =
   assert.match(result.stdout, /get-endpoints\.ts/);
 });
 
-test("the live endpoint fixture ranks generation speed independently of output capacity", () => {
-  const largeOutput = runScript("get-endpoints.ts", [
+test("throughput sorting puts the faster endpoint before the higher-capacity endpoint", () => {
+  const result = runScript("get-endpoints.ts", [
     "example/large-output-slow",
     "--sort",
     "throughput",
   ]);
-  const fastOutput = runScript("get-endpoints.ts", [
-    "example/small-output-fast",
-    "--sort",
-    "throughput",
-  ]);
 
-  assert.equal(largeOutput.status, 0, largeOutput.stderr);
-  assert.equal(fastOutput.status, 0, fastOutput.stderr);
+  assert.equal(result.status, 0, result.stderr);
 
-  const largeOutputEndpoint = JSON.parse(largeOutput.stdout).endpoints[0];
-  const fastOutputEndpoint = JSON.parse(fastOutput.stdout).endpoints[0];
+  const [fastEndpoint, highCapacityEndpoint] = JSON.parse(result.stdout).endpoints;
 
+  assert.equal(fastEndpoint.provider, "Speed Provider");
+  assert.equal(highCapacityEndpoint.provider, "Capacity Provider");
   assert.ok(
-    largeOutputEndpoint.max_completion_tokens > fastOutputEndpoint.max_completion_tokens
+    fastEndpoint.max_completion_tokens < highCapacityEndpoint.max_completion_tokens
   );
   assert.ok(
-    largeOutputEndpoint.throughput_30m_tokens_per_sec.p50 <
-      fastOutputEndpoint.throughput_30m_tokens_per_sec.p50
+    fastEndpoint.throughput_30m_tokens_per_sec.p50 >
+      highCapacityEndpoint.throughput_30m_tokens_per_sec.p50
   );
 });
 
