@@ -30,5 +30,6 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - `callModel` for text generation, tool use, and streaming
 - Defining tools with `tool()` and stop conditions (`stepCountIs`, `hasToolCall`, `maxCost`, `maxTokensUsed`, `finishReasonIs`)
 - Multi-turn conversations and message history management
+- Lifecycle hooks (`PreToolUse`, `PermissionRequest`, `Stop`, `PostModelCall`, …) and `HooksManager`
 - Format converters between OpenRouter, Claude, and OpenAI Chat message shapes
 - Platform APIs: model listing, credits, OAuth, API key management
