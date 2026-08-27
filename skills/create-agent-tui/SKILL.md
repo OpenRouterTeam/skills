@@ -42,8 +42,9 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 | Web Search | `openrouter:web_search` | ON | engine, max_results, domain filtering |
 | Datetime | `openrouter:datetime` | ON | timezone |
 | Image Generation | `openrouter:image_generation` | OFF | model, quality, size, format |
+| Shell | `openrouter:shell` | OFF | sandbox engine, container environment |
 
-Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
+Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them. `openrouter:shell` runs in the OpenRouter sandbox; use it for sandbox execution on Responses, while `openrouter:bash` with `engine: 'openrouter'` is Messages-only.
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
