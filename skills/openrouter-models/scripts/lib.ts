@@ -60,6 +60,26 @@ export function formatModel(m: any) {
   };
 }
 
+export function validateModelSort(
+  sort: string | undefined,
+  availableSorts: readonly string[]
+): void {
+  if (!sort || availableSorts.includes(sort)) return;
+
+  if (sort === "speed" || sort === "throughput") {
+    console.error(
+      `Error: --sort ${sort} is not available for model-level results.\n` +
+        "Throughput is live, provider-specific performance data, not output capacity.\n" +
+        'Use get-endpoints.ts "<model-id>" --sort throughput for each model.'
+    );
+  } else {
+    console.error(
+      `Error: Unknown sort option "${sort}". Available: ${availableSorts.join(", ")}`
+    );
+  }
+  process.exit(1);
+}
+
 export function parseArgs(argv: string[]): Map<string, string | true> {
   const result = new Map<string, string | true>();
   const positional: string[] = [];

@@ -1,8 +1,24 @@
-import { optionalApiKey, fetchApi, parseArgs } from "./lib.js";
+import { optionalApiKey, fetchApi, parseArgs, validateModelSort } from "./lib.js";
+
+const help =
+  "Usage: compare-models.ts <model-id-1> <model-id-2> [...] [--sort price|context]\n\n" +
+  "Examples:\n" +
+  '  npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"\n' +
+  '  npx tsx compare-models.ts "anthropic/claude-sonnet-4" "google/gemini-2.5-pro" --sort price\n\n' +
+  "Sort options:\n" +
+  "  price   - Sort by prompt cost (cheapest first)\n" +
+  "  context - Sort by context length (largest first)\n\n" +
+  "Throughput is live, provider-specific performance data.\n" +
+  'Use get-endpoints.ts "<model-id>" --sort throughput for each model.';
 
 const apiKey = optionalApiKey();
 const args = parseArgs(process.argv.slice(2));
 const sortBy = args.get("sort") as string | undefined;
+
+if (args.has("help")) {
+  console.log(help);
+  process.exit(0);
+}
 
 // Collect positional args as model IDs
 const modelIds: string[] = [];
@@ -13,19 +29,11 @@ for (let i = 0; ; i++) {
 }
 
 if (modelIds.length < 2) {
-  console.error(
-    "Usage: compare-models.ts <model-id-1> <model-id-2> [...] [--sort price|context|speed|throughput]\n\n" +
-      "Examples:\n" +
-      '  npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o"\n' +
-      '  npx tsx compare-models.ts "anthropic/claude-sonnet-4" "google/gemini-2.5-pro" --sort price\n\n' +
-      "Sort options:\n" +
-      "  price      - Sort by prompt cost (cheapest first)\n" +
-      "  context    - Sort by context length (largest first)\n" +
-      "  speed      - Sort by max completion tokens (largest first)\n" +
-      "  throughput - Alias for speed"
-  );
+  console.error(help);
   process.exit(1);
 }
+
+validateModelSort(sortBy, ["price", "context"]);
 
 const json = await fetchApi("/models", apiKey);
 const allModels = json.data ?? [];
@@ -62,11 +70,6 @@ if (sortBy === "price") {
   matched.sort((a: any, b: any) => parseFloat(a.pricing?.prompt ?? "0") - parseFloat(b.pricing?.prompt ?? "0"));
 } else if (sortBy === "context") {
   matched.sort((a: any, b: any) => (b.context_length ?? 0) - (a.context_length ?? 0));
-} else if (sortBy === "speed" || sortBy === "throughput") {
-  matched.sort(
-    (a: any, b: any) =>
-      (b.top_provider?.max_completion_tokens ?? 0) - (a.top_provider?.max_completion_tokens ?? 0)
-  );
 }
 
 const comparison = matched.map((m: any) => {

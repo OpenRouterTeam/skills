@@ -22,8 +22,8 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Listing and sorting models by newest, price, or throughput (`list-models.ts`)
+- Listing and sorting models by newest, price, or context (`list-models.ts`)
 - Filtering by category (programming, roleplay, vision, etc.)
 - Looking up a specific model's pricing, context length, and modalities
-- Per-provider latency, uptime, and throughput via `get-endpoints.ts`
+- Live per-provider latency, uptime, and throughput via `get-endpoints.ts`
 - Fuzzy model-name resolution

@@ -1,6 +1,6 @@
 ---
 name: openrouter-models
-description: Query OpenRouter for available AI models, pricing, capabilities, throughput, and provider performance. Use when the user asks about available OpenRouter models, model pricing, model context lengths, model capabilities, provider latency or uptime, throughput limits, supported parameters, wants to search/filter/compare models, or find the fastest provider for a model.
+description: Query OpenRouter for available AI models, pricing, capabilities, and live provider performance. Use when the user asks about available OpenRouter models, model pricing, model context lengths, model capabilities, provider latency, uptime, or throughput, supported parameters, wants to search/filter/compare models, or find the fastest provider for a model.
 ---
 
 # OpenRouter Models
@@ -26,13 +26,13 @@ Pick the right script based on what the user is asking:
 | See all available models | `list-models.ts` | "What models does OpenRouter have?" |
 | Find recently added models | `list-models.ts --sort newest` | "What are the newest models?" |
 | Find cheapest models | `list-models.ts --sort price` | "What's the cheapest model?" |
-| Find highest throughput models | `list-models.ts --sort throughput` | "Which models have the most output capacity?" |
+| Find largest-context models | `list-models.ts --sort context` | "Which models have the largest context windows?" |
 | Find models in a category | `list-models.ts --category X` | "Best programming models?" |
 | Search by name | `search-models.ts "query"` | "Do they have Claude?" |
 | Resolve an informal model name | `resolve-model.ts "query"` | "Use the nano banana 2.0 model" |
 | Find image-capable models | `search-models.ts --modality image` | "Which models accept images?" |
 | Compare specific models | `compare-models.ts A B` | "Compare Claude vs GPT-4o" |
-| Compare by throughput | `compare-models.ts A B --sort throughput` | "Which has higher throughput, Claude or GPT-4o?" |
+| Compare candidate models by throughput | Run `get-endpoints.ts "model-id" --sort throughput` for each candidate | "Which has higher throughput, Claude or GPT-4o?" |
 | Check provider performance | `get-endpoints.ts "model-id"` | "Which provider is fastest for Claude?" |
 | Find fastest provider | `get-endpoints.ts "model-id" --sort throughput` | "Fastest provider for Claude Sonnet?" |
 | Find lowest-latency provider | `get-endpoints.ts "model-id" --sort latency` | "Lowest latency provider for GPT-4o?" |
@@ -80,7 +80,6 @@ Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology
 cd <skill-path>/scripts && npx tsx list-models.ts --sort newest      # Recently added first
 cd <skill-path>/scripts && npx tsx list-models.ts --sort price       # Cheapest first
 cd <skill-path>/scripts && npx tsx list-models.ts --sort context     # Largest context first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort throughput  # Most output tokens first
 ```
 
 Models with upcoming `expiration_date` values trigger a stderr warning.
@@ -104,7 +103,9 @@ cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4"
 cd <skill-path>/scripts && npx tsx compare-models.ts "anthropic/claude-sonnet-4" "openai/gpt-4o" "google/gemini-2.5-pro" --sort price
 ```
 
-Sort options: `price` (cheapest first), `context` (largest first), `speed`/`throughput` (most output tokens first)
+Sort options: `price` (cheapest first), `context` (largest first)
+
+The models list does not contain generation-speed data. `max_completion_tokens` is an output-capacity limit, not throughput.
 
 ## Provider Performance (Endpoints)
 
@@ -117,6 +118,8 @@ cd <skill-path>/scripts && npx tsx get-endpoints.ts "openai/gpt-4o" --sort laten
 ```
 
 Sort options: `throughput` (fastest tokens/sec first), `latency` (lowest p50 ms first), `uptime` (most reliable first), `price` (cheapest first)
+
+Throughput is live and provider-specific. For model-to-model throughput comparisons, run `get-endpoints.ts` once for each model and compare the same percentile, normally p50, from the current results.
 
 Returns for each provider:
 - **Latency** (p50/p75/p90/p99 in ms) — median to worst-case response times
@@ -143,6 +146,7 @@ Returns for each provider:
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
+- `top_provider.max_completion_tokens` is an output-capacity limit. It does not measure tokens per second and must not be used as a throughput proxy.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
@@ -206,7 +210,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 |---|---|
 | `pricing.prompt` / `pricing.completion` | Cost per token in USD. Multiply by 1,000,000 for per-million-token pricing |
 | `context_length` | Max total tokens (input + output) |
-| `top_provider.max_completion_tokens` | Max output tokens from the best provider |
+| `top_provider.max_completion_tokens` | Max output tokens from the best provider; an output-capacity limit, not generation speed |
 | `top_provider.is_moderated` | Whether content moderation is applied |
 | `per_request_limits` | Per-request token limits (when non-null) |
 | `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `web_search_options`) |
@@ -221,7 +225,8 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - When a user mentions a model by informal name, use `resolve-model.ts` first, then feed the resolved `id` into other scripts
 - Convert pricing to per-million-tokens format for readability
 - When comparing, use a markdown table with models as columns
-- For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
+- For provider endpoints, report generation speed from `throughput_30m_tokens_per_sec` and response latency from `latency_30m_ms`; do not conflate them
+- When comparing throughput across models, use the same live endpoint percentile for each model and never infer speed from `max_completion_tokens`
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
 - Note cache pricing when available — it can cut input costs 90%+
 - Flag models with `expiration_date` as deprecated
