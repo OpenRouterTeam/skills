@@ -138,6 +138,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 
 **Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
+- `session_id` — session grouping ID; sessionless requests are returned as `none`
 - `provider` — upstream provider name
 - `origin` — request origin/source
 - `country` — request country
