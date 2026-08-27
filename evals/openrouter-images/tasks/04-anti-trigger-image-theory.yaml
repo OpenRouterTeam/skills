@@ -1,0 +1,28 @@
+id: anti-trigger-image-theory-001
+name: Anti-Trigger - Image Generation Theory
+description: |
+  A conceptual question should receive an explanation without invoking or
+  proposing image-generation scripts.
+tags:
+  - anti-trigger
+  - negative-test
+
+inputs:
+  prompt: |
+    How do diffusion models generate images from text? Explain the basic idea.
+    I am curious about the technique, not looking to generate anything.
+
+graders:
+  - type: code
+    name: no_image_scripts
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" not in output'
+        - '"edit.ts" not in output'
+        - '"discover.ts" not in output'
+
+
+expected:
+  outcomes:
+    - type: task_completed

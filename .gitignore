@@ -5,3 +5,5 @@ build/
 .env.*
 .DS_Store
 .claude/worktrees/
+.waza-results/
+.waza-cache/

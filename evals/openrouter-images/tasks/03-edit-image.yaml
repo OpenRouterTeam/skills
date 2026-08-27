@@ -1,0 +1,38 @@
+id: edit-image-001
+name: Edit Existing Image
+description: |
+  User wants to modify an existing image. The agent should use edit.ts,
+  pass the source path first, and avoid generate.ts and raw API calls.
+tags:
+  - happy-path
+  - edit
+
+inputs:
+  prompt: |
+    I have a file called photo.png. Edit it so the sky is purple. Do not
+    execute the request because my API key is unavailable; show the exact
+    bundled-script command you would run.
+
+graders:
+  - type: code
+    name: uses_only_edit_script
+    config:
+      language: python
+      assertions:
+        - '"edit.ts" in output'
+        - '"generate.ts" not in output'
+        - '"/api/v1/chat/completions" not in output and "/api/v1/responses" not in output'
+
+  - type: code
+    name: passes_source_then_prompt
+    config:
+      language: python
+      assertions:
+        - '"photo.png" in output'
+        - '"purple" in output.lower() and "sky" in output.lower()'
+        - 'output.find("photo.png") < output.lower().find("purple")'
+
+
+expected:
+  outcomes:
+    - type: task_completed
