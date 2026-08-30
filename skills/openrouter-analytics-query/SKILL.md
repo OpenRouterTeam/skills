@@ -71,7 +71,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 |---|---|---|---|
 | `dimensions` | `string[]` | `[]` | Up to 2 dimensions to group by |
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
-| `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 datetime strings |
+| `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 UTC datetime strings. Seconds are required (`YYYY-MM-DDTHH:MM:SSZ`; fractional seconds allowed) — minute-precision values such as `2026-05-01T00:00Z` are rejected with 400. |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
 | `order_by` | `object` | time desc (if granularity set) | `{ field, direction }` where field is a metric, dimension, or `"date"` (short-form alias — maps to `date__day`, `date__hour`, etc. based on granularity) |
 | `limit` | `integer` | 1000 | Maximum total rows to return (1–10,000). On time-series queries with dimensions and no explicit `group_limit`, the server may raise this to accommodate the expected number of time-bucket/dimension combinations. |
@@ -202,8 +202,8 @@ The `query-analytics.ts` script in the `openrouter-analytics` skill accepts thes
 | `--metrics` | Comma-separated metric names (required) | `--metrics request_count,total_usage` |
 | `--dimensions` | Comma-separated dimension names | `--dimensions model,provider` |
 | `--granularity` | Time bucket size | `--granularity day` |
-| `--start` | Time range start (ISO 8601) | `--start 2026-05-01T00:00:00Z` |
-| `--end` | Time range end (ISO 8601) | `--end 2026-05-20T00:00:00Z` |
+| `--start` | Time range start (ISO 8601 UTC, seconds required) | `--start 2026-05-01T00:00:00Z` |
+| `--end` | Time range end (ISO 8601 UTC, seconds required) | `--end 2026-05-20T00:00:00Z` |
 | `--filter-field` | Filter dimension name (first filter; see notes below) | `--filter-field model` |
 | `--filter-op` | Filter operator (first filter) | `--filter-op eq` |
 | `--filter-value` | Filter value (comma-separated for `in`/`not_in`) | `--filter-value anthropic/claude-sonnet-4` |
@@ -321,7 +321,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end. Max 2 dimensions, 20 filters. |
+| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
@@ -329,6 +329,8 @@ Combine up to 2 dimensions for cross-tabulation:
 | 500 | Server error | Retry after a moment |
 
 ## Time Range Behavior
+
+`start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs.
 
 Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
