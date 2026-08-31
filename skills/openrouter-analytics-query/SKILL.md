@@ -87,6 +87,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 - Scalar operators (`eq`, `neq`, `gt`, `gte`, `lt`, `lte`): `value` is a string or number
 - Array operators (`in`, `not_in`): `value` is an array of strings or numbers
+- `in` / `not_in` accept an optional `include_unset: true`, which also matches rows where the dimension has no value. Supported only on dimensions with an unset bucket (`api_key_id`, `app`, `user`) — otherwise the request is rejected with 400.
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
@@ -120,13 +121,14 @@ Classifier dimensions allow grouping by dynamic, user-defined classification lab
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `classifier_id` | `string` (UUID) | Yes | ID of the classifier (must belong to the caller's account) |
-| `dimension_names` | `string[]` | No | Specific dimension names to group by (max 10). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars). |
+| `dimension_names` | `string[]` | No | Specific dimension names to group by (max 2). If omitted, all classifier dimensions are included. Names must be valid identifiers (letters, digits, underscores; max 64 chars). |
 | `include_nulls` | `boolean` | No | When `true`, unclassified rows are included in results. Default `false` (only classified rows). |
 
 **Constraints:**
 - Limits the query time range to 31 days
 - Single dimension name → result column is aliased to that name (e.g., `category`)
-- Multiple dimension names → result uses generic `clf_dimension_name` / `clf_dimension_value` columns
+- Two dimension names → each becomes its own result column, cross-grouping results by both values
+- `dimension_names` omitted → result uses generic `clf_dimension_name` / `clf_dimension_value` columns (one row per dimension/value pair)
 
 ## Classifier Filters
 
@@ -190,7 +192,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. Sentinel buckets are labelled rather than returned raw: `api_key_id` `-1` → `Chatroom`, `app` `-1` → `Unknown`, and the max-UUID `workspace` sentinel → `Unattributed`. `model` is never relabelled — it stays a permaslug.
 
 ## CLI Reference
 
@@ -321,7 +323,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. |
+| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
@@ -332,9 +334,13 @@ Combine up to 2 dimensions for cross-tabulation:
 
 `start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs.
 
-Some metric/dimension combinations support time ranges up to **365 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
+Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
-Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 365 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
+
+Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup. They are limited to 31 days regardless of granularity, support only `model` and `provider` dimensions and filters, and are rejected with 400 when combined with `minute` granularity, classifier dimensions, or classifier filters.
+
+`hour` granularity reads the minute materialized view, so it caps the range at 31 days even for metrics that otherwise allow 367.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
 
