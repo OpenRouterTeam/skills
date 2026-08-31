@@ -136,6 +136,7 @@ Sentinel buckets get named labels rather than raw values:
 All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is without resolution.
 
 > Rows with an empty `user` value represent traffic not attributed to a specific org member (e.g., API keys created at the org level).
+>
 > Rows written before workspace resolution existed carry an all-zero workspace UUID. Grouping folds them into the account's default workspace, and a filter on the default workspace UUID matches them too, so one logical workspace stays one group.
 
 ### Dimension Categories
