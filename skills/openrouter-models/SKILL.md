@@ -121,6 +121,7 @@ Sort options: `throughput` (fastest tokens/sec first), `latency` (lowest p50 ms 
 Returns for each provider:
 - **Latency** (p50/p75/p90/p99 in ms) — median to worst-case response times
 - **Throughput** (p50/p75/p90/p99 tokens/sec) — generation speed
+- **Per-workload performance** (`perf_last_30m_by_workload`) — the same window split by the kind of request served, with end-to-end latency for image and video generation
 - **Uptime** — percentage over the last 30 minutes
 - **Status** — `operational` or `degraded`
 - **Provider-specific pricing** — some providers offer discounts
@@ -146,6 +147,7 @@ Returns for each provider:
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
+- Endpoint `perf_last_30m_by_workload`: the same 30-minute window keyed by workload — `text_generation`, `image_generation`, `video_generation`, `embeddings`, `rerank`, `tts`, `stt`, `unknown`. Only workloads the endpoint served appear, each as `{ latency, throughput, request_count }`. `throughput` is null outside text generation, and image and video report full end-to-end generation time, while the flat `latency_last_30m` measures only request acknowledgement for those workloads — prefer the workload entry when comparing image or video endpoints. Present only when authenticated.
 
 ## Script Output Formats
 
@@ -194,7 +196,14 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
       "max_completion_tokens": 64000,
       "pricing_per_million_tokens": { "prompt": "$3.00", "completion": "$15.00", "cached_input": "$0.30" },
       "supports_implicit_caching": true,
-      "supported_parameters": ["max_tokens", "temperature", "tools", "..."]
+      "supported_parameters": ["max_tokens", "temperature", "tools", "..."],
+      "perf_30m_by_workload": {
+        "text_generation": {
+          "latency": { "p50": 800, "p75": 1200, "p90": 2000, "p99": 5000 },
+          "throughput": { "p50": 45, "p75": 55, "p90": 65, "p99": 90 },
+          "request_count": 1000
+        }
+      }
     }
   ]
 }
@@ -215,6 +224,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | `latency_30m_ms.p50` | Median response latency over last 30 min |
 | `throughput_30m_tokens_per_sec.p50` | Median generation speed over last 30 min |
 | `uptime_30m` | Provider availability percentage over last 30 min |
+| `perf_30m_by_workload.<workload>` | Per-workload `latency` / `throughput` percentiles and `request_count` over the last 30 min; latency is end-to-end for image and video |
 
 ## Presenting Results
 

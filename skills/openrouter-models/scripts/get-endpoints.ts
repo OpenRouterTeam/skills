@@ -12,6 +12,7 @@ if (!modelId) {
       "  - Latency percentiles (p50/p75/p90/p99) in ms\n" +
       "  - Uptime % over last 30 minutes\n" +
       "  - Throughput (tokens/sec) percentiles\n" +
+      "  - Per-workload performance (end-to-end latency for image/video)\n" +
       "  - Provider-specific pricing and limits\n\n" +
       "Sort options:\n" +
       "  throughput - Fastest generation speed first (highest p50 tokens/sec)\n" +
@@ -79,6 +80,7 @@ const output = {
     quantization: ep.quantization !== "unknown" ? ep.quantization : null,
     supports_implicit_caching: ep.supports_implicit_caching,
     supported_parameters: ep.supported_parameters,
+    perf_30m_by_workload: ep.perf_last_30m_by_workload ?? null,
   })),
 };
 
