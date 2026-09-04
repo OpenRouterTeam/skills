@@ -98,7 +98,9 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | `input_audio.format` | yes      | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Support varies by provider. |
 | `language`           | no       | ISO-639-1 code (`en`, `ja`, `fr`). Auto-detected if omitted.                                              |
 | `temperature`        | no       | 0–1. Lower is more deterministic.                                                                         |
-| `provider`           | no       | Provider passthrough — see below.                                                                         |
+| `response_format`    | no       | `json` (default) or `verbose_json` — see below.                                                           |
+| `timestamp_granularities` | no  | Array of `"segment"` and/or `"word"`. Only used with `response_format: "verbose_json"`.                 |
+| `provider`           | no       | Provider passthrough under `provider.options` — see below. Routing preferences (`order`, `only`, `ignore`) are not applied to transcription requests. |
 
 ### Picking an audio format
 
@@ -108,9 +110,48 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 
 The `format` field must match the actual container/codec of the bytes. A file saved as `.wav` that is actually mp3 will be rejected or mis-decoded. When in doubt, confirm with `ffprobe <file>`.
 
+## Verbose transcripts (timestamps and speakers)
+
+Set `response_format: "verbose_json"` to get structured fields alongside `text`: `language`, `duration` (seconds), and a `segments` array with `id`, `start`, `end`, `text` (OpenAI-compatible providers also return `task`). Add `"word"` to `timestamp_granularities` to also get a `words` array with `word`, `start`, `end`. Which fields are present varies by provider.
+
+Speaker diarization is a provider-specific option. Example — Azure diarization for `microsoft/mai-transcribe-2`, which adds a `speaker` index to each segment and word:
+
+```json
+{
+  "model": "microsoft/mai-transcribe-2",
+  "input_audio": { "data": "SUQzBAAA...", "format": "mp3" },
+  "response_format": "verbose_json",
+  "timestamp_granularities": ["segment", "word"],
+  "provider": {
+    "options": {
+      "azure": { "diarization": { "enabled": true } }
+    }
+  }
+}
+```
+
+```json
+{
+  "language": "en",
+  "duration": 6.4,
+  "text": "Hello there. Hi, how are you?",
+  "segments": [
+    { "id": 0, "start": 0.0, "end": 1.2, "text": "Hello there.", "speaker": 0 },
+    { "id": 1, "start": 1.5, "end": 3.1, "text": "Hi, how are you?", "speaker": 1 }
+  ],
+  "words": [
+    { "word": "Hello", "start": 0.0, "end": 0.4, "speaker": 0 },
+    { "word": "there.", "start": 0.4, "end": 1.2, "speaker": 0 }
+  ],
+  "usage": { "seconds": 6.4, "cost": 0.000178 }
+}
+```
+
+Providers that do not return structured output reject `verbose_json` with a 400, as do some individual models (for example `openai/gpt-4o-transcribe` and `microsoft/mai-transcribe-1.5`). The default `json` works everywhere.
+
 ## Provider-specific options
 
-Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Example — Groq's `prompt` for vocabulary hinting:
+Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Find the slug for a model's providers with `GET /api/v1/models/<author>/<slug>/endpoints` — the `tag` field of each endpoint record is the key to use. Normalized parameters (`language`, `temperature`, `response_format`, `timestamp_granularities`) stay at the top level, not under `provider.options`. Example — Groq's `prompt` for vocabulary hinting:
 
 ```json
 {
@@ -126,7 +167,7 @@ Provider passthrough goes under `provider.options.<slug>` and is only forwarded 
 }
 ```
 
-Options keyed by provider slug are forwarded only when that provider matches; other keys are ignored. Check each provider's upstream docs for available passthrough keys.
+Options keyed by provider slug are forwarded only when that provider matches; other keys are ignored. Providers differ in how they treat unsupported options — some forward only an allowlist and silently drop the rest (Deepgram), others forward most fields as-is so an invalid option surfaces as a provider error (Azure). Check each provider's upstream docs for available passthrough keys.
 
 ## TypeScript (fetch)
 
