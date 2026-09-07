@@ -67,12 +67,12 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 ### Metric Categories
 
 **Volume metrics** (how much):
-- `request_count` — number of API requests (up to 367 days)
+- `request_count` — number of API requests (up to 367 days). Excludes server-tool rows (web search / file-parsing charges recorded alongside a request), so it counts model requests, not billed line items
 - `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts (up to 367 days)
 - `reasoning_tokens` — tokens used for extended thinking (up to 367 days)
 - `cached_tokens` — tokens served from cache (up to 367 days)
 - `possible_cached_tokens` — prompt tokens that were eligible for caching, whether or not they were cached (31-day limit, hourly rollup only)
-- `byok_request_count` — number of BYOK requests (up to 367 days)
+- `byok_request_count` — number of BYOK requests (up to 367 days). Server-tool rows are excluded when the query reads raw generations (any latency/throughput metric or generations-only dimension in the same request) but still counted when served from the rollups, so the two paths can differ for BYOK traffic that uses server tools
 - `guardrail_invoked_count` — count of requests that triggered guardrails (31-day limit)
 - `response_cached_count` — count of responses served from cache (31-day limit)
 
