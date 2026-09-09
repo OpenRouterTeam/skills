@@ -97,7 +97,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--aspect-ratio <r>` | Aspect ratio (e.g. `16:9`, `1:1`, `4:3`) | Model default |
 | `--resolution <t>` | Resolution tier (`512`, `1K`, `2K`, `4K`) | Model default |
 | `--size <s>` | Shorthand: a tier (`2K`) or explicit pixels (`2048x2048`) | Model default |
-| `--quality <q>` | `auto`, `low`, `medium`, or `high` | Model default |
+| `--quality <q>` | `auto`, `low`, `medium`, `high`, `xhigh`, or `max` (`xhigh`/`max` only where the endpoint advertises them, e.g. OpenAI gpt-image-2.5) | Model default |
 | `--output-format <f>` | `png`, `jpeg`, `webp`, or `svg` (vector models) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
