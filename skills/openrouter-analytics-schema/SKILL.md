@@ -60,7 +60,7 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Most volume and cost metrics support time ranges up to **365 days** with daily granularity. Latency/throughput metrics and some dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `streamed`) are limited to **31-day** time ranges. If a query times out, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -90,8 +90,13 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `usage_upstream_web_fetch` — provider-side web fetch cost in USD (31-day limit)
 
 **Performance metrics** (how fast):
-- `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
-- `avg_throughput`, `p50_throughput`, `p90_throughput`, `p99_throughput` — tokens per second
+- `avg_latency`, `p50_latency`, `p90_latency`, `p95_latency`, `p99_latency` — provider-side time to first token in milliseconds (for non-streamed requests this is the full response time)
+- `avg_total_time_to_first_token`, `p50_total_time_to_first_token`, `p90_total_time_to_first_token`, `p95_total_time_to_first_token`, `p99_total_time_to_first_token` — end-to-end time to first token in milliseconds (`latency` + `router_latency`); computed over streamed rows only
+- `avg_router_latency`, `p50_router_latency`, `p90_router_latency`, `p95_router_latency`, `p99_router_latency` — OpenRouter pre-dispatch routing overhead in milliseconds
+- `avg_generation_time`, `p50_generation_time`, `p90_generation_time`, `p95_generation_time`, `p99_generation_time` — time from first to last token in milliseconds
+- `avg_throughput`, `p50_throughput`, `p90_throughput`, `p95_throughput`, `p99_throughput` — completion tokens per second
+
+All timing and throughput metrics exclude server-tool rows (web search, file parsing, etc.), so they reflect real inference requests only.
 
 **Efficiency metrics** (how well):
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
@@ -144,6 +149,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `finish_reason` — why the generation ended (stop, length, etc.)
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
+- `streamed` — `"true"` or `"false"` depending on whether the request was streamed
 
 ## Classifier Dimensions
 
