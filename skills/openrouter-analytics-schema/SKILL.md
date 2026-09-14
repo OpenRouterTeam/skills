@@ -60,7 +60,7 @@ Each metric has:
 
 ### Time Range Limits
 
-Most volume and cost metrics support time ranges up to **367 days** with day or coarser granularity. Latency/throughput metrics and generations-only dimensions (`provider`, `origin`, `country`, `data_region`, `skin`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `session_id`) are limited to **31-day** time ranges, as is `hour` granularity. Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup, so they are capped at **31 days** too and coarser granularity does not lift that cap.
+Most volume and cost metrics support time ranges up to **367 days** with day or coarser granularity. Latency/throughput metrics, `blended_cost_per_million_tokens`, and generations-only dimensions (`provider`, `origin`, `country`, `data_region`, `skin`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `session_id`, `streamed`) are limited to **31-day** time ranges, as is `hour` granularity. Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup, so they are capped at **31 days** too and coarser granularity does not lift that cap.
 
 Exceeding a cap returns 400 with the applicable maximum in the message, not a truncated result. If a query times out instead, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
@@ -91,11 +91,16 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `usage_upstream_file` — provider-side file processing cost in USD (31-day limit)
 - `usage_web_fetch` — web fetch cost in USD (31-day limit)
 - `usage_upstream_web_fetch` — provider-side web fetch cost in USD (31-day limit)
-- `blended_cost_per_million_tokens` — average cost per 1M tokens (prompt + completion), including BYOK inference cost (up to 367 days). A rate metric: `null` for buckets with no tokens, so it cannot be summed across rows.
+- `blended_cost_per_million_tokens` — average cost per 1M tokens (prompt + completion), including BYOK inference cost (31-day limit; always reads raw generations). Server-tool spend is excluded from the numerator. A rate metric: `null` for buckets with no tokens, so it cannot be summed across rows.
 
-**Performance metrics** (how fast):
-- `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
-- `avg_throughput`, `p50_throughput`, `p90_throughput`, `p99_throughput` — tokens per second
+**Performance metrics** (how fast; all 31-day limit, milliseconds unless noted). Each family has `avg_`, `p50_`, `p90_`, `p95_`, and `p99_` variants:
+- `*_latency` — provider-side time to first token (full response time for non-streamed requests)
+- `*_router_latency` — time spent in OpenRouter routing before the provider request
+- `*_total_time_to_first_token` — `latency + router_latency`, computed over streamed requests only
+- `*_generation_time` — provider-side generation time
+- `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens
+
+All performance metrics exclude server-tool rows (web search / file-parsing charges recorded alongside a request).
 
 **Efficiency metrics** (how well):
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
@@ -126,7 +131,7 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 | `api_key_id` | Key name/label |
 | `app` | App title or origin URL |
 | `user` | User name or email address |
-| `workspace` | Workspace name |
+| `workspace` | Workspace name (deleted workspaces are still named) |
 
 Sentinel buckets get named labels rather than raw values:
 - `api_key_id` `-1` → `Chatroom` (traffic with no API key, e.g. chatroom requests)
@@ -160,6 +165,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
 - `session_id` — session the request belonged to; sessionless requests group as the literal `none`
+- `streamed` — whether the request was streamed; values are the strings `true` and `false`
 
 ## Classifier Dimensions
 
@@ -263,7 +269,7 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Maximum 10,000 rows returned per query (default 1,000)
 - `group_limit` (1–10,000): controls max rows per dimension combination. Auto-computed on time-series queries with dimensions to guarantee full time-window coverage. Set explicitly to cap per-group rows (e.g., top N per model per day).
 - Most volume/cost metrics: up to 367 days with daily granularity
-- Latency/throughput metrics and per-generation dimensions: up to 31 days
+- Latency/throughput metrics, `blended_cost_per_million_tokens`, and per-generation dimensions: up to 31 days
 - Classifier dimensions/filters: always limited to 31 days
 - Minute granularity: only available when the time window is ≤ 3 hours
 - `hour` granularity reads the minute materialized view: 31-day maximum
