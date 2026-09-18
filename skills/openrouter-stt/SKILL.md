@@ -112,7 +112,7 @@ The `format` field must match the actual container/codec of the bytes. A file sa
 
 ## Verbose transcripts (timestamps and speakers)
 
-Set `response_format: "verbose_json"` to get structured fields alongside `text`: `language`, `duration` (seconds), and a `segments` array with `id`, `start`, `end`, `text` (OpenAI-compatible providers also return `task`). Add `"word"` to `timestamp_granularities` to also get a `words` array with `word`, `start`, `end`. Which fields are present varies by provider.
+Set `response_format: "verbose_json"` to get structured fields alongside `text`: `language`, `duration` (seconds), and a `segments` array with `id`, `start`, `end`, `text` (OpenAI-compatible providers also return `task`). Add `"word"` to `timestamp_granularities` to also get a `words` array with `word`, `start`, `end`. Providers that score their output also return an optional `confidence` (0 to 1) on each word and, for the whole transcript, at the top level (AssemblyAI does; most others omit it). Which fields are present varies by provider.
 
 Speaker diarization is a provider-specific option. Example — Azure diarization for `microsoft/mai-transcribe-2`, which adds a `speaker` index to each segment and word:
 
