@@ -37,9 +37,9 @@ rubric.thresholds.noul = numberArg(args, "noul", rubric.thresholds.noul);
 rubric.thresholds.score = numberArg(args, "score", rubric.thresholds.score);
 const margin = numberArg(args, "margin", 0.15);
 
-const { body } = holdOut(readText(file));
+const { body, held } = holdOut(readText(file));
 const paragraphs = splitParagraphs(body);
-const result = await evaluate(apiKey, task, body, rubric, { margin });
+const result = await evaluate(apiKey, task, body, rubric, { margin, held });
 
 const answersPath = stringArg(args, "answers");
 if (answersPath) {

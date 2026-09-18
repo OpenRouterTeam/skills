@@ -5,9 +5,9 @@ description: Find AI-writing tells in a draft with Jev (TypeSafe's typed decisio
 
 # Edit writing with Jev
 
-Three tiers judge the draft. Regex patterns catch exact surface tells (dashes, curly quotes, a vocabulary list). Jev `noul` propositions judge each paragraph, with the whole draft as context, for tells that need reading (puffed significance, weasel attribution, mannered prose). Jev `score` questions grade the whole draft on ordered scales (specificity, neutrality). Every finding carries a location, evidence, and the exact fix sentence the writer model receives. The user reviews the findings before any text changes, and their corrections become rubric edits, so the rewrite applies a rubric they have accepted.
+Three tiers judge the draft. Deterministic checks catch exact surface tells (dashes, curly quotes, a vocabulary list, bold overuse, label-and-colon lists, title-case headings, placeholders, citation artifacts) and heading and table structure (a level-1 heading that repeats the title, skipped levels, headings with nothing under them, a table with fewer than three rows). Jev `noul` propositions judge each paragraph, with the whole draft as context, for tells that need reading (puffed significance, weasel attribution, mannered prose). Jev `score` questions grade the whole draft on ordered scales (specificity, neutrality). Every finding carries a location, evidence, and the exact fix sentence the writer model receives. The user reviews the findings before any text changes, and their corrections become rubric edits, so the rewrite applies a rubric they have accepted.
 
-Everything configurable lives in `rubric.json` next to this file. It holds the thresholds, the scope preamble prepended to every paragraph proposition, regex patterns, the vocabulary list, the paragraph propositions, and the document scores. The scripts in `scripts/` read it. Never edit the installed copy. Copy it into the working directory and edit that.
+Everything configurable lives in `rubric.json` next to this file. It holds the thresholds, the scope preamble prepended to every paragraph proposition, regex patterns, the vocabulary list, the structure checks, the paragraph propositions, and the document scores. The checks follow the prose, language, style, and markup sections of [Wikipedia's Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing). Signs that only apply to wiki editing (wikitext, citation validity, edit summaries, talk-page behavior) are left out. The scripts in `scripts/` read it. Never edit the installed copy. Copy it into the working directory and edit that.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ cd <skill-path>/scripts && npx tsx evaluate.ts <draft> --task "<brief>" --rubric
 
 The JSON on stdout has `findings` (what fires), `near_misses` (paragraph propositions that landed under the `noul` threshold by at most `--margin`, default 0.15), `document` (the raw scores), and `jev_cost_usd`. `answers.json` holds every raw probability for every paragraph and check.
 
-Front matter, fenced code blocks, and Markdown tables are held out before evaluation and restored after rewriting. They appear as `[[HELD_n]]` paragraphs and are never judged or edited.
+Front matter, fenced code blocks, and Markdown tables are held out before evaluation and restored after rewriting. They appear as `[[HELD_n]]` paragraphs and are never judged or edited, with one exception. A held-out table with fewer than three rows fires `small_table`, and the writer is told to replace that `[[HELD_n]]` line with prose carrying the cells.
 
 **Done when** the command exits 0 and you have the findings and near misses in hand.
 
@@ -72,6 +72,8 @@ A probe can land a few hundredths away from the same paragraph's number in `answ
 **Missed tell, no existing check fits:** write a new entry in `paragraph_nouls` with `instructions` that describe one narrow, observable tell with an example and name the legitimate devices it must not catch, and a `fix` that tells the writer exactly what to do. Test it with `--instructions` before saving.
 
 **False positive:** add an exception clause to the check's `instructions` naming the legitimate device (dialogue inside a scene, a term the article defines, a figure the paragraph quotes as someone else's wording). If several borderline findings are false positives, raise the threshold instead.
+
+**False positive from a pattern or structure check** (a house style that uses title-case headings, a doc that opens with its title as a level-1 heading, a bolded term the reader must find again): narrow the `regex`, remove the word from `vocabulary.words`, or delete the entry from `patterns` or `structure`. No API call needed.
 
 Before saving any reworded or new proposition, probe one sentence the user accepts as clean with the same wording. It must not fire.
 
@@ -115,6 +117,7 @@ Show the user the diff (`diff -u <draft> <work>/revised.md`, which exits 1 when 
 | `thresholds.score` | A document score fires below this position on its `criteria` scale (0 to `criteria.length - 1`). Higher is stricter. |
 | `paragraph_scope` | Prepended to every paragraph proposition. Tells Jev to judge only `paragraph` and treat `article` as context, so a tell elsewhere in the draft does not fire on the paragraph under judgment. |
 | `patterns[]` | `id`, `regex`, `flags`, `fix`. Run on every heading and paragraph. Evidence is the matched text. |
+| `structure` | `id` to `fix` for checks that read the whole draft. Known ids are `title_heading`, `multiple_h1`, `skipped_heading_level`, `empty_heading`, `small_table`. Remove an entry to turn the check off. |
 | `vocabulary` | `words` matched case-insensitively at word boundaries, reported as one `ai_vocabulary` finding per block. |
 | `paragraph_nouls` | `id` to `instructions` and `fix`. One narrow proposition each, with its exceptions stated. |
 | `document_scores` | `id` to `instructions`, ordered `criteria` from worst to best, and `fix`. |

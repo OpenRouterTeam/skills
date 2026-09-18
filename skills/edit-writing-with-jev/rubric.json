@@ -24,14 +24,38 @@
       "fix": "Remove the emoji."
     },
     {
-      "id": "markdown_syntax",
-      "regex": "\\*\\*|^\\s*[-*]\\s|^---\\s*$|^\\s*>\\s",
+      "id": "bold_overuse",
+      "regex": "(?:\\*\\*[^*\\n]+\\*\\*[^*]*){2,}",
+      "flags": "gu",
+      "fix": "Remove the bold from this paragraph. Bold at most one term, and only where the reader must find it again."
+    },
+    {
+      "id": "inline_header_list",
+      "regex": "^[ \\t]*(?:[-*+\u2022\u2013]|\\d+[.)])[ \\t]+(?:\\*\\*[^*\\n]+\\*\\*[ \\t]*:|\\*\\*[^*\\n]+:\\*\\*|[^:\\n*]{1,50}:[ \\t])",
       "flags": "gmu",
-      "fix": "Remove bold, bullet lists, block quotes, and horizontal rules. Write the content as plain paragraphs."
+      "fix": "Turn this list of bolded labels with colons into prose sentences, or into a plain list without the label-and-colon lead-in."
+    },
+    {
+      "id": "thematic_break",
+      "regex": "^[ \\t]*(?:-{3,}|\\*{3,}|_{3,})[ \\t]*$",
+      "flags": "gmu",
+      "fix": "Delete the horizontal rule. Headings and paragraph breaks already separate the sections."
+    },
+    {
+      "id": "title_case_heading",
+      "regex": "^ {0,3}#{1,6}[ \\t]+[A-Z][\\w'-]*(?:[ \\t]+(?:[A-Z][\\w'-]*|(?:a|an|the|of|and|or|in|on|to|for|with|by|at|from|vs)\\b)){2,}[ \\t]*$",
+      "flags": "gu",
+      "fix": "Put the heading in sentence case. Capitalize only the first word and proper nouns."
+    },
+    {
+      "id": "placeholder_text",
+      "regex": "(?<!\\[)\\[[A-Z][^\\]\\n]{2,60}\\](?![\\(\\[:\\]])",
+      "flags": "gu",
+      "fix": "Replace the bracketed placeholder with the real words, or cut the sentence if there is nothing to put there."
     },
     {
       "id": "citation_artifact",
-      "regex": "oaicite|turn\\d+(search|news|view)\\d+|\\[cite:|grok_card|attached_file|utm_source=",
+      "regex": "oaicite|oai_citation|contentReference|attributableIndex|turn\\d+(?:search|news|view|fetch)\\d+|\\[cite:|\\[span_\\d+\\]|start_span|grok_card|grok_render_citation_card_json|attached_file|ppl-ai-file-upload|:::writing|\\u3010\\d+\\u2020|utm_source=(?:openai|chatgpt\\.com|copilot\\.com)|referrer=grok\\.com",
       "flags": "gu",
       "fix": "Remove the citation artifact or tracking parameter."
     }
@@ -43,9 +67,28 @@
       "nestled", "renowned", "intricate", "seamless", "multifaceted", "foster",
       "fostering", "garner", "indelible", "vital", "landmark", "legacy",
       "transform", "transformed", "landscape", "realm", "journey",
-      "stands as", "serves as"
+      "stands as", "serves as", "align with", "aligns with", "bolstered", "deep dive",
+      "emphasizing", "enhance", "enhances", "highlighting", "interplay", "intricacies",
+      "meticulous", "meticulously", "robust", "valuable", "leverage", "leverages"
     ],
     "fix": "Replace the listed words with plainer wording that does the same job in the sentence."
+  },
+  "structure": {
+    "title_heading": {
+      "fix": "Delete the level-1 heading that repeats the title. The title is already set by the front matter or the page."
+    },
+    "multiple_h1": {
+      "fix": "Keep one level-1 heading at most. Demote the others one level."
+    },
+    "skipped_heading_level": {
+      "fix": "Make heading levels step down one at a time. A section under a level-2 heading uses level 3, not level 4."
+    },
+    "empty_heading": {
+      "fix": "Either write a sentence or two under this heading or remove it and promote the headings beneath it."
+    },
+    "small_table": {
+      "fix": "Write this table as a sentence or a short list. A table with this little in it is harder to read than prose."
+    }
   },
   "paragraph_nouls": {
     "puffed_significance": {
@@ -95,6 +138,14 @@
     "canned_notability": {
       "instructions": "The paragraph claims fame, recognition, or iconic status in generic terms such as \"one of the most recognizable\" or \"widely celebrated\" without a concrete supporting fact.",
       "fix": "Cut the generic claim of fame. If the article gives a fact that supports it, use that fact instead."
+    },
+    "elegant_variation": {
+      "instructions": "The paragraph refers to the same thing by a rotating set of synonyms to avoid repeating a word, for example \"the city\", then \"the metropolis\", then \"the urban center\", or \"the company\", then \"the firm\", then \"the organization\". Repeating a plain noun is not a tell. Using a pronoun is not a tell.",
+      "fix": "Use one name for each thing and repeat it. Cut the synonyms."
+    },
+    "section_summary": {
+      "instructions": "The paragraph opens with \"In summary\", \"In conclusion\", \"Overall\", \"Ultimately\", or \"To sum up\" and then restates points the article already made, or a sentence tells the reader that something is important, critical, or worth noting instead of saying the thing. A closing paragraph that adds a new point, a decision, or a next step is not a tell.",
+      "fix": "Cut the summary or the note-that sentence. If the paragraph has a new point, keep only that point."
     },
     "stale_figure": {
       "instructions": "The paragraph uses a metaphor, simile, or idiom the reader has seen many times in print, such as \"at the end of the day\", \"a double-edged sword\", \"the tip of the iceberg\", or \"moving the needle\".",

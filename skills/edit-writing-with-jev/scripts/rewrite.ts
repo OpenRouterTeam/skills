@@ -41,6 +41,7 @@ const original = readText(file);
 const { body, held } = holdOut(original);
 
 const result = await editUntilClean(apiKey, task, body, rubric, {
+  held,
   writer: stringArg(args, "writer") ?? DEFAULT_WRITER,
   maxRounds: numberArg(args, "rounds", 3),
   lengthTolerance: numberArg(args, "length", 0.1),
