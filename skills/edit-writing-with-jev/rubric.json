@@ -1,0 +1,148 @@
+{
+  "thresholds": {
+    "noul": 0.7,
+    "score": 1.5
+  },
+  "paragraph_scope": "Judge only the wording of `paragraph` itself. The rest of `article` is context for understanding it and is not being judged. Wording the paragraph quotes as someone else's does not count against it, and neither does wording in other paragraphs.",
+  "patterns": [
+    {
+      "id": "dash",
+      "regex": "\u2014|\u2013",
+      "flags": "gu",
+      "fix": "Replace each em dash or en dash with a comma, a period, a hyphen, or the word \"to\"."
+    },
+    {
+      "id": "curly_quotes",
+      "regex": "[\u2018\u2019\u201C\u201D]",
+      "flags": "gu",
+      "fix": "Use straight quotation marks and apostrophes."
+    },
+    {
+      "id": "emoji",
+      "regex": "\\p{Extended_Pictographic}",
+      "flags": "gu",
+      "fix": "Remove the emoji."
+    },
+    {
+      "id": "markdown_syntax",
+      "regex": "\\*\\*|^\\s*[-*]\\s|^---\\s*$|^\\s*>\\s",
+      "flags": "gmu",
+      "fix": "Remove bold, bullet lists, block quotes, and horizontal rules. Write the content as plain paragraphs."
+    },
+    {
+      "id": "citation_artifact",
+      "regex": "oaicite|turn\\d+(search|news|view)\\d+|\\[cite:|grok_card|attached_file|utm_source=",
+      "flags": "gu",
+      "fix": "Remove the citation artifact or tracking parameter."
+    }
+  ],
+  "vocabulary": {
+    "words": [
+      "testament", "tapestry", "delve", "pivotal", "vibrant", "crucial",
+      "underscore", "underscores", "showcase", "showcases", "enduring", "boasts",
+      "nestled", "renowned", "intricate", "seamless", "multifaceted", "foster",
+      "fostering", "garner", "indelible", "vital", "landmark", "legacy",
+      "transform", "transformed", "landscape", "realm", "journey",
+      "stands as", "serves as"
+    ],
+    "fix": "Replace the listed words with plainer wording that does the same job in the sentence."
+  },
+  "paragraph_nouls": {
+    "puffed_significance": {
+      "instructions": "The paragraph asserts the importance, reach, or lasting legacy of its subject in general terms, for example \"a pivotal moment\", \"a lasting influence\", or \"shaped the field\", instead of showing it with a specific fact or example.",
+      "fix": "Cut the general claim of importance. Make the point with one concrete instance the article already contains, in the same voice."
+    },
+    "tacked_on_analysis": {
+      "instructions": "A sentence in the paragraph ends with a participial phrase such as \"highlighting\", \"reflecting\", \"underscoring\", \"ensuring\", or \"symbolizing\" that appends interpretation to a fact.",
+      "fix": "Delete the trailing participial phrase and keep the factual part of the sentence."
+    },
+    "promotional_tone": {
+      "instructions": "The paragraph praises its subject with evaluative words such as \"stunning\", \"remarkable\", \"groundbreaking\", or \"essential\" that assert value instead of showing it.",
+      "fix": "Remove the praise words. Keep the scene or example and let it carry the point."
+    },
+    "weasel_attribution": {
+      "instructions": "The paragraph supports a claim the article itself makes by attributing it to an unnamed authority or vague group such as \"experts\", \"critics\", \"many\", or \"is widely regarded\". Words spoken by a character inside a scene are dialogue, not attribution.",
+      "fix": "Name who holds the view, or drop the attribution and state the claim on its own."
+    },
+    "challenges_boilerplate": {
+      "instructions": "The paragraph follows the template of benefits, then a \"however\" or \"but\" pivot to costs or challenges, then a balancing sentence, where the pivot and balancing sentences add no information the reader could act on.",
+      "fix": "Cut the hedge and pivot sentences. Keep the specific points, in the same voice."
+    },
+    "copula_avoidance": {
+      "instructions": "The paragraph uses an inflated verb phrase such as \"serves as\", \"stands as\", \"features\", \"boasts\", or \"offers\" where \"is\", \"has\", or \"was\" would state the same thing.",
+      "fix": "Replace the inflated verb phrase with \"is\", \"has\", or \"was\"."
+    },
+    "vague_association": {
+      "instructions": "The paragraph describes a relationship only as \"associated with\", \"connected to\", \"linked to\", or \"tied to\" instead of saying what the relationship is.",
+      "fix": "State the exact relationship in plain words."
+    },
+    "negative_parallelism": {
+      "instructions": "The paragraph contains a sentence built on the contrast \"not X, but Y\", \"not just X but also Y\", \"more than X\", or \"Y rather than X\", where the sentence would say the same thing with Y alone.",
+      "fix": "Drop the \"not X, but Y\" framing and state Y on its own, in the same voice."
+    },
+    "rule_of_three_flourish": {
+      "instructions": "The paragraph groups adjectives, nouns, examples, or clauses in a set of exactly three for rhythm, such as \"faster, cheaper, and more reliable\" or \"innovation, collaboration, and growth\". Three items that are each a distinct fact the reader needs are not a flourish.",
+      "fix": "Keep the items that each carry their own weight, in whatever number that is."
+    },
+    "knowledge_gap_speculation": {
+      "instructions": "The paragraph says that a fact or figure is unknown, unavailable, or varies between sources, and speculates in its place. A hypothetical scene used as an example is not a missing fact.",
+      "fix": "Remove the speculation. If the article gives the figure and its source, keep those."
+    },
+    "assistant_voice_leak": {
+      "instructions": "The paragraph speaks in the voice of a chat assistant, for example \"I hope this helps\" or \"Let's explore\", announces what the article will do next, or comments on its own writing.",
+      "fix": "Delete the sentence that speaks as an assistant or comments on the writing."
+    },
+    "canned_notability": {
+      "instructions": "The paragraph claims fame, recognition, or iconic status in generic terms such as \"one of the most recognizable\" or \"widely celebrated\" without a concrete supporting fact.",
+      "fix": "Cut the generic claim of fame. If the article gives a fact that supports it, use that fact instead."
+    },
+    "stale_figure": {
+      "instructions": "The paragraph uses a metaphor, simile, or idiom the reader has seen many times in print, such as \"at the end of the day\", \"a double-edged sword\", \"the tip of the iceberg\", or \"moving the needle\".",
+      "fix": "Replace the stock figure of speech with a literal statement of what is meant."
+    },
+    "long_word": {
+      "instructions": "The paragraph uses a longer or more formal word where a shorter everyday word means the same thing in context, such as \"utilize\" for \"use\", \"commence\" for \"start\", \"facilitate\" for \"help\", or \"approximately\" for \"about\".",
+      "fix": "Replace the long word with the shorter everyday word."
+    },
+    "padding": {
+      "instructions": "The paragraph contains words that can be cut without changing its meaning, such as \"in order to\", \"the fact that\", \"it is important to note\", \"actually\", \"very\", or a sentence that restates the one before it.",
+      "fix": "Cut the words that add nothing. Keep the meaning and the voice."
+    },
+    "passive_voice": {
+      "instructions": "A sentence in the paragraph is in the passive voice although the actor is named or obvious from the article, such as \"the window was repaired by the glazier\" for \"the glazier repaired the window\".",
+      "fix": "Rewrite the sentence in the active voice with the actor as the subject."
+    },
+    "jargon": {
+      "instructions": "The paragraph uses a foreign phrase, scientific term, or jargon word where an everyday English word carries the same meaning for the audience named in `task`. A term the article defines, or that the audience needs in order to use the piece, is not jargon.",
+      "fix": "Replace the term with the everyday English word, or keep it and define it in plain words where it first appears."
+    },
+    "mannered_prose": {
+      "instructions": "The paragraph substitutes a metaphor or flourish for a direct statement where a literal phrase was available, such as \"a dial worth turning\" for \"a parameter worth varying\", \"earns its keep\" for \"still matters\", or \"prose carries habits\" for \"readers can tell a model wrote it\". One figurative verb counts, and so does an abstraction described as doing what only a person does. Ordinary technical usage, such as a function returning a value, is not a figure. A scene or example the argument depends on is not a flourish. A figure the paragraph uses in its own voice counts even if the article discusses that figure elsewhere.",
+      "fix": "Say what is meant. Replace the figure with the literal phrase."
+    },
+    "stiff_register": {
+      "instructions": "The paragraph avoids contractions, writing \"do not\", \"it is\", \"there is\", or \"cannot\" where a person explaining this out loud to the audience in `task` would say \"don't\", \"it's\", \"there's\", or \"can't\", so it reads stiffer than the task calls for.",
+      "fix": "Use contractions where a person speaking plainly would. Keep the full form only where the stress falls on it."
+    }
+  },
+  "document_scores": {
+    "specificity": {
+      "instructions": "How concrete is the article, given the brief in `task`?",
+      "criteria": [
+        "Mostly general statements that could open any piece on the topic",
+        "A mix of concrete examples or facts and generic filler sentences",
+        "Nearly every paragraph carries an example, scene, name, number, or other detail the reader can picture or check"
+      ],
+      "fix": "Cut sentences that would be true of many similar subjects. Where a point needs support, illustrate it with material the article already contains."
+    },
+    "neutrality": {
+      "instructions": "How plain is the register of the article, given the brief in `task`?",
+      "criteria": [
+        "Praises or sells the subject; adjectives do the work",
+        "Mostly plain with some evaluative language",
+        "Plain throughout; examples carry the point and the reader judges"
+      ],
+      "fix": "Cut adjectives and adverbs that praise rather than describe. Keep the voice the brief asks for and let the examples carry the point."
+    }
+  }
+}

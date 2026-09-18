@@ -1,0 +1,8 @@
+{
+  "name": "edit-writing-with-jev-scripts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}
