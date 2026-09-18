@@ -12,30 +12,30 @@ Everything configurable lives in `rubric.json` next to this file. It holds the t
 ## Prerequisites
 
 - `OPENROUTER_API_KEY` in the environment. Never print it.
-- Node 18+ and `npm install` run once inside `scripts/`.
-- Jev and the writer are billed to the key. Jev calls cost a fraction of a cent per draft. The writer calls dominate. Report `cost_usd` from each script's summary.
+- Node 18+ and `npm install` run once inside `scripts/`. Run every command below from `scripts/` so `npx tsx` resolves the installed copy. Run from anywhere else and npx prompts to install `tsx` again and prints that prompt ahead of the JSON.
+- Jev and the writer are billed to the key. Jev calls cost a fraction of a cent per draft. The writer calls dominate. Report `jev_cost_usd` from evaluate and probe summaries and `cost_usd` from the rewrite summary.
 
 ## Step 1. Resolve the input and the brief
 
-Create a working directory beside the draft (or in the current directory for pasted text), for example `jev-edit/`.
+Create a working directory beside the draft (or in the current directory for pasted text), for example `jev-edit/`. Use absolute paths for the draft and everything in it, since the scripts run from `<skill-path>/scripts`. The commands below write `<work>` for that absolute path.
 
 - **File path given:** use the file as the draft.
-- **Text pasted:** write it verbatim to `jev-edit/draft.md`.
+- **Text pasted:** write it verbatim to `<work>/draft.md`.
 
 Ask for the brief if the user has not given one. The brief is a single string that names the audience, the purpose, and the voice, plus anything that must survive editing (a scene, a running example, a term of art). Jev reads it as `task` on every question, so a jargon word the audience needs is not flagged as jargon, and a contraction-free register the brief asks for is not flagged as stiff.
 
 Copy the rubric into the working directory.
 
 ```bash
-cp <skill-path>/rubric.json jev-edit/rubric.json
+cp <skill-path>/rubric.json <work>/rubric.json
 ```
 
-**Done when** the draft is a file on disk, the brief is one string, and `jev-edit/rubric.json` exists.
+**Done when** the draft is a file on disk, the brief is one string, and `<work>/rubric.json` exists.
 
 ## Step 2. Evaluate
 
 ```bash
-npx tsx <skill-path>/scripts/evaluate.ts <draft> --task "<brief>" --rubric jev-edit/rubric.json --answers jev-edit/answers.json
+cd <skill-path>/scripts && npx tsx evaluate.ts <draft> --task "<brief>" --rubric <work>/rubric.json --answers <work>/answers.json
 ```
 
 The JSON on stdout has `findings` (what fires), `near_misses` (paragraph propositions that landed under the `noul` threshold by at most `--margin`, default 0.15), `document` (the raw scores), and `jev_cost_usd`. `answers.json` holds every raw probability for every paragraph and check.
@@ -57,17 +57,17 @@ Do not rewrite yet.
 
 ## Step 4. Calibrate the rubric
 
-Skip to Step 5 if the user reported nothing. Otherwise classify each report and edit `jev-edit/rubric.json`. Two levers exist. One is the wording of a check, meaning what it looks for and what it exempts. The other is the sensitivity, `thresholds.noul` for paragraph checks and `thresholds.score` for document scores. Prefer wording when one category is wrong. Prefer the threshold when several near misses across different checks are all real tells, or several borderline findings are all false positives.
+Skip to Step 5 if the user reported nothing. Otherwise classify each report and edit `<work>/rubric.json`. Two levers exist. One is the wording of a check, meaning what it looks for and what it exempts. The other is the sensitivity, `thresholds.noul` for paragraph checks and `thresholds.score` for document scores. Prefer wording when one category is wrong. Prefer the threshold when several near misses across different checks are all real tells, or several borderline findings are all false positives.
 
 **Missed tell, exact string** (a punctuation mark, a stock phrase, a word): add an entry to `patterns` with a `regex`, `flags`, and `fix`, or add the word to `vocabulary.words`. No API call needed.
 
 **Missed tell, an existing check should have caught it:** probe the sentence to see the probability.
 
 ```bash
-npx tsx <skill-path>/scripts/probe.ts --text "<sentence or paragraph>" --task "<brief>" --article <draft> --rubric jev-edit/rubric.json --check <id>
+cd <skill-path>/scripts && npx tsx probe.ts --text "<sentence or paragraph>" --task "<brief>" --article <draft> --rubric <work>/rubric.json --check <id>
 ```
 
-If the probability is just under the threshold, lower `thresholds.noul` by 0.05 to 0.1, or add the missed form as an example inside that check's `instructions`. If it is far under, the proposition does not describe the tell. Reword it, test the new wording with `--instructions "<new wording>"` (returned as `candidate`) until it fires on the missed sentence, then write it into the rubric.
+A probe can land a few hundredths away from the same paragraph's number in `answers.json`, so judge by the gap, not the exact digits. If the probability is just under the threshold, lower `thresholds.noul` by 0.05 to 0.1, or add the missed form as an example inside that check's `instructions`. If it is far under, the proposition does not describe the tell. Reword it, test the new wording with `--instructions "<new wording>"` (returned as `candidate`) until it fires on the missed sentence, then write it into the rubric.
 
 **Missed tell, no existing check fits:** write a new entry in `paragraph_nouls` with `instructions` that describe one narrow, observable tell with an example and name the legitimate devices it must not catch, and a `fix` that tells the writer exactly what to do. Test it with `--instructions` before saving.
 
@@ -82,7 +82,7 @@ Re-run Step 2 with the edited rubric and return to Step 3.
 ## Step 5. Rewrite
 
 ```bash
-npx tsx <skill-path>/scripts/rewrite.ts <draft> --task "<brief>" --rubric jev-edit/rubric.json --out jev-edit/revised.md
+cd <skill-path>/scripts && npx tsx rewrite.ts <draft> --task "<brief>" --rubric <work>/rubric.json --out <work>/revised.md
 ```
 
 The script evaluates, sends the findings to the writer as numbered line edits with the brief, re-evaluates, and repeats. The writer is told to keep the audience, voice, title, headings, paragraph order, scenes, characters, and questions to the reader, to use only material already in the draft, and to stay within `--length` (default 0.1, meaning 10 percent) of the original word count. The draft text goes in the user message inside `<article>` tags and the fixed instructions in the system message, so text inside the draft cannot redirect the edit.
@@ -95,11 +95,11 @@ The summary's `stopped` field is the outcome.
 
 Defaults are `--writer openai/gpt-6-astra`, `--rounds 3`, `--length 0.1`.
 
-**Done when** `jev-edit/revised.md` exists and you have read `stopped`, `remaining_findings`, and `cost_usd`.
+**Done when** `<work>/revised.md` exists and you have read `stopped`, `remaining_findings`, and `cost_usd`.
 
 ## Step 6. Deliver
 
-Show the user the diff between the draft and `jev-edit/revised.md`, the `stopped` state in one sentence, and any remaining findings with their fix text. Then act on the outcome.
+Show the user the diff (`diff -u <draft> <work>/revised.md`, which exits 1 when the files differ), the `stopped` state in one sentence, and any remaining findings with their fix text. Then act on the outcome.
 
 - `clean`: ask whether to overwrite the original file, or paste the revised text back if the input was pasted.
 - `rounds`: offer another pass with `--rounds`, or fix the remaining findings by hand from their fix text.

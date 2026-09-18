@@ -121,7 +121,7 @@
       "fix": "Say what is meant. Replace the figure with the literal phrase."
     },
     "stiff_register": {
-      "instructions": "The paragraph avoids contractions, writing \"do not\", \"it is\", \"there is\", or \"cannot\" where a person explaining this out loud to the audience in `task` would say \"don't\", \"it's\", \"there's\", or \"can't\", so it reads stiffer than the task calls for.",
+      "instructions": "The paragraph avoids contractions, writing \"do not\", \"it is\", \"there is\", or \"cannot\" where a person explaining this out loud to the audience in `task` would say \"don't\", \"it's\", \"there's\", or \"can't\", so it reads stiffer than the task calls for. Only fires when the paragraph contains a full form that could be contracted. Past-tense narration, possessives, and imperatives with no such full form do not count.",
       "fix": "Use contractions where a person speaking plainly would. Keep the full form only where the stress falls on it."
     }
   },
