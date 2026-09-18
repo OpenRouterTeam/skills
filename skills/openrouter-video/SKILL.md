@@ -82,8 +82,11 @@ Required: `model`, `prompt`. Common optional fields:
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+- `previous_job_id` (string) — edit or extend a completed job by passing its `id` from the submit response. The new job runs on the same `model` and endpoint as the original (a different `model` returns 400, a job that is not `completed` returns 409). Only models that support continuation accept it.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
+
+The request body is capped at 50 MiB, checked against `Content-Length` before the body is read, so an oversized submission returns `413` rather than a job. Base64 inflates bytes by ~33% — for larger reference images, pass an `https://` URL instead of a data URL.
 
 ## Provider passthrough
 
