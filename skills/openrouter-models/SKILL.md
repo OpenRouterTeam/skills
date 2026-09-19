@@ -147,7 +147,7 @@ Returns for each provider:
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
-- Endpoint `perf_last_30m_by_workload`: the same 30-minute window keyed by workload — `text_generation`, `image_generation`, `video_generation`, `embeddings`, `rerank`, `tts`, `stt`, `unknown`. Only workloads the endpoint served appear, each as `{ latency, throughput, request_count }`. `throughput` is null outside text generation, and image and video report full end-to-end generation time, while the flat `latency_last_30m` measures only request acknowledgement for those workloads — prefer the workload entry when comparing image or video endpoints. Present only when authenticated.
+- Endpoint `perf_last_30m_by_workload`: the same 30-minute window keyed by workload — `text_generation`, `image_generation`, `video_generation`, `embeddings`, `rerank`, `tts`, `stt`, `decisions`, `unknown`. Only workloads the endpoint served appear, each as `{ latency, throughput, request_count }`. `throughput` is null outside text generation, and image and video report full end-to-end generation time, while the flat `latency_last_30m` measures only request acknowledgement for those workloads — prefer the workload entry when comparing image or video endpoints. Present only when authenticated.
 
 ## Script Output Formats
 
