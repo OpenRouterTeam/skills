@@ -323,7 +323,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
+| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |

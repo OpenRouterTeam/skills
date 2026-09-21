@@ -98,6 +98,7 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `*_router_latency` — time spent in OpenRouter routing before the provider request
 - `*_total_time_to_first_token` — `latency + router_latency`, computed over streamed requests only
 - `*_generation_time` — provider-side generation time
+- `*_inter_token_latency` — average time between consecutive completion tokens, `(generation_time - latency) / (native_tokens_completion - 1)`, computed over streamed requests with more than one completion token only
 - `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens
 
 All performance metrics exclude server-tool rows (web search / file-parsing charges recorded alongside a request).
@@ -232,6 +233,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Which API key uses the most?" | `request_count`, `total_usage` | `api_key_id` | — |
 | "Usage over time" | `request_count` or `total_usage` | — | Set `granularity: "day"` |
 | "Latency trends" | `p90_latency` | — | Set `granularity: "hour"`, 31d limit |
+| "How smooth is streaming?" | `p50_inter_token_latency`, `p95_inter_token_latency` | `model` or `provider` | 31-day limit. Streamed requests with more than one completion token only |
 | "Usage by country" | `request_count` | `country` | 31-day limit |
 | "How can I save money?" | `total_usage`, `cache_hit_rate`, `tokens_total` | `model` | See cost optimization in `openrouter-analytics` skill |
 | "Show me individual requests" | `total_usage`, `tokens_total` | `generation_id` | 31-day limit. Use returned IDs with `openrouter-generations` skill for full metadata and content |
