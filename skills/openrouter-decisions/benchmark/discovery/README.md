@@ -1,6 +1,6 @@
 # Use-case discovery and implementation quality
 
-This directory holds a small fixture codebase and the labels for measuring the two things the skill claims to do: find the places in existing code where a decision model belongs, and implement them according to the practices in `SKILL.md`. `scripts/discovery.ts` runs the comparison against an arm that receives only the Decisions API reference.
+This directory holds a small fixture codebase and the labels for measuring the two things the skill claims to do, finding the places in existing code where a decision model belongs and implementing them according to the practices in `SKILL.md`. `scripts/discovery.ts` runs the comparison against an arm that receives only the Decisions API reference.
 
 ## Method
 
@@ -68,9 +68,9 @@ Neither arm flagged a deterministic module in any scan, and every flagged primit
 | api-only | 2 | 79.2% (374/472) | 122/136 | 14 | 12 | $0.37 |
 | skill | 2 | 88.1% (416/472) | 126/136 | 10 | 19 | $0.73 |
 
-The skill arm was ahead on every generator in both runs, by 4 to 15 points (run 2: Haiku 68.6% to 83.1%, Sonnet 85.6% to 91.5%, Gemini 78.8% to 90.7%, GPT-4.1 83.9% to 87.3%), and on every site in both runs.
+The skill arm was ahead on every generator in both runs, by 4 to 15 points (in run 2, Haiku 68.6% to 83.1%, Sonnet 85.6% to 91.5%, Gemini 78.8% to 90.7%, GPT-4.1 83.9% to 87.3%), and on every site in both runs.
 
-Rubric items where the arms differed by two or more grades in run 2 (api-only to skill, out of 56 generic or 8 site-specific):
+**Rubric items where the arms differed by two or more grades in run 2** (api-only to skill, out of 56 generic or 8 site-specific)
 
 | Item | api-only | skill |
 | --- | --- | --- |
@@ -88,9 +88,9 @@ Rubric items where the arms differed by two or more grades in run 2 (api-only to
 
 The skill's gains are concentrated in what goes into state and what stays in code. Its two regressions are both on `refunds/approve.ts`. Haiku with the skill collapsed the review path to a `noul` gate at 0.5 with approve on one side and deny on the other in all four of its designs across both runs, so the step 7 sentence about keeping an existing fallback did not reach it. Gemini with the skill in run 2 dropped the hard rules from `decide_js` entirely in both rounds and approved the over-cap sample, which it had not done in run 1.
 
-Items neither arm gets right: `plan_cap_in_code` is 0/8 in both arms in both runs, because every generator sends the plan field to the model even when it also applies the cap in code. `deterministic_rules_first` on lead routing is 4/8 to 5/8, because Gemini and Haiku call the model on partner-source leads and apply the rule to the answer afterwards. The sentence added to step 4 for run 2 did not change either.
+Two items are failed by both arms. `plan_cap_in_code` is 0/8 in both arms in both runs, because every generator sends the plan field to the model even when it also applies the cap in code. `deterministic_rules_first` on lead routing is 4/8 to 5/8, because Gemini and Haiku call the model on partner-source leads and apply the rule to the answer afterwards. The sentence added to step 4 for run 2 did not change either.
 
-Runtime errors are output-contract violations shared by both arms: `decide_js` returning a number where the site's actions are the strings `"1"` to `"5"`, returning an object with a `publish` flag instead of an action, or building a one-option `choice` when there are no candidates. They count against the design in the rubric because the judge sees them.
+Runtime errors are output-contract violations shared by both arms, namely `decide_js` returning a number where the site's actions are the strings `"1"` to `"5"`, returning an object with a `publish` flag instead of an action, or building a one-option `choice` when there are no candidates. They count against the design in the rubric because the judge sees them.
 
 ### What this supports
 
