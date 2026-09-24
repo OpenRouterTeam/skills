@@ -475,13 +475,23 @@ function implementPrompt(site: Extract<Site, { opportunity: true }>): string {
   ].join("\n");
 }
 
+function siteRubric(site: Extract<Site, { opportunity: true }>): RubricItem[] {
+  return [...GENERIC_RUBRIC, ...site.implement.rubric];
+}
+
+function rubricIds(file: string): string[] {
+  const site = opportunities.find((s) => s.file === file);
+  if (site === undefined) throw new Error(`No opportunity site for ${file}`);
+  return siteRubric(site).map((item) => item.id);
+}
+
 async function runImplementation(
   site: Extract<Site, { opportunity: true }>,
   arm: Arm,
   generator: string,
   round: number
 ): Promise<ImplementationResult> {
-  const rubric = [...GENERIC_RUBRIC, ...site.implement.rubric];
+  const rubric = siteRubric(site);
   const base: ImplementationResult = {
     site: site.file,
     arm,
@@ -678,10 +688,10 @@ function summarize(discovery: DiscoveryResult[], implementations: Implementation
     const i = implementations.filter((r) => r.arm === arm);
     const perItem: Record<string, { passed: number; total: number }> = {};
     for (const r of i) {
-      for (const [id, grade] of Object.entries(r.grades)) {
+      for (const id of rubricIds(r.site)) {
         perItem[id] ??= { passed: 0, total: 0 };
         perItem[id].total += 1;
-        if (grade.pass) perItem[id].passed += 1;
+        if (r.grades[id]?.pass === true) perItem[id].passed += 1;
       }
     }
     const rubricPassed = i.reduce((n, r) => n + r.rubric_passed, 0);

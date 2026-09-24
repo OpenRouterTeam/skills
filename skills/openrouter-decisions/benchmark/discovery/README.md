@@ -74,18 +74,18 @@ Generators `openai/gpt-6-astra`, `openai/gpt-5.6-luna`, `z-ai/glm-5.3-flash`, so
 
 The skill arm was ahead on every generator and on every site (categorize 48 versus 40 out of 48, urgency 45 versus 36, duplicates 53 versus 46 out of 54, moderation 40 versus 36, refunds 54 versus 51, leads 47 versus 41, suggest 53 versus 48).
 
-Rubric items where the arms differed by two or more grades (api-only to skill):
+Rubric items where the arms differed by two or more grades (api-only to skill). Denominators count every scheduled design, so the skill arm's one design error (GLM 5.3 Flash on moderation, round 2) is a fail on each of that site's items:
 
 | Item | api-only | skill |
 | --- | --- | --- |
-| `state_minimal` | 16/42 | 39/41 |
-| `deterministic_in_code` | 36/42 | 41/41 |
-| `fact_not_text` | 36/42 | 41/41 |
+| `state_minimal` | 16/42 | 39/42 |
+| `deterministic_in_code` | 36/42 | 41/42 |
+| `fact_not_text` | 36/42 | 41/42 |
 | `plan_cap_in_code` (urgency: cap applied without telling the model the plan) | 0/6 | 6/6 |
 | `plan_not_in_state` (categorize) | 2/6 | 6/6 |
-| `fact_not_words` (moderation) | 3/6 | 5/5 |
+| `fact_not_words` (moderation) | 3/6 | 5/6 |
 | `skip_model_when_settled` (refunds) | 4/6 | 6/6 |
-| `primitive_fit` | 42/42 | 38/41 |
+| `primitive_fit` | 42/42 | 38/42 |
 
 The api-only failures on `state_minimal` and `plan_cap_in_code` are the same design decision in every generator: the plan field goes into state even though the cap is applied in code. On moderation the api-only questions list surface features (a URL, the phrase "discount code", named insults) as the criteria for a label, which the judge failed as asking about the words rather than the fact and as deterministic work the model was asked to do.
 
