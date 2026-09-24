@@ -14,10 +14,11 @@
  *   npx tsx ablation.ts --filter refund --report out.json
  *   npx tsx ablation.ts --model <decision-model-id>      # decision model the designs run against
  */
+import { execFile } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runInNewContext } from "node:vm";
+import { promisify } from "node:util";
 import {
   decide,
   parseRequest,
@@ -93,6 +94,31 @@ type ArmSummary = {
 const CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_GENERATORS = ["anthropic/claude-sonnet-4.5", "openai/gpt-4.1", "google/gemini-2.5-flash"];
 const CONCURRENCY = 4;
+const SANDBOX_TIMEOUT_MS = 2_000;
+const SANDBOX_PROCESS_TIMEOUT_MS = 10_000;
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * Body of the child process that runs generated code. It reads { source, sandbox } from stdin,
+ * evaluates source in a fresh vm context, and writes { ok, value } or { ok, error } to stdout.
+ * The child is started with --permission and an empty environment, so escaping the vm context
+ * yields a process with no API key, no filesystem, and no child processes.
+ */
+const SANDBOX_RUNNER = [
+  "const chunks = [];",
+  "process.stdin.on('data', (chunk) => chunks.push(chunk)).on('end', () => {",
+  "  const { source, sandbox, timeout } = JSON.parse(Buffer.concat(chunks).toString('utf8'));",
+  "  let out;",
+  "  try {",
+  "    const value = require('node:vm').runInNewContext(source, sandbox, { timeout });",
+  "    out = { ok: true, value: value === undefined ? null : value };",
+  "  } catch (error) {",
+  "    out = { ok: false, error: error instanceof Error ? error.message : String(error) };",
+  "  }",
+  "  process.stdout.write(JSON.stringify(out));",
+  "});",
+].join("\n");
 
 const args = process.argv.slice(2);
 const offline = args.includes("--offline");
@@ -277,13 +303,17 @@ async function runDesign(task: Task, arm: Arm, generator: string, round: number)
     errors: 0,
     decisions_cost: 0,
   };
-  let generated: { design: Design; cost: number };
+  let generated: Generated;
   try {
     generated = await generateDesign(task, arm, generator);
   } catch (error) {
     return { ...base, design_error: errorMessage(error), errors: task.examples.length };
   }
-  const { design, cost } = generated;
+  const { cost } = generated;
+  if (generated.design === null) {
+    return { ...base, generation_cost: cost, design_error: generated.error, errors: task.examples.length };
+  }
+  const { design } = generated;
   const examples: ExampleResult[] = [];
   for (const example of task.examples) {
     examples.push(await runExample(task, design, example));
@@ -300,7 +330,9 @@ async function runDesign(task: Task, arm: Arm, generator: string, round: number)
   };
 }
 
-async function generateDesign(task: Task, arm: Arm, generator: string): Promise<{ design: Design; cost: number }> {
+type Generated = { design: Design; error: null; cost: number } | { design: null; error: string; cost: number };
+
+async function generateDesign(task: Task, arm: Arm, generator: string): Promise<Generated> {
   const res = await fetch(CHAT_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -318,10 +350,14 @@ async function generateDesign(task: Task, arm: Arm, generator: string): Promise<
   const body: unknown = await res.json();
   if (!isRecord(body)) throw new Error(`Generator returned a non-object body (HTTP ${res.status})`);
   if (!res.ok || "error" in body) throw new Error(`Generator HTTP ${res.status}: ${JSON.stringify(body.error ?? body)}`);
-  const content = firstMessageContent(body);
   const cost = isRecord(body.usage) && typeof body.usage.cost === "number" ? body.usage.cost : 0;
-  const parsed: unknown = JSON.parse(content.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ""));
-  return { design: parseDesign(parsed), cost };
+  try {
+    const content = firstMessageContent(body);
+    const parsed: unknown = JSON.parse(content.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ""));
+    return { design: parseDesign(parsed), error: null, cost };
+  } catch (error) {
+    return { design: null, error: errorMessage(error), cost };
+  }
 }
 
 function firstMessageContent(body: Record<string, unknown>): string {
@@ -366,16 +402,16 @@ async function runExample(task: Task, design: Design, example: Example): Promise
     cost: 0,
   };
   try {
-    const state = callGenerated(design.build_state_js, ["input"], { input: example.input });
+    const state = await callGenerated(design.build_state_js, ["input"], { input: example.input });
     result.state = state;
     let answers: Record<string, Answer> = {};
     let questions: Record<string, unknown> = design.questions;
     if (state !== null && design.build_questions_js !== null) {
-      const built = callGenerated(design.build_questions_js, ["input", "state"], { input: example.input, state });
+      const built = await callGenerated(design.build_questions_js, ["input", "state"], { input: example.input, state });
       if (!isRecord(built)) throw new Error(`build_questions_js returned ${JSON.stringify(built)}, not an object`);
       questions = built;
-      result.questions = built;
     }
+    if (state !== null) result.questions = questions;
     if (state === null || Object.keys(questions).length === 0) {
       result.skipped_model = true;
     } else {
@@ -389,7 +425,7 @@ async function runExample(task: Task, design: Design, example: Example): Promise
       result.decision_model = response.model;
       result.cost = response.usage.cost ?? 0;
     }
-    const action = callGenerated(design.decide_js, ["answers", "state", "input"], { answers, state, input: example.input });
+    const action = await callGenerated(design.decide_js, ["answers", "state", "input"], { answers, state, input: example.input });
     if (typeof action !== "string") throw new Error(`decide_js returned ${JSON.stringify(action)}, not a string`);
     result.action = action;
     if (!task.actions.includes(action)) throw new Error(`decide_js returned ${action}, not one of the allowed actions`);
@@ -400,10 +436,13 @@ async function runExample(task: Task, design: Design, example: Example): Promise
   return result;
 }
 
-/** Runs generated code as a function body, or as a function expression when the generator wrote one. */
-function callGenerated(code: string, params: string[], args: Record<string, unknown>): unknown {
+/**
+ * Runs generated code as a function body, or as a function expression when the generator wrote one,
+ * in a separate locked-down node process (see SANDBOX_RUNNER). Only parsing happens in this process.
+ */
+async function callGenerated(code: string, params: string[], args: Record<string, unknown>): Promise<unknown> {
   const sandbox: Record<string, unknown> = {};
-  for (const name of params) sandbox[`__${name}`] = clone(args[name]);
+  for (const name of params) sandbox[`__${name}`] = args[name];
   const callArgs = params.map((name) => `__${name}`).join(", ");
   const trimmed = code.trim().replace(/;$/, "");
   const asBody = `(function(${params.join(", ")}){\n${code}\n})(${callArgs})`;
@@ -418,12 +457,27 @@ function callGenerated(code: string, params: string[], args: Record<string, unkn
     new Function(second);
     source = second;
   }
-  const value: unknown = runInNewContext(source, sandbox, { timeout: 2_000 });
-  return value === undefined ? null : clone(value);
+  return runSandboxed(source, sandbox);
 }
 
-function clone<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+async function runSandboxed(source: string, sandbox: Record<string, unknown>): Promise<unknown> {
+  const child = execFileAsync(process.execPath, ["--permission", "-e", SANDBOX_RUNNER], {
+    env: {},
+    timeout: SANDBOX_PROCESS_TIMEOUT_MS,
+    maxBuffer: 16 * 1024 * 1024,
+    encoding: "utf8",
+  });
+  child.child.stdin?.end(JSON.stringify({ source, sandbox, timeout: SANDBOX_TIMEOUT_MS }));
+  let stdout: string;
+  try {
+    ({ stdout } = await child);
+  } catch (error) {
+    throw new Error(`Sandbox process failed: ${errorMessage(error)}`);
+  }
+  const out: unknown = JSON.parse(stdout);
+  if (!isRecord(out) || typeof out.ok !== "boolean") throw new Error("Sandbox returned a malformed result");
+  if (!out.ok) throw new Error(typeof out.error === "string" ? out.error : "Generated code threw");
+  return out.value === undefined ? null : out.value;
 }
 
 async function runPool<T, R>(items: T[], size: number, worker: (item: T) => Promise<R>): Promise<R[]> {

@@ -11,7 +11,7 @@ For every task, generator model, and round, the harness asks the generator to im
 - **api-only** receives `references/decisions-api.md` and nothing else from the skill.
 - **skill** receives `SKILL.md`, `references/decisions-api.md`, `references/decision-model-limits.md`, and `references/models.md`.
 
-Both arms get the same task text, the same single example input without its label, the same output contract, and the same decision model. Every design is then executed on every labeled example of its task: the generated JavaScript runs in a Node `vm` sandbox, valid requests go to the live Decisions API, and the returned action is compared with the label. Invalid requests, sandbox exceptions, and actions outside the allowed set are recorded as errors and count as incorrect.
+Both arms get the same task text, the same single example input without its label, the same output contract, and the same decision model. Every design is then executed on every labeled example of its task: the generated JavaScript runs in a separate `node --permission` process with an empty environment (so it cannot reach the API key, the filesystem, or child processes), valid requests go to the live Decisions API, and the returned action is compared with the label. Invalid requests, sandbox exceptions, and actions outside the allowed set are recorded as errors and count as incorrect.
 
 The score per arm is the fraction of examples where the generated code returned the expected action. The report also carries per-design results, the raw design, and per-example state, questions, answers, action, error, resolved decision model, and cost, so any failure can be traced to the question wording, the threshold, or the model output.
 

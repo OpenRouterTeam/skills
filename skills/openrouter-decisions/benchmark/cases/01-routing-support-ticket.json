@@ -41,6 +41,8 @@
   "expect": [
     { "kind": "noul", "question": "is_bug", "min": 0.7 },
     { "kind": "choice", "question": "team", "equals": "payments" },
-    { "kind": "score_level", "question": "urgency", "equals": 2 }
+    { "kind": "confidence", "question": "team", "min": 0.6 },
+    { "kind": "score_level", "question": "urgency", "equals": 2 },
+    { "kind": "probability", "question": "urgency", "option": "2", "min": 0.5 }
   ]
 }

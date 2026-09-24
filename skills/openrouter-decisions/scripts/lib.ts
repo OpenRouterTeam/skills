@@ -239,9 +239,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function numberField(obj: Record<string, unknown>, ...keys: string[]): number {
   for (const key of keys) {
     const v = obj[key];
-    if (typeof v === "number") return v;
+    if (typeof v === "number" && Number.isFinite(v)) return v;
   }
-  return 0;
+  throw new Error(`Response usage has no finite ${keys[0]}`);
 }
 
 function finiteField(key: string, field: string, value: unknown): number {
