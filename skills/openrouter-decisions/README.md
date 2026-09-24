@@ -16,7 +16,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## Prerequisites
 
-`OPENROUTER_API_KEY` must be set to any valid OpenRouter API key. Get one at [openrouter.ai/keys](https://openrouter.ai/keys). Reading the skill and validating benchmark cases offline needs no key.
+`OPENROUTER_API_KEY` must be set to any valid OpenRouter API key. Get one at [openrouter.ai/keys](https://openrouter.ai/keys). Reading the skill and validating benchmark cases offline needs no key. The live ablation additionally needs Node 22.13 or later, because it runs generated code under `node --permission` and checks for that before spending anything on generation.
 
 ## What it covers
 

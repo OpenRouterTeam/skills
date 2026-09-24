@@ -99,19 +99,32 @@ const SANDBOX_PROCESS_TIMEOUT_MS = 10_000;
 
 const execFileAsync = promisify(execFile);
 
+const SANDBOX_ARGS = ["--permission"];
+
 /**
- * Body of the child process that runs generated code. It reads { source, sandbox } from stdin,
- * evaluates source in a fresh vm context, and writes { ok, value } or { ok, error } to stdout.
- * The child is started with --permission and an empty environment, so escaping the vm context
- * yields a process with no API key, no filesystem, and no child processes.
+ * Body of the child process that runs generated code. It reads { sources, sandbox, timeout } from
+ * stdin, compiles each candidate source in order until one parses, runs it in a fresh vm context,
+ * and writes { ok, value } or { ok, error } to stdout. Generated code is never compiled or run in
+ * the parent. The child is started with --permission and an empty environment, so escaping the vm
+ * context yields a process with no API key, no filesystem, and no child processes.
  */
 const SANDBOX_RUNNER = [
+  "const vm = require('node:vm');",
   "const chunks = [];",
   "process.stdin.on('data', (chunk) => chunks.push(chunk)).on('end', () => {",
-  "  const { source, sandbox, timeout } = JSON.parse(Buffer.concat(chunks).toString('utf8'));",
+  "  const { sources, sandbox, timeout } = JSON.parse(Buffer.concat(chunks).toString('utf8'));",
   "  let out;",
   "  try {",
-  "    const value = require('node:vm').runInNewContext(source, sandbox, { timeout });",
+  "    let script;",
+  "    let syntaxError;",
+  "    for (const source of sources) {",
+  "      try { script = new vm.Script(source); break; } catch (error) {",
+  "        if (!(error instanceof SyntaxError)) throw error;",
+  "        syntaxError = error;",
+  "      }",
+  "    }",
+  "    if (!script) throw syntaxError;",
+  "    const value = script.runInNewContext(sandbox, { timeout });",
   "    out = { ok: true, value: value === undefined ? null : value };",
   "  } catch (error) {",
   "    out = { ok: false, error: error instanceof Error ? error.message : String(error) };",
@@ -145,6 +158,7 @@ if (offline) {
 }
 
 const apiKey = requireApiKey();
+await requireSandboxSupport();
 const systemPrompts: Record<Arm, string> = {
   "api-only": apiOnlyPrompt(),
   skill: skillPrompt(),
@@ -436,9 +450,27 @@ async function runExample(task: Task, design: Design, example: Example): Promise
   return result;
 }
 
+/** Fails before any paid generation when this Node cannot start the locked-down child. */
+async function requireSandboxSupport(): Promise<void> {
+  try {
+    const { stdout } = await execFileAsync(process.execPath, [...SANDBOX_ARGS, "-e", "process.stdout.write('ok')"], {
+      env: {},
+      timeout: SANDBOX_PROCESS_TIMEOUT_MS,
+      encoding: "utf8",
+    });
+    if (stdout !== "ok") throw new Error(`unexpected output ${JSON.stringify(stdout)}`);
+  } catch (error) {
+    console.error(
+      `This Node (${process.version}) cannot run generated code under ${SANDBOX_ARGS.join(" ")}: ${errorMessage(error)}\n` +
+        "The ablation needs a Node release with the stable permission model (22.13 or later)."
+    );
+    process.exit(1);
+  }
+}
+
 /**
  * Runs generated code as a function body, or as a function expression when the generator wrote one,
- * in a separate locked-down node process (see SANDBOX_RUNNER). Only parsing happens in this process.
+ * in a separate locked-down node process (see SANDBOX_RUNNER). The child picks whichever wrapping parses.
  */
 async function callGenerated(code: string, params: string[], args: Record<string, unknown>): Promise<unknown> {
   const sandbox: Record<string, unknown> = {};
@@ -448,26 +480,18 @@ async function callGenerated(code: string, params: string[], args: Record<string
   const asBody = `(function(${params.join(", ")}){\n${code}\n})(${callArgs})`;
   const asExpression = `(${trimmed})(${callArgs})`;
   const looksLikeFunction = /^(async\s+)?function\b|^\(?[\w\s,{}]*\)?\s*=>/.test(trimmed);
-  const [first, second] = looksLikeFunction ? [asExpression, asBody] : [asBody, asExpression];
-  let source = first;
-  try {
-    new Function(first);
-  } catch (error) {
-    if (!(error instanceof SyntaxError)) throw error;
-    new Function(second);
-    source = second;
-  }
-  return runSandboxed(source, sandbox);
+  const sources = looksLikeFunction ? [asExpression, asBody] : [asBody, asExpression];
+  return runSandboxed(sources, sandbox);
 }
 
-async function runSandboxed(source: string, sandbox: Record<string, unknown>): Promise<unknown> {
-  const child = execFileAsync(process.execPath, ["--permission", "-e", SANDBOX_RUNNER], {
+async function runSandboxed(sources: string[], sandbox: Record<string, unknown>): Promise<unknown> {
+  const child = execFileAsync(process.execPath, [...SANDBOX_ARGS, "-e", SANDBOX_RUNNER], {
     env: {},
     timeout: SANDBOX_PROCESS_TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,
     encoding: "utf8",
   });
-  child.child.stdin?.end(JSON.stringify({ source, sandbox, timeout: SANDBOX_TIMEOUT_MS }));
+  child.child.stdin?.end(JSON.stringify({ sources, sandbox, timeout: SANDBOX_TIMEOUT_MS }));
   let stdout: string;
   try {
     ({ stdout } = await child);
