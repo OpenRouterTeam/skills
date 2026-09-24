@@ -27,11 +27,17 @@ export type ScoreQuestion = {
 
 export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
 
+export type DecisionsState = string | Record<string, unknown> | unknown[];
+
 export type DecisionsRequest = {
   model: string;
-  state: string | Record<string, unknown> | unknown[];
+  state: DecisionsState;
   questions: Record<string, Question>;
+  session_id?: string;
+  user?: string;
 };
+
+const REQUEST_KEYS = new Set(["model", "state", "questions", "session_id", "user"]);
 
 export type ChoiceAnswer = {
   type: "choice";
@@ -85,7 +91,22 @@ export async function decide(
     transport === "sdk"
       ? await decideViaSdk(request, apiKey)
       : await decideViaHttp(request, apiKey);
+  assertAnswersMatch(request, response);
   return { response, latencyMs: Math.round(performance.now() - started) };
+}
+
+function assertAnswersMatch(request: DecisionsRequest, response: DecisionsResponse): void {
+  const expected = Object.keys(request.questions);
+  const received = Object.keys(response.answers);
+  const missing = expected.filter((key) => !(key in response.answers));
+  const extra = received.filter((key) => !(key in request.questions));
+  if (missing.length > 0) throw new Error(`Response is missing answers: ${missing.join(", ")}`);
+  if (extra.length > 0) throw new Error(`Response has unexpected answers: ${extra.join(", ")}`);
+  for (const key of expected) {
+    const want = request.questions[key].type;
+    const got = response.answers[key].type;
+    if (want !== got) throw new Error(`Answer ${key} is a ${got}, question is a ${want}`);
+  }
 }
 
 async function decideViaHttp(
@@ -117,6 +138,8 @@ async function decideViaSdk(
       model: request.model,
       state: request.state,
       questions: request.questions,
+      sessionId: request.session_id,
+      user: request.user,
     },
   });
   return parseResponse({
@@ -219,17 +242,29 @@ export function readJsonFile(path: string): unknown {
 
 export function parseRequest(raw: unknown, source: string): DecisionsRequest {
   if (!isRecord(raw)) throw new Error(`${source}: request is not an object`);
-  const { model, state, questions } = raw;
+  const unsupported = Object.keys(raw).filter((key) => !REQUEST_KEYS.has(key));
+  if (unsupported.length > 0) {
+    throw new Error(`${source}: unsupported request field(s) ${unsupported.join(", ")}`);
+  }
+  const { model, state, questions, session_id, user } = raw;
   if (typeof model !== "string") throw new Error(`${source}: model must be a string`);
-  if (state === undefined || state === null) throw new Error(`${source}: state is required`);
+  if (!isState(state)) throw new Error(`${source}: state must be a string, object, or array`);
   if (!isRecord(questions) || Object.keys(questions).length === 0) {
     throw new Error(`${source}: questions must be a non-empty object`);
   }
+  if (session_id !== undefined && typeof session_id !== "string") {
+    throw new Error(`${source}: session_id must be a string`);
+  }
+  if (user !== undefined && typeof user !== "string") throw new Error(`${source}: user must be a string`);
   const parsed: Record<string, Question> = {};
   for (const [key, value] of Object.entries(questions)) {
     parsed[key] = parseQuestion(`${source}: questions.${key}`, value);
   }
-  return { model, state: state as DecisionsRequest["state"], questions: parsed };
+  return { model, state, questions: parsed, session_id, user };
+}
+
+function isState(value: unknown): value is DecisionsState {
+  return typeof value === "string" || isRecord(value) || Array.isArray(value);
 }
 
 function parseQuestion(source: string, value: unknown): Question {

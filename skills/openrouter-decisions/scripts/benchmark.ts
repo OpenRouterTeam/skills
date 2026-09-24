@@ -184,7 +184,10 @@ function parseExpectation(raw: unknown, source: string, request: DecisionsReques
       const target = request.questions[question];
       if (target.type === "noul") throw new Error(`${source}: use kind noul for a noul question`);
       if (typeof raw.option !== "string") throw new Error(`${source}.option must be a string`);
-      const valid = target.type === "choice" ? raw.option in target.criteria : Number(raw.option) < target.criteria.length;
+      const valid =
+        target.type === "choice"
+          ? raw.option in target.criteria
+          : target.criteria.some((_, i) => String(i) === raw.option);
       if (!valid) throw new Error(`${source}.option ${raw.option} is not an option of ${question}`);
       return { kind: "probability", question, option: raw.option, ...range() };
     }
@@ -273,7 +276,8 @@ function check(expectation: Expectation, answers: Record<string, Answer>): Check
     case "probability": {
       const answer = answers[expectation.question];
       if (!answer || answer.type === "noul") return fail(`no choice/score answer for ${expectation.question}`);
-      const value = answer.probabilities[expectation.option] ?? 0;
+      const value = answer.probabilities[expectation.option];
+      if (value === undefined) return fail(`no probability for option ${expectation.option}`);
       const observed = `P(${expectation.option})=${value}`;
       return inRange(value, expectation.min, expectation.max) ? pass(observed) : fail(observed);
     }

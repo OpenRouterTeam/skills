@@ -63,7 +63,7 @@ The response `model` field carries the exact build that answered, for example `t
 - `noul.criteria` is optional and has exactly `true` and `false` keys.
 - `score.criteria` is an ordered array of level descriptions, lowest first. The answer's `legend` maps `"0"`, `"1"`, ... back to them.
 - `instructions` and every criterion accept a string or JSON structure.
-- Optional: `session_id` and `trace` for observability grouping, `user` for per-end-user attribution, `provider` for routing preferences.
+- Optional: `session_id` and `trace` for observability grouping, `user` for per-end-user attribution, `provider` for routing preferences. The bundled scripts forward `session_id` and `user` and reject the other two, so send `trace` and `provider` from your own client.
 
 ## Response
 
