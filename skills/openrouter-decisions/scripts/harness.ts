@@ -41,7 +41,7 @@ const SANDBOX_RUNNER = [
   "    for (const source of sources) {",
   "      try { script = new vm.Script(source); break; } catch (error) {",
   "        if (!(error instanceof SyntaxError)) throw error;",
-  "        syntaxError = error;",
+  "        syntaxError = syntaxError ?? error;",
   "      }",
   "    }",
   "    if (!script) throw syntaxError;",
@@ -133,27 +133,33 @@ export async function chatJson(
       usage: { include: true },
     }),
   });
-  const body: unknown = await res.json();
+  const text = await res.text();
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Generator response body is not JSON (HTTP ${res.status}, ${text.length} chars): ${errorMessage(error)}`);
+  }
   if (!isRecord(body)) throw new Error(`Generator returned a non-object body (HTTP ${res.status})`);
   if (!res.ok || "error" in body) throw new Error(`Generator HTTP ${res.status}: ${JSON.stringify(body.error ?? body)}`);
   const cost = isRecord(body.usage) && typeof body.usage.cost === "number" ? body.usage.cost : 0;
+  const first = firstChoice(body);
+  const finish = first !== null && typeof first.finish_reason === "string" ? first.finish_reason : "unknown";
+  const content = first !== null && isRecord(first.message) && typeof first.message.content === "string" ? first.message.content : null;
+  if (content === null) return { parsed: null, error: `Generator returned no message content (finish_reason ${finish})`, cost };
   try {
-    const content = firstMessageContent(body);
     const parsed: unknown = JSON.parse(content.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ""));
     return { parsed, error: null, cost };
   } catch (error) {
-    return { parsed: null, error: errorMessage(error), cost };
+    return { parsed: null, error: `${errorMessage(error)} (finish_reason ${finish}, ${content.length} chars)`, cost };
   }
 }
 
-function firstMessageContent(body: Record<string, unknown>): string {
+function firstChoice(body: Record<string, unknown>): Record<string, unknown> | null {
   const choices = body.choices;
-  if (!Array.isArray(choices) || choices.length === 0) throw new Error("Generator returned no choices");
+  if (!Array.isArray(choices) || choices.length === 0) return null;
   const first: unknown = choices[0];
-  if (!isRecord(first) || !isRecord(first.message) || typeof first.message.content !== "string") {
-    throw new Error("Generator returned no message content");
-  }
-  return first.message.content;
+  return isRecord(first) ? first : null;
 }
 
 /** Fails before any paid generation when this Node cannot start the locked-down child. */

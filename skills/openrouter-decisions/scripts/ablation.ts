@@ -9,7 +9,7 @@
  *   npx tsx ablation.ts --offline                        # validate task files only
  *   npx tsx ablation.ts                                  # both arms, default generators
  *   npx tsx ablation.ts --arm skill                      # one arm
- *   npx tsx ablation.ts --generator openai/gpt-4.1       # comma-separated generator IDs
+ *   npx tsx ablation.ts --generator openai/gpt-5.6-luna  # comma-separated generator IDs
  *   npx tsx ablation.ts --rounds 2                       # repeat every generation to average out sampling noise
  *   npx tsx ablation.ts --filter refund --report out.json
  *   npx tsx ablation.ts --model <decision-model-id>      # decision model the designs run against
@@ -80,6 +80,7 @@ type DesignResult = {
   generation_cost: number;
   design: Design | null;
   design_error: string | null;
+  design_raw: unknown;
   question_count: number;
   examples: ExampleResult[];
   correct: number;
@@ -212,7 +213,7 @@ function userPrompt(task: Task): string {
     '  "notes": "..."',
     "}",
     "",
-    "questions: the questions object of the Decisions API request, reused for every input. The harness supplies model. Use an empty object if no question is needed.",
+    "questions: the questions object of the Decisions API request, reused for every input. The harness supplies model. Use an empty object if no question is needed or if build_questions_js supplies the questions.",
     "build_questions_js (optional): the body of a JavaScript function with two parameters named input and state. Return the questions object for this input. Provide it when the options depend on the input (for example candidates that vary per input), and it replaces questions for that input.",
     "build_state_js: the body of a JavaScript function with one parameter named input. Return the request state for this input. Return null to skip the model entirely for this input, in which case decide_js receives an empty answers object and must still return the action.",
     "decide_js: the body of a JavaScript function with three parameters named answers, state, and input. answers is the answers object from the Decisions API response (each value has a type field and, by type, noul, choice plus probabilities plus confidence, or score plus probabilities plus confidence). state is what build_state_js returned. Return the final action string.",
@@ -231,6 +232,7 @@ async function runDesign(task: Task, arm: Arm, generator: string, round: number)
     generation_cost: 0,
     design: null,
     design_error: null,
+    design_raw: null,
     question_count: 0,
     examples: [],
     correct: 0,
@@ -246,7 +248,7 @@ async function runDesign(task: Task, arm: Arm, generator: string, round: number)
   }
   const { cost } = generated;
   if (generated.design === null) {
-    return { ...base, generation_cost: cost, design_error: generated.error, errors: task.examples.length };
+    return { ...base, generation_cost: cost, design_error: generated.error, design_raw: generated.raw, errors: task.examples.length };
   }
   const { design } = generated;
   const examples: ExampleResult[] = [];
@@ -265,29 +267,30 @@ async function runDesign(task: Task, arm: Arm, generator: string, round: number)
   };
 }
 
-type Generated = { design: Design; error: null; cost: number } | { design: null; error: string; cost: number };
+type Generated = { design: Design; error: null; cost: number } | { design: null; error: string; raw: unknown; cost: number };
 
 async function generateDesign(task: Task, arm: Arm, generator: string): Promise<Generated> {
   const reply = await chatJson(generator, systemPrompts[arm], userPrompt(task), apiKey);
-  if (reply.error !== null) return { design: null, error: reply.error, cost: reply.cost };
+  if (reply.error !== null) return { design: null, error: reply.error, raw: null, cost: reply.cost };
   try {
     return { design: parseDesign(reply.parsed), error: null, cost: reply.cost };
   } catch (error) {
-    return { design: null, error: errorMessage(error), cost: reply.cost };
+    return { design: null, error: errorMessage(error), raw: reply.parsed, cost: reply.cost };
   }
 }
 
 function parseDesign(raw: unknown): Design {
   if (!isRecord(raw)) throw new Error("Design is not an object");
   const { questions, build_questions_js, build_state_js, decide_js, notes } = raw;
-  if (!isRecord(questions)) throw new Error("Design.questions must be an object");
   if (build_questions_js !== undefined && build_questions_js !== null && typeof build_questions_js !== "string") {
     throw new Error("Design.build_questions_js must be a string when present");
   }
+  const staticQuestions = questions ?? (typeof build_questions_js === "string" ? {} : undefined);
+  if (!isRecord(staticQuestions)) throw new Error("Design.questions must be an object");
   if (typeof build_state_js !== "string") throw new Error("Design.build_state_js must be a string");
   if (typeof decide_js !== "string") throw new Error("Design.decide_js must be a string");
   return {
-    questions,
+    questions: staticQuestions,
     build_questions_js: typeof build_questions_js === "string" ? build_questions_js : null,
     build_state_js,
     decide_js,

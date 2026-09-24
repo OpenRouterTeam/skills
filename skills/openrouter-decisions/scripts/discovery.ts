@@ -113,6 +113,7 @@ type ImplementationResult = {
   generation_cost: number;
   design: Design | null;
   design_error: string | null;
+  design_raw: unknown;
   samples: SampleRun[];
   valid_samples: number;
   runtime_errors: number;
@@ -464,7 +465,7 @@ function implementPrompt(site: Extract<Site, { opportunity: true }>): string {
     '  "notes": "..."',
     "}",
     "",
-    "questions: the questions object of the Decisions API request, reused for every input. The harness supplies model. Use an empty object if no question is needed.",
+    "questions: the questions object of the Decisions API request, reused for every input. The harness supplies model. Use an empty object if no question is needed or if build_questions_js supplies the questions.",
     "build_questions_js (optional): the body of a JavaScript function with two parameters named input and state. Return the questions object for this input. Provide it when the options depend on the input (for example candidates that vary per input), and it replaces questions for that input.",
     "build_state_js: the body of a JavaScript function with one parameter named input. Return the request state for this input. Return null to skip the model entirely for this input, in which case decide_js receives an empty answers object and must still return the action.",
     "decide_js: the body of a JavaScript function with three parameters named answers, state, and input. answers is the answers object from the Decisions API response (each value has a type field and, by type, noul, choice plus probabilities plus confidence, or score plus probabilities plus confidence). state is what build_state_js returned. Return the final action string.",
@@ -489,6 +490,7 @@ async function runImplementation(
     generation_cost: 0,
     design: null,
     design_error: null,
+    design_raw: null,
     samples: [],
     valid_samples: 0,
     runtime_errors: 0,
@@ -510,7 +512,7 @@ async function runImplementation(
   try {
     design = parseDesign(reply.parsed);
   } catch (error) {
-    return { ...base, generation_cost: reply.cost, design_error: errorMessage(error) };
+    return { ...base, generation_cost: reply.cost, design_error: errorMessage(error), design_raw: reply.parsed };
   }
   const samples: SampleRun[] = [];
   for (const sample of site.implement.samples) samples.push(await runSample(site, design, sample));
@@ -533,14 +535,15 @@ async function runImplementation(
 function parseDesign(raw: unknown): Design {
   if (!isRecord(raw)) throw new Error("Design is not an object");
   const { questions, build_questions_js, build_state_js, decide_js, notes } = raw;
-  if (!isRecord(questions)) throw new Error("Design.questions must be an object");
   if (build_questions_js !== undefined && build_questions_js !== null && typeof build_questions_js !== "string") {
     throw new Error("Design.build_questions_js must be a string when present");
   }
+  const staticQuestions = questions ?? (typeof build_questions_js === "string" ? {} : undefined);
+  if (!isRecord(staticQuestions)) throw new Error("Design.questions must be an object");
   if (typeof build_state_js !== "string") throw new Error("Design.build_state_js must be a string");
   if (typeof decide_js !== "string") throw new Error("Design.decide_js must be a string");
   return {
-    questions,
+    questions: staticQuestions,
     build_questions_js: typeof build_questions_js === "string" ? build_questions_js : null,
     build_state_js,
     decide_js,
