@@ -4,7 +4,7 @@ These limits follow from what a decision model is. It maps state and a question 
 
 | Limit | What goes wrong | Do instead |
 | --- | --- | --- |
-| Literal reading | Loose wording such as "is this about billing" matches broadly. Presence questions ignore negation, so "does it mention breaking changes" reads as true for "No breaking changes". | Write the exact condition and ask for the meaning. Say "the customer states they were charged more than once" instead of "billing problem". |
+| Literal reading | Loose wording such as "is this about billing" matches broadly. Presence questions ignore negation, so "does it mention breaking changes" reads as true for "No breaking changes". Questions about what the text "states" or "says" suppress inference the other way, so "does the report state that users cannot check out" reads low for "Checkout returns HTTP 500 for every user". | Ask about the fact with the exact condition. "Is this change breaking" and "was the customer charged more than once" instead of "does it mention breaking changes" or "billing problem". |
 | Math and numbers | Cannot add, compare magnitudes, or judge closeness of numeric values such as hex colors, RGB triples, or amounts. Semantic forms beat numeric ones. | Compute in code, then pass the result or a named bucket (`over_limit: true`, `color_name: "red"`). |
 | Score used as a number | The `score` expectation is not calibrated between levels. Interpolating a magnitude from it is unreliable. | Use `score` to pick a level or pass a threshold. Never reconstruct a quantity from it. |
 | Counting | Cannot count items or occurrences reliably. | Ask one `noul` per item (`Is items[3] a fruit?`) and count the yeses in code. |

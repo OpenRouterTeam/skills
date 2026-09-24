@@ -1,19 +1,19 @@
 {
   "id": "negation-meaning-not-mention",
   "category": "model-limits",
-  "task": "Gate automerge on whether a PR description declares a breaking change. The description says 'No breaking changes.' Asking whether it mentions breaking changes reads literally and scores high. Asking whether it states the change is breaking scores low.",
-  "code_rule": "Block automerge when declares_breaking >= 0.3. The mentions question is included only as the contrast to avoid, never gate on it.",
+  "task": "Gate automerge on whether a PR description declares a breaking change. The description says 'No breaking changes.' Asking whether it mentions breaking changes reads literally and scores high. Asking whether the change is breaking scores low.",
+  "code_rule": "Block automerge when is_breaking >= 0.3. The mentions question is included only as the contrast to avoid, never gate on it.",
   "request": {
     "state": {
       "description": "Bumps lodash from 4.17.20 to 4.17.21. Release notes: fixes prototype pollution. No breaking changes."
     },
     "questions": {
-      "declares_breaking": {
+      "is_breaking": {
         "type": "noul",
-        "instructions": "Does `description` state that this change is breaking or requires a migration?",
+        "instructions": "Is this change breaking or does it require a migration, based on `description`?",
         "criteria": {
-          "true": "The description says the change breaks compatibility, removes or renames something callers use, or requires a migration step.",
-          "false": "The description says nothing about breakage, or says there are no breaking changes."
+          "true": "The change breaks compatibility, removes or renames something callers use, or requires a migration step.",
+          "false": "The change is compatible and needs no migration, or the description gives no sign of breakage."
         }
       },
       "mentions_breaking": {
@@ -27,6 +27,6 @@
     }
   },
   "expect": [
-    { "kind": "noul", "question": "declares_breaking", "max": 0.2 }
+    { "kind": "noul", "question": "is_breaking", "max": 0.2 }
   ]
 }

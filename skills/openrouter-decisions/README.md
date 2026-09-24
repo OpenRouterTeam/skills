@@ -39,6 +39,10 @@ npx tsx decide.ts request.json --sdk      # send it through @openrouter/sdk
 npx tsx benchmark.ts --offline            # validate benchmark/cases without a key
 npx tsx benchmark.ts --transport both     # replay every case live over HTTP and SDK
 npx tsx benchmark.ts --model <model-id>   # replay against another decision model
+npx tsx ablation.ts --offline             # validate benchmark/ablation tasks without a key
+npx tsx ablation.ts --rounds 2            # skill versus API-reference-only, executed live
 ```
 
-Both scripts take the model from the request, then `--model`, then the `DECISION_MODEL` environment variable, then the default. `benchmark/cases` holds fifteen decision requests with expected outcomes and the code-side rule for each, covering routing, no-match, multi-label, guardrail, verification, scoring, ranking, extraction, ambiguity, adversarial text, and the counting, date, arithmetic, and negation patterns. Live runs report pass or fail per case with the resolved model version, latency, and cost, which makes the set a first read on any new decision model.
+All scripts take the model from the request, then `--model`, then the `DECISION_MODEL` environment variable, then the default. `benchmark/cases` holds fifteen decision requests with expected outcomes and the code-side rule for each, covering routing, no-match, multi-label, guardrail, verification, scoring, ranking, extraction, ambiguity, adversarial text, and the counting, date, arithmetic, and negation patterns. Live runs report pass or fail per case with the resolved model version, latency, and cost, which makes the set a first read on any new decision model.
+
+`benchmark/ablation` holds eight held-out tasks with labeled examples for measuring whether the skill changes what an agent builds. `ablation.ts` has a generator LLM design the integration for each task with and without the skill, runs every design end to end against the live Decisions API, and compares the two arms on the fraction of examples where the generated code returns the expected action. The method, the latest measured results, and their limits are in [benchmark/ablation/README.md](benchmark/ablation/README.md).

@@ -1,0 +1,40 @@
+{
+  "id": "lead-routing",
+  "brief": "Inbound contact-form submissions are routed to a sales team or dropped. Rule: if the message is not a sales inquiry (a job seeker, a vendor pitching us, a support request from an existing customer, or unrelated), route to none. Otherwise route by headcount: 1000 or more employees to enterprise, 100 to 999 to mid_market, fewer than 100 to smb.",
+  "input_shape": "{ company: string, employees: number, message: string }",
+  "actions": ["enterprise", "mid_market", "smb", "none"],
+  "examples": [
+    {
+      "input": { "company": "Halvorsen Logistics", "employees": 5000, "message": "We would like to discuss pricing for rolling this out across our whole organization." },
+      "expected": "enterprise"
+    },
+    {
+      "input": { "company": "Bramble Studio", "employees": 250, "message": "Looking to trial the product for our design team next quarter." },
+      "expected": "mid_market"
+    },
+    {
+      "input": { "company": "Quill Labs", "employees": 12, "message": "What does pricing look like for a small startup?" },
+      "expected": "smb"
+    },
+    {
+      "input": { "company": "Halvorsen Logistics", "employees": 3000, "message": "I am a technical recruiter, are you hiring backend engineers?" },
+      "expected": "none"
+    },
+    {
+      "input": { "company": "Northwind Retail", "employees": 999, "message": "Interested in buying seats for our operations group." },
+      "expected": "mid_market"
+    },
+    {
+      "input": { "company": "RankBoost Agency", "employees": 40, "message": "We sell SEO services and would love to partner with you." },
+      "expected": "none"
+    },
+    {
+      "input": { "company": "Northwind Retail", "employees": 1000, "message": "We need an enterprise agreement with SSO and a security review." },
+      "expected": "enterprise"
+    },
+    {
+      "input": { "company": "Quill Labs", "employees": 12, "message": "We are already customers and our invoices are not showing up in the dashboard." },
+      "expected": "none"
+    }
+  ]
+}
