@@ -36,19 +36,70 @@ cd scripts && npm install
 npx tsx discovery.ts --offline                                  # validate fixture and labels
 npx tsx discovery.ts --rounds 2 --report out.json               # both arms, both phases, default generators
 npx tsx discovery.ts --phase discovery                          # scan only
-npx tsx discovery.ts --generator openai/gpt-4.1 --filter refunds # one generator, one implementation site
+npx tsx discovery.ts --generator openai/gpt-5.6-luna --filter refunds # one generator, one implementation site
 npx tsx discovery.ts --judge <model-id> --model <decision-model-id>
 ```
 
-Node 22.13 or later is required for the sandbox. A two-round run over four generators costs about $0.23 for discovery, $1.10 for implementation generation, under $0.01 for decisions, and about $3.40 for the judge.
+Node 22.13 or later is required for the sandbox. A two-round run over the three default generators spent $0.33 on discovery, $1.55 on implementation generation, under $0.01 on decisions, and $2.41 on the judge.
 
 ## Results
 
-Decision model `typesafe/jev-1.13`. Generators `anthropic/claude-sonnet-4.5`, `openai/gpt-4.1`, `google/gemini-2.5-flash`, `anthropic/claude-haiku-4.5` at temperature 0 with JSON output. Judge `openai/gpt-5` at its default temperature. Two rounds, so 8 scans and 56 designs per arm, 136 executed samples and 472 rubric grades per arm.
+Decision model `typesafe/jev-1.13` and judge `openai/gpt-5` at its default temperature in every run. Generators run at temperature 0 with JSON output. Every run is two rounds.
+
+### Current generators
+
+Generators `openai/gpt-6-astra`, `openai/gpt-5.6-luna`, `z-ai/glm-5.3-flash`, so 6 scans and 42 designs per arm, 354 rubric grades per arm. This run followed the harness fixes for async generated code, dynamic questions without a static `questions` object, and duplicate flagged files. It ran on the skill text before the step 3 sentence about ordered rubrics, which was added from its findings (see below).
+
+**Discovery**
+
+| Arm | Precision | Recall | False positives | Primitive in accepted set |
+| --- | --- | --- | --- | --- |
+| api-only | 100% | 92.9% (39/42) | 0 | 39/39 |
+| skill | 100% | 100% (42/42) | 0 | 41/42 |
+
+`openai/gpt-6-astra` found all seven opportunities in every scan for both arms. `openai/gpt-5.6-luna` with the API reference alone missed `kb/suggest.ts` in both rounds and `z-ai/glm-5.3-flash` missed it in one, while both found it with the skill. The one primitive outside the accepted set was `openai/gpt-5.6-luna` with the skill proposing a `choice` for `tickets/urgency.ts`, the same pattern as the implementation regression below.
+
+**Implementation quality**
+
+| Arm | Rubric pass rate | Design errors | Valid samples | Runtime errors | Samples where code skipped the model | Generation cost |
+| --- | --- | --- | --- | --- | --- | --- |
+| api-only | 84.2% (298/354) | 0/42 | 100/102 | 2 | 17 | $0.68 |
+| skill | 96.0% (340/354) | 1/42 | 96/100 | 4 | 18 | $0.87 |
+
+| Generator | api-only | skill |
+| --- | --- | --- |
+| `openai/gpt-6-astra` | 84.7% (100/118) | 99.2% (117/118) |
+| `openai/gpt-5.6-luna` | 80.5% (95/118) | 95.8% (113/118) |
+| `z-ai/glm-5.3-flash` | 87.3% (103/118) | 93.2% (110/118) |
+
+The skill arm was ahead on every generator and on every site (categorize 48 versus 40 out of 48, urgency 45 versus 36, duplicates 53 versus 46 out of 54, moderation 40 versus 36, refunds 54 versus 51, leads 47 versus 41, suggest 53 versus 48).
+
+Rubric items where the arms differed by two or more grades (api-only to skill):
+
+| Item | api-only | skill |
+| --- | --- | --- |
+| `state_minimal` | 16/42 | 39/41 |
+| `deterministic_in_code` | 36/42 | 41/41 |
+| `fact_not_text` | 36/42 | 41/41 |
+| `plan_cap_in_code` (urgency: cap applied without telling the model the plan) | 0/6 | 6/6 |
+| `plan_not_in_state` (categorize) | 2/6 | 6/6 |
+| `fact_not_words` (moderation) | 3/6 | 5/5 |
+| `skip_model_when_settled` (refunds) | 4/6 | 6/6 |
+| `primitive_fit` | 42/42 | 38/41 |
+
+The api-only failures on `state_minimal` and `plan_cap_in_code` are the same design decision in every generator: the plan field goes into state even though the cap is applied in code. On moderation the api-only questions list surface features (a URL, the phrase "discount code", named insults) as the criteria for a label, which the judge failed as asking about the words rather than the fact and as deterministic work the model was asked to do.
+
+The skill arm's one regression is `primitive_fit` on `tickets/urgency.ts`. The api-only arm used a `score` in all six designs. With the skill, `openai/gpt-6-astra` (one round) and `openai/gpt-5.6-luna` (both rounds) asked for the 1 to 5 rating as a `choice` with the rubric levels as options. The step 3 sentence "When the outcome is one label from a written rubric, one `choice` whose criteria restate the rubric's levels beats several `noul`s recombined in code" reads as applying to an ordered rubric. It was rewritten to say it applies to unordered labels and that ordered levels are a `score` even when code stores the result as a label. A rerun of the skill arm on that site alone with the same three generators and two rounds produced a `score` in 6 of 6 designs and passed 47 of 48 grades. That rerun is in-sample and covers one site.
+
+The other skill-arm misses were `openai/gpt-5.6-luna` asking the model to apply the lead routing priority order in its instructions (one design in each arm did this) and `z-ai/glm-5.3-flash` violating the output contract on urgency in both rounds (`build_questions_js` returning `null`, `decide_js` returning the number 5 where the actions are strings). Its one design error was a chat completion response body that ended before its JSON was complete on `moderation/reviews.ts`. The api-only runtime errors were `openai/gpt-5.6-luna` generating code that did not parse on `moderation/reviews.ts`.
+
+### Earlier generators
+
+Generators `anthropic/claude-sonnet-4.5`, `openai/gpt-4.1`, `google/gemini-2.5-flash`, `anthropic/claude-haiku-4.5`, so 8 scans and 56 designs per arm, 136 executed samples and 472 rubric grades per arm, on the harness before the fixes named above.
 
 Two runs were made. Run 1 was on the skill text as it stood before this benchmark existed. Its findings led to four sentences being added to `SKILL.md` (retrieval thresholds as a discovery pattern in step 1, fields that only feed a code-side rule in step 4, phrasing the question as a property of the thing judged in step 5, and applying settling rules before the request and keeping an existing fallback for the uncertain band in step 7). Run 2 is on the committed text. Because the changes were made after seeing this fixture, run 2 is an in-sample check that the wording took effect, not evidence that it generalizes.
 
-### Discovery
+**Discovery**
 
 | Arm | Run | Precision | Recall | False positives | Files flagged per scan |
 | --- | --- | --- | --- | --- | --- |
@@ -59,7 +110,7 @@ Two runs were made. Run 1 was on the skill text as it stood before this benchmar
 
 Neither arm flagged a deterministic module in any scan, and every flagged primitive was in the accepted set. The api-only arm missed `tickets/duplicates.ts` and `kb/suggest.ts` in all 16 scans and Haiku also missed `tickets/urgency.ts` and `moderation/reviews.ts`. The skill arm found `duplicates.ts` in 14 of 16 scans. It found `suggest.ts` in 2 of 8 scans in run 1 and 5 of 8 in run 2 after the step 1 wording named retrieval thresholds. The api-only results were identical across runs, so scan variance is low at temperature 0.
 
-### Implementation quality
+**Implementation quality**
 
 | Arm | Run | Rubric pass rate | Valid samples | Runtime errors | Samples where code skipped the model | Generation cost |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -94,13 +145,13 @@ Runtime errors are output-contract violations shared by both arms, namely `decid
 
 ### What this supports
 
-On this fixture the skill arm finds more of the planted opportunities without flagging any deterministic module, and its designs pass more of the best-practice rubric on every generator and every site. The recall gain comes from the similarity-heuristic and retrieval-threshold patterns that the api-only arm never recognized as decision points. The rubric gain comes mostly from state design and from keeping deterministic work in code. The skill does not get generators to omit a code-only field from state when the field also looks relevant to the judgment, and it does not reliably get the smaller generators to return before the request when a rule settles the input, or to preserve a review band on a binary gate.
+On this fixture, across both generator sets, the skill arm finds more of the planted opportunities without flagging any deterministic module, and its designs pass more of the best-practice rubric on every generator and every site. The recall gain comes from the similarity-heuristic and retrieval-threshold patterns that the api-only arm recognized less often or never. The rubric gain comes mostly from state design and from keeping deterministic work in code, and with the current generators the skill arm also cleared `plan_cap_in_code`, which both arms failed with the earlier generators. With the earlier generators the skill did not get them to omit a code-only field from state, and did not reliably get the smaller ones to return before the request when a rule settles the input or to preserve a review band on a binary gate. With the current generators its one measured regression was the ordered-rubric wording, since corrected.
 
 ## Limits
 
 - One fixture of fourteen files written for this benchmark. The planted opportunities are the patterns `SKILL.md` step 1 names, so recall measures whether an agent applies the skill's own list to code, not whether that list is complete. A codebase with opportunities outside that list would test the latter.
 - Rubric grades come from one judge model reading the design and its recorded behavior. The api-only arm's `fact_not_text` count moved from 45 to 51 between runs with no change to its inputs, so single-item deltas of that size are judge noise. The arm-level totals moved by 1.4 points for both arms between runs.
-- Run 2 used skill text revised after reading run 1 on the same fixture. Its discovery recall for `kb/suggest.ts` is in-sample.
+- Run 2 of the earlier generators used skill text revised after reading run 1 on the same fixture, so its discovery recall for `kb/suggest.ts` is in-sample. The step 3 ordered-rubric sentence was likewise added after reading the current-generator run, and only its one-site rerun has been measured.
 - Precision was 100% for both arms, so this fixture does not measure whether the skill prevents over-flagging. The deterministic modules are unambiguous. Modules that mix a judgment with heavy computation would be a harder negative set.
 - Both arms use the harness's function-body output contract rather than editing the fixture in place, so the benchmark does not observe how an agent would restructure the surrounding code.
 - One decision model. The rubric is about the design, so it should transfer to other models, but the executed samples and their answers would differ.
