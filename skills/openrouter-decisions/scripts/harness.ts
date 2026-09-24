@@ -12,7 +12,7 @@ import { promisify } from "node:util";
 export type Arm = "api-only" | "skill";
 
 export const CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
-export const DEFAULT_GENERATORS = ["anthropic/claude-sonnet-4.5", "openai/gpt-4.1", "google/gemini-2.5-flash"];
+export const DEFAULT_GENERATORS = ["openai/gpt-6-astra", "openai/gpt-5.6-luna", "z-ai/glm-5.3-flash"];
 export const skillDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const SANDBOX_TIMEOUT_MS = 2_000;
@@ -33,7 +33,8 @@ const SANDBOX_RUNNER = [
   "const chunks = [];",
   "process.stdin.on('data', (chunk) => chunks.push(chunk)).on('end', () => {",
   "  const { sources, sandbox, timeout } = JSON.parse(Buffer.concat(chunks).toString('utf8'));",
-  "  let out;",
+  "  const fail = (error) => ({ ok: false, error: error instanceof Error ? error.message : String(error) });",
+  "  const write = (out) => process.stdout.write(JSON.stringify(out));",
   "  try {",
   "    let script;",
   "    let syntaxError;",
@@ -44,12 +45,13 @@ const SANDBOX_RUNNER = [
   "      }",
   "    }",
   "    if (!script) throw syntaxError;",
-  "    const value = script.runInNewContext(sandbox, { timeout });",
-  "    out = { ok: true, value: value === undefined ? null : value };",
+  "    Promise.resolve(script.runInNewContext(sandbox, { timeout })).then(",
+  "      (value) => write({ ok: true, value: value === undefined ? null : value }),",
+  "      (error) => write(fail(error))",
+  "    );",
   "  } catch (error) {",
-  "    out = { ok: false, error: error instanceof Error ? error.message : String(error) };",
+  "    write(fail(error));",
   "  }",
-  "  process.stdout.write(JSON.stringify(out));",
   "});",
 ].join("\n");
 
@@ -181,9 +183,9 @@ export async function callGenerated(code: string, params: string[], args: Record
   for (const name of params) sandbox[`__${name}`] = args[name];
   const callArgs = params.map((name) => `__${name}`).join(", ");
   const trimmed = code.trim().replace(/;$/, "");
-  const asBody = `(function(${params.join(", ")}){\n${code}\n})(${callArgs})`;
+  const asBody = `(async function(${params.join(", ")}){\n${code}\n})(${callArgs})`;
   const asExpression = `(${trimmed})(${callArgs})`;
-  const looksLikeFunction = /^(async\s+)?function\b|^\(?[\w\s,{}]*\)?\s*=>/.test(trimmed);
+  const looksLikeFunction = /^async\b|^function\b|^\(?[\w\s,{}=\[\]]*\)?\s*=>/.test(trimmed);
   const sources = looksLikeFunction ? [asExpression, asBody] : [asBody, asExpression];
   return runSandboxed(sources, sandbox);
 }

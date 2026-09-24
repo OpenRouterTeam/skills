@@ -17,7 +17,7 @@
  *   npx tsx discovery.ts                                  # both phases, both arms, default generators
  *   npx tsx discovery.ts --phase discovery                # discovery or implement
  *   npx tsx discovery.ts --rounds 2 --report out.json
- *   npx tsx discovery.ts --generator openai/gpt-4.1 --filter refunds
+ *   npx tsx discovery.ts --generator openai/gpt-5.6-luna --filter refunds
  *   npx tsx discovery.ts --judge <model-id>               # rubric judge (default openai/gpt-5)
  *   npx tsx discovery.ts --model <decision-model-id>      # decision model the designs run against
  */
@@ -418,16 +418,21 @@ async function runDiscovery(arm: Arm, generator: string, round: number): Promise
   };
 }
 
+/** One entry per file. When a reply lists a file more than once, the first entry stands for it. */
 function parseFlagged(raw: unknown): Flagged[] {
   if (!isRecord(raw) || !Array.isArray(raw.sites)) throw new Error("Discovery reply has no sites array");
-  return raw.sites.map((entry, i) => {
+  const byFile = new Map<string, Flagged>();
+  raw.sites.forEach((entry, i) => {
     if (!isRecord(entry) || typeof entry.file !== "string") throw new Error(`sites[${i}] has no file string`);
-    return {
-      file: normalizeFile(entry.file),
+    const file = normalizeFile(entry.file);
+    if (byFile.has(file)) return;
+    byFile.set(file, {
+      file,
       judgment: typeof entry.judgment === "string" ? entry.judgment : "",
       primitive: typeof entry.primitive === "string" ? entry.primitive.toLowerCase() : null,
-    };
+    });
   });
+  return [...byFile.values()];
 }
 
 function normalizeFile(file: string): string {
