@@ -111,10 +111,28 @@ function assertAnswersMatch(request: DecisionsRequest, response: DecisionsRespon
   if (missing.length > 0) throw new Error(`Response is missing answers: ${missing.join(", ")}`);
   if (extra.length > 0) throw new Error(`Response has unexpected answers: ${extra.join(", ")}`);
   for (const key of expected) {
-    const want = request.questions[key].type;
-    const got = response.answers[key].type;
-    if (want !== got) throw new Error(`Answer ${key} is a ${got}, question is a ${want}`);
+    const question = request.questions[key];
+    const answer = response.answers[key];
+    if (question.type !== answer.type) {
+      throw new Error(`Answer ${key} is a ${answer.type}, question is a ${question.type}`);
+    }
+    if (question.type === "choice" && answer.type === "choice") {
+      assertSameKeys(key, Object.keys(question.criteria), answer.probabilities);
+      if (!(answer.choice in question.criteria)) {
+        throw new Error(`Answer ${key} chose ${answer.choice}, which is not an option`);
+      }
+    }
+    if (question.type === "score" && answer.type === "score") {
+      assertSameKeys(key, question.criteria.map((_, i) => String(i)), answer.probabilities);
+    }
   }
+}
+
+function assertSameKeys(key: string, options: string[], probabilities: Record<string, number>): void {
+  const missing = options.filter((option) => !(option in probabilities));
+  const extra = Object.keys(probabilities).filter((option) => !options.includes(option));
+  if (missing.length > 0) throw new Error(`Answer ${key} has no probability for ${missing.join(", ")}`);
+  if (extra.length > 0) throw new Error(`Answer ${key} has probabilities for unknown ${extra.join(", ")}`);
 }
 
 async function decideViaHttp(
@@ -197,17 +215,17 @@ function parseAnswer(key: string, value: unknown): Answer {
       return {
         type: "choice",
         choice: value.choice,
-        probabilities: numberMap(value.probabilities),
-        confidence: typeof value.confidence === "number" ? value.confidence : 0,
+        probabilities: numberMap(key, "probabilities", value.probabilities),
+        confidence: finiteField(key, "confidence", value.confidence),
       };
     case "score":
       if (typeof value.score !== "number") throw new Error(`Answer ${key} has no score`);
       return {
         type: "score",
         score: value.score,
-        probabilities: numberMap(value.probabilities),
-        legend: stringMap(value.legend),
-        confidence: typeof value.confidence === "number" ? value.confidence : 0,
+        probabilities: numberMap(key, "probabilities", value.probabilities),
+        legend: stringMap(key, "legend", value.legend),
+        confidence: finiteField(key, "confidence", value.confidence),
       };
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
@@ -226,17 +244,24 @@ function numberField(obj: Record<string, unknown>, ...keys: string[]): number {
   return 0;
 }
 
-function numberMap(value: unknown): Record<string, number> {
-  if (!isRecord(value)) return {};
+function finiteField(key: string, field: string, value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`Answer ${key} has no finite ${field}`);
+  }
+  return value;
+}
+
+function numberMap(key: string, field: string, value: unknown): Record<string, number> {
+  if (!isRecord(value)) throw new Error(`Answer ${key} has no ${field} object`);
   const out: Record<string, number> = {};
   for (const [k, v] of Object.entries(value)) {
-    if (typeof v === "number") out[k] = v;
+    out[k] = finiteField(key, `${field}.${k}`, v);
   }
   return out;
 }
 
-function stringMap(value: unknown): Record<string, string> {
-  if (!isRecord(value)) return {};
+function stringMap(key: string, field: string, value: unknown): Record<string, string> {
+  if (!isRecord(value)) throw new Error(`Answer ${key} has no ${field} object`);
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(value)) {
     out[k] = typeof v === "string" ? v : JSON.stringify(v);

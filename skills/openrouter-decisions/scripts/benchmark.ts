@@ -68,8 +68,7 @@ const filter = argValue("--filter");
 const reportPath = argValue("--report");
 const transportArg = argValue("--transport") ?? "http";
 const model = resolveModel(argValue("--model"));
-const transports: Transport[] =
-  transportArg === "both" ? ["http", "sdk"] : transportArg === "sdk" ? ["sdk"] : ["http"];
+const transports = parseTransports(transportArg);
 
 const casesDir = join(dirname(fileURLToPath(import.meta.url)), "..", "benchmark", "cases");
 const cases = loadCases(casesDir).filter((c) => !filter || c.id.includes(filter) || c.category.includes(filter));
@@ -114,6 +113,20 @@ process.exit(totals.fail + totals.error > 0 ? 1 : 0);
 function argValue(flag: string): string | undefined {
   const index = args.indexOf(flag);
   return index >= 0 ? args[index + 1] : undefined;
+}
+
+function parseTransports(value: string): Transport[] {
+  switch (value) {
+    case "http":
+      return ["http"];
+    case "sdk":
+      return ["sdk"];
+    case "both":
+      return ["http", "sdk"];
+    default:
+      console.error(`Unknown --transport ${value}. Use http, sdk, or both.`);
+      process.exit(1);
+  }
 }
 
 function loadCases(dir: string): BenchmarkCase[] {
@@ -174,7 +187,13 @@ function parseExpectation(raw: unknown, source: string, request: DecisionsReques
     case "score_level": {
       const question = questionOf(raw.question, "score");
       const levels = request.questions[question];
-      if (typeof raw.equals !== "number" || levels.type !== "score" || raw.equals >= levels.criteria.length) {
+      if (
+        typeof raw.equals !== "number" ||
+        !Number.isInteger(raw.equals) ||
+        raw.equals < 0 ||
+        levels.type !== "score" ||
+        raw.equals >= levels.criteria.length
+      ) {
         throw new Error(`${source}.equals must be a level index of ${question}`);
       }
       return { kind: "score_level", question, equals: raw.equals };
