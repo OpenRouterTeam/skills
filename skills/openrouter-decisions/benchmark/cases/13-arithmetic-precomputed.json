@@ -1,8 +1,8 @@
 {
   "id": "arithmetic-precomputed",
-  "category": "jev-limits",
+  "category": "model-limits",
   "task": "Approve an expense report only if the line items sum to the total and the policy allows the category. Code does the arithmetic and passes the result as a named boolean.",
-  "code_rule": "line_items_sum_matches_total is computed in code before the call. Jev only judges the policy fit and reads the precomputed flag.",
+  "code_rule": "line_items_sum_matches_total is computed in code before the call. The model only judges the policy fit and reads the precomputed flag.",
   "request": {
     "state": {
       "policy": "Meals with clients are reimbursable up to $75 per person. Alcohol is not reimbursable. Reports whose line items do not add up to the stated total are rejected.",

@@ -1,20 +1,6 @@
 # Decisions API reference
 
-Two surfaces reach Jev through OpenRouter. Both take an OpenRouter API key and bill the same account.
-
-| Surface | Endpoint | Use when |
-| --- | --- | --- |
-| Decisions API | `POST https://openrouter.ai/api/alpha/decisions` | Plain HTTP from any language, or the OpenRouter TypeScript, Python, or Go SDK |
-| System One API | `POST https://openrouter.ai/api/v1/systemone` | You already use the TypeSafe JavaScript or Python SDK and want to point it at OpenRouter |
-
-## Model IDs
-
-| ID | Meaning |
-| --- | --- |
-| `typesafe/jev-1.13` | Pinned release. Use for production and anything with tuned thresholds. |
-| `~typesafe/jev-latest` | Alias that follows the newest Jev release. Probabilities can shift when it moves. |
-
-The response `model` field carries the exact build that answered, for example `typesafe/jev-1.13-20260917`. Log it with every stored answer. Context length is 32,000 tokens. Billing is per input token, output tokens are free, and `usage.cost` is in USD.
+`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. Every decision model on OpenRouter takes the same request and returns the same response shape. Model IDs, per-model limits, and vendor-specific surfaces are in [models.md](models.md). The examples below use `typesafe/jev-1.13`, and any decision model ID goes in `model`.
 
 ## Request
 
@@ -92,7 +78,7 @@ The response `model` field carries the exact build that answered, for example `t
 }
 ```
 
-Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default.
+Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default. The `model` field carries the exact build that answered. Log it with every stored answer. `usage.cost` is in USD.
 
 ## curl
 
@@ -128,23 +114,3 @@ console.log(refund.noul);
 ```
 
 Python and Go clients expose the same operation as `alpha.decisions.create` with a `decisions_request` body. Reference pages: [TypeScript](https://openrouter.ai/docs/client-sdks/typescript/sdks/decisions/README), [Python](https://openrouter.ai/docs/client-sdks/python/sdks/decisions/README), [Go](https://openrouter.ai/docs/client-sdks/go/sdks/decisions/README).
-
-## TypeSafe SDK pointed at OpenRouter
-
-The official TypeSafe SDK appends `/v1/systemone` to its base URL and takes the bare model ID.
-
-```typescript
-import { TypeSafeClient } from '@typesafe-ai/sdk';
-
-const client = new TypeSafeClient({ apiKey: process.env.OPENROUTER_API_KEY, baseURL: 'https://openrouter.ai/api' });
-const result = await client.systemOne({ model: 'jev-1.13', state, questions });
-```
-
-```python
-from typesafe_sdk import TypeSafeClient
-
-client = TypeSafeClient(api_key=os.environ["OPENROUTER_API_KEY"], base_url="https://openrouter.ai/api")
-result = client.system_one(model="jev-1.13", state=state, questions=questions)
-```
-
-TypeSafe's own docs cover the SDK surface: https://docs.typesafe.ai/llms.txt

@@ -1,6 +1,6 @@
-# Jev 1.13 limits and the code-side pattern for each
+# Decision model limits and the code-side pattern for each
 
-Source: TypeSafe's model jaggedness page for Jev 1.13 (https://docs.typesafe.ai/model-jaggedness/jev-1.13.md). Each row names a limit, the symptom, and what to do instead. The rule underneath all of them: the model judges, code computes.
+These limits follow from what a decision model is. It maps state and a question to a probability distribution over a fixed answer set, so it has no scratchpad for arithmetic, no loop for counting, and no output channel for text. Treat every row as the default assumption for any decision model until that model's section in [models.md](models.md) says otherwise, and reprobe when you change models. The rows were verified on Jev 1.13 (https://docs.typesafe.ai/model-jaggedness/jev-1.13.md), and the bundled benchmark replays them against whichever model you pass. The rule underneath all of them: the model judges, code computes.
 
 | Limit | What goes wrong | Do instead |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Source: TypeSafe's model jaggedness page for Jev 1.13 (https://docs.typesafe.ai/
 | Adversarial content | State is treated as data, not as hostile. Injected instructions or text that argues for its own classification can move the answer. | Make criteria explicit about what counts, test with adversarial inputs, and keep a code-side or human fallback for high-stakes decisions. |
 | Contradictory instructions and criteria | When `instructions` and `criteria` pull apart (a `noul` whose `true` means no), answers degrade. | Write criteria as an extension of the instructions, in plain language a non-expert would read the same way. |
 | Structural invariants | A `noul` and a yes/no `choice` on the same question give different numbers. `P(refund)` and `1 - P(not_refund)` from two `noul`s do not agree. | Ask each decision one way, tune its threshold on its own outputs, and enforce identities in code rather than expecting them from the model. |
-| Generation | Not trained to produce text or values. Chaining choices to spell out an answer is slow and poor. | When the answer space is bounded, offer it as `choice` options. Use regex or a generative model to produce candidates, then let Jev pick. |
+| Generation | Not trained to produce text or values. Chaining choices to spell out an answer is slow and poor. | When the answer space is bounded, offer it as `choice` options. Use regex or a generative model to produce candidates, then let the decision model pick. |
 
 Avoid, in every question:
 

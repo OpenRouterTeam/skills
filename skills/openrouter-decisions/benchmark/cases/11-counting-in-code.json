@@ -1,8 +1,8 @@
 {
   "id": "counting-in-code",
-  "category": "jev-limits",
-  "task": "Count how many items in a list are fruit. Jev is weak at counting, so ask one noul per item and count the yeses in code.",
-  "code_rule": "count = answers.filter(noul >= 0.5).length. Never ask Jev how many.",
+  "category": "model-limits",
+  "task": "Count how many items in a list are fruit. Decision models are weak at counting, so ask one noul per item and count the yeses in code.",
+  "code_rule": "count = answers.filter(noul >= 0.5).length. Never ask the model how many.",
   "request": {
     "state": {
       "items": ["banana", "wrench", "mango", "screwdriver", "kiwi"]

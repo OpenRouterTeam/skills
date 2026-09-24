@@ -1,7 +1,7 @@
 {
   "id": "extraction-closed-set",
   "category": "extraction",
-  "task": "Extract bounded fields from an invoice email as choices over closed sets, with not_stated for anything missing. Jev picks, it does not generate.",
+  "task": "Extract bounded fields from an invoice email as choices over closed sets, with not_stated for anything missing. The model picks, it does not generate.",
   "code_rule": "Store the chosen value when confidence >= 0.8, otherwise leave the field empty for a human. Treat not_stated as null, never as a default.",
   "request": {
     "state": {

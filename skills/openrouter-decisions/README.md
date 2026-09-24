@@ -1,6 +1,6 @@
 # openrouter-decisions
 
-Make typed decisions in code with a decision model (Jev) through OpenRouter's Decisions API (`POST /api/alpha/decisions`). Routing, classification, guardrails, verification, scoring, ranking, and bounded extraction come back as probabilities instead of generated text, so code can gate on them directly.
+Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword heuristic, or a human queue, then implement them through OpenRouter's Decisions API (`POST /api/alpha/decisions`). Routing, classification, guardrails, verification, scoring, ranking, and bounded extraction come back as probabilities instead of generated text, so code can gate on them directly. The workflow, scripts, and benchmark work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
 
 ## Install
 
@@ -22,12 +22,13 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 See [SKILL.md](SKILL.md) for the workflow, including:
 
-- Splitting a task into judgments for the model and deterministic steps for code
+- Finding decision points in existing code (parsed LLM outputs, keyword heuristics, review queues, candidate picking)
+- Splitting each one into judgments for the model and deterministic steps for code
 - Choosing between `choice`, `noul`, and `score` for each judgment
 - Building minimal state and writing questions that ask for meaning, with no-match options
-- Calling the pinned `typesafe/jev-1.13` over raw HTTP or `@openrouter/sdk`
+- Picking a decision model from the live catalog, pinning it, and calling it over raw HTTP or `@openrouter/sdk`
 - Gating on probabilities and confidence in code, and probing thresholds on real data
-- Known limits of Jev 1.13 (arithmetic, counting, dates, negation, adversarial text) and the code-side pattern for each
+- Limits shared by decision models (arithmetic, counting, dates, negation, adversarial text) with the code-side pattern for each, plus a per-model reference
 
 ## Scripts and benchmark
 
@@ -37,6 +38,7 @@ npx tsx decide.ts request.json            # send one request over HTTP
 npx tsx decide.ts request.json --sdk      # send it through @openrouter/sdk
 npx tsx benchmark.ts --offline            # validate benchmark/cases without a key
 npx tsx benchmark.ts --transport both     # replay every case live over HTTP and SDK
+npx tsx benchmark.ts --model <model-id>   # replay against another decision model
 ```
 
-`benchmark/cases` holds fifteen decision requests with expected outcomes and the code-side rule for each, covering routing, no-match, multi-label, guardrail, verification, scoring, ranking, extraction, ambiguity, adversarial text, and the counting, date, arithmetic, and negation patterns. Live runs report pass or fail per case with the resolved model version, latency, and cost.
+Both scripts take the model from the request, then `--model`, then the `DECISION_MODEL` environment variable, then the default. `benchmark/cases` holds fifteen decision requests with expected outcomes and the code-side rule for each, covering routing, no-match, multi-label, guardrail, verification, scoring, ranking, extraction, ambiguity, adversarial text, and the counting, date, arithmetic, and negation patterns. Live runs report pass or fail per case with the resolved model version, latency, and cost, which makes the set a first read on any new decision model.

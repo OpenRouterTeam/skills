@@ -1,25 +1,25 @@
 #!/usr/bin/env npx tsx
 /**
- * Replay the benchmark cases against Jev and check the expected outcomes.
+ * Replay the benchmark cases against a decision model and check the expected outcomes.
  *
  * Usage (from the scripts directory):
  *   npx tsx benchmark.ts --offline            # validate case files only, no API key needed
  *   npx tsx benchmark.ts                      # live, raw HTTP
  *   npx tsx benchmark.ts --transport sdk      # live, through @openrouter/sdk
  *   npx tsx benchmark.ts --transport both
+ *   npx tsx benchmark.ts --model <model-id>   # any decision model (default: DECISION_MODEL env, then DEFAULT_MODEL)
  *   npx tsx benchmark.ts --filter routing --report out.json
- *
- * Every live case pins typesafe/jev-1.13 unless the case sets its own model.
  */
 import { readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  PINNED_MODEL,
   decide,
   parseRequest,
   readJsonFile,
   requireApiKey,
+  resolveModel,
+  withModel,
   type Answer,
   type DecisionsRequest,
   type DecisionsResponse,
@@ -67,6 +67,7 @@ const offline = args.includes("--offline");
 const filter = argValue("--filter");
 const reportPath = argValue("--report");
 const transportArg = argValue("--transport") ?? "http";
+const model = resolveModel(argValue("--model"));
 const transports: Transport[] =
   transportArg === "both" ? ["http", "sdk"] : transportArg === "sdk" ? ["sdk"] : ["http"];
 
@@ -83,6 +84,7 @@ if (offline) {
   process.exit(0);
 }
 
+console.log(`Model: ${model}`);
 const apiKey = requireApiKey();
 const results: CaseResult[] = [];
 for (const transport of transports) {
@@ -100,7 +102,10 @@ console.log(
 );
 
 if (reportPath) {
-  writeFileSync(reportPath, JSON.stringify({ generated_at: new Date().toISOString(), totals, results }, null, 2));
+  writeFileSync(
+    reportPath,
+    JSON.stringify({ generated_at: new Date().toISOString(), requested_model: model, totals, results }, null, 2)
+  );
   console.log(`Report written to ${reportPath}`);
 }
 
@@ -126,10 +131,7 @@ function parseCase(raw: unknown, source: string): BenchmarkCase {
   if (warn_only !== undefined && typeof warn_only !== "boolean") {
     throw new Error(`${source}: warn_only must be a boolean`);
   }
-  const parsedRequest = parseRequest(
-    isRecord(request) && !("model" in request) ? { ...request, model: PINNED_MODEL } : request,
-    source
-  );
+  const parsedRequest = parseRequest(withModel(request, model), source);
   if (!Array.isArray(expect) || expect.length === 0) throw new Error(`${source}: expect must be a non-empty array`);
   const expectations = expect.map((e, i) => parseExpectation(e, `${source}: expect[${i}]`, parsedRequest));
   return { id, category, task, code_rule, warn_only, request: parsedRequest, expect: expectations };

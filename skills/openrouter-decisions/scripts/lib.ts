@@ -3,7 +3,15 @@ import { OpenRouter } from "@openrouter/sdk";
 
 export const DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions";
 export const SDK_SERVER_URL = "https://openrouter.ai";
-export const PINNED_MODEL = "typesafe/jev-1.13";
+export const DEFAULT_MODEL = "typesafe/jev-1.13";
+
+export function resolveModel(flag: string | undefined): string {
+  return flag ?? process.env.DECISION_MODEL ?? DEFAULT_MODEL;
+}
+
+export function withModel(raw: unknown, model: string): unknown {
+  return isRecord(raw) && !("model" in raw) ? { ...raw, model } : raw;
+}
 
 export type Criterion = string | Record<string, unknown> | unknown[];
 

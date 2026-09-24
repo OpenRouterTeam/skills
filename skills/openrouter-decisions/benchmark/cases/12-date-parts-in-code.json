@@ -1,7 +1,7 @@
 {
   "id": "date-parts-in-code",
-  "category": "jev-limits",
-  "task": "Decide whether a contract ends before a cutoff. Jev cannot compare dates, so extract each part as a choice over a closed set and compare in code.",
+  "category": "model-limits",
+  "task": "Decide whether a contract ends before a cutoff. Decision models do not compare dates, so extract each part as a choice over a closed set and compare in code.",
   "code_rule": "Require confidence >= 0.8 on each of the three choices. Map the month name to a zero-based index, convert year and day to numbers, build new Date(year, monthIndex, day), reject it if the parts do not round-trip (a nonexistent calendar date), then compare with the cutoff in code. Any not_stated means ask a human.",
   "request": {
     "state": {
