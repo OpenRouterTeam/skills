@@ -1,0 +1,274 @@
+import { readFileSync } from "node:fs";
+import { OpenRouter } from "@openrouter/sdk";
+
+export const DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions";
+export const SDK_SERVER_URL = "https://openrouter.ai";
+export const PINNED_MODEL = "typesafe/jev-1.13";
+
+export type Criterion = string | Record<string, unknown> | unknown[];
+
+export type ChoiceQuestion = {
+  type: "choice";
+  instructions: Criterion;
+  criteria: Record<string, Criterion>;
+};
+
+export type NoulQuestion = {
+  type: "noul";
+  instructions: Criterion;
+  criteria?: { true: Criterion; false: Criterion };
+};
+
+export type ScoreQuestion = {
+  type: "score";
+  instructions: Criterion;
+  criteria: Criterion[];
+};
+
+export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
+
+export type DecisionsRequest = {
+  model: string;
+  state: string | Record<string, unknown> | unknown[];
+  questions: Record<string, Question>;
+};
+
+export type ChoiceAnswer = {
+  type: "choice";
+  choice: string;
+  probabilities: Record<string, number>;
+  confidence: number;
+};
+
+export type NoulAnswer = { type: "noul"; noul: number };
+
+export type ScoreAnswer = {
+  type: "score";
+  score: number;
+  probabilities: Record<string, number>;
+  legend: Record<string, string>;
+  confidence: number;
+};
+
+export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer;
+
+export type DecisionsResponse = {
+  id?: string;
+  model: string;
+  provider?: string;
+  answers: Record<string, Answer>;
+  usage: { input_tokens: number; output_tokens: number; cost?: number };
+};
+
+export type Transport = "http" | "sdk";
+
+export type DecideResult = { response: DecisionsResponse; latencyMs: number };
+
+export function requireApiKey(): string {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error(
+      "Error: OPENROUTER_API_KEY is not set. Get a key at https://openrouter.ai/keys"
+    );
+    process.exit(1);
+  }
+  return apiKey;
+}
+
+export async function decide(
+  request: DecisionsRequest,
+  transport: Transport,
+  apiKey: string
+): Promise<DecideResult> {
+  const started = performance.now();
+  const response =
+    transport === "sdk"
+      ? await decideViaSdk(request, apiKey)
+      : await decideViaHttp(request, apiKey);
+  return { response, latencyMs: Math.round(performance.now() - started) };
+}
+
+async function decideViaHttp(
+  request: DecisionsRequest,
+  apiKey: string
+): Promise<DecisionsResponse> {
+  const res = await fetch(DECISIONS_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Decisions API ${res.status}: ${text}`);
+  }
+  return parseResponse(JSON.parse(text));
+}
+
+async function decideViaSdk(
+  request: DecisionsRequest,
+  apiKey: string
+): Promise<DecisionsResponse> {
+  const client = new OpenRouter({ apiKey, serverURL: SDK_SERVER_URL });
+  const result = await client.alpha.decisions.create({
+    decisionsRequest: {
+      model: request.model,
+      state: request.state,
+      questions: request.questions,
+    },
+  });
+  return parseResponse({
+    id: result.id,
+    model: result.model,
+    provider: result.provider,
+    answers: result.answers,
+    usage: {
+      input_tokens: result.usage.inputTokens,
+      output_tokens: result.usage.outputTokens,
+      cost: result.usage.cost,
+    },
+  });
+}
+
+function parseResponse(raw: unknown): DecisionsResponse {
+  if (!isRecord(raw)) throw new Error("Response is not an object");
+  const { id, model, provider, answers, usage } = raw;
+  if (typeof model !== "string") throw new Error("Response has no model");
+  if (!isRecord(answers)) throw new Error("Response has no answers");
+  if (!isRecord(usage)) throw new Error("Response has no usage");
+  const parsedAnswers: Record<string, Answer> = {};
+  for (const [key, value] of Object.entries(answers)) {
+    parsedAnswers[key] = parseAnswer(key, value);
+  }
+  return {
+    id: typeof id === "string" ? id : undefined,
+    model,
+    provider: typeof provider === "string" ? provider : undefined,
+    answers: parsedAnswers,
+    usage: {
+      input_tokens: numberField(usage, "input_tokens", "inputTokens"),
+      output_tokens: numberField(usage, "output_tokens", "outputTokens"),
+      cost: typeof usage.cost === "number" ? usage.cost : undefined,
+    },
+  };
+}
+
+function parseAnswer(key: string, value: unknown): Answer {
+  if (!isRecord(value)) throw new Error(`Answer ${key} is not an object`);
+  switch (value.type) {
+    case "noul":
+      if (typeof value.noul !== "number") throw new Error(`Answer ${key} has no noul`);
+      return { type: "noul", noul: value.noul };
+    case "choice":
+      if (typeof value.choice !== "string") throw new Error(`Answer ${key} has no choice`);
+      return {
+        type: "choice",
+        choice: value.choice,
+        probabilities: numberMap(value.probabilities),
+        confidence: typeof value.confidence === "number" ? value.confidence : 0,
+      };
+    case "score":
+      if (typeof value.score !== "number") throw new Error(`Answer ${key} has no score`);
+      return {
+        type: "score",
+        score: value.score,
+        probabilities: numberMap(value.probabilities),
+        legend: stringMap(value.legend),
+        confidence: typeof value.confidence === "number" ? value.confidence : 0,
+      };
+    default:
+      throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function numberField(obj: Record<string, unknown>, ...keys: string[]): number {
+  for (const key of keys) {
+    const v = obj[key];
+    if (typeof v === "number") return v;
+  }
+  return 0;
+}
+
+function numberMap(value: unknown): Record<string, number> {
+  if (!isRecord(value)) return {};
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(value)) {
+    if (typeof v === "number") out[k] = v;
+  }
+  return out;
+}
+
+function stringMap(value: unknown): Record<string, string> {
+  if (!isRecord(value)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(value)) {
+    out[k] = typeof v === "string" ? v : JSON.stringify(v);
+  }
+  return out;
+}
+
+export function readJsonFile(path: string): unknown {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+export function parseRequest(raw: unknown, source: string): DecisionsRequest {
+  if (!isRecord(raw)) throw new Error(`${source}: request is not an object`);
+  const { model, state, questions } = raw;
+  if (typeof model !== "string") throw new Error(`${source}: model must be a string`);
+  if (state === undefined || state === null) throw new Error(`${source}: state is required`);
+  if (!isRecord(questions) || Object.keys(questions).length === 0) {
+    throw new Error(`${source}: questions must be a non-empty object`);
+  }
+  const parsed: Record<string, Question> = {};
+  for (const [key, value] of Object.entries(questions)) {
+    parsed[key] = parseQuestion(`${source}: questions.${key}`, value);
+  }
+  return { model, state: state as DecisionsRequest["state"], questions: parsed };
+}
+
+function parseQuestion(source: string, value: unknown): Question {
+  if (!isRecord(value)) throw new Error(`${source} is not an object`);
+  const instructions = value.instructions;
+  if (!isCriterion(instructions)) throw new Error(`${source}.instructions is required`);
+  switch (value.type) {
+    case "noul": {
+      const criteria = value.criteria;
+      if (criteria === undefined) return { type: "noul", instructions };
+      if (!isRecord(criteria) || !isCriterion(criteria.true) || !isCriterion(criteria.false)) {
+        throw new Error(`${source}.criteria needs true and false`);
+      }
+      return { type: "noul", instructions, criteria: { true: criteria.true, false: criteria.false } };
+    }
+    case "choice": {
+      const criteria = value.criteria;
+      if (!isRecord(criteria) || Object.keys(criteria).length < 2) {
+        throw new Error(`${source}.criteria needs at least two options`);
+      }
+      const options: Record<string, Criterion> = {};
+      for (const [k, v] of Object.entries(criteria)) {
+        if (!isCriterion(v)) throw new Error(`${source}.criteria.${k} is not a criterion`);
+        options[k] = v;
+      }
+      return { type: "choice", instructions, criteria: options };
+    }
+    case "score": {
+      const criteria = value.criteria;
+      if (!Array.isArray(criteria) || criteria.length < 2 || !criteria.every(isCriterion)) {
+        throw new Error(`${source}.criteria needs an array of at least two levels`);
+      }
+      return { type: "score", instructions, criteria };
+    }
+    default:
+      throw new Error(`${source}.type must be choice, noul, or score`);
+  }
+}
+
+function isCriterion(value: unknown): value is Criterion {
+  return typeof value === "string" || isRecord(value) || Array.isArray(value);
+}

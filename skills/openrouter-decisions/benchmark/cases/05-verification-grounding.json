@@ -1,0 +1,31 @@
+{
+  "id": "verification-grounding",
+  "category": "verification",
+  "task": "Verify a drafted support answer against the help-center excerpts it was supposed to be grounded in. The draft invents a number.",
+  "code_rule": "Send when choice is supported and confidence >= 0.8. Hand off when declined. Otherwise escalate to a stronger drafting model once, then hand off.",
+  "request": {
+    "state": {
+      "customer_question": "How long do I have to return an unopened item?",
+      "help_center_excerpts": [
+        "Unopened items in original packaging can be returned within 30 days of delivery for a full refund.",
+        "Opened items may be exchanged within 14 days if defective."
+      ],
+      "assistant_answer": "You can return unopened items within 60 days of delivery for a full refund."
+    },
+    "questions": {
+      "support": {
+        "type": "choice",
+        "instructions": "Compare `assistant_answer` against `help_center_excerpts`. Which one describes it?",
+        "criteria": {
+          "supported": "The answer addresses `customer_question`, and every fact, number, and policy in it is stated in the excerpts.",
+          "unsupported": "The answer states at least one fact, number, or policy that the excerpts do not contain or that contradicts them, or it answers a different question than `customer_question`.",
+          "declined": "The answer says the excerpts do not cover the question and does not assert facts of its own."
+        }
+      }
+    }
+  },
+  "expect": [
+    { "kind": "choice", "question": "support", "equals": "unsupported" },
+    { "kind": "confidence", "question": "support", "min": 0.6 }
+  ]
+}

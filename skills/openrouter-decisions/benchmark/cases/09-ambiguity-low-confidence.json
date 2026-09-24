@@ -1,0 +1,36 @@
+{
+  "id": "ambiguity-low-confidence",
+  "category": "ambiguity",
+  "task": "Route a ticket that reports two unrelated problems owned by different teams. The point is to see the ambiguity in the probabilities, not to force one label.",
+  "code_rule": "Route only when confidence >= 0.8. Below that, send to triage with the probabilities shown. If two-problem tickets are common, replace the choice with one noul per team so both can fire.",
+  "request": {
+    "state": {
+      "ticket": "I cannot log in since yesterday and I was also double charged for my subscription."
+    },
+    "questions": {
+      "team": {
+        "type": "choice",
+        "instructions": "Which team should own `ticket`?",
+        "criteria": {
+          "payments": "Problems completing a purchase, being charged, billing, or refunds.",
+          "account": "Login, password, permissions, or profile problems.",
+          "reporting": "Dashboards, exports, or analytics numbers.",
+          "none": "None of the teams above fits."
+        }
+      }
+    }
+  },
+  "expect": [
+    {
+      "kind": "confidence",
+      "question": "team",
+      "max": 0.75
+    },
+    {
+      "kind": "probability",
+      "question": "team",
+      "option": "account",
+      "min": 0.3
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "counting-in-code",
+  "category": "jev-limits",
+  "task": "Count how many items in a list are fruit. Jev is weak at counting, so ask one noul per item and count the yeses in code.",
+  "code_rule": "count = answers.filter(noul >= 0.5).length. Never ask Jev how many.",
+  "request": {
+    "state": {
+      "items": ["banana", "wrench", "mango", "screwdriver", "kiwi"]
+    },
+    "questions": {
+      "item_0_is_fruit": { "type": "noul", "instructions": "Is `items[0]` a fruit?" },
+      "item_1_is_fruit": { "type": "noul", "instructions": "Is `items[1]` a fruit?" },
+      "item_2_is_fruit": { "type": "noul", "instructions": "Is `items[2]` a fruit?" },
+      "item_3_is_fruit": { "type": "noul", "instructions": "Is `items[3]` a fruit?" },
+      "item_4_is_fruit": { "type": "noul", "instructions": "Is `items[4]` a fruit?" }
+    }
+  },
+  "expect": [
+    { "kind": "count", "questions": ["item_0_is_fruit", "item_1_is_fruit", "item_2_is_fruit", "item_3_is_fruit", "item_4_is_fruit"], "threshold": 0.5, "equals": 3 },
+    { "kind": "noul", "question": "item_1_is_fruit", "max": 0.3 }
+  ]
+}
