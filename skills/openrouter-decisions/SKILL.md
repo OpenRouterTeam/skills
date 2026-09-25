@@ -1,6 +1,6 @@
 ---
 name: openrouter-decisions
-description: Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword heuristic, or a human queue, then implement them through OpenRouter's Decisions API. Use when code needs routing, classification, guardrails, verification, scoring, ranking, or bounded extraction with probabilities instead of generated text, or when the user mentions decision models, Jev, TypeSafe, System One, or `/api/alpha/decisions`.
+description: Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword or similarity heuristic, or a human review queue, then implement them through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text. Use for routing, classification, moderation, guardrails, checking that an answer is grounded, scoring, ranking or dedupe of candidates, escalation and approval gates, and bounded extraction, and whenever a router, filter, classifier, or yes/no LLM prompt misfires or needs a threshold. Also use when the user mentions decision models, Jev, TypeSafe, or System One. Not for chat completions, text generation, or general OpenRouter setup.
 ---
 
 # OpenRouter Decisions

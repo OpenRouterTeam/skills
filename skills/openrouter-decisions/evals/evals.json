@@ -1,0 +1,288 @@
+{
+  "skill_name": "openrouter-decisions",
+  "notes": "Trigger evals check whether an agent with this skill installed reads SKILL.md for the prompt (should_trigger true) or leaves it alone (false). Run each prompt in a clean session, with and without the skill, and grade the assertions against the transcript and output. Implementation evals carry the best-practice assertions the skill is meant to produce. Prompts are self-contained so no fixture files are needed.",
+  "evals": [
+    {
+      "id": 1,
+      "category": "trigger-explicit",
+      "should_trigger": true,
+      "prompt": "Use the openrouter-decisions skill to replace this ticket router with a decision model. Plan only, no code yet.\n\n```ts\nexport function route(text: string): \"billing\" | \"engineering\" | \"support\" {\n  const t = text.toLowerCase();\n  if (t.includes(\"invoice\") || t.includes(\"charge\")) return \"billing\";\n  if (t.includes(\"crash\") || t.includes(\"error\")) return \"engineering\";\n  return \"support\";\n}\n```",
+      "expected_output": "A plan that keeps the routing in code, asks one choice question over the ticket text with a none_of_these option, gates on the returned probabilities and confidence, and falls back to support below the threshold.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The plan uses a single choice question with the three teams plus a no-match option",
+        "The plan puts the confidence threshold and the fallback route in code, not in the question"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "trigger-explicit",
+      "should_trigger": true,
+      "prompt": "Apply openrouter-decisions to this moderation filter and show me the request you would send.\n\n```py\nBANNED = [\"idiot\", \"scam\", \"kill\"]\ndef is_toxic(review: str) -> bool:\n    return any(w in review.lower() for w in BANNED)\n```",
+      "expected_output": "A Decisions API request with the review text as state and one noul question per policy label, plus code that thresholds each noul independently.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The request is valid for POST /api/alpha/decisions with state, questions, and a model",
+        "Each policy violation is its own noul question rather than one multi-label choice",
+        "The question asks whether the review is abusive or a scam, not whether it contains particular words"
+      ]
+    },
+    {
+      "id": 3,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "Our ticket router keeps sending billing questions to general support. It is a keyword map: 'invoice' or 'charge' goes to billing, 'crash' or 'error' goes to engineering, everything else goes to support. Customers write things like 'you took money from me twice' and it lands in support. How would you fix this? Plan first, no code.",
+      "expected_output": "A plan that replaces the keyword map with a decision model choice question over the ticket text, keeps deterministic routing rules in code, and adds a fallback for low confidence.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The plan proposes a bounded classification with probabilities rather than a free-text LLM prompt parsed afterwards",
+        "The plan includes an option for tickets that fit none of the teams"
+      ]
+    },
+    {
+      "id": 4,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "We ask gpt to classify product reviews and then parse the answer with string matching. It breaks whenever the wording changes. Replace it with something that gives us numbers we can threshold.\n\n```ts\nconst out = await llm(`Is this review spam, abusive, or fine? Answer with one word.\\n\\n${review}`);\nif (out.toLowerCase().includes(\"spam\")) return \"spam\";\nif (out.toLowerCase().includes(\"abus\")) return \"abusive\";\nreturn \"fine\";\n```",
+      "expected_output": "Code that calls the Decisions API with the review as state, one noul per label (spam, abusive), thresholds in code, and no text parsing.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The output removes the string matching on generated text",
+        "Spam and abusive are separate noul questions so a review can be both",
+        "Thresholds live in code next to the returned probabilities"
+      ]
+    },
+    {
+      "id": 5,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "Audit this service for places where a hand-written heuristic or a human queue is doing judgment work that could be handled better. Files: triage.ts (keyword router for tickets), tax.ts (VAT by country table), dedupe.ts (flags a ticket as duplicate when token overlap with an open ticket is above 0.6), approvals.ts (every refund over $50 waits for a human), auth/permissions.ts (role to scope mapping). Just list the candidates and say why, no code.",
+      "expected_output": "triage.ts, dedupe.ts, and approvals.ts flagged as decision points. tax.ts and permissions.ts left alone because they are lookups and rules.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The answer flags the keyword router, the token-overlap dedupe, and the manual refund queue",
+        "The answer does not flag the VAT table or the role-to-scope mapping"
+      ]
+    },
+    {
+      "id": 6,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "Every refund request over $50 sits in a human queue and 95% get approved without changes. I want to auto-approve the obvious ones and keep humans for the ambiguous ones. The hard rules are: purchase within 90 days, amount at or below the order total, at most two refunds per customer per year. Sketch the approach.",
+      "expected_output": "The three hard rules checked in code before any model call. A decision model judges only whether the stated reason is plausible and matches policy. The probability is split into auto-approve, human review, and auto-deny bands in code.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The 90-day window, amount cap, and refund count are computed in code, not asked of the model",
+        "The model is asked only about the judgment (reason plausibility or policy fit)",
+        "There is a middle band that routes to a human rather than a single yes/no gate"
+      ]
+    },
+    {
+      "id": 7,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "Add a prompt-injection guardrail in front of our support agent. User messages come in as strings, and the agent has tools that can issue refunds. I want the check to be fast and to return a probability, not another chat completion.",
+      "expected_output": "A noul question over the user message (does it attempt to override instructions or trigger tool use it was not asked for), with the block threshold in code and the message passed as a single named state field.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The guardrail is a noul question with the threshold in code",
+        "The untrusted message is placed in a named state field and not concatenated into the question"
+      ]
+    },
+    {
+      "id": 8,
+      "category": "trigger-contextual",
+      "should_trigger": true,
+      "prompt": "We're already on OpenRouter for the chat model. Before we return an answer from our RAG endpoint, I want to check that the answer is actually supported by the retrieved passages and refuse otherwise. How would you wire that in?",
+      "expected_output": "A noul question with the answer and the passages as separate state fields asking whether the passages support the answer, gated in code with a refusal path.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The check is a Decisions API call, not a second chat completion asked to grade the answer",
+        "The answer and the passages are separate named fields in state"
+      ]
+    },
+    {
+      "id": 9,
+      "category": "trigger-contextual",
+      "should_trigger": true,
+      "prompt": "Try Jev on our lead routing. Leads have a company name, headcount, region, and a free-text 'what are you looking for' field. Enterprise is headcount over 1000 or any lead in three or more regions, otherwise SMB. Enterprise also when the free text describes a company-wide rollout. Show me the code.",
+      "expected_output": "Headcount and region rules in code. One noul question over the free text asking whether it describes a company-wide rollout. The model pinned to a versioned ID with the answer probabilities logged.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "Headcount and region-count rules are evaluated in code before the model is called",
+        "The model is called through OpenRouter's Decisions API with a pinned version ID",
+        "The state sent to the model does not include headcount or region count"
+      ]
+    },
+    {
+      "id": 10,
+      "category": "trigger-contextual",
+      "should_trigger": true,
+      "prompt": "Our duplicate-ticket detector uses token overlap above 0.6 against open tickets and misses paraphrases. For each new ticket we have up to 20 candidates. Give me something that ranks them by how likely they are the same issue.",
+      "expected_output": "One score question per candidate pair (or a choice over the candidates with a none option), ranked in code by the returned score, with the merge threshold in code.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "Ranking is done in code from per-candidate scores or probabilities, not by asking the model to output an ordering",
+        "There is a path for the case where no candidate is a duplicate"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Add exponential backoff with jitter and a maximum of five retries to this OpenAI call.\n\n```ts\nconst res = await openai.chat.completions.create({ model, messages });\n```",
+      "expected_output": "A retry wrapper around the call. No mention of decision models.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The output is a retry loop with exponential backoff and jitter"
+      ]
+    },
+    {
+      "id": 12,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "This VAT calculation rounds the wrong way for negative amounts (credit notes). Fix it.\n\n```ts\nexport function vat(amountCents: number, rate: number): number {\n  return Math.floor(amountCents * rate);\n}\n```",
+      "expected_output": "A rounding fix using Math.round or sign-aware truncation. No decision model.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The fix handles negative amounts symmetrically"
+      ]
+    },
+    {
+      "id": 13,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Write a function that validates an email address on the signup form and returns a boolean.",
+      "expected_output": "A deterministic validator (regex or parser). No decision model.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The validator is deterministic code with no network call"
+      ]
+    },
+    {
+      "id": 14,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Switch our chat completion endpoint to stream tokens to the client with server-sent events instead of waiting for the full response.",
+      "expected_output": "Streaming changes to the chat completion call and the HTTP handler. No decision model.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md"
+      ]
+    },
+    {
+      "id": 15,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Write a one-paragraph summary of each support ticket using an LLM and store it on the ticket.",
+      "expected_output": "A chat completion that generates the summary. A decision model cannot generate text, so the skill should not be used.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The output uses a generative model for the summary"
+      ]
+    },
+    {
+      "id": 16,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Rank search results by BM25 against the query and return the top 10. Documents are already tokenized.",
+      "expected_output": "A BM25 implementation and a sort. Ranking here is a formula, so no decision model.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The ranking is computed deterministically from term statistics"
+      ]
+    },
+    {
+      "id": 17,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Set up OpenRouter in this project and make a first chat completion call with the TypeScript SDK.",
+      "expected_output": "SDK install, API key from the environment, one chat completion call. OpenRouter is mentioned but nothing here is a decision.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The output is a chat completion call, not a Decisions API call"
+      ]
+    },
+    {
+      "id": 18,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Compute precision, recall, and F1 for our ticket classifier against the labeled set in labels.csv (columns: ticket_id, predicted, actual).",
+      "expected_output": "A script that reads the CSV and computes the metrics. Classification is mentioned but the task is arithmetic over labels.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The metrics are computed in code from the CSV"
+      ]
+    },
+    {
+      "id": 19,
+      "category": "trigger-negative",
+      "should_trigger": false,
+      "prompt": "Our regex PII detector misses phone numbers written with spaces, like 415 555 0199. Fix the regex.\n\n```ts\nconst PHONE = /\\d{3}-\\d{3}-\\d{4}/g;\n```",
+      "expected_output": "A widened regex. The user asked for a regex fix, and phone number formats are a pattern, not a judgment.",
+      "assertions": [
+        "The transcript does not show the agent reading the openrouter-decisions SKILL.md",
+        "The output is a regex change and nothing else"
+      ]
+    },
+    {
+      "id": 20,
+      "category": "trigger-implicit",
+      "should_trigger": true,
+      "prompt": "Our support bot hands off to a human far too often. Looking at last week's escalations, about half were questions it could have answered itself. The handoff decision is a prompt that asks the chat model 'should this be escalated? yes or no' and checks for 'yes'. Tighten this up.",
+      "expected_output": "Replace the yes/no chat prompt with a noul over the conversation asking whether the request needs a human, with the escalation threshold in code and tuned on the logged escalations.",
+      "assertions": [
+        "The transcript shows the agent reading the openrouter-decisions SKILL.md",
+        "The handoff becomes a noul with the threshold in code rather than a parsed yes/no from a chat model",
+        "The plan tunes the threshold on the logged escalations"
+      ]
+    },
+    {
+      "id": 21,
+      "category": "implementation",
+      "should_trigger": true,
+      "prompt": "Rate incoming incident reports for urgency on a 1 to 5 scale so the on-call dashboard can sort them. Reports are free text plus the affected service name. Use a decision model.",
+      "expected_output": "A score question with five ordered levels over the report text, sorted in code by the returned score, with the affected service as a separate state field.",
+      "assertions": [
+        "Urgency is a score question with ordered levels, not a choice over the digits 1 to 5",
+        "Sorting happens in code on the returned score",
+        "The report text and the service name are separate named state fields"
+      ]
+    },
+    {
+      "id": 22,
+      "category": "implementation",
+      "should_trigger": true,
+      "prompt": "Gate auto-merge on whether a PR description says the change is breaking. Use a decision model and show the question you would send.",
+      "expected_output": "A noul asking whether the description states that the change is breaking, worded about the fact rather than about whether the text mentions breaking changes, with the merge threshold in code.",
+      "assertions": [
+        "The question asks whether the description states the change is breaking, not whether it mentions or contains the phrase",
+        "The auto-merge threshold is in code",
+        "A description saying 'no breaking changes' is expected to yield a low probability"
+      ]
+    },
+    {
+      "id": 23,
+      "category": "implementation",
+      "should_trigger": true,
+      "prompt": "Check whether a customer's subscription is more than one year old and, if so, whether their cancellation reason suggests they will come back. Use a decision model where it fits.",
+      "expected_output": "The age check is computed in code from the dates. Only the cancellation reason goes to the model as a noul about likely return.",
+      "assertions": [
+        "The one-year date comparison is done in code, not asked of the model",
+        "The model receives the cancellation reason and not the raw dates",
+        "The question is a noul about likely return, with the threshold in code"
+      ]
+    },
+    {
+      "id": 24,
+      "category": "implementation",
+      "should_trigger": true,
+      "prompt": "Pick a decision model for a new classification job and pin it. Show the config and how you would confirm the thresholds before shipping.",
+      "expected_output": "Lists the catalog or reads the models reference, pins a versioned ID in one config value, and runs the probe script over representative inputs before setting thresholds.",
+      "assertions": [
+        "A versioned model ID is pinned in a single config value, not a latest alias",
+        "The response model string is logged with stored answers",
+        "Thresholds are probed on real inputs (the decide.ts probe or equivalent) before they are fixed in code"
+      ]
+    }
+  ]
+}

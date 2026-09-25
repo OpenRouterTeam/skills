@@ -1,6 +1,6 @@
 # openrouter-decisions
 
-Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword heuristic, or a human queue, then implement them through OpenRouter's Decisions API (`POST /api/alpha/decisions`). Routing, classification, guardrails, verification, scoring, ranking, and bounded extraction come back as probabilities instead of generated text, so code can gate on them directly. The workflow and probe script work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
+Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword or similarity heuristic, or a human review queue, then implement them through OpenRouter's Decisions API (`POST /api/alpha/decisions`). Routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, approval gates, and bounded extraction come back as probabilities instead of generated text, so code can gate on them directly. The workflow and probe script work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
 
 ## Install
 
@@ -40,3 +40,7 @@ npx tsx decide.ts request.json --model <model-id>
 ```
 
 The script takes the model from the request, then `--model`, then the `DECISION_MODEL` environment variable, then the default. It prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code.
+
+## Evals
+
+[evals/evals.json](evals/evals.json) holds the test prompts for the skill in the [agentskills.io format](https://agentskills.io/skill-creation/evaluating-skills): trigger prompts (explicit, implicit, contextual, and negative controls, each with `should_trigger`) and implementation prompts with expected outputs and assertions. Run each prompt in a clean agent session with the skill installed, check the transcript for whether `SKILL.md` was read, and grade the assertions against the output. Rerun the set after changing the description or the workflow.
