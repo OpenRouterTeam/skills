@@ -39,7 +39,7 @@ npx tsx decide.ts request.json --sdk      # send it through @openrouter/sdk
 npx tsx decide.ts request.json --model <model-id>
 ```
 
-The script takes the model from the request, then `--model`, then the `DECISION_MODEL` environment variable, then the default. It prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code.
+The script takes the model from `--model`, then the request, then the `DECISION_MODEL` environment variable, then the default. It prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code.
 
 ## Evals
 

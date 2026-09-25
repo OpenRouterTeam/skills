@@ -9,10 +9,10 @@
  *   cat request.json | npx tsx decide.ts -              # read the request from stdin
  *
  * request.json: { "state": ..., "questions": { ... } } plus an optional "model".
- * Model precedence: request.model, then --model, then DECISION_MODEL, then DEFAULT_MODEL.
+ * Model precedence: --model, then request.model, then DECISION_MODEL, then DEFAULT_MODEL.
  */
 import { readFileSync } from "node:fs";
-import { decide, parseRequest, requireApiKey, resolveModel, withModel, type Transport } from "./lib.ts";
+import { decide, parseRequest, requireApiKey, withModel, type Transport } from "./lib.ts";
 
 const args = process.argv.slice(2);
 const transport: Transport = args.includes("--sdk") ? "sdk" : "http";
@@ -21,14 +21,14 @@ const modelValueIndex = modelFlagIndex === -1 ? -1 : modelFlagIndex + 1;
 const modelFlag = modelValueIndex === -1 ? undefined : args[modelValueIndex];
 const source = args.find((a, i) => !a.startsWith("--") && i !== modelValueIndex);
 
-if (!source || (modelFlagIndex !== -1 && !modelFlag)) {
+if (!source || (modelFlagIndex !== -1 && (!modelFlag || modelFlag.startsWith("--")))) {
   console.error("Usage: npx tsx decide.ts <request.json | -> [--sdk] [--model <model-id>]");
   process.exit(1);
 }
 
 const rawText = source === "-" ? readFileSync(0, "utf8") : readFileSync(source, "utf8");
 const raw: unknown = JSON.parse(rawText);
-const request = parseRequest(withModel(raw, resolveModel(modelFlag)), source);
+const request = parseRequest(withModel(raw, modelFlag), source);
 
 const apiKey = requireApiKey();
 const { response, latencyMs } = await decide(request, transport, apiKey);

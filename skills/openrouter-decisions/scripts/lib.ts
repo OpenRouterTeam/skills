@@ -4,12 +4,11 @@ export const DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions";
 export const SDK_SERVER_URL = "https://openrouter.ai";
 export const DEFAULT_MODEL = "typesafe/jev-1.13";
 
-export function resolveModel(flag: string | undefined): string {
-  return flag ?? process.env.DECISION_MODEL ?? DEFAULT_MODEL;
-}
-
-export function withModel(raw: unknown, model: string): unknown {
-  return isRecord(raw) && !("model" in raw) ? { ...raw, model } : raw;
+export function withModel(raw: unknown, flag: string | undefined): unknown {
+  if (!isRecord(raw)) return raw;
+  if (flag !== undefined) return { ...raw, model: flag };
+  if ("model" in raw) return raw;
+  return { ...raw, model: process.env.DECISION_MODEL ?? DEFAULT_MODEL };
 }
 
 export type Criterion = string | Record<string, unknown> | unknown[];
@@ -295,8 +294,14 @@ function isState(value: unknown): value is DecisionsState {
   return typeof value === "string" || isRecord(value) || Array.isArray(value);
 }
 
+const QUESTION_KEYS = new Set(["type", "instructions", "criteria"]);
+
 function parseQuestion(source: string, value: unknown): Question {
   if (!isRecord(value)) throw new Error(`${source} is not an object`);
+  const unsupported = Object.keys(value).filter((key) => !QUESTION_KEYS.has(key));
+  if (unsupported.length > 0) {
+    throw new Error(`${source}: unsupported question field(s) ${unsupported.join(", ")}`);
+  }
   const instructions = value.instructions;
   if (!isCriterion(instructions)) throw new Error(`${source}.instructions is required`);
   switch (value.type) {
@@ -305,6 +310,10 @@ function parseQuestion(source: string, value: unknown): Question {
       if (criteria === undefined) return { type: "noul", instructions };
       if (!isRecord(criteria) || !isCriterion(criteria.true) || !isCriterion(criteria.false)) {
         throw new Error(`${source}.criteria needs true and false`);
+      }
+      const extra = Object.keys(criteria).filter((key) => key !== "true" && key !== "false");
+      if (extra.length > 0) {
+        throw new Error(`${source}.criteria has unsupported key(s) ${extra.join(", ")}`);
       }
       return { type: "noul", instructions, criteria: { true: criteria.true, false: criteria.false } };
     }
