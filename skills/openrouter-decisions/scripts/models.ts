@@ -35,7 +35,7 @@ type ModelReport = {
   providers: string[];
   endpoints_error?: string;
   min_uptime_last_30m?: number;
-  max_input_tokens: number;
+  max_input_tokens?: number;
   estimated_input_tokens?: number;
   fit?: Fit;
   description: string;
@@ -76,7 +76,7 @@ async function report(model: DecisionModel, tokens: number | undefined): Promise
   const listed = await fetchEndpoints(model);
   const endpoints = listed.endpoints;
   const uptimes = endpoints.map((e) => e.uptimeLast30m).filter((u): u is number => u !== undefined);
-  const maxInput = maxInputTokens(model, endpoints);
+  const maxInput = listed.error === undefined ? maxInputTokens(model, endpoints) : undefined;
   return {
     id: model.id,
     name: model.name,
@@ -91,7 +91,7 @@ async function report(model: DecisionModel, tokens: number | undefined): Promise
     min_uptime_last_30m: uptimes.length === 0 ? undefined : Math.min(...uptimes),
     max_input_tokens: maxInput,
     estimated_input_tokens: tokens,
-    fit: tokens === undefined ? undefined : fit(tokens, maxInput),
+    fit: tokens === undefined || maxInput === undefined ? undefined : fit(tokens, maxInput),
     description: model.description,
   };
 }
@@ -139,7 +139,7 @@ function printTable(rows: ModelReport[]): void {
     r.id,
     r.alias_target === undefined ? r.build_slug : `alias -> ${r.alias_target}`,
     String(r.context_length),
-    String(r.max_input_tokens),
+    r.max_input_tokens === undefined ? "-" : String(r.max_input_tokens),
     r.usd_per_million_input_tokens.toFixed(3),
     r.endpoints_error === undefined ? r.providers.join(", ") || "none" : "unavailable",
     r.min_uptime_last_30m === undefined ? "-" : `${r.min_uptime_last_30m}%`,
@@ -152,7 +152,7 @@ function printTable(rows: ModelReport[]): void {
   console.log(line(widths.map((w) => "-".repeat(w))));
   for (const row of cells) console.log(line(row));
   for (const r of rows) {
-    if (r.endpoints_error !== undefined) console.log(`\n${r.id}: endpoints listing failed, providers and uptime unknown (${r.endpoints_error})`);
+    if (r.endpoints_error !== undefined) console.log(`\n${r.id}: endpoints listing failed, providers, uptime, and input cap unknown (${r.endpoints_error})`);
   }
   if (rows[0].estimated_input_tokens !== undefined) {
     console.log(`\nEstimated input tokens for this request: ${rows[0].estimated_input_tokens} (state and questions at 4 chars per token, a lower bound; the probe's usage.input_tokens is the real number)`);
