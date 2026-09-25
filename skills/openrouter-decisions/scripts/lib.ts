@@ -28,6 +28,7 @@ export type DecisionModel = {
 export type ModelEndpoint = {
   providerName: string;
   contextLength: number;
+  maxPromptTokens?: number;
   quantization?: string;
   uptimeLast30m?: number;
 };
@@ -42,7 +43,10 @@ export async function listDecisionModels(): Promise<DecisionModel[]> {
 }
 
 export async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {
-  const res = await fetch(model.endpointsUrl);
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const res = await fetch(model.endpointsUrl, {
+    headers: apiKey === undefined ? {} : { Authorization: `Bearer ${apiKey}` },
+  });
   const text = await res.text();
   if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);
   const raw: unknown = JSON.parse(text);
@@ -82,9 +86,11 @@ function parseEndpoint(modelId: string, entry: unknown): ModelEndpoint {
   if (!isRecord(entry)) throw new Error(`Endpoint of ${modelId} is not an object`);
   const quantization = entry.quantization;
   const uptime = entry.uptime_last_30m;
+  const maxPrompt = entry.max_prompt_tokens;
   return {
     providerName: stringField(modelId, entry, "provider_name"),
     contextLength: finiteField(`Endpoint of ${modelId}`, "context_length", entry.context_length),
+    maxPromptTokens: typeof maxPrompt === "number" && Number.isFinite(maxPrompt) ? maxPrompt : undefined,
     quantization: typeof quantization === "string" && quantization !== "unknown" ? quantization : undefined,
     uptimeLast30m: typeof uptime === "number" && Number.isFinite(uptime) ? uptime : undefined,
   };

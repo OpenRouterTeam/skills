@@ -33,7 +33,9 @@ type ModelReport = {
   usd_per_million_input_tokens: number;
   usd_per_million_output_tokens: number;
   providers: string[];
+  endpoints_error?: string;
   min_uptime_last_30m?: number;
+  max_input_tokens: number;
   estimated_input_tokens?: number;
   fit?: Fit;
   description: string;
@@ -71,8 +73,10 @@ function readRequest(path: string) {
 }
 
 async function report(model: DecisionModel, tokens: number | undefined): Promise<ModelReport> {
-  const endpoints = await listEndpoints(model);
+  const listed = await fetchEndpoints(model);
+  const endpoints = listed.endpoints;
   const uptimes = endpoints.map((e) => e.uptimeLast30m).filter((u): u is number => u !== undefined);
+  const maxInput = maxInputTokens(model, endpoints);
   return {
     id: model.id,
     name: model.name,
@@ -83,11 +87,21 @@ async function report(model: DecisionModel, tokens: number | undefined): Promise
     usd_per_million_input_tokens: perMillion(model.promptPricePerToken),
     usd_per_million_output_tokens: perMillion(model.completionPricePerToken),
     providers: unique(endpoints.map(providerLabel)),
+    endpoints_error: listed.error,
     min_uptime_last_30m: uptimes.length === 0 ? undefined : Math.min(...uptimes),
+    max_input_tokens: maxInput,
     estimated_input_tokens: tokens,
-    fit: tokens === undefined ? undefined : fit(tokens, minContext(model, endpoints)),
+    fit: tokens === undefined ? undefined : fit(tokens, maxInput),
     description: model.description,
   };
+}
+
+async function fetchEndpoints(model: DecisionModel): Promise<{ endpoints: ModelEndpoint[]; error?: string }> {
+  try {
+    return { endpoints: await listEndpoints(model) };
+  } catch (error) {
+    return { endpoints: [], error: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 function perMillion(pricePerToken: number): number {
@@ -100,13 +114,13 @@ function providerLabel(endpoint: ModelEndpoint): string {
     : `${endpoint.providerName} (${endpoint.quantization})`;
 }
 
-function minContext(model: DecisionModel, endpoints: ModelEndpoint[]): number {
-  return Math.min(model.contextLength, ...endpoints.map((e) => e.contextLength));
+function maxInputTokens(model: DecisionModel, endpoints: ModelEndpoint[]): number {
+  return Math.min(model.contextLength, ...endpoints.map((e) => Math.min(e.contextLength, e.maxPromptTokens ?? e.contextLength)));
 }
 
-function fit(tokens: number, contextLength: number): Fit {
-  if (tokens > contextLength) return "no";
-  return tokens * CONTEXT_HEADROOM > contextLength ? "tight" : "ok";
+function fit(tokens: number, maxInput: number): Fit {
+  if (tokens > maxInput) return "no";
+  return tokens * CONTEXT_HEADROOM > maxInput ? "tight" : "ok";
 }
 
 function unique(values: string[]): string[] {
@@ -120,13 +134,14 @@ function byPinnedThenPrice(a: ModelReport, b: ModelReport): number {
 }
 
 function printTable(rows: ModelReport[]): void {
-  const header = ["id", "pin", "ctx", "$/M in", "providers", "uptime30m", "released", "fit"];
+  const header = ["id", "pin", "ctx", "max in", "$/M in", "providers", "uptime30m", "released", "fit"];
   const cells = rows.map((r) => [
     r.id,
     r.alias_target === undefined ? r.build_slug : `alias -> ${r.alias_target}`,
     String(r.context_length),
+    String(r.max_input_tokens),
     r.usd_per_million_input_tokens.toFixed(3),
-    r.providers.join(", ") || "none",
+    r.endpoints_error === undefined ? r.providers.join(", ") || "none" : "unavailable",
     r.min_uptime_last_30m === undefined ? "-" : `${r.min_uptime_last_30m}%`,
     r.released,
     r.fit ?? "-",
@@ -136,6 +151,9 @@ function printTable(rows: ModelReport[]): void {
   console.log(line(header));
   console.log(line(widths.map((w) => "-".repeat(w))));
   for (const row of cells) console.log(line(row));
+  for (const r of rows) {
+    if (r.endpoints_error !== undefined) console.log(`\n${r.id}: endpoints listing failed, providers and uptime unknown (${r.endpoints_error})`);
+  }
   if (rows[0].estimated_input_tokens !== undefined) {
     console.log(`\nEstimated input tokens for this request: ${rows[0].estimated_input_tokens} (state and questions at 4 chars per token, a lower bound; the probe's usage.input_tokens is the real number)`);
   }
