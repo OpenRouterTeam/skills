@@ -277,8 +277,10 @@
       "category": "implementation",
       "should_trigger": true,
       "prompt": "Pick a decision model for a new classification job and pin it. Show the config and how you would confirm the thresholds before shipping.",
-      "expected_output": "Lists the catalog or reads the models reference, pins a versioned ID in one config value, and runs the probe script over representative inputs before setting thresholds.",
+      "expected_output": "Lists the live decision-model catalog rather than naming a model from memory, compares the candidates on context fit, price, providers, and the same probe set, pins a versioned ID in one config value, and runs the probe script over representative inputs before setting thresholds.",
       "assertions": [
+        "The candidate models come from the live catalog (models.ts or GET /api/v1/models?output_modalities=decisions), not from a hardcoded name",
+        "When more than one candidate fits, the choice rests on the same request run against each (decide.ts --compare or equivalent), not on the description alone",
         "A versioned model ID is pinned in a single config value, not a latest alias",
         "The response model string is logged with stored answers",
         "Thresholds are probed on real inputs (the decide.ts probe or equivalent) before they are fixed in code"

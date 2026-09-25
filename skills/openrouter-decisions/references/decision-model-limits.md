@@ -1,6 +1,6 @@
 # Decision model limits and the code-side pattern for each
 
-A decision model maps state and a question to a probability distribution over a fixed answer set, so it has no scratchpad for arithmetic, no loop for counting, and no output channel for text. Treat every row as the default for any decision model until that model's section in [models.md](models.md) says otherwise, and reprobe when you change models. The rows were verified on Jev 1.13 (https://docs.typesafe.ai/model-jaggedness/jev-1.13.md).
+A decision model maps state and a question to a probability distribution over a fixed answer set, so it has no scratchpad for arithmetic, no loop for counting, and no output channel for text. Treat every row as the default for any decision model until your own probe of that model shows otherwise, and reprobe when you change models. The rows were verified on Jev 1.13 (https://docs.typesafe.ai/model-jaggedness/jev-1.13.md); a vendor's own limits page for another model, when it publishes one, is the place to check for additions.
 
 | Limit | What goes wrong | Do instead |
 | --- | --- | --- |

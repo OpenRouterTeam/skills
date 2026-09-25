@@ -1,6 +1,6 @@
 # openrouter-decisions
 
-Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and probe script work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
+Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.
 
 ## Install
 
@@ -20,18 +20,19 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## What it covers
 
-[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and a per-model section. `scripts/lib.ts` holds the request validation and the HTTP and SDK calls for an integration to import or copy.
+[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.
 
-## Probe script
+## Scripts
 
 ```bash
 cd scripts && npm install
-npx tsx decide.ts request.json            # send one request over HTTP
-npx tsx decide.ts request.json --sdk      # send it through @openrouter/sdk
-npx tsx decide.ts request.json --model <model-id>
+npx tsx models.ts request.json                     # live decision-model catalog with context, price, providers, and fit for this request
+npx tsx decide.ts request.json --model <model-id>  # send one request over HTTP
+npx tsx decide.ts request.json --sdk               # send it through @openrouter/sdk
+npx tsx decide.ts request.json --compare           # same request to every pinned model in the catalog
 ```
 
-The script takes the model from `--model`, then the request, then the `DECISION_MODEL` environment variable, then the default. It prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code.
+`models.ts` reads `GET /api/v1/models?output_modalities=decisions` and each model's endpoints, and needs no key. `decide.ts` takes the model from `--model`, then the request, then the `DECISION_MODEL` environment variable, and prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code. `--compare` runs the request against every non-alias model the catalog returns and reports each model's answers or its error, so the choice between models rests on observed numbers.
 
 ## Evals
 

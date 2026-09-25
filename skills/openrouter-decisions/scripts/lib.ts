@@ -2,13 +2,111 @@ import { OpenRouter } from "@openrouter/sdk";
 
 export const DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions";
 export const SDK_SERVER_URL = "https://openrouter.ai";
-export const DEFAULT_MODEL = "typesafe/jev-1.13";
+export const MODELS_URL = "https://openrouter.ai/api/v1/models?output_modalities=decisions";
 
 export function withModel(raw: unknown, flag: string | undefined): unknown {
   if (!isRecord(raw)) return raw;
   if (flag !== undefined) return { ...raw, model: flag };
   if ("model" in raw) return raw;
-  return { ...raw, model: process.env.DECISION_MODEL ?? DEFAULT_MODEL };
+  const fromEnv = process.env.DECISION_MODEL;
+  return fromEnv === undefined ? raw : { ...raw, model: fromEnv };
+}
+
+export type DecisionModel = {
+  id: string;
+  name: string;
+  buildSlug: string;
+  aliasTarget?: string;
+  createdAt: Date;
+  contextLength: number;
+  promptPricePerToken: number;
+  completionPricePerToken: number;
+  description: string;
+  endpointsUrl: string;
+};
+
+export type ModelEndpoint = {
+  providerName: string;
+  contextLength: number;
+  quantization?: string;
+  uptimeLast30m?: number;
+};
+
+export async function listDecisionModels(): Promise<DecisionModel[]> {
+  const res = await fetch(MODELS_URL);
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Models API ${res.status}: ${text}`);
+  const raw: unknown = JSON.parse(text);
+  if (!isRecord(raw) || !Array.isArray(raw.data)) throw new Error("Models API response has no data array");
+  return raw.data.filter(isDecisionsEntry).map(parseModel);
+}
+
+export async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {
+  const res = await fetch(model.endpointsUrl);
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);
+  const raw: unknown = JSON.parse(text);
+  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {
+    throw new Error(`Endpoints API response for ${model.id} has no data.endpoints array`);
+  }
+  return raw.data.endpoints.map((entry) => parseEndpoint(model.id, entry));
+}
+
+function isDecisionsEntry(entry: unknown): entry is Record<string, unknown> {
+  if (!isRecord(entry) || !isRecord(entry.architecture)) return false;
+  const modalities = entry.architecture.output_modalities;
+  return Array.isArray(modalities) && modalities.includes("decisions");
+}
+
+function parseModel(entry: Record<string, unknown>): DecisionModel {
+  const id = stringField("model", entry, "id");
+  const pricing = entry.pricing;
+  if (!isRecord(pricing)) throw new Error(`Model ${id} has no pricing`);
+  const links = entry.links;
+  const detailsPath = isRecord(links) && typeof links.details === "string" ? links.details : undefined;
+  return {
+    id,
+    name: stringField(id, entry, "name"),
+    buildSlug: stringField(id, entry, "canonical_slug"),
+    aliasTarget: isRecord(entry.alias_target) ? stringField(id, entry.alias_target, "slug") : undefined,
+    createdAt: new Date(finiteField(id, "created", entry.created) * 1000),
+    contextLength: finiteField(id, "context_length", entry.context_length),
+    promptPricePerToken: priceField(id, pricing, "prompt"),
+    completionPricePerToken: priceField(id, pricing, "completion"),
+    description: typeof entry.description === "string" ? entry.description : "",
+    endpointsUrl: `${SDK_SERVER_URL}${detailsPath ?? `/api/v1/models/${id}/endpoints`}`,
+  };
+}
+
+function parseEndpoint(modelId: string, entry: unknown): ModelEndpoint {
+  if (!isRecord(entry)) throw new Error(`Endpoint of ${modelId} is not an object`);
+  const quantization = entry.quantization;
+  const uptime = entry.uptime_last_30m;
+  return {
+    providerName: stringField(modelId, entry, "provider_name"),
+    contextLength: finiteField(`Endpoint of ${modelId}`, "context_length", entry.context_length),
+    quantization: typeof quantization === "string" && quantization !== "unknown" ? quantization : undefined,
+    uptimeLast30m: typeof uptime === "number" && Number.isFinite(uptime) ? uptime : undefined,
+  };
+}
+
+function stringField(owner: string, obj: Record<string, unknown>, field: string): string {
+  const value = obj[field];
+  if (typeof value !== "string" || value.length === 0) throw new Error(`${owner} has no ${field}`);
+  return value;
+}
+
+function priceField(modelId: string, pricing: Record<string, unknown>, field: string): number {
+  const value = pricing[field];
+  const parsed = typeof value === "string" ? Number(value) : value;
+  if (typeof parsed !== "number" || !Number.isFinite(parsed)) {
+    throw new Error(`Model ${modelId} has no numeric pricing.${field}`);
+  }
+  return parsed;
+}
+
+export function estimateInputTokens(request: Pick<DecisionsRequest, "state" | "questions">): number {
+  return Math.ceil(JSON.stringify({ state: request.state, questions: request.questions }).length / 4);
 }
 
 export type Criterion = string | Record<string, unknown> | unknown[];
@@ -52,7 +150,12 @@ export type ChoiceAnswer = {
   confidence?: number;
 };
 
-export type NoulAnswer = { type: "noul"; noul: number };
+export type NoulAnswer = {
+  type: "noul";
+  noul: number;
+  probabilities?: Record<string, number>;
+  confidence?: number;
+};
 
 export type ScoreAnswer = {
   type: "score";
@@ -209,14 +312,19 @@ function parseAnswer(key: string, value: unknown): Answer {
   switch (value.type) {
     case "noul":
       if (typeof value.noul !== "number") throw new Error(`Answer ${key} has no noul`);
-      return { type: "noul", noul: value.noul };
+      return {
+        type: "noul",
+        noul: value.noul,
+        probabilities: optional(value.probabilities, (v) => numberMap(key, "probabilities", v)),
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
+      };
     case "choice":
       if (typeof value.choice !== "string") throw new Error(`Answer ${key} has no choice`);
       return {
         type: "choice",
         choice: value.choice,
         probabilities: optional(value.probabilities, (v) => numberMap(key, "probabilities", v)),
-        confidence: optional(value.confidence, (v) => finiteField(key, "confidence", v)),
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
       };
     case "score":
       if (typeof value.score !== "number") throw new Error(`Answer ${key} has no score`);
@@ -225,7 +333,7 @@ function parseAnswer(key: string, value: unknown): Answer {
         score: value.score,
         probabilities: optional(value.probabilities, (v) => numberMap(key, "probabilities", v)),
         legend: optional(value.legend, (v) => criterionMap(key, "legend", v)),
-        confidence: optional(value.confidence, (v) => finiteField(key, "confidence", v)),
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
       };
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
@@ -244,9 +352,9 @@ function numberField(obj: Record<string, unknown>, ...keys: string[]): number {
   throw new Error(`Response usage has no finite ${keys[0]}`);
 }
 
-function finiteField(key: string, field: string, value: unknown): number {
+function finiteField(owner: string, field: string, value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Answer ${key} has no finite ${field}`);
+    throw new Error(`${owner} has no finite ${field}`);
   }
   return value;
 }
@@ -255,7 +363,7 @@ function numberMap(key: string, field: string, value: unknown): Record<string, n
   if (!isRecord(value)) throw new Error(`Answer ${key} has no ${field} object`);
   const out: Record<string, number> = {};
   for (const [k, v] of Object.entries(value)) {
-    out[k] = finiteField(key, `${field}.${k}`, v);
+    out[k] = finiteField(`Answer ${key}`, `${field}.${k}`, v);
   }
   return out;
 }
@@ -274,14 +382,26 @@ function criterionMap(key: string, field: string, value: unknown): Record<string
   return out;
 }
 
+export type DecisionsRequestBody = Omit<DecisionsRequest, "model">;
+
 export function parseRequest(raw: unknown, source: string): DecisionsRequest {
+  const body = parseRequestBody(raw, source);
+  const model = isRecord(raw) ? raw.model : undefined;
+  if (typeof model !== "string") {
+    throw new Error(
+      `${source}: model must be a string. Pass --model <id>, set DECISION_MODEL, or add "model" to the request. List the candidates with models.ts.`
+    );
+  }
+  return { model, ...body };
+}
+
+export function parseRequestBody(raw: unknown, source: string): DecisionsRequestBody {
   if (!isRecord(raw)) throw new Error(`${source}: request is not an object`);
   const unsupported = Object.keys(raw).filter((key) => !REQUEST_KEYS.has(key));
   if (unsupported.length > 0) {
     throw new Error(`${source}: unsupported request field(s) ${unsupported.join(", ")}`);
   }
-  const { model, state, questions, session_id, user } = raw;
-  if (typeof model !== "string") throw new Error(`${source}: model must be a string`);
+  const { state, questions, session_id, user } = raw;
   if (!isState(state)) throw new Error(`${source}: state must be a string, object, or array`);
   if (!isRecord(questions) || Object.keys(questions).length === 0) {
     throw new Error(`${source}: questions must be a non-empty object`);
@@ -294,7 +414,7 @@ export function parseRequest(raw: unknown, source: string): DecisionsRequest {
   for (const [key, value] of Object.entries(questions)) {
     parsed[key] = parseQuestion(`${source}: questions.${key}`, value);
   }
-  return { model, state, questions: parsed, session_id, user };
+  return { state, questions: parsed, session_id, user };
 }
 
 function isState(value: unknown): value is DecisionsState {

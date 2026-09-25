@@ -1,6 +1,6 @@
 # Decisions API reference
 
-`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID goes in `model` (the examples use `typesafe/jev-1.13`), and the IDs are in [models.md](models.md).
+`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).
 
 ## Request
 
