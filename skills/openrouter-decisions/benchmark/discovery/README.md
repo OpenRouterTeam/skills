@@ -74,7 +74,7 @@ Generators `openai/gpt-6-astra`, `openai/gpt-5.6-luna`, `z-ai/glm-5.3-flash`, so
 
 The skill arm was ahead on every generator and on every site (categorize 48 versus 40 out of 48, urgency 45 versus 36, duplicates 53 versus 46 out of 54, moderation 40 versus 36, refunds 54 versus 51, leads 47 versus 41, suggest 53 versus 48).
 
-Rubric items where the arms differed by two or more grades (api-only to skill). Denominators count every scheduled design, so the skill arm's one design error (GLM 5.3 Flash on moderation, round 2) is a fail on each of that site's items:
+Rubric items where the arms differed by two or more grades (api-only to skill). Denominators count every scheduled design, so the skill arm's one design error (GLM 5.3 Flash on moderation, round 1) is a fail on each of that site's items:
 
 | Item | api-only | skill |
 | --- | --- | --- |
