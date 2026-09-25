@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenRouter Decisions"
+  short_description: "Find and implement decision-model use cases"
+  default_prompt: "Use $openrouter-decisions to replace this prompt-and-parse classification step with a decision model through the OpenRouter Decisions API."
