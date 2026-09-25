@@ -76,7 +76,7 @@
 }
 ```
 
-Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default. `model` is the exact build that answered and `usage.cost` is in USD.
+Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default. `noul`, `choice`, and `score` are always present. The schema marks `probabilities`, `confidence`, and `legend` optional, so read them through a presence check even though current models return them. `legend` values keep the structure of the `criteria` you sent. `model` is the exact build that answered and `usage.cost` is in USD.
 
 ## curl
 

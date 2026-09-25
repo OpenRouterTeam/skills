@@ -16,7 +16,7 @@ export type Criterion = string | Record<string, unknown> | unknown[];
 export type ChoiceQuestion = {
   type: "choice";
   instructions: Criterion;
-  criteria: Record<string, Criterion>;
+  criteria: Record<string, Criterion | null>;
 };
 
 export type NoulQuestion = {
@@ -48,8 +48,8 @@ const REQUEST_KEYS = new Set(["model", "state", "questions", "session_id", "user
 export type ChoiceAnswer = {
   type: "choice";
   choice: string;
-  probabilities: Record<string, number>;
-  confidence: number;
+  probabilities?: Record<string, number>;
+  confidence?: number;
 };
 
 export type NoulAnswer = { type: "noul"; noul: number };
@@ -57,9 +57,9 @@ export type NoulAnswer = { type: "noul"; noul: number };
 export type ScoreAnswer = {
   type: "score";
   score: number;
-  probabilities: Record<string, number>;
-  legend: Record<string, string>;
-  confidence: number;
+  probabilities?: Record<string, number>;
+  legend?: Record<string, Criterion>;
+  confidence?: number;
 };
 
 export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer;
@@ -115,22 +115,24 @@ function assertAnswersMatch(request: DecisionsRequest, response: DecisionsRespon
       throw new Error(`Answer ${key} is a ${answer.type}, question is a ${question.type}`);
     }
     if (question.type === "choice" && answer.type === "choice") {
-      assertSameKeys(key, Object.keys(question.criteria), answer.probabilities);
+      if (answer.probabilities) assertSameKeys(key, Object.keys(question.criteria), answer.probabilities);
       if (!(answer.choice in question.criteria)) {
         throw new Error(`Answer ${key} chose ${answer.choice}, which is not an option`);
       }
     }
     if (question.type === "score" && answer.type === "score") {
-      assertSameKeys(key, question.criteria.map((_, i) => String(i)), answer.probabilities);
+      const levels = question.criteria.map((_, i) => String(i));
+      if (answer.probabilities) assertSameKeys(key, levels, answer.probabilities);
+      if (answer.legend) assertSameKeys(key, levels, answer.legend);
     }
   }
 }
 
-function assertSameKeys(key: string, options: string[], probabilities: Record<string, number>): void {
-  const missing = options.filter((option) => !(option in probabilities));
-  const extra = Object.keys(probabilities).filter((option) => !options.includes(option));
-  if (missing.length > 0) throw new Error(`Answer ${key} has no probability for ${missing.join(", ")}`);
-  if (extra.length > 0) throw new Error(`Answer ${key} has probabilities for unknown ${extra.join(", ")}`);
+function assertSameKeys(key: string, options: string[], map: Record<string, unknown>): void {
+  const missing = options.filter((option) => !(option in map));
+  const extra = Object.keys(map).filter((option) => !options.includes(option));
+  if (missing.length > 0) throw new Error(`Answer ${key} has no entry for ${missing.join(", ")}`);
+  if (extra.length > 0) throw new Error(`Answer ${key} has entries for unknown ${extra.join(", ")}`);
 }
 
 async function decideViaHttp(
@@ -213,17 +215,17 @@ function parseAnswer(key: string, value: unknown): Answer {
       return {
         type: "choice",
         choice: value.choice,
-        probabilities: numberMap(key, "probabilities", value.probabilities),
-        confidence: finiteField(key, "confidence", value.confidence),
+        probabilities: optional(value.probabilities, (v) => numberMap(key, "probabilities", v)),
+        confidence: optional(value.confidence, (v) => finiteField(key, "confidence", v)),
       };
     case "score":
       if (typeof value.score !== "number") throw new Error(`Answer ${key} has no score`);
       return {
         type: "score",
         score: value.score,
-        probabilities: numberMap(key, "probabilities", value.probabilities),
-        legend: stringMap(key, "legend", value.legend),
-        confidence: finiteField(key, "confidence", value.confidence),
+        probabilities: optional(value.probabilities, (v) => numberMap(key, "probabilities", v)),
+        legend: optional(value.legend, (v) => criterionMap(key, "legend", v)),
+        confidence: optional(value.confidence, (v) => finiteField(key, "confidence", v)),
       };
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
@@ -258,11 +260,16 @@ function numberMap(key: string, field: string, value: unknown): Record<string, n
   return out;
 }
 
-function stringMap(key: string, field: string, value: unknown): Record<string, string> {
+function optional<T>(value: unknown, parse: (value: unknown) => T): T | undefined {
+  return value === undefined || value === null ? undefined : parse(value);
+}
+
+function criterionMap(key: string, field: string, value: unknown): Record<string, Criterion> {
   if (!isRecord(value)) throw new Error(`Answer ${key} has no ${field} object`);
-  const out: Record<string, string> = {};
+  const out: Record<string, Criterion> = {};
   for (const [k, v] of Object.entries(value)) {
-    out[k] = typeof v === "string" ? v : JSON.stringify(v);
+    if (!isCriterion(v)) throw new Error(`Answer ${key} has a non-criterion ${field}.${k}`);
+    out[k] = v;
   }
   return out;
 }
@@ -322,9 +329,9 @@ function parseQuestion(source: string, value: unknown): Question {
       if (!isRecord(criteria) || Object.keys(criteria).length < 2) {
         throw new Error(`${source}.criteria needs at least two options`);
       }
-      const options: Record<string, Criterion> = {};
+      const options: Record<string, Criterion | null> = {};
       for (const [k, v] of Object.entries(criteria)) {
-        if (!isCriterion(v)) throw new Error(`${source}.criteria.${k} is not a criterion`);
+        if (v !== null && !isCriterion(v)) throw new Error(`${source}.criteria.${k} is not a criterion`);
         options[k] = v;
       }
       return { type: "choice", instructions, criteria: options };
