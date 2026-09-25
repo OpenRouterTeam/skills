@@ -1,6 +1,6 @@
 # openrouter-decisions
 
-Find the places in an app or agent where a decision model should replace a prompt-and-parse LLM call, a keyword or similarity heuristic, or a human review queue, then implement them through OpenRouter's Decisions API (`POST /api/alpha/decisions`). Routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, approval gates, and bounded extraction come back as probabilities instead of generated text, so code can gate on them directly. The workflow and probe script work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
+Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and probe script work with any decision model on OpenRouter. Jev (`typesafe/jev-1.13`) is the current default.
 
 ## Install
 
@@ -20,15 +20,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## What it covers
 
-See [SKILL.md](SKILL.md) for the workflow, including:
-
-- Finding decision points in existing code (parsed LLM outputs, keyword heuristics, review queues, candidate picking)
-- Splitting each one into judgments for the model and deterministic steps for code
-- Choosing between `choice`, `noul`, and `score` for each judgment
-- Building minimal state and writing questions that ask for meaning, with no-match options
-- Picking a decision model from the live catalog, pinning it, and calling it over raw HTTP or `@openrouter/sdk`
-- Gating on probabilities and confidence in code, and probing thresholds on real data
-- Limits shared by decision models (arithmetic, counting, dates, negation, adversarial text) with the code-side pattern for each, plus a per-model reference
+[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and a per-model section. `scripts/lib.ts` holds the request validation and the HTTP and SDK calls for an integration to import or copy.
 
 ## Probe script
 

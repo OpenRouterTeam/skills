@@ -1,6 +1,6 @@
 # Decisions API reference
 
-`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. Every decision model on OpenRouter takes the same request and returns the same response shape. Model IDs, per-model limits, and vendor-specific surfaces are in [models.md](models.md). The examples below use `typesafe/jev-1.13`, and any decision model ID goes in `model`.
+`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID goes in `model` (the examples use `typesafe/jev-1.13`), and the IDs are in [models.md](models.md).
 
 ## Request
 
@@ -44,11 +44,9 @@
 ```
 
 - `state` is a string, object, or array. Objects with named fields are preferred.
-- `questions` is an object keyed by your own IDs. Keys are not sent to the model.
-- `choice.criteria` is an object mapping option name to description.
-- `noul.criteria` is optional and has exactly `true` and `false` keys.
-- `score.criteria` is an ordered array of level descriptions, lowest first. The answer's `legend` maps `"0"`, `"1"`, ... back to them.
-- `instructions` and every criterion accept a string or JSON structure.
+- `questions` is an object keyed by your own IDs.
+- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and the answer's `legend` maps `"0"`, `"1"`, ... back to it.
+- `instructions` and every criterion accept a string or a JSON structure.
 - Optional: `session_id` and `trace` for observability grouping, `user` for per-end-user attribution, `provider` for routing preferences. The bundled scripts forward `session_id` and `user` and reject the other two, so send `trace` and `provider` from your own client.
 
 ## Response
@@ -78,7 +76,7 @@
 }
 ```
 
-Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default. The `model` field carries the exact build that answered. Log it with every stored answer. `usage.cost` is in USD.
+Every answer carries `type`. Check it before reading fields, and treat a missing key or an unexpected `type` as an error rather than a default. `model` is the exact build that answered and `usage.cost` is in USD.
 
 ## curl
 
@@ -91,7 +89,7 @@ curl -s https://openrouter.ai/api/alpha/decisions \
 
 ## OpenRouter TypeScript SDK
 
-The Decisions path lives outside the `/api/v1` prefix the SDK uses by default, so construct the client with `serverURL: 'https://openrouter.ai'`.
+The Decisions path lives outside the `/api/v1` prefix the SDK uses by default, so construct the client with `serverURL: 'https://openrouter.ai'`. [scripts/lib.ts](../scripts/lib.ts) wraps both transports with request validation and typed answers (`parseRequest`, `decide`).
 
 ```typescript
 import { OpenRouter } from '@openrouter/sdk';
