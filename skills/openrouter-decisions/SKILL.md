@@ -49,7 +49,3 @@ npx tsx decide.ts request.json --model <model-id>       # any decision model
 ## Limits shared by decision models
 
 A decision model judges. It does not compute, count, compare dates or numbers, follow multi-hop indirection, resist adversarial state, or generate, and it reads questions literally. The code-side pattern for each of these is in [references/decision-model-limits.md](references/decision-model-limits.md). Read it whenever a question involves quantities, dates, negation, or untrusted text, and read the model's own section in [references/models.md](references/models.md) for anything specific to it.
-
-## Worked examples
-
-[benchmark/cases](benchmark/cases) holds one request per task type (routing, no-match, multi-label, guardrail, verification, scoring, ranking, extraction, ambiguity, adversarial, and the counting, date, arithmetic, and negation patterns) with the expected outcome and the code-side rule for each. `npx tsx benchmark.ts --offline` validates the files, and without the flag replays them live against the default or `--model` decision model and reports pass or fail per case. Use them as templates, as a regression check after changing a question, and as a first read on a new model before moving thresholds to it.

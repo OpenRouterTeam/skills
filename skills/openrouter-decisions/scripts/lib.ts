@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { OpenRouter } from "@openrouter/sdk";
 
 export const DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions";
@@ -267,10 +266,6 @@ function stringMap(key: string, field: string, value: unknown): Record<string, s
     out[k] = typeof v === "string" ? v : JSON.stringify(v);
   }
   return out;
-}
-
-export function readJsonFile(path: string): unknown {
-  return JSON.parse(readFileSync(path, "utf8"));
 }
 
 export function parseRequest(raw: unknown, source: string): DecisionsRequest {
