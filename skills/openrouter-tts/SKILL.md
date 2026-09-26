@@ -67,11 +67,11 @@ curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
   | jq -r '.data[] | select(.id=="openai/gpt-4o-mini-tts-2025-12-15") | .supported_voices[]'
 ```
 
-Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`:
+Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`. Two more flags gate the richer reference modes: `supports_multiple_audio_references` (more than one clip) and `supports_image_reference` (an `image_url` reference describing the voice). Requests are only routed to endpoints whose flags allow the references sent:
 
 ```bash
 curl -sS "https://openrouter.ai/api/v1/models/fish-audio/s1/endpoints" \
-  | jq '.data.endpoints[] | {provider_name, model_id, supports_voice_cloning}'
+  | jq '.data.endpoints[] | {provider_name, model_id, supports_voice_cloning, supports_multiple_audio_references, supports_image_reference}'
 ```
 
 Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtral encodes language + persona + emotion (`en_paul_happy`), Kokoro prefixes with language/gender (`af_bella` = American female Bella).
@@ -85,7 +85,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `voice`           | no       | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `input_references` | no       | Stateless voice cloning: one `input_audio` part with base64 or data-URI `data` and optional `format`, optionally accompanied by one transcript `text` part. The schema rejects more than one audio part or more than one transcript; send this only to endpoints whose `supports_voice_cloning` capability is `true`. |
+| `input_references` | no       | Stateless voice cloning or voice design. Audio mode: one to three `input_audio` parts (each with base64/data-URI `data` **or** a public `url`, plus optional `format`), each optionally paired with a transcript `text` part. Image mode: exactly one `image_url` part. The two modes cannot be mixed; an empty array means no reference. See [Voice cloning](#voice-cloning) for routing requirements. |
 | `provider`        | no       | Provider passthrough — see below.                                                                                 |
 
 ### Voice cloning
@@ -117,7 +117,17 @@ curl -sS -X POST https://openrouter.ai/api/v1/audio/speech \
   --output cloned-voice.mp3
 ```
 
-The audio `data` may be raw base64 or a data URI. `format` is optional; most providers detect it from the audio bytes. Reference audio is limited to 20 MiB of base64 (15 MiB decoded), and `input_references` requires one `input_audio` part plus at most one transcript part.
+Each `input_audio` needs exactly one of `data` (raw base64 or a data URI, max 20 MiB of base64 / 15 MiB decoded) or `url` (public http(s) URL; OpenRouter downloads it, 15 MiB max, and forwards the bytes, never the URL). `format` is optional; most providers detect it from the audio bytes. With a single clip the transcript may come before or after it.
+
+**Multiple clips.** Send up to three `input_audio` parts; with more than one clip, each transcript `text` part must immediately follow the clip it transcribes. On providers that support multiple references, the Nth clip is addressable from `input` as `@AudioN` (e.g. `"input": "Read this in the voice of @Audio1, then @Audio2."`). Only routed to endpoints with `supports_multiple_audio_references: true`.
+
+**Image reference (voice design).** Instead of audio, send exactly one image describing the desired voice; it cannot be combined with `input_audio` parts and is only routed to endpoints with `supports_image_reference: true`. The `url` is a JPEG, PNG, or WebP as a base64 data URI or a public http(s) URL (downloaded, 15 MiB max):
+
+```json
+"input_references": [
+  { "type": "image_url", "image_url": { "url": "https://example.com/speaker.png" } }
+]
+```
 
 ### Picking a format
 
