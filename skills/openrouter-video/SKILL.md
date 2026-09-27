@@ -24,7 +24,18 @@ curl -sS https://openrouter.ai/api/v1/videos/models \
   | jq '.data[] | select(.id == "MODEL_ID")'
 ```
 
-Fields on each model worth knowing: `supported_resolutions`, `supported_aspect_ratios`, `supported_sizes`, `supported_durations` (often discrete like `[4,6,8]`, not a range), `supported_frame_images` (which `frame_type` values are accepted), `generate_audio` and `seed` (capability bools), `pricing_skus`, and `allowed_passthrough_parameters`. An out-of-set value returns a 400, so validate client-side.
+Fields on each model worth knowing: `supported_resolutions`, `supported_aspect_ratios`, `supported_sizes`, `supported_durations` (often discrete like `[4,6,8]`, not a range), `supported_frame_images` (which `frame_type` values are accepted), `generate_audio` and `seed` (capability bools), `upscale_factor` (`{min, max}` range, non-null only on upscaling models) and `creativity` (array of accepted levels, same), `pricing_skus`, and `allowed_passthrough_parameters`. An out-of-set value returns a 400, so validate client-side.
+
+## Upscaling models
+
+A model whose `upscale_factor` or `creativity` field is non-null upscales an existing clip instead of generating one. Send the source clip as exactly one `input_references` entry of `{ type: "video_url", video_url: { url } }`; image or audio references, extra video references, and `frame_images` are all rejected. The source clip's geometry and duration carry over, so `duration`, `resolution`, `aspect_ratio`, `size`, `seed`, and `generate_audio` return a 400.
+
+Upscale-only parameters:
+
+- `upscale_factor` (number > 0) — must fall inside the model's `upscale_factor` range.
+- `creativity` (int) — must be one of the model's `creativity` values (`0` = precise, `1` = creative); defaults to the model's preferred level when omitted.
+
+Sending either one to a generation model returns `400 ... This model does not support upscale_factor.` (likewise for `creativity`).
 
 ## Full workflow (drop-in)
 
@@ -80,7 +91,8 @@ Required: `model`, `prompt`. Common optional fields:
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `input_references[]` — reference-to-video (style guidance) and the source clip for upscaling models; entries are `{ type: "image_url" | "audio_url" | "video_url", ... }` with no `frame_type`. If both arrays are present, `frame_images` wins.
+- `upscale_factor` / `creativity` — upscaling models only, see above.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
