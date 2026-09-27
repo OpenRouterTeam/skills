@@ -69,6 +69,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `tokens_total`, `tokens_prompt`, `tokens_completion` — token counts (up to 365 days)
 - `reasoning_tokens` — tokens used for extended thinking (up to 365 days)
 - `cached_tokens` — tokens served from cache (up to 365 days)
+- `possible_cached_tokens` — prompt tokens that were cacheable, whether or not they hit cache (possible-cache metric, see below)
 - `byok_request_count` — number of BYOK requests (up to 365 days)
 - `guardrail_invoked_count` — count of requests that triggered guardrails (31-day limit)
 - `response_cached_count` — count of responses served from cache (31-day limit)
@@ -88,6 +89,7 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `usage_upstream_file` — provider-side file processing cost in USD (31-day limit)
 - `usage_web_fetch` — web fetch cost in USD (31-day limit)
 - `usage_upstream_web_fetch` — provider-side web fetch cost in USD (31-day limit)
+- `blended_cost_per_million_tokens` — total cost (incl. BYOK inference) per 1M prompt + completion tokens (up to 365 days). Rate metric — averaged, not summed
 
 **Performance metrics** (how fast):
 - `avg_latency`, `p50_latency`, `p90_latency`, `p99_latency` — response latency in milliseconds
@@ -97,6 +99,18 @@ Most volume and cost metrics support time ranges up to **365 days** with daily g
 - `cache_hit_rate` — ratio of cached tokens to prompt tokens (0–1)
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
+- `possible_cache_hit_rate` — possible cached tokens as a ratio of prompt tokens; the caching opportunity (possible-cache metric)
+- `cache_capture_rate` — how much of that opportunity was actually captured: matched cached tokens over possible cached tokens (possible-cache metric)
+
+### Possible-Cache Metrics
+
+`possible_cached_tokens`, `possible_cache_hit_rate`, and `cache_capture_rate` are served only by the hourly possible-cache rollup, which constrains any query that requests them:
+
+- Time range limited to **31 days**. Coarser granularity does not lift this — the rollup is always the source
+- Groupable and filterable by `model` and `provider` only; `minute` granularity, classifier dimensions, and classifier filters are rejected
+- Combinable metrics are limited to those the rollup also carries: `tokens_prompt`, `cached_tokens`, `cache_hit_rate`
+- Any incompatible metric, dimension, filter field, or granularity returns 400 naming what was incompatible, rather than silently falling back to another source
+- With `day`, `week`, or `month` granularity, range bounds snap to UTC days; sub-day timezone bucketing is approximate because each row is an hour bucket
 
 ## Understanding Dimensions
 
@@ -144,6 +158,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `finish_reason` — why the generation ended (stop, length, etc.)
 - `external_user` — custom user ID passed by the caller
 - `context_length_bucket` — bucketed context length (1K, 10K, 100K, etc.)
+- `session_id` — session grouping ID; sessionless requests group and filter as the literal `none`
 
 ## Classifier Dimensions
 
@@ -177,6 +192,13 @@ Filter operators for the `filters` array in query requests:
 | `lte` | scalar | Less than or equal |
 | `in` | array | In list |
 | `not_in` | array | Not in list |
+
+For dimensions with an unset bucket, `in` and `not_in` filters may set
+`include_unset: true` to include rows where the dimension has no value. The
+public `/api/v1/analytics/meta` response lists dimension names and labels but
+does not indicate which dimensions have an unset bucket. If `include_unset`
+is used for an unsupported dimension, validation reports
+`Dimension "<field>" has no unset bucket`.
 
 ## Understanding Granularities
 
@@ -216,6 +238,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Non-BYOK inference spend?" | `openrouter_usage` | `model` | 31-day limit |
 | "How many guardrail triggers?" | `guardrail_invoked_count`, `guardrail_invoked_rate` | `model` | 31-day limit |
 | "How many cached responses?" | `response_cached_count`, `response_cached_rate` | `model` | 31-day limit |
+| "How much more could caching save me?" | `possible_cache_hit_rate`, `cache_capture_rate`, `cache_hit_rate` | `model` | Possible-cache metrics: 31-day limit, `model`/`provider` only |
 | "Where does my spend go?" | `usage_upstream`, `usage_cache`, `usage_data` | — | Full cost breakdown (up to 365 days) |
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 365 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
@@ -246,5 +269,6 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Most volume/cost metrics: up to 365 days with daily granularity
 - Latency/throughput metrics and per-generation dimensions: up to 31 days
 - Classifier dimensions/filters: always limited to 31 days
+- Possible-cache metrics: always limited to 31 days, `model`/`provider` grouping only, `hour` granularity or coarser
 - Minute granularity: only available when the time window is ≤ 3 hours
 - Rate-limited to 64 requests per minute
