@@ -221,7 +221,7 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 | `is_byok` | bool | Whether user's own provider key was used |
 | `cancelled` | bool\|null | Whether request was cancelled |
 | `app_id` | int\|null | OAuth app ID |
-| `external_user` | string\|null | External user identifier (X-External-User header) |
+| `external_user` | string\|null | End-user identifier: the request body's `user` field, falling back to the API key's `external_user` when the request omits `user` |
 | `session_id` | string\|null | Session grouping ID |
 | `request_id` | string\|null | Request grouping ID (all gens from one API call) |
 | `router` | string\|null | Router used (e.g., `openrouter/auto`) |
