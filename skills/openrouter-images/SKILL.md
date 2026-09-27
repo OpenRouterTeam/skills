@@ -103,6 +103,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
+| `--user <id>` | Stable end-user identifier for abuse prevention; never sent to providers verbatim | None |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
 
 `--provider-options` takes a JSON object keyed by provider slug, using keys from that endpoint's `allowed_passthrough_parameters`:

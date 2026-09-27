@@ -186,6 +186,7 @@ export function buildImageParams(args: Map<string, string | true>): Record<strin
   setString("quality", "quality");
   setString("output-format", "output_format");
   setString("background", "background");
+  setString("user", "user");
   setInt("n", "n");
   setInt("seed", "seed");
   setInt("output-compression", "output_compression");
