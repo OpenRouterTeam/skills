@@ -39,11 +39,13 @@ Present this as a multi-select checklist. Items marked **ON** are pre-selected d
 
 | Tool | Type string | Default | Config |
 |------|------------|---------|--------|
-| Web Search | `openrouter:web_search` | ON | engine, max_results, domain filtering |
+| Web Search | `openrouter:web_search` | ON | engine, mode, max_results, domain filtering |
 | Datetime | `openrouter:datetime` | ON | timezone |
 | Image Generation | `openrouter:image_generation` | OFF | model, quality, size, format |
 
 Server tools go in the `tools` array alongside user-defined tools. No client code needed — OpenRouter executes them.
+
+`mode` selects the engine-native search depth, and its valid values depend on the engine: Exa accepts `instant`, `fast`, `auto` (default), `deep-lite`, `deep`, and `deep-reasoning`; Parallel accepts `basic` (default), `turbo`, and `advanced`. Set `engine` explicitly whenever setting `mode` — a mode the selected engine does not support is ignored and the engine's default applies. Deeper modes cost more per request.
 
 ### User-Defined Tools (client-side, generated into src/tools/)
 
