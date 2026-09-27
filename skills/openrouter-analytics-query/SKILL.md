@@ -90,7 +90,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
-  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results. Filtering or grouping by the account default workspace UUID also covers activity recorded before workspace resolution existed, whose legacy all-zero UUID is folded into the default workspace; grouping never returns the all-zero UUID as a separate group.
   - `app` — numeric app ID, not the app title shown in results.
   - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
 - Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
@@ -190,7 +190,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 > **Numeric types:** Count metrics (`request_count`, `tokens_*`, etc.) are returned as strings (`"1523"`). Cost and rate metrics (`total_usage`, `cache_hit_rate`, latency, throughput) are returned as numbers (`4.27`). Parse count values with `Number()` or `parseInt()` before arithmetic.
 
-> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs.
+> **Label resolution:** Dimensions `api_key_id`, `app`, `user`, and `workspace` return human-readable labels in data rows (key names, app titles, user names, workspace names), not raw IDs. Filtering or grouping by the account default workspace UUID also covers activity recorded before workspace resolution existed, whose legacy all-zero UUID is folded into the default workspace; grouping never returns the all-zero UUID as a separate group.
 
 ## CLI Reference
 
