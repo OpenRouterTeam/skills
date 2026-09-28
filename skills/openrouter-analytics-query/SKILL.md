@@ -183,7 +183,7 @@ Classifier filters narrow results to generations matching specific classificatio
 
 | Field | Description |
 |---|---|
-| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With multiple names or no `dimension_names`, rows include `clf_dimension_name` and `clf_dimension_value` columns. |
+| `data.data` | Array of result rows. Each row has keys for requested metrics, dimensions, and `date__<granularity>` (when granularity is set). For `classifier_dimensions` queries with a single `dimension_name`, a column is aliased to that name (e.g., `category`). With two names, each name gets its own column and rows are cross-grouped by both. With `dimension_names` omitted, rows include `clf_dimension_name` and `clf_dimension_value` columns, one row per dimension/value pair. |
 | `data.metadata.query_time_ms` | Query execution time in milliseconds |
 | `data.metadata.row_count` | Number of rows returned |
 | `data.metadata.truncated` | `true` if results were truncated at the limit |
