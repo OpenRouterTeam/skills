@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00536,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.009104,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "Final message states: “I can compute them, but `labels.csv` isn’t present in the workspace,” and no code or metrics were produced.",
+      "evidence": "The agent produced no files and wrote no code that computes metrics; it stopped with \"`labels.csv` isn’t present in the workspace. Please add/upload it or provide its path.\"",
       "graded_by": "judge"
     }
   ],

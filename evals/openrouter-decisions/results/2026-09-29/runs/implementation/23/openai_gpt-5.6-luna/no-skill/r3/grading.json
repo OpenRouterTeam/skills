@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02523125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025328,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The code computes age in code: evaluated_on > _one_year_anniversary(started) in subscription_is_old_and_likely_to_return.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "Only the reason is given to the decision step: _reason_suggests_return(cancellation_reason) and def _reason_suggests_return(reason: str | None) -> bool (no dates passed).",
+      "evidence": "The age check is computed in code in subscription_decision.py with `evaluated_on > _one_year_anniversary(started)`, and no model is ever asked about dates.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no noul/model call; return intent is determined by regex patterns (_RETURN_REASON_PATTERNS) in _reason_suggests_return, not a natural-language question to a model.",
+      "evidence": "No decision model is called: `_reason_suggests_return` only runs regex patterns from `_RETURN_REASON_PATTERNS` over the reason, and the docstring calls a trained model something to add 'later'.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No noul or model question about likely return exists; return likelihood is a hard-coded boolean regex match (`any(pattern.search(normalized) ...)`), so there is no model score or probability for a code threshold to apply to.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 1,
   "total": 3
 }

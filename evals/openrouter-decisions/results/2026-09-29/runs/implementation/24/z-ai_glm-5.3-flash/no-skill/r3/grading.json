@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0471175,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.113428,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "No live catalog listing was performed; the agent picked GLM 4.7 Flash from memory and directly wrote id \"z-ai/glm-4.7-flash\" into config/classification-decision-model.json without calling models.ts or GET /api/v1/models.",
+      "evidence": "The agent says \"I'll research the current model lineup\" but runs no command against models.ts or GET /api/v1/models; it then names \"GLM 4.7 Flash\" with no catalog output shown.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no decide.ts --compare or equivalent same-request comparison across multiple candidates; the transcript only pins a single model and tunes thresholds.",
+      "evidence": "No compare run or side-by-side probe appears; the choice rests only on the agent's statement \"GLM 4.7 Flash is the right operating point: cheap, low latency, ample context.\"",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "config/classification-decision-model.json pins \"id\": \"z-ai/glm-4.7-flash\" with \"pin\": \"exact\" and \"pinned\": true, i.e., a versioned ID in a single config value, not a latest alias.",
+      "evidence": "config/classification-decision-model.json pins \"id\": \"z-ai/glm-4.7-flash\" with \"pin\": \"exact\" in a single model.id value, which is a versioned ID rather than a latest alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Stored answers in artifacts/validation-predictions.jsonl lack a model field; although scripts/confirm-thresholds.sh prints {\"model\": ...} in a summary, the per-answer logs do not record the response model string.",
+      "evidence": "The prediction rows hold only label, confidence, latency_ms and correct, and the script prints config[\"model\"][\"id\"] instead of the model string returned in responses.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds were tuned using ./scripts/confirm-thresholds.sh over a synthetic fixture generated in-transcript (a Python loop writing 300 rows), not via decide.ts probe or real inputs.",
+      "evidence": "Thresholds were tuned against a fixture built by a Python loop (\"for index in range(300)\" with formula-driven confidences), which the agent itself calls \"an execution test, not the production validation set\"; no real inputs were probed.",
       "graded_by": "judge"
     }
   ],

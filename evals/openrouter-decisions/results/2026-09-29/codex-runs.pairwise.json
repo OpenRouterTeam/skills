@@ -1,38 +1,38 @@
 {
   "summary": {
     "source": "results/2026-09-29/codex-runs.json",
-    "judge": "openai/gpt-5",
+    "judge": "anthropic/claude-opus-5.5",
     "pairs": 36,
     "no-skill": 0,
-    "skill": 31,
+    "skill": 36,
     "tie": 0,
-    "inconsistent": 5,
+    "inconsistent": 0,
     "errors": 0,
     "skill_win_rate_of_decided": 1,
     "per_model": {
       "openai/gpt-5.6-luna": {
         "no-skill": 0,
-        "skill": 11,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 1,
+        "inconsistent": 0,
         "errors": 0
       },
       "openai/gpt-6-astra": {
         "no-skill": 0,
-        "skill": 10,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 2,
+        "inconsistent": 0,
         "errors": 0
       },
       "z-ai/glm-5.3-flash": {
         "no-skill": 0,
-        "skill": 10,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 2,
+        "inconsistent": 0,
         "errors": 0
       }
     },
-    "cost": 2.3518125000000003
+    "cost": 5.559523999999999
   },
   "pairs": [
     {
@@ -42,10 +42,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, validates inputs, asks a well-scoped score question with clear criteria, and safely parses the response to a deterministic 1–5 urgency for the dashboard. Candidate B ignores the requirement to use a decision model by implementing local heuristics instead, so it does not meet the spec or leverage the model for judgment.",
-      "reason_2": "B correctly uses the OpenRouter Decisions API with a pinned model, validates inputs, fail-closes on bad responses, and deterministically converts the model’s score to the 1–5 dashboard scale. A ignores the requirement to use a decision model and instead hardcodes rules, making the split of concerns and future generalization poor.",
+      "reason_1": "Candidate A does what was asked: it calls the Decisions API with a pinned model, frames urgency as an ordered score question with a generalizable rubric, maps the result to 1–5 deterministically in code, and fails closed on malformed responses. Candidate B skips the decision model entirely in favor of brittle keyword regexes, which ignores the request and won't generalize to new report phrasings, and it also commits stray pytest cache files.",
+      "reason_2": "Candidate A never calls a decision model; it reimplements urgency judgment as brittle keyword regexes (e.g., 'down' or 'user' bumping scores) and even commits its .pytest_cache, so it ignores the explicit request. Candidate B uses a single ordered score question with general criteria over the report and service, pins the model, validates inputs, fails closed on malformed responses, and converts the zero-based score to 1–5 deterministically in code.",
       "winner": "skill",
-      "cost": 0.031055,
+      "cost": 0.062228,
       "error": null
     },
     {
@@ -55,10 +55,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "B correctly uses the OpenRouter Decisions API with a pinned model, a score question over JSON state, safe parsing, and code-side thresholds that map the continuous score to 1–5 and provide deterministic sorting. A is well-validated and simple but uses chat completions instead of the Decisions API and lacks typed questions and probabilities, so it doesn’t meet the spec as closely.",
-      "reason_2": "Candidate A correctly uses the OpenRouter Decisions API with a single score question, pins the model, validates and maps the score to 1–5 via coded thresholds, returns a fractional sort score and probabilities, and handles errors and timeouts safely. Candidate B uses the chat completions API instead of the Decisions API, omits probabilities and ordinal tie-breaking, and does not pin a model, so it fails key parts of the spec.",
+      "reason_1": "B calls the Decisions API as asked, using one ordered score question with a generalizing rubric, and maps the score to levels 1–5 in code with named, probe-justified boundaries. It also pins a dated model build and validates the response structure and probabilities. A uses plain chat completions with a JSON schema rather than the Decisions API and leaves the model unpinned and caller-supplied, though it is simpler and handles failures carefully.",
+      "reason_2": "A calls the actual Decisions API with a single score question over five ordered criteria and a pinned model build. It maps the zero-based score to levels 1–5 using named boundaries enforced in code, validates the probability distribution, and treats failures as unscored rather than low urgency. B never uses the Decisions API: it sends a chat-completions prompt with a JSON schema to a model chosen by an environment variable, so it has no pinned model and no probabilities, and it also commits __pycache__ artifacts.",
       "winner": "skill",
-      "cost": 0.146845,
+      "cost": 0.499308,
       "error": null
     },
     {
@@ -68,10 +68,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A uses the OpenRouter Decisions API with a pinned score model, validates inputs, and cleanly splits the model’s judgment from code that maps to a 1–5 urgency level. B ignores the Decisions API entirely and implements ad‑hoc regex scoring, so it fails the requirement to use a decision model and doesn’t handle model responses.",
-      "reason_2": "Candidate B actually uses the OpenRouter Decisions API with a pinned model, validates input, asks a generalizable score question, and safely maps the score to a 1–5 urgency level. Candidate A implements its own regex-based heuristic and never calls a decision model, so it doesn't meet the core requirement despite having tests.",
+      "reason_1": "Candidate A actually uses the Decisions API: it asks a pinned-model `score` question with a clear five-level rubric, validates the typed answer, and maps the score to 1–5 in code. It does have unused constants (`MIN_CONFIDENCE`, `SCORE_TO_LEVEL`), while Candidate B ignores the request to use a decision model and instead hand-writes regex keyword weights that will not generalize, miss negation (e.g. \"not an outage\" still scores as an outage), and ship committed `__pycache__`/`.pytest_cache` artifacts.",
+      "reason_2": "Candidate A never calls a decision model: it is a hand-rolled regex keyword scorer that will break on negation and paraphrase, and it also commits pytest cache and .pyc artifacts. Candidate B uses a pinned Decisions API score question with general, level-anchored criteria and validates the answer type, though it has minor rough edges: unused MIN_CONFIDENCE/SCORE_TO_LEVEL constants and an assumed 0-based score offset.",
       "winner": "skill",
-      "cost": 0.0639875,
+      "cost": 0.158768,
       "error": null
     },
     {
@@ -81,10 +81,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A correctly uses the OpenRouter Decisions API with a typed noul question, pins the model, enforces a clear probability threshold in code, and fails closed on empty/invalid responses. B uses chat completions with a non-pinned model, no probability handling or threshold, and merges on ambiguous cases, which violates the requirement to use the Decisions API.",
-      "reason_2": "Candidate B correctly uses the OpenRouter Decisions API with a pinned model, typed answer (noul) and an explicit threshold enforced in code, plus solid validation and fail-closed behavior. Candidate A uses chat completions instead of the Decisions API and leaves the model unpinned, even though its question more closely matches the 'says breaking' wording.",
+      "reason_1": "A uses the Decisions API as asked, with a pinned model and a noul question that has criteria. The 0.5 threshold and the empty/oversized/failure fail-closed rules are enforced in code, and it validates the answer shape. B skips the Decisions API for a free-form chat completion with an unpinned, overridable model that returns a boolean verdict, so there are no probabilities and no code-side threshold, and a draft or edited PR description never re-triggers the gate.",
+      "reason_2": "Candidate B calls the Decisions API with a pinned model and a typed noul question whose criteria generalize beyond keywords, and it applies the 0.5 threshold in code while failing closed on empty, oversized, or invalid input. Candidate A never uses the Decisions API: it sends a chat-completions prompt to an unpinned, variable-overridable model that returns a self-reported boolean, it ignores the `edited` event, and its question leans on keyword examples.",
       "winner": "skill",
-      "cost": 0.045135,
+      "cost": 0.053388,
       "error": null
     },
     {
@@ -94,10 +94,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a typed noul question, pins the model, validates responses and failures safely, and cleanly enforces a code-side threshold/business rules. Candidate B provides a convenient GitHub workflow but calls the chat completions API instead of the Decisions API and does not pin a model, missing a key requirement.",
-      "reason_2": "Candidate B correctly uses the OpenRouter Decisions API with a typed noul question over JSON state, pins a specific model, enforces a clear threshold in code, and validates response shape and model drift. Candidate A instead uses the chat completions API (not Decisions), relies on a categorical verdict from the model, and does not pin the model, despite otherwise solid GitHub integration and safe handling.",
+      "reason_1": "A calls the OpenRouter Decisions API with a single noul question. It pins a dated model build, rejects model drift, and applies the 0.5 threshold in code. B skips the Decisions API for a chat-completions call with an unpinned model taken from a repo variable, and gets no probabilities back, though its GitHub workflow wiring is useful and A leaves integration to the user.",
+      "reason_2": "Candidate B uses the OpenRouter Decisions API as asked, with a typed noul question and a pinned model version that is checked on the response, and it enforces the 0.5 threshold and fail-closed rules in code. Candidate A instead calls chat completions with an unpinned, variable-configured model and commits pycache artifacts, although it has a better GitHub workflow integration.",
       "winner": "skill",
-      "cost": 0.09943,
+      "cost": 0.31609200000000004,
       "error": null
     },
     {
@@ -107,10 +107,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, typed noul answer, thresholded gating, and robust response/error handling. Candidate B does not use the Decisions API and relies on a free-form prompt and ad-hoc JSON parsing, missing the core requirement despite having a question that better targets explicit declarations.",
-      "reason_2": "B properly uses the OpenRouter Decisions API with a typed noul question over JSON state, validates and thresholds the response, fails closed on errors, and pins a model in a simple, safe gate. A ignores the Decisions API and relies on a brittle freeform prompt/JSON contract even though its wording better targets whether the description explicitly says it is breaking.",
+      "reason_1": "Candidate A uses the Decisions API as requested: a pinned model, a typed noul question with general criteria, a probability threshold enforced in code, and validation of the answer shape before gating. Candidate B skips the Decisions API for a free-form JSON-returning prompt with no probability or threshold, and it classifies ambiguous descriptions as non-breaking, so unclear PRs get auto-merged.",
+      "reason_2": "Candidate B actually calls the OpenRouter Decisions API with a pinned model and a generalizable noul question, validates the typed answer, and enforces the blocking threshold in code. Candidate A never uses the Decisions API: it relies on a free-form prompt returning label JSON with no probabilities or pinned model, though it does fail safely on invalid output.",
       "winner": "skill",
-      "cost": 0.047695,
+      "cost": 0.052792,
       "error": null
     },
     {
@@ -120,10 +120,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A cleanly keeps date arithmetic in code and uses the OpenRouter Decisions API for the semantic judgment with a pinned model, explicit threshold, and safe response handling. Candidate B does not use a decision model at all, instead hardcoding keyword/phrase rules, so it fails the core requirement despite otherwise correct date handling.",
-      "reason_2": "Candidate B computes tenure deterministically in code and delegates the semantic judgment to a pinned OpenRouter Decisions model with clear, generalizable instructions, robust parsing, and a conservative probability threshold enforced in code. Candidate A ignores the requirement to use the decision model and relies on hardcoded heuristics, so it doesn’t meet the spec despite being simple.",
+      "reason_1": "Candidate A computes tenure deterministically, sends only the cancellation text to a pinned Decisions API model as a well-phrased noul question, and applies the 0.70 threshold in code with validated response handling. Candidate B never calls the Decisions API and relies on brittle keyword matching instead, and its tenure check has a bug: it compares against the anniversary in `as_of`'s year rather than the start year plus one, so a subscription started earlier the same year counts as more than one year old.",
+      "reason_2": "Candidate A never calls the Decisions API; its \"decision model\" is a hardcoded keyword list, which will not generalize to new cancellation phrasings. Candidate B computes tenure deterministically in code, sends only the semantic judgement to a pinned model as a well-phrased noul question, enforces the threshold in code, and validates the response shape.",
       "winner": "skill",
-      "cost": 0.033432500000000004,
+      "cost": 0.06703200000000001,
       "error": null
     },
     {
@@ -133,10 +133,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A cleanly separates date logic from judgment, uses the OpenRouter Decisions API with a pinned model and a well-scoped noul question, enforces a clear 0.5 threshold in code, and validates responses robustly. Candidate B calls chat completions instead of the Decisions API, lacks a pinned decision model and probability thresholding, and returns a tri-state label that doesn’t match the requested gated decision.",
-      "reason_2": "Candidate B correctly uses the OpenRouter Decisions API with a pinned noul question, keeps age and threshold business logic in code, validates responses, and only sends minimal state with safe timeout/error handling. Candidate A instead uses chat completions (not Decisions), embeds policy in the prompt without a code threshold, doesn’t pin a model, and avoids probability-driven judgments.",
+      "reason_1": "Candidate A uses the actual Decisions API with a pinned build (`typesafe/jev-1.13-20260917`). It keeps the date logic and the `>= 0.5` threshold in code, and it asks a single well-phrased `noul` question that ignores prompt injection. It also validates the response and was probed live across nine cases. Candidate B skips the Decisions API entirely in favor of a chat-completions call, leaves the model unpinned via an env var, returns a model-chosen label with no probability or code-enforced threshold, and ships `__pycache__` artifacts.",
+      "reason_2": "B uses the Decisions API with a single noul question over minimal JSON state, pins a dated model build chosen from a live catalog comparison, and applies the 0.5 threshold in code while logging the raw probability and resolved model. A calls the chat completions endpoint rather than the Decisions API, leaves the model unpinned through an env var, and has the model output a categorical label with no probability or threshold, so it misses the requested API.",
       "winner": "skill",
-      "cost": 0.09376999999999999,
+      "cost": 0.27698,
       "error": null
     },
     {
@@ -146,10 +146,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B cleanly handles age/missing-reason logic in code and delegates the ambiguous judgment to a pinned OpenRouter Decisions model with a documented threshold and type-safe response handling. Candidate A never uses a decision model and relies on brittle keyword heuristics, so it misses the requirement and is less generalizable.",
-      "reason_2": "Candidate A cleanly separates date eligibility in code from qualitative judgment via a pinned OpenRouter Decisions noul question, applies a clear probability threshold, validates inputs, and handles the model response safely. Candidate B ignores the Decisions API and substitutes a fixed keyword heuristic, so it doesn’t satisfy the requirement to use a decision model.",
+      "reason_1": "B keeps the date check and missing-reason handling in code and uses a pinned noul decision only for the judgment of whether the cancellation reason implies a return, applying a code-side threshold and checking the answer type. A does not use a decision model at all and instead relies on brittle keyword lists that won't generalize to new reasons (it even treats \"price\" and \"budget\" oppositely), and it commits pytest and pycache artifacts.",
+      "reason_2": "Candidate A computes subscription age in code, uses a pinned noul decision for the open-ended judgment of whether the customer will return, and applies the threshold in code. Its flaws are minor: a comment calls the 0.7 gate \"low\", and the type allows null but the function returns false for new or reasonless subscriptions. Candidate B never uses the decision model and relies on brittle substring keyword matching (\"budget\" counts as positive, \"price\" as negative), crashes on Feb 29 start dates, and commits pytest and __pycache__ artifacts.",
       "winner": "skill",
-      "cost": 0.042827500000000004,
+      "cost": 0.081984,
       "error": null
     },
     {
@@ -159,10 +159,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A actually uses the OpenRouter Decisions API with a pinned dated decision model, clear typed question, code-enforced thresholds and fallback, and a concrete threshold validation plan. Candidate B targets a generic responses endpoint with a moving alias and schema-based probabilities instead of Decisions, so it misses the required API semantics and true pinning despite thorough eval docs.",
-      "reason_2": "Candidate B actually uses the OpenRouter Decisions API with typed choice questions, pins a dated model, and gates decisions in code with safe handling and a clear calibration plan. Candidate A relies on a generic LLM responses flow and a self-reported probability with an alias-like model ID, which deviates from the Decisions API despite a thorough threshold sign-off doc.",
+      "reason_1": "Candidate A uses the Decisions API as asked: it pins a dated model build rather than a moving alias, asks a typed choice question with criteria, checks the answer type, gates on the returned confidence in code, and lays out a measured calibration plan. Candidate B skips the Decisions API and has the model self-report a probability inside a JSON schema, and it labels a moving alias as a pinned snapshot, so its thorough sign-off document rests on an unsound setup.",
+      "reason_2": "Candidate B uses the Decisions API as asked: it pins a dated decision-model build, poses a generalizable choice question with criteria, checks the answer type, and enforces a provisional threshold in code with a held-out calibration plan. Candidate A has a rigorous sign-off process but never uses the Decisions API, pinning a general chat model on the responses endpoint and gating on a probability the model reports about itself, which is much weaker than API-returned probabilities.",
       "winner": "skill",
-      "cost": 0.0267525,
+      "cost": 0.03514,
       "error": null
     },
     {
@@ -172,10 +172,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "B actually uses the OpenRouter Decisions API, pins a dated build of a decision model, validates typed answers and model drift, and keeps thresholds/business rules in code with errors routed to review. A instead selects a chat completions LLM with a custom JSON schema, not a Decisions model, so it misses the typed-questions contract and pushes key validation/enforcement to unspecified runtime.",
-      "reason_2": "Candidate A actually uses the OpenRouter Decisions API with a pinned dated build, validates response types and model identity, provides tooling to compare candidates, and documents a clear shadow-mode plus human-review threshold plan before enabling auto-routing. Candidate B switches to chat completions instead of Decisions, so it misses the required typed-questions/probabilities primitive and lacks a concrete, code-level enforcement path for the specified business gates.",
+      "reason_1": "B actually uses the Decisions API: it queries the live decision-model catalog, compares candidates on probes, pins a dated build slug, and uses a typed `choice` question with criteria and response validation, including checks on answer types, option keys, and model drift. A skips the Decisions API entirely, pinning a chat-completions LLM that returns a self-reported JSON score, and ships only config and prose with no measured evidence or response-handling code.",
+      "reason_2": "A uses the Decisions API as asked: it picks a dated decision model from the live catalog and backs the choice with probe evidence. It pins that exact build with drift detection, validates responses against the question schema, and leaves thresholds null pending labeled validation. B skips the Decisions API entirely, pinning a chat-completions LLM that self-reports a score, and runs no probes, so its choice and 0.1/0.9 candidate thresholds rest on no measurement.",
       "winner": "skill",
-      "cost": 0.080415,
+      "cost": 0.27933600000000003,
       "error": null
     },
     {
@@ -185,10 +185,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B pins a real OpenRouter decision model with a canonical slug and supplies a concrete config using the choice primitive, labels, and explicit probability gates, keeping thresholds in code and using the model only for scoring. Candidate A selects a generic chat model, doesn’t use the Decisions API or probabilities, and provides only high-level evaluation notes without enforceable gating or a verifiable pin.",
-      "reason_2": "A actually uses an OpenRouter decision model with a pinned canonical slug, defines a choice primitive with labels, and enforces business thresholds in code with a concrete plan to validate using returned probabilities. B ignores the Decisions API and proposes a generic chat model with no probability-based gating or safe handling of decision outputs, so it doesn’t meet the brief.",
+      "reason_1": "Candidate B picks and pins an actual Decisions API model by its dated canonical slug, keeps the auto/review/default thresholds in config, and confirms them by probing clear, ambiguous, no-match and adversarial cases against the raw probabilities, re-probing on any model change. Candidate A ignores the Decisions API altogether, recommending an OpenAI chat model with reasoning effort and a generic accuracy eval, so it never pins a decision model or sets any probability gates.",
+      "reason_2": "A picks a decision model and pins its canonical dated slug. Its config uses the choice primitive with explicit probability gates, and its plan confirms those thresholds against observed probabilities on a probe set, with a re-probe whenever the model changes. B ignores the Decisions API entirely and suggests a general OpenAI chat model with reasoning effort; its versionless 'gpt-5.6-terra' with a 'pin_version' flag isn't a real pin, and its thresholds are accuracy/cost targets rather than decision-probability gates.",
       "winner": "skill",
-      "cost": 0.019505,
+      "cost": 0.023236,
       "error": null
     },
     {
@@ -198,10 +198,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, delegates the judgment to the model with a clear five-level rubric, and safely maps probabilities/score to a 1–5 urgency while validating inputs and responses. Candidate B ignores the requirement to use a decision model and instead implements hard-coded rules, which won't generalize or leverage the API.",
-      "reason_2": "Candidate B correctly uses the OpenRouter Decisions API with a pinned model, validates inputs, frames a generalizable five-level rubric, and safely maps probabilities or score to a 1–5 urgency. Candidate A hard-codes keyword rules and never calls a decision model, failing the requirement to use the Decisions API.",
+      "reason_1": "Candidate A does what was asked: it calls the Decisions API with a pinned model and a score question anchored to five criteria. It maps the most probable level to 1–5 in code and validates the response shape. Candidate B never calls a decision model, relying instead on brittle keyword regexes that won't generalize to free-text reports, and it commits __pycache__ and .pytest_cache artifacts.",
+      "reason_2": "Candidate A ignores the request to use a decision model: it is a hand-written keyword matcher that will misrate phrasing it didn't anticipate, and it commits pytest caches and pyc files. Candidate B calls the Decisions API with a pinned model, a score question whose five criteria describe each level generically and a prompt-injection guard, validates the response, and takes the most probable discrete level.",
       "winner": "skill",
-      "cost": 0.050045,
+      "cost": 0.111864,
       "error": null
     },
     {
@@ -211,10 +211,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B correctly uses OpenRouter’s Decisions API with a typed score question over JSON state, pins a specific model build, and cleanly maps the 0–4 score to a 1–5 urgency with robust validation, error handling, and sorting logic. Candidate A instead uses the chat/completions endpoint with JSON schema, not the Decisions API, so it misses the typed-questions contract despite otherwise solid input validation and safety checks.",
-      "reason_2": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, strong input validation, deterministic scale mapping and sorting, and robust response verification so business rules live in code and the model just judges impact using a generalizable rubric. Candidate B relies on chat completions instead of the Decisions API, requires an env-selected (unpinned) model, and returns only an integer without typed decision handling, making it less compliant and less safe to merge.",
+      "reason_1": "B uses the Decisions API as requested, with a single well-phrased score question over JSON state, and pins a dated model build chosen from recorded probe evidence. In code it maps the zero-based score to 1–5, validates probabilities, and surfaces failures, while A uses chat completions with an unpinned, env-supplied model and gets no probabilities back.",
+      "reason_2": "A uses the Decisions API as asked, with a single ordered score question whose rubric generalizes, pins the model to a build chosen from probe evidence, and does the rounding and sort ordering in code with strict validation of the response. B skips the Decisions API and calls chat completions with an unpinned model taken from an environment variable, and it commits compiled .pyc files.",
       "winner": "skill",
-      "cost": 0.1330525,
+      "cost": 0.5041800000000001,
       "error": null
     },
     {
@@ -224,10 +224,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B correctly uses the OpenRouter Decisions API with a pinned model, validates inputs, safely handles the score response and probabilities, and enforces clear business thresholds and sorting, leaving the qualitative judgment to the model. Candidate A hand-implements a heuristic rater without calling the decision model at all, so it fails the key requirement and entangles policy with code rather than asking a generalizable question.",
-      "reason_2": "A correctly uses the OpenRouter Decisions API with a pinned score model, clear rubric, solid input validation, and safe response handling while keeping thresholds in code and leaving judgment to the model. B ignores the Decisions API entirely by hardcoding a regex-based rater (and even commits cache artifacts), so it fails the core requirement and bakes business logic into code rather than the model.",
+      "reason_1": "Candidate A never calls the Decisions API; it hand-builds a regex heuristic with odd weights (an isolated single-user issue scores 4, and an urgency multiplier doubles scores) and commits pytest cache and .pyc files. Candidate B uses the score primitive with a pinned model, a general rubric, the review threshold enforced in code and a checked answer type, though its sort puts the least urgent reports first.",
+      "reason_2": "Candidate A actually calls the Decisions API with a pinned model and a score question built on a generalizable rubric, and it validates the response type and computes the review threshold in code. It has small issues (an ascending sort and an unclear 0–4 versus 1–5 probability mapping), but Candidate B never uses a decision model and instead ships brittle regex heuristics with odd multiplier logic, plus committed pycache and pytest cache artifacts.",
       "winner": "skill",
-      "cost": 0.064345,
+      "cost": 0.123772,
       "error": null
     },
     {
@@ -237,10 +237,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "B correctly uses the OpenRouter Decisions API with a typed noul question over JSON state, pins the model, and enforces a clear probability threshold in code while validating the response. A uses generic chat completions instead of the Decisions API and pushes business rules into the prompt rather than code, even though it toggles auto-merge.",
-      "reason_2": "Candidate A correctly uses the OpenRouter Decisions API with a typed noul question over JSON state, pins the model, validates the response, and enforces a code-level threshold while printing the exact question. Candidate B uses chat completions instead of the Decisions API, does not pin a decisions model or typed answer, and embeds business rules in the prompt rather than code, making it less aligned and less safe.",
+      "reason_1": "Candidate B uses the Decisions API as requested: it sends a `noul` question with true/false criteria over typed state, pins a dated model, validates the typed answer, and applies the 0.5 threshold in code, with probe results recorded. Candidate A skips the Decisions API and calls chat completions with a floating default model, so the model returns a boolean verdict with no probability and nothing for code to threshold, which is a weaker judgment/code split even though its fail-closed handling and wiring to `gh pr merge` are careful.",
+      "reason_2": "A uses the Decisions API as requested, with a typed noul question over JSON state, a pinned dated model, the 0.5 threshold enforced in code, and validation of the typed answer before gating. B skips the Decisions API for a chat completion that returns a boolean with no probability, lets the model default to an unpinned `openai/gpt-4o-mini`, puts the fail-closed policy in the prompt instead of code, and interpolates the raw PR body into the prompt under `pull_request_target` with write permissions.",
       "winner": "skill",
-      "cost": 0.05613749999999999,
+      "cost": 0.047388,
       "error": null
     },
     {
@@ -248,12 +248,12 @@
       "model": "openai/gpt-6-astra",
       "round": 2,
       "first_order": "no-skill-first",
-      "verdict_1": "A",
+      "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "A matches the requested policy by asking only whether the description explicitly declares a breaking change, keeps the business rule (threshold, errors) in code, validates the typed response, and ships a small, well-tested gate. B pins a build and validates robustly but broadens the question to infer implied migrations and adds considerable, unnecessary complexity for this task.",
-      "reason_2": "A pins an immutable model build, validates and guards the Decisions response rigorously (including model build checks, timeouts, and fail-closed behavior), and cleanly separates model judgment from code-enforced thresholds and business rules. B’s question matches the narrow ‘explicitly says’ reading but it only pins the alias, lacks build verification and broader response checks, and uses an arbitrary low threshold, making it less safe to merge.",
-      "winner": "inconsistent",
-      "cost": 0.1208975,
+      "reason_1": "B pins a dated model build and rejects responses from any other build, and its live probes back the 0.5 threshold that code enforces; A calls the unpinned `typesafe/jev-1.13` alias and sets an unprobed 0.10 cutoff. A's question matches \"says it is breaking\" more literally and is simpler, but B is heavier yet safer to merge because of the pinning, response validation and probe evidence.",
+      "reason_2": "A pins the dated build `typesafe/jev-1.13-20260917`, rejects responses from any other build, and fails closed on every error path. Its 0.5 threshold is backed by recorded live probes, including negation, implicit-migration, and injection cases. B calls the floating alias `typesafe/jev-1.13` without checking which build answered, picks a 0.10 cutoff with no probe evidence, and ships committed `__pycache__` files, so its simpler, more literal \"explicitly states\" question does not make up for the weaker grounding.",
+      "winner": "skill",
+      "cost": 0.319936,
       "error": null
     },
     {
@@ -263,10 +263,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model and a typed noul question over the PR description, enforces a conservative threshold in code, and safely handles the response. Candidate B ignores the Decisions API in favor of a bespoke regex classifier and workflow, which does not meet the requirement to use the decision model and adds unnecessary complexity.",
-      "reason_2": "Candidate B actually uses the Decisions API with a pinned model, a typed noul question, safe response handling, and a clear thresholded gating rule, and it shows the exact JSON question. Candidate A builds a local regex classifier without calling the API or handling probabilities, so despite printing a question it misses the core requirement to use a decision model.",
+      "reason_1": "Candidate A calls the Decisions API with a pinned model and a noul question whose criteria generalize to new inputs, then enforces a named 0.5 threshold in code. Candidate B never calls a decision model: it passes off a regex classifier under a made-up model ID as the decision model and commits pytest and pycache artifacts.",
+      "reason_2": "Candidate A never calls a decision model: it runs a local regex classifier under an invented model ID and only prints a prompt it never sends, and it also commits pytest and pycache artifacts. Candidate B sends a typed noul question to a pinned model, keeps the named 0.5 threshold and the fail-closed rule in code, and checks the answer type before using it, though it could not run a live probe.",
       "winner": "skill",
-      "cost": 0.056412500000000004,
+      "cost": 0.099828,
       "error": null
     },
     {
@@ -276,10 +276,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A uses a pinned OpenRouter Decisions model for the subjective judgment while keeping the one-year check deterministic, validating the response and enforcing a clear threshold in code. B hardcodes regex heuristics and never calls a decision model, failing the requirement to use a decision model where it fits.",
-      "reason_2": "Candidate B cleanly separates deterministic age logic in code from the subjective judgment via a pinned OpenRouter Decisions model, validates the API response, and enforces a clear probability threshold. Candidate A ignores the Decisions API and hardcodes heuristic regex rules, failing the core requirement to use a decision model where it fits.",
+      "reason_1": "A computes subscription age deterministically in code and only calls a pinned decision model (typesafe/jev-1.13-20260917) with a general noul question for the subjective judgment of whether the cancellation reason suggests a return. It validates the response and applies the threshold in code, while B uses no decision model at all and relies on a brittle regex keyword list that won't generalize to new reasons (it also commits a .pytest_cache directory).",
+      "reason_2": "Candidate A never calls the Decisions API; it relabels a brittle regex keyword list as a \"decision model\" that will miss most real cancellation reasons, and it also commits pytest cache files. Candidate B computes the anniversary deterministically in code, sends only the reason to a pinned model as a generic noul question, validates the response, and applies the threshold in code, though its async wrapper blocks on a synchronous urlopen.",
       "winner": "skill",
-      "cost": 0.02186,
+      "cost": 0.051224000000000006,
       "error": null
     },
     {
@@ -289,10 +289,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A cleanly gates by age in code, uses the OpenRouter Decisions API with a pinned model and a well-specified noul question, applies a code-level threshold, validates responses, and sends only the minimal state. Candidate B relies on chat completions instead of the Decisions API, doesn’t pin a decision model or enforce a probability threshold in code, and returns a tri-state result that’s less aligned with the requested boolean judgment.",
-      "reason_2": "B correctly uses the OpenRouter Decisions API with a pinned noul model and enforces a clear probability threshold in code, sending only the cancellation reason and validating responses robustly. A uses the chat completions endpoint with JSON-schema parsing instead of the Decisions API, so it misses the typed-answers contract despite otherwise solid age gating and simplicity.",
+      "reason_1": "A does what was asked. It computes subscription age deterministically in code, sends only the cancellation reason to the Decisions API as a noul question with clear, generalizable criteria, applies a named threshold in code, and pins a dated model build chosen from recorded probes, with strict response validation. B skips the Decisions API and uses chat completions with an unpinned, env-overridable model alias; it also commits __pycache__ artifacts, though its age logic and error handling are sound.",
+      "reason_2": "B does what was asked: it calls the actual Decisions API with a noul question over minimal JSON state, pins a dated model build chosen from live probe comparisons, applies the probability threshold in code, and validates the response strictly. A does the age check in code correctly, but it uses a general chat-completions model (`openai/gpt-4.1-mini`) with structured output instead of the Decisions API, the model can be overridden through an env var instead of being pinned, and it returns no probability.",
       "winner": "skill",
-      "cost": 0.1092275,
+      "cost": 0.35516000000000003,
       "error": null
     },
     {
@@ -302,10 +302,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A cleanly separates date logic in code from return-likelihood judgment via the OpenRouter Decisions API, pins the model, validates the response, and gates the boolean with a clear probability threshold. Candidate B implements static keyword heuristics without using the decision model at all, making it less generalizable and not meeting the API requirement.",
-      "reason_2": "Candidate B cleanly separates age logic in code and uses the OpenRouter Decisions API with a pinned model to evaluate the cancellation reason, validating the response and enforcing a clear threshold. Candidate A ignores the Decisions API and relies on hardcoded keyword heuristics, failing the requirement to use a decision model and reducing generalizability.",
+      "reason_1": "Candidate A keeps the date arithmetic and the 0.5 threshold in code, sends only the judgment about the cancellation reason to a pinned decision model as a `noul` question, and validates the response shape. Candidate B never calls a decision model and instead uses brittle substring matching (e.g., \"price\" is checked before \"competitor\", so a competitor switch over price is misclassified as likely), and it also commits a stray `.pyc` file.",
+      "reason_2": "Candidate B keeps the one-year date check in code, calls a pinned decision model with a well-phrased noul question only for older subscriptions, enforces the 0.5 threshold in code, and validates the response shape before using it. Candidate A never calls a decision model and uses brittle keyword matching instead; its matching also misclassifies cases such as \"price was too high after switching to a competitor,\" which it marks LIKELY because the likely-return patterns are checked first.",
       "winner": "skill",
-      "cost": 0.0327325,
+      "cost": 0.04772,
       "error": null
     },
     {
@@ -315,10 +315,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B actually uses the OpenRouter Decisions API with typed questions and pins a dated decide model, keeping thresholds and gates in code with a clear holdout-based calibration plan. Candidate A pins a generic chat model and invents its own label/score protocol instead of leveraging the Decisions API, so it’s less aligned with the request despite its thorough gating doc.",
-      "reason_2": "Candidate A correctly uses a pinned OpenRouter decision model with typed questions (choice, noul), keeps business thresholds in code, and outlines a realistic probe/holdout calibration process. Candidate B pins a generic chat model and invents its own output schema instead of the Decisions API contract, so it doesn’t meet the requirement despite thorough threshold checks.",
+      "reason_1": "Candidate B uses the Decisions API as asked: it pins a dated decision model, asks typed choice and noul questions with generalizable criteria, keeps the thresholds in code, and lays out a probe-then-holdout calibration process. Candidate A skips the Decisions API and pins a general chat model that self-reports its label and a 'score' through JSON-schema output. That puts the decision and its confidence in the model's own claims, which is the wrong split, despite A's thorough release-gate checklist.",
+      "reason_2": "Candidate A uses the Decisions API as asked, pinning a dated decision model with a choice question and a noul question that generalize to new tickets, and it keeps the gates in code. Its calibration plan sets thresholds from probe and holdout results rather than guesses. Candidate B skips the Decisions API for a generic chat model whose self-reported score is not a real probability, hardcodes 0.80/0.20 thresholds before any measurement, and depends on an evaluator that doesn't exist.",
       "winner": "skill",
-      "cost": 0.036555000000000004,
+      "cost": 0.037916000000000005,
       "error": null
     },
     {
@@ -328,10 +328,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A correctly uses the Decisions API, pins a specific build, asks a generalizable choice question with a clear rubric, validates returned structure, and keeps thresholds and routing logic in code with a concrete plan to confirm cutoffs before shipping. B diverges from the spec by using chat completions instead of the Decisions API, introduces unnecessary calibration complexity, and leaves key behavior to a template rather than enforcing business rules in code.",
-      "reason_2": "Candidate B actually uses the OpenRouter Decisions API with a pinned decisions model (typesafe/jev-1.13-20260917), typed choice questions, probability thresholds enforced in code, safe error handling, and a clear validation plan. Candidate A pins a generic chat model via /v1/chat and pushes scoring into the model rather than using typed decisions, so it misses the required API and separation of concerns despite solid calibration guidance.",
+      "reason_1": "A uses the Decisions API as asked, compares real decision models from the live catalog on probe cases, pins a dated build, checks the returned model against the pin, and leaves the threshold null in shadow mode with a sound calibration-split plan. B skips the Decisions API and pins a chat-completions LLM that asks for a self-reported raw score, runs no probes, and ships illustrative 0.10/0.90 bands that are not grounded in any evidence.",
+      "reason_2": "Candidate B uses the Decisions API as asked, with a well-phrased `choice` question and explicit criteria. It pins a dated build, verifies that the returned model matches that pin, and keeps the cutoff null in shadow mode so code owns routing until the threshold is validated. Candidate A bypasses the Decisions API with a chat-completions prompt that asks a generic LLM to self-report a raw score, and it offers no measured evidence for its model choice, even though its validation plan is careful.",
       "winner": "skill",
-      "cost": 0.054035,
+      "cost": 0.139076,
       "error": null
     },
     {
@@ -339,12 +339,12 @@
       "model": "z-ai/glm-5.3-flash",
       "round": 2,
       "first_order": "no-skill-first",
-      "verdict_1": "A",
+      "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "A cleanly pins a model and provides a rigorous, quantitative pre-ship plan (calibration, threshold sweep, band rate, and cost) with clear business thresholds and review cadence. B’s write-up is thin on validation (tiny probe with implausible 1.0 probabilities), lacks files, and doesn’t convincingly reflect proper Decisions API usage or robust threshold confirmation.",
-      "reason_2": "A pins a concrete build slug, keeps thresholds and routing logic in code (including a low-confidence fallback), and calls out logging the returned model field for drift, which aligns with safe handling and simplicity. B’s YAML is more thorough on pre-ship checks but mixes confusing threshold semantics and targets a generic OpenAI classifications endpoint rather than the OpenRouter Decisions API, reducing confidence in correctness.",
-      "winner": "inconsistent",
-      "cost": 0.058975,
+      "reason_1": "Candidate B pins a canonical dated build slug rather than the floating alias, gives a single coherent routing rule for the thresholds, and actually runs the pinned build on a probe set to check them (though four cases all at probability 1.0 is thin evidence). Candidate A targets an invented OpenAI classifications endpoint instead of the Decisions API, its floor/ceiling/review-band thresholds contradict each other, and its confirmation is only an unexecuted plan.",
+      "reason_2": "Candidate A pins a canonical dated build slug instead of an alias, keeps the accept/review/fallback routing in code constants, and runs a real probe set against the pinned build (though four cases all at 1.0 is thin evidence for the thresholds). Candidate B's config targets a made-up OpenAI `/v1/classifications` endpoint rather than the Decisions API, and its threshold semantics contradict themselves (0.85 is both the review floor and the start of the review band), so its confirmation plan rests on a broken config.",
+      "winner": "skill",
+      "cost": 0.031748,
       "error": null
     },
     {
@@ -354,10 +354,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B correctly uses the OpenRouter Decisions API with a pinned score model, clear criteria, robust input/response validation, and selects the most probable urgency for sorting. Candidate A ignores the decision model requirement and hardcodes a regex-based classifier, reducing flexibility and misaligning with the requested API-based design.",
-      "reason_2": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, poses a generalizable score question with clear criteria, validates responses robustly, and cleanly selects and returns the top-probability 1–5 urgency for dashboard sorting. Candidate B implements its own deterministic regex rules and never calls the decision model API, so it does not meet the requirement to use a decision model and is less aligned with the spec.",
+      "reason_1": "Candidate A ignores the request to use the OpenRouter Decisions API and swaps in a brittle regex keyword scorer, which also contains a stray non-English token and misses indirectly phrased impact. Candidate B pins the decision model and sends a well-phrased score question with clear per-level criteria over structured state. It validates the probability map before taking the argmax and handles errors safely, which does what was asked.",
+      "reason_2": "Candidate A calls the Decisions API with a pinned model and sends a score question whose rubric describes each of the five levels in general terms. It also validates inputs and the response shape before picking the most probable level. Candidate B never uses a decision model; it reinterprets the request as hand-written regex keyword rules that will not handle indirectly phrased reports, so it fails the core requirement.",
       "winner": "skill",
-      "cost": 0.0408,
+      "cost": 0.113732,
       "error": null
     },
     {
@@ -366,11 +366,11 @@
       "round": 3,
       "first_order": "skill-first",
       "verdict_1": "A",
-      "verdict_2": "A",
-      "reason_1": "A cleanly uses the OpenRouter Decisions API with a pinned build, strong input/response validation, a well-phrased rubric, and keeps business rules (mapping, sorting, timeouts) in code. B relies on the System One endpoint with an unpinned alias and imposes brittle invariants (requiring confidence/probabilities and score-probability consistency) that may reject valid responses.",
-      "reason_2": "Candidate A cleanly uses a native score question, enforces business rules in code, and rigorously validates the response (probability keys, sum-to-one, score consistency) while keeping the implementation simple and dependency-free. It doesn’t hard-pin a build by default, but the model is configurable and overall its responsibility split and failure handling are stronger than Candidate B’s heavier SDK-based approach.",
-      "winner": "inconsistent",
-      "cost": 0.14706,
+      "verdict_2": "B",
+      "reason_1": "Candidate A pins a dated build (`typesafe/jev-1.13-20260917`), calls the Decisions API endpoint through the vendored client with response validation, and supports the model choice with recorded probes, including negation and injection cases. Candidate B uses the floating alias `typesafe/jev-1.13`, which can be overridden by environment variable, and targets a different `/api/v1/systemone` endpoint; it also adds brittle score-versus-probability consistency checks and commits `__pycache__` artifacts.",
+      "reason_2": "B pins a dated model build (`typesafe/jev-1.13-20260917`) chosen from a recorded live comparison of three models, while A defaults to the floating `typesafe/jev-1.13` alias and lets an environment variable swap the model. A is simpler and validates responses more strictly (for example, it checks that probabilities sum to one and match the score), but B's pinned model, equally sound score rubric, and code-side rounding and validation make it the safer merge despite its heavier vendored client.",
+      "winner": "skill",
+      "cost": 0.367572,
       "error": null
     },
     {
@@ -380,10 +380,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B actually uses the OpenRouter Decisions API with a pinned model, frames a single score question over clean state, validates and rounds the response safely to 1–5, and enforces clear code-side rules (e.g., declared outage => 5) while keeping sorting logic simple. Candidate A ignores the Decisions API and replaces it with a bespoke heuristic scorer in code, so it fails the requirement to use a decision model and mixes policy with parsing in a way that won’t generalize as well.",
-      "reason_2": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, asks a single well-structured score question over state, validates and rounds the response, applies a clear code-side outage hard rule, and safely handles errors and sorting. Candidate B ignores the Decisions API and implements a bespoke keyword scorer, making the model/code split incorrect and less generalizable despite having tests.",
+      "reason_1": "Candidate A never calls the Decisions API and hand-writes a regex keyword scorer, so it misses the core requirement to use a decision model. Candidate B is preferable: it sends a well-phrased five-level score question over JSON state with a pinned model and validates the response, though it may have an off-by-one when mapping the 0-indexed score to the 1-5 scale, and its outage/down/unavailable keyword override is brittle.",
+      "reason_2": "Candidate A does what was asked: it calls the OpenRouter Decisions API with a pinned model and a single well-phrased five-level score question, and it validates the response strictly, throwing on malformed answers rather than inventing a rating. Its regex hard rule is too crude (\"not down\" would still force a 5), but Candidate B never calls a decision model at all, instead hand-rolling a brittle weighted-keyword heuristic, and it commits pytest and pycache artifacts.",
       "winner": "skill",
-      "cost": 0.0644,
+      "cost": 0.168964,
       "error": null
     },
     {
@@ -392,11 +392,11 @@
       "round": 3,
       "first_order": "skill-first",
       "verdict_1": "A",
-      "verdict_2": "A",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned decision model, a typed noul question over minimal JSON state, and validates responses while encoding business rules in code. Although A mistakenly allows “uncertain” results to auto-merge (a small logic fix), B does not use the Decisions API, is not pinned, and relies on a brittle chat-completions prompt.",
-      "reason_2": "A actually gates auto-merge in a GitHub Action with a clear, fail-closed boolean rule that matches the requirement—only enable auto-merge when the description does not say it’s breaking—and it shows the exact question and handles model errors safely. B uses the Decisions API and pins the model, but its question drifts from the requirement (infers breaking rather than checking if the description says so) and its code contradicts its README by auto-merging “uncertain” cases, making the business rule leaky.",
-      "winner": "inconsistent",
-      "cost": 0.0656725,
+      "verdict_2": "B",
+      "reason_1": "Candidate A uses the Decisions API as asked: a typed noul question over minimal JSON state, a pinned dated model, and a named probability threshold enforced in code with validated responses. Candidate B calls chat completions with an unpinned default model and gets only a boolean with no threshold to tune; A has its own flaw, since uncertain probabilities between 0.2 and 0.8 still set autoMerge to true despite the README saying they should not.",
+      "reason_2": "B uses the Decisions API as asked: a typed noul question with true/false criteria, a pinned dated model, only the needed state sent, answer shape validated, and the block threshold enforced in code. A calls the plain chat-completions endpoint with an unpinned alias default, relies on free-form JSON parsing, and commits a stray .pyc. B does have a flaw: probabilities between 0.2 and 0.8 still set autoMerge to true, which contradicts its README claim that uncertain results do not authorize auto-merge.",
+      "winner": "skill",
+      "cost": 0.070656,
       "error": null
     },
     {
@@ -406,10 +406,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "B pins the decision model, validates the response and model ID strictly, defines clear pass/review/block thresholds in code, and shows the exact noul question using only the PR description as evidence. A is simpler but does not pin the model or verify the response model and relies on a single hard threshold, making it less robust for safe auto-merge gating.",
-      "reason_2": "Candidate A cleanly separates model judgment from code policy with a calibrated review band, pins a specific model build, validates the returned model and answer type, and routes all errors and edge cases to review. Candidate B is simpler but uses an unpinned model alias and a single tight threshold without model verification or broader safeguards, making it riskier to rely on.",
+      "reason_1": "B pins the dated build `typesafe/jev-1.13-20260917`, checks that the response came from that model, and keeps a code-owned review band backed by recorded live probes. A calls the floating alias with no model check and sets a threshold nobody has tested, even though both fail closed and phrase the question well. B's copied helper library and SDK dependency add weight, but they don't outweigh the pinning and validation gap in A.",
+      "reason_2": "A pins the dated build `typesafe/jev-1.13-20260917`, rejects responses from any other model, and backs its pass/review/block thresholds with recorded probe results. B is simpler and phrases its question closer to the request, but it sends the floating `typesafe/jev-1.13` alias and never checks which model answered, so a model update could silently change gate behavior.",
       "winner": "skill",
-      "cost": 0.0964575,
+      "cost": 0.242608,
       "error": null
     },
     {
@@ -419,10 +419,10 @@
       "first_order": "no-skill-first",
       "verdict_1": "B",
       "verdict_2": "A",
-      "reason_1": "Candidate B uses the Decisions API correctly with a typed noul question over JSON state, enforces a code-side threshold, validates the response type, and recommends pinning the model, cleanly separating model judgment from business rules. Candidate A relies on a local heuristic and a free‑form prompt instead of the Decisions API, so it doesn’t meet the requirement to use typed questions and probabilities despite otherwise solid gating and tests.",
-      "reason_2": "A cleanly uses the OpenRouter Decisions pattern with typed questions over JSON state, a code-side threshold gate, and guidance to pin the model, keeping judgment in the model and business rules in code. B substitutes a local heuristic and a generic prompt instead of the Decisions API, so it doesn’t meet the requirement to use typed probabilities or handle the response safely.",
+      "reason_1": "Candidate B uses the Decisions API as intended: a typed noul question with true/false criteria over JSON state, the answer type validated, a named probability threshold enforced in code, and guidance to pin the canonical slug. Candidate A never calls a decision model; it swaps in a keyword heuristic, uses a free-form JSON prompt with no probability or model pinning, and commits pytest and pycache artifacts.",
+      "reason_2": "Candidate A sends a typed noul question over JSON state, keeps the threshold in code, checks the answer type and says to pin a canonical slug, though its criteria reach past what the description says. Candidate B never calls the Decisions API: its free-text prompt is served by a keyword-matching stand-in that misreads negations like \"no breaking change\", and it commits pytest and bytecode cache files.",
       "winner": "skill",
-      "cost": 0.055425,
+      "cost": 0.073244,
       "error": null
     },
     {
@@ -432,10 +432,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A computes age in code, delegates free‑text interpretation to a pinned OpenRouter Decisions noul question with clear criteria, enforces a code threshold, validates responses, and only calls the model when appropriate. Candidate B does not use the Decisions API at all and instead hardcodes regex heuristics, so it fails the requirement and is less generalizable.",
-      "reason_2": "B cleanly separates deterministic age computation from free‑text judgment via a pinned OpenRouter Decisions noul question, enforces the probability threshold in code, and validates the API response safely. A never uses a decision model and instead hard‑codes regex heuristics, so it fails a core requirement despite a solid age check.",
+      "reason_1": "Candidate A computes the subscription age in code and sends only the free-text cancellation reason to a pinned Decisions API model through a well-phrased noul question. It also enforces the threshold in code, skips the call when it is unnecessary, and validates the response. Candidate B never uses a decision model and relies on a brittle regex keyword list that will miss most real return-intent phrasings, and it commits a stray .pyc file.",
+      "reason_2": "B computes subscription age in code, calls the model only when it's needed, and sends the free-text cancellation reason to a pinned-model noul question with general criteria. It also enforces the threshold in code and validates the response. A never uses the decision model and relies on a brittle regex list that won't generalize to new phrasings, and it commits a stray .pyc file.",
       "winner": "skill",
-      "cost": 0.0393125,
+      "cost": 0.058468,
       "error": null
     },
     {
@@ -445,10 +445,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A correctly uses the OpenRouter Decisions API with a pinned model, poses a noul question over JSON state, applies a clear code-side threshold, and robustly handles age (including UTC/time and Feb 29), empty reasons, and API errors. Candidate B relies on chat completions instead of the Decisions API, has no probability-to-threshold mapping or pinning, and only does date-level age checks, so it does not meet the spec as closely.",
-      "reason_2": "Candidate B correctly uses the OpenRouter Decisions API with a typed noul question over JSON state, pins a specific model build, applies a code-level threshold to probabilities, and enforces age/blank-reason gating and error handling in code. Candidate A uses chat/completions with a boolean JSON schema (not Decisions), lacks probabilities and a pinned model, so it doesn’t meet the Decisions API requirement.",
+      "reason_1": "Candidate A uses the Decisions API as asked: it pins a model build, sends a single noul question with only the reason in state, applies a named threshold in code, and validates the probability and answer shape. Candidate B skips the Decisions API for a chat-completions JSON-schema call, leaves the model unpinned (supplied via env), returns a bare boolean with no probability or threshold, and commits __pycache__ artifacts.",
+      "reason_2": "B uses the Decisions API as requested, with a single noul question over the cancellation reason. It pins a probe-validated model build, enforces a named threshold in code, validates the answer's type and range, and keeps the anniversary math deterministic. A never uses the Decisions API: it asks a caller-chosen chat-completions model to emit a boolean via JSON schema, so there is no probability, no code-side threshold, and no pinned model, and it also commits stale __pycache__ bytecode.",
       "winner": "skill",
-      "cost": 0.0973375,
+      "cost": 0.301708,
       "error": null
     },
     {
@@ -458,10 +458,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "Candidate A cleanly separates deterministic age logic from model judgment, uses a pinned OpenRouter Decisions noul question with a reasonable threshold, and validates the API response. Candidate B relies on hardcoded keywords and never uses a decision model, failing the requirement to leverage the Decisions API where it fits.",
-      "reason_2": "B cleanly separates hard business rules (age) in code from the judgment task (intent) via the OpenRouter Decisions API, pins a specific model, applies an explicit threshold in code, and validates the response. A does not use a decision model at all and hardcodes keyword heuristics, which fails the requirement to use the Decisions API where it fits.",
+      "reason_1": "Candidate A computes the one-year age rule in code and calls the Decisions API with a pinned model only for the free-text return-intent judgment. It uses a generalizable noul question with clear criteria, enforces a documented threshold in code, and validates the response. Candidate B never calls the decision model and instead uses a brittle keyword match that misclassifies phrases (e.g., 'support' as a return signal even in 'terrible support'), and it commits pytest cache and .pyc artifacts.",
+      "reason_2": "Candidate B computes the one-year age check in code and sends only the free-text cancellation reason to a pinned decision model as a clearly phrased noul question. It enforces a documented threshold in code and validates the response shape. Candidate A never calls the Decisions API, uses a brittle keyword list that cannot generalize to unseen reasons, and commits pytest cache and .pyc artifacts.",
       "winner": "skill",
-      "cost": 0.0499575,
+      "cost": 0.077252,
       "error": null
     },
     {
@@ -471,10 +471,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A actually uses the OpenRouter Decisions API with typed questions and probability-based routing, pins a concrete build, and enforces thresholds and business rules in code with safe fallbacks and response validation. B provides a generic LLM config that doesn’t use the Decisions API or typed questions and lacks response pin-checks, even though its evaluation plan is otherwise rigorous.",
-      "reason_2": "B correctly uses the Decisions API with typed questions, pins a specific build, enforces thresholds and business rules in code, and verifies the returned model, making it safer and more generalizable. A provides a custom YAML for a generic LLM without Decisions questions or probability handling, so its thresholding and calibration are not clearly tied to the API or to safe response checks.",
+      "reason_1": "A uses the Decisions API itself, with typed choice/noul questions whose criteria generalize to new tickets and a pinned dated build. It enforces probability and margin thresholds in code with a human-review fallback, verifies the returned model, and gives a concrete probe-set calibration plan. B never touches the Decisions API: it configures a generic chat-completion model to self-report a score and gives no code that enforces its thresholds or handles the response, even though its release-gate metrics are reasonable.",
+      "reason_2": "B uses the Decisions API as intended: it pins a versioned decision-model build, asks typed choice and noul questions with generalizable criteria, and enforces the probability and margin thresholds in code with a probe-set calibration plan. A treats a general chat model's self-reported `score` as a calibrated probability without any Decisions API questions, though B has minor flaws of its own: the pinned-model check runs after routing is computed, and the `needs_human_review` answer is never used.",
       "winner": "skill",
-      "cost": 0.04352,
+      "cost": 0.031728,
       "error": null
     },
     {
@@ -484,10 +484,10 @@
       "first_order": "skill-first",
       "verdict_1": "A",
       "verdict_2": "B",
-      "reason_1": "A actually uses the Decisions API with typed choice questions, pins an exact decision-model build, verifies the returned model, and keeps business gates (empty input, errors, thresholds, top-two margin) in application code with auto‑routing disabled until calibration. B ignores the Decisions API in favor of a chat LLM, so the split between code and model is wrong for this request and its thresholds are hypothetical rather than enforced.",
-      "reason_2": "B actually uses the OpenRouter Decisions API with typed choice questions, pins an exact build, and implements safe routing/threshold enforcement in code with clear pin verification from the returned model. A selects a chat model rather than a Decisions model, lacks typed questions and concrete application gating, and its pin/checks target chat endpoints rather than the Decisions workflow.",
+      "reason_1": "Candidate A uses the Decisions API as asked: it compares live decision models on typed `choice` probes, pins a dated build, and verifies the pinned build resolves. It also keeps thresholds null and blocks auto-routing until calibration. Candidate B ignores the Decisions API entirely, choosing a chat-completions LLM with no measured evidence, and ships unvalidated 0.90/0.15 threshold numbers in its config.",
+      "reason_2": "Candidate B uses the Decisions API as asked: it compares decision models from the live catalog, pins the exact dated build `typesafe/jev-1.13-20260917`, and writes a general `choice` question with clear criteria and an application-owned gate that sends errors and uncalibrated cases to review. Candidate A skips the Decisions API and routes Claude Haiku through chat completions, and it proposes unvalidated 0.90/0.15 cutoffs, whereas B deliberately leaves thresholds null until calibration data justifies them.",
       "winner": "skill",
-      "cost": 0.060412499999999994,
+      "cost": 0.17362,
       "error": null
     },
     {
@@ -496,11 +496,11 @@
       "round": 3,
       "first_order": "skill-first",
       "verdict_1": "A",
-      "verdict_2": "A",
-      "reason_1": "A uses the Decisions API correctly (noul and choice), pins a specific versioned build, derives and documents thresholds from probes, and describes a concrete pre-ship verification tied to those probabilities. B switches to a generic chat model with custom JSON output and metrics that don’t reflect Decisions-typed questions or the actual business labels, making the split of responsibilities and pinning less reliable for this job.",
-      "reason_2": "Candidate A pins the model with provider/no-fallbacks, validates schema, and includes a reproducible script that enforces accuracy/FPR/review/latency gates before shipping. Candidate B references the Decisions API but only provides a YAML and manual probes without code-enforced thresholds or safety checks, making it less robust.",
-      "winner": "inconsistent",
-      "cost": 0.0663325,
+      "verdict_2": "B",
+      "reason_1": "Candidate A pins a versioned decision model (`typesafe/jev-1.13-20260917`) and sets its gates from observed noul and choice probabilities, with a probe set to rerun before shipping, though its 0.70 gate sitting inside the 0.45–0.85 review band is confusing. Candidate B pins a general chat model whose self-reported 'confidence' is not a Decisions API probability, validates against an obviously synthetic patterned fixture, and its docs contradict its config on the review-rate limit (8% vs 15%).",
+      "reason_2": "Candidate B picks an actual decision model pinned to a dated build and sets its is_billing and category gates from observed noul and choice probabilities, though its six-probe set is thin, its 0.45–0.85 review band overlaps the 0.70 gate, and its confirmation command uses the unpinned alias. Candidate A pins a general chat model that self-reports confidence in JSON rather than using the Decisions API, tunes its gates to match a synthetic fixture, and its docs contradict the config (8% vs 15% review rate), so its runnable gate script does not rescue the core mismatch.",
+      "winner": "skill",
+      "cost": 0.103876,
       "error": null
     }
   ]

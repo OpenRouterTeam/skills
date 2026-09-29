@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.016665,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02938,
   "judge_error": null,
   "assertions": [
     {
@@ -10,20 +10,20 @@
     },
     {
       "pass": true,
-      "evidence": "Code uses Decisions API and numeric outputs: e.g., 'const spam = response.answers.is_spam; ... if (spam.noul >= SPAM_T) ...' with no string matching like includes().",
-      "graded_by": "judge"
-    },
-    {
-      "pass": false,
-      "evidence": "Although 'is_spam' and 'is_abusive' are separate noul questions, the function returns a single ReviewVerdict and short-circuits ('if (spam.noul >= SPAM_T) return \"spam\"; if (abusive.noul >= ABUSIVE_T) return \"abusive\";'), so a review cannot be both in the output.",
+      "evidence": "The `out.toLowerCase().includes(...)` checks are gone; the verdict now comes from `spam.noul >= SPAM_T` and `abusive.noul >= ABUSIVE_T` on the Decisions API response.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Thresholds are defined in code next to where probabilities are used: 'const SPAM_T = 0.7; const ABUSIVE_T = 0.7;' and then compared to 'spam.noul' and 'abusive.noul'.",
+      "evidence": "The request defines two separate questions, `is_spam` and `is_abusive`, each with `type: \"noul\"`, and the agent says \"Spam and abuse can co-occur, so they're separate `noul`s, not one `choice`\". The function still returns a single label and the message wrongly says \"three `noul`s\", but the questions themselves are independent.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Named constants `SPAM_T = 0.7` and `ABUSIVE_T = 0.7` are defined in the code and compared directly against the returned `spam.noul` and `abusive.noul` probabilities.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 4,
   "total": 4
 }

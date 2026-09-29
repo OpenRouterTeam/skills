@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02756125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.081468,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In src/incident-urgency.ts, URGENCY_QUESTION has type: \"score\" with an ordered criteria array of five levels (\"1 — Informational...\" to \"5 — Critical impact\"), not a choice over digits.",
+      "evidence": "URGENCY_QUESTION in src/incident-urgency.ts has `type: \"score\"` and an ordered five-item `criteria` array running from \"1 — Informational\" to \"5 — Critical impact\"; it is not a choice over the digits.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "parseResponse derives urgency from answer.probabilities by selecting the max-probability level and returning Number(urgency), and rateIncident makes a single Decisions API call; the test confirms the most probable level is chosen.",
+      "evidence": "parseResponse computes `urgency` in code as the argmax over `answer.probabilities` via reduce, all within a single `rateIncident` request, and `sortByUrgency` sorts on that derived value.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The request sends state: { incident: { report: string, service: string } }, keeping report text and service name as separate named fields (test asserts sent.state.incident.service === \"checkout\").",
+      "evidence": "The request sends `state: { incident }`, where `incident` is `{ report, service }`, and the test asserts `sent.state.incident.service === \"checkout\"`.",
       "graded_by": "judge"
     }
   ],

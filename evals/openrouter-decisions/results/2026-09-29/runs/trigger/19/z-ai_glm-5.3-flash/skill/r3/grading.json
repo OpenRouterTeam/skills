@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00378,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.010512,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "Final message includes extra prose ('This matches both `415-555-0199` and `415 555 0199`. If you also want...') beyond the regex change.",
+      "pass": true,
+      "evidence": "The final message gives only the widened regex `/\\d{3}[- ]\\d{3}[- ]\\d{4}/g` plus a one-line note offering an optional regex variant; no other code, files, or unrelated changes were produced.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 2,
   "total": 2
 }

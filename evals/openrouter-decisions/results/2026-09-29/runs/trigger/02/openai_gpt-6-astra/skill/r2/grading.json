@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01762125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03208,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The final message shows \"POST https://openrouter.ai/api/alpha/decisions\" with a JSON body that includes \"model\", \"state\", and \"questions\".",
+      "evidence": "The final message shows `POST https://openrouter.ai/api/alpha/decisions` with a JSON body that has \"model\": \"typesafe/jev-1.13-20260917\", a \"state\" object holding the review, and a \"questions\" object, matching the reference shape the agent read.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Only one noul question \"is_toxic\" is defined; there are no separate noul questions for each policy violation.",
+      "evidence": "The request has a single `is_toxic` noul that folds abuse, harassment, and threats into one judgment, rather than a separate noul question for each policy label.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The question is framed as \"Is `review` toxic?\" with toxicity defined as abuse or threats, and it even says \"allegations of fraud... do not by themselves count,\" so it does not ask whether the review is a scam.",
+      "evidence": "The question does ask about a property instead of word presence, but it only asks about abuse: it states \"allegations of fraud... do not by themselves count\", so it never asks whether the review is a scam.",
       "graded_by": "judge"
     }
   ],

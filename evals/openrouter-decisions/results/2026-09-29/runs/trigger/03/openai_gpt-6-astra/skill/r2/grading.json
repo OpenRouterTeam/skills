@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.007225,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01668,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "\"Use a bounded decision call... one `choice` among billing, engineering, support, and unclear, returning probabilities rather than generated text.\"",
+      "evidence": "Step 2 proposes 'one `choice` among billing, engineering, support, and unclear, returning probabilities rather than generated text' via the Decisions API.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "\"Include an **unclear** outcome so missing information doesn’t silently become support.\" Also: \"one `choice` among billing, engineering, support, and unclear\"",
+      "evidence": "Step 1 says 'Include an **unclear** outcome so missing information doesn't silently become support,' and step 2 includes 'unclear' as a choice option.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0197025,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.023456,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": false,
-      "evidence": "The plan defines a single choice over 'billing | engineering | support' and lists criteria only for those three, with no explicit 'none' or no-match option.",
+      "evidence": "The question draft's criteria list only `billing`, `engineering`, and `support`; there is no separate none/no-match option, and `support` instead absorbs \"anything not clearly billing or engineering.\"",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "It says 'Gate in code... Optional later refinement: a fallback band on probabilities (e.g. if probabilities[choice] < T, route to support)', putting the threshold and fallback route in code, not in the question.",
+      "pass": false,
+      "evidence": "The fallback is written into the question itself (`support`: \"...anything not clearly billing or engineering\"), and the code-side threshold is only an \"Optional later refinement\" with T left unset, so the fallback does not live solely in code.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 1,
   "total": 3
 }

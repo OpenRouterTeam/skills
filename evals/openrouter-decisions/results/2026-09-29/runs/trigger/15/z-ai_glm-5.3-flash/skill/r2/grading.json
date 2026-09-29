@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.013545,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.053784,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "scripts/summarize-tickets.mjs sends a POST to OpenRouter’s chat completions endpoint (https://openrouter.ai/api/v1/chat/completions) with messages and takes choices[0].message.content as the one-paragraph summary.",
+      "evidence": "scripts/summarize-tickets.mjs sends a POST to OPENROUTER_API_URL (default \"https://openrouter.ai/api/v1/chat/completions\") with model \"openai/gpt-4o-mini\" and a system prompt \"Write exactly one concise paragraph summarizing the support ticket\", then reads data.choices[0].message.content as the summary; this is a generative chat completion, not the Decisions API.",
       "graded_by": "judge"
     }
   ],

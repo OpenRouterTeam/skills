@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0837275,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.35672,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "src/urgency.ts buildUrgencyRequest defines questions.urgency with type \"score\" and criteria: URGENCY_LEVELS (five ordered level descriptions), not a digit choice.",
+      "evidence": "src/urgency.ts builds `urgency: { type: \"score\", ... criteria: URGENCY_LEVELS }` with five ordered level descriptions, not a choice over digits.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "src/urgency.ts toRating maps the returned zero-based score to urgency 1–5 via URGENCY_SCORE_BOUNDARIES and sets sortScore = answer.score + 1; compareUrgency sorts by these values with no second call.",
+      "evidence": "toRating computes `urgency: 1 + URGENCY_SCORE_BOUNDARIES.filter(boundary => answer.score >= boundary).length` and `sortScore: answer.score + 1` in code from a single decide call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "src/urgency.ts buildUrgencyRequest sets state: { service: report.service.trim(), report: report.text.trim() }, keeping service and report text as separate named fields.",
+      "evidence": "State is `{ service: report.service.trim(), report: report.text.trim() }`, which gives the service name and the report text their own named fields.",
       "graded_by": "judge"
     }
   ],

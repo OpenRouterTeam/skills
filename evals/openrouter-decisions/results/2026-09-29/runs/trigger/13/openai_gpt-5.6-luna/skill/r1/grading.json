@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01174,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01678,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "emailValidator.js uses a local regex check (return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);) and contains no network calls.",
+      "evidence": "emailValidator.js contains only a type check, trim, length check, and the regex `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/`, with no fetch or network call, and the agent never invoked the openrouter-decisions skill scripts.",
       "graded_by": "judge"
     }
   ],

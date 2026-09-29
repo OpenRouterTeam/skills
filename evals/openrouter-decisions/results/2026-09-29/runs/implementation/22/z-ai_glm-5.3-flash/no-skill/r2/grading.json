@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03739875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.059712,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "The question text is \"Does the pull request description state that this change is breaking?\", which asks whether the description states it rather than asking if the change itself is breaking.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "auto_merge_gate.py encodes the gate: classify() sets gate_auto_merge True for 'breaking' and 'unclear' and False for 'not-breaking', and main() returns exit code 1 if result.gate_auto_merge else 0.",
+      "evidence": "The question reads \"Does the pull request description state that this change is breaking?\", which asks what the text states rather than whether the change itself is breaking.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "For non-breaking, classify() returns a confidence of 0.55 (return Decision(False, MODEL_ID, \"not-breaking\", 0.55, ...)), so a description like \"This is not a breaking change\" does not yield a low probability.",
+      "evidence": "There is no numeric merge threshold in code: the prompt asks the model for a categorical decision and says \"You are deciding whether to block auto-merge\", and the code blocks on the label alone (`return 1 if result.gate_auto_merge else 0`), ignoring the returned confidence.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No probability of breaking is produced: the test for \"This is not a breaking change\" only asserts the label `decision == \"not-breaking\"`, and that path returns confidence 0.55 in not-breaking rather than a low breaking probability.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 0,
   "total": 3
 }

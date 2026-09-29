@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0476875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.13618,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "They pulled the live catalog and wrote classification/results/catalog.json via scripts/models.ts and also ran curl -fsS 'https://openrouter.ai/api/v1/models?output_modalities=decisions'.",
+      "evidence": "The agent fetched the live catalog with `curl 'https://openrouter.ai/api/v1/models?output_modalities=decisions'` and ran `models.ts classification/request.json --json`, saving the output to results/catalog.json, before naming any candidate.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They ran the same request against each candidate with decide.ts --compare, producing comparison-*.json files for each probe (e.g., '.../decide.ts classification/request.json --compare' and the Python loop generating all comparisons).",
+      "evidence": "The agent ran `decide.ts <probe> --compare` on all nine probe files, recorded per-model matches, latency and cost in results/comparison-*.json, and based the Jev-vs-Kev-vs-Solar choice on those results.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "classification/config.json pins a versioned build in a single value: \"model\": \"typesafe/jev-1.13-20260917\", not a '~...latest' alias.",
+      "evidence": "config.json holds the single value `\"model\": \"typesafe/jev-1.13-20260917\"`, a dated build rather than the `~typesafe/jev-latest` alias, and the README calls it 'the single source of the model pin'.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Stored results include the response model string alongside answers, e.g., classification/results/pinned-billing.json has \"model\": \"typesafe/jev-1.13-20260917\" with the 'answers' object.",
+      "evidence": "Every stored result in results/comparison-*.json and pinned-billing.json records the response `model` next to `answers`, and the README gate requires 'log response.model with answer and rubric_version'.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They probed thresholds using the decide.ts probe over nine inputs before setting any cutoffs, leaving thresholds null in config and noting 'The thresholds remain unset deliberately.'",
+      "evidence": "The agent ran the decide.ts probe over nine cases (synthetic, not real production inputs) and left `min_selected_probability_by_label: null`, explicitly refusing to fix thresholds until calibration on labeled real inputs.",
       "graded_by": "judge"
     }
   ],

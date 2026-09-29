@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.063375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.246064,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "In src/rank-tickets.ts the code asks one noul question per candidate and then sorts by the returned probabilities: return {...}.sort((a, b) => b.probabilitySameIssue - a.probabilitySameIssue);",
+      "evidence": "In src/rank-tickets.ts, each candidate gets its own `noul` question. The returned `answer.noul` values are then sorted in code with `.sort((a, b) => b.probabilitySameIssue - a.probabilitySameIssue)`. The model is never asked for an ordering.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "README.md states “all can score low” and no auto-merge threshold; probes/no_match.results.json shows low probabilities for all candidates (0.04, 0.01, 0.01), allowing a no-duplicate outcome.",
+      "pass": false,
+      "evidence": "Independent probabilities can all be low, but no code threshold or 'none' outcome labels a set as having no duplicate. The README says 'No duplicate/merge threshold is applied' and 'A no-match list still has a highest-ranked item'. The only non-ranked statuses are `no_candidates` and `empty_new_ticket`, which cover empty inputs only.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

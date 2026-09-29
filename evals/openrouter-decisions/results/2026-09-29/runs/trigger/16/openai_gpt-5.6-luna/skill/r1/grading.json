@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01168375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.027252,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "In bm25.py the score is computed from term statistics (term frequencies, document frequencies, and lengths), e.g., \"idf = log(1 + (document_count - df + 0.5) / (df + 0.5)); score += idf * (frequency * (k1 + 1)) / (frequency + k1 * length_factor)\" and results are deterministically ordered with tie-breaking by index via \"scored.sort(key=lambda item: (-item[0], item[1]))\".",
+      "evidence": "bm25.py computes each score from document frequency (`document_frequency = Counter(...)`), term frequencies, and length normalization using `log(1 + (document_count - df + 0.5) / (df + 0.5))`, then sorts with `scored.sort(key=lambda item: (-item[0], item[1]))`; there is no model or API call.",
       "graded_by": "judge"
     }
   ],

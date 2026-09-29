@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.04642125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.195604,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "src/subscription.ts computes `olderThanOneYear` in code using a UTC anniversary comparison and returns early without calling the model when false; no dates are sent to the model.",
+      "evidence": "src/subscription.ts builds the first anniversary with `setUTCFullYear(... + 1)`, clamps Feb 29, and decides `olderThanOneYear = now.getTime() > anniversary.getTime()`, all in code before any model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request state is `{ cancellation_reason: reason }` (src/subscription.ts), and the test asserts `body.state` equals only the trimmed reason (tests/subscription.test.ts: uses the Decisions endpoint...).",
+      "evidence": "The request state is `{ cancellation_reason: reason }` only, and the test asserts `body.state` deepEquals `{ cancellation_reason: \"I'll return next month\" }`, so no dates are sent.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question is defined as a `NoulQuestion` named `likely_to_return` (RETURN_QUESTION, type: \"noul\"), and code applies a `RETURN_THRESHOLD = 0.5` gate (`returnProbability >= RETURN_THRESHOLD`) in src/subscription.ts.",
+      "evidence": "RETURN_QUESTION is `type: \"noul\"` asking whether the customer is likely to resume, and code applies `returnProbability >= RETURN_THRESHOLD` with `RETURN_THRESHOLD = 0.5` defined in src/subscription.ts.",
       "graded_by": "judge"
     }
   ],

@@ -10,39 +10,39 @@
 
 | Model | Arm | Assertions passed | Per-round pass rate mean ± sd | Time s mean ± sd | Tokens in mean | Tokens out mean | Cost/run $ | Errors |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| openai/gpt-5.6-luna | no-skill | 15/42 | 35.7% ± 0.0% | 41 ± 9 | 109k | 4k | 0.010 | 0 |
-| openai/gpt-5.6-luna | skill | 36/42 | 85.7% ± 0.0% | 47 ± 16 | 168k | 4k | 0.012 | 0 |
-| openai/gpt-6-astra | no-skill | 23/42 | 54.8% ± 10.9% | 98 ± 36 | 120k | 4k | 0.521 | 0 |
+| openai/gpt-5.6-luna | no-skill | 5/42 | 11.9% ± 4.1% | 41 ± 9 | 109k | 4k | 0.010 | 0 |
+| openai/gpt-5.6-luna | skill | 32/42 | 76.2% ± 4.1% | 47 ± 16 | 168k | 4k | 0.012 | 0 |
+| openai/gpt-6-astra | no-skill | 18/42 | 42.9% ± 14.3% | 98 ± 36 | 120k | 4k | 0.521 | 0 |
 | openai/gpt-6-astra | skill | 42/42 | 100.0% ± 0.0% | 166 ± 53 | 399k | 7k | 1.103 | 0 |
-| z-ai/glm-5.3-flash | no-skill | 20/42 | 47.6% ± 4.1% | 85 ± 54 | 99k | 3k | 0.008 | 0 |
-| z-ai/glm-5.3-flash | skill | 34/42 | 81.0% ± 8.2% | 129 ± 79 | 334k | 5k | 0.018 | 0 |
+| z-ai/glm-5.3-flash | no-skill | 5/42 | 11.9% ± 4.1% | 85 ± 54 | 99k | 3k | 0.008 | 0 |
+| z-ai/glm-5.3-flash | skill | 33/42 | 78.6% ± 7.1% | 129 ± 79 | 334k | 5k | 0.018 | 0 |
 
 ## Assertions (all models pooled)
 
 | Eval | # | no-skill pass | skill pass | Verdict |
 |---|---:|---:|---:|---|
-| 21 | 0 | 3/9 | 9/9 | discriminates |
-| 21 | 1 | 7/9 | 9/9 | discriminates |
-| 21 | 2 | 9/9 | 9/9 | passes in both arms: does not measure the skill |
+| 21 | 0 | 1/9 | 9/9 | discriminates |
+| 21 | 1 | 1/9 | 9/9 | discriminates |
+| 21 | 2 | 3/9 | 9/9 | discriminates |
 | 22 | 0 | 1/9 | 9/9 | discriminates |
-| 22 | 1 | 8/9 | 9/9 | discriminates |
-| 22 | 2 | 2/9 | 7/9 | discriminates |
+| 22 | 1 | 2/9 | 9/9 | discriminates |
+| 22 | 2 | 3/9 | 7/9 | discriminates |
 | 23 | 0 | 9/9 | 9/9 | passes in both arms: does not measure the skill |
-| 23 | 1 | 7/9 | 8/9 | discriminates |
-| 23 | 2 | 6/9 | 9/9 | discriminates |
-| 24 | 0 | 2/9 | 9/9 | discriminates |
+| 23 | 1 | 3/9 | 8/9 | discriminates |
+| 23 | 2 | 0/9 | 9/9 | discriminates |
+| 24 | 0 | 0/9 | 9/9 | discriminates |
 | 24 | 1 | 0/9 | 4/9 | discriminates |
-| 24 | 2 | 4/9 | 9/9 | discriminates |
-| 24 | 3 | 0/9 | 7/9 | discriminates |
+| 24 | 2 | 5/9 | 8/9 | discriminates |
+| 24 | 3 | 0/9 | 3/9 | discriminates |
 | 24 | 4 | 0/9 | 5/9 | discriminates |
 
-## Implementation on discriminating assertions only (2 always-pass assertion(s) removed)
+## Implementation on discriminating assertions only (1 always-pass assertion(s) removed)
 
 | Model | no-skill | skill | Skill − no-skill (per-round mean ± sd) |
 |---|---:|---:|---:|
-| openai/gpt-5.6-luna | 9/36 (25.0%) | 30/36 (83.3%) | 58.3% ± 0.0% |
-| openai/gpt-6-astra | 17/36 (47.2%) | 36/36 (100.0%) | 52.8% ± 12.7% |
-| z-ai/glm-5.3-flash | 14/36 (38.9%) | 28/36 (77.8%) | 38.9% ± 12.7% |
+| openai/gpt-5.6-luna | 2/39 (5.1%) | 29/39 (74.4%) | 69.2% ± 7.7% |
+| openai/gpt-6-astra | 15/39 (38.5%) | 39/39 (100.0%) | 61.5% ± 15.4% |
+| z-ai/glm-5.3-flash | 2/39 (5.1%) | 30/39 (76.9%) | 71.8% ± 8.9% |
 
 ## Discovery: marketplace-ops (18 discovery runs, 126 designs, decision model typesafe/jev-1.13-20260917, judge openai/gpt-5)
 
@@ -133,9 +133,9 @@ skill 29 · api-only 23 · tie 0 · inconsistent 10 · errors 0 → skill wins 5
 
 skill 38 · api-only 11 · tie 0 · inconsistent 12 · errors 0 → skill wins 77.6% of decided pairs
 
-## Blind pairwise: Codex implementation runs (judge openai/gpt-5, 36 pairs)
+## Blind pairwise: Codex implementation runs (judge anthropic/claude-opus-5.5, 36 pairs)
 
-skill 31 · no-skill 0 · tie 0 · inconsistent 5 · errors 0 → skill wins 100.0% of decided pairs
-- openai/gpt-5.6-luna: skill 11 · no-skill 0 · tie 0 · inconsistent 1 · errors 0 → skill wins 100.0% of decided pairs
-- openai/gpt-6-astra: skill 10 · no-skill 0 · tie 0 · inconsistent 2 · errors 0 → skill wins 100.0% of decided pairs
-- z-ai/glm-5.3-flash: skill 10 · no-skill 0 · tie 0 · inconsistent 2 · errors 0 → skill wins 100.0% of decided pairs
+skill 36 · no-skill 0 · tie 0 · inconsistent 0 · errors 0 → skill wins 100.0% of decided pairs
+- openai/gpt-5.6-luna: skill 12 · no-skill 0 · tie 0 · inconsistent 0 · errors 0 → skill wins 100.0% of decided pairs
+- openai/gpt-6-astra: skill 12 · no-skill 0 · tie 0 · inconsistent 0 · errors 0 → skill wins 100.0% of decided pairs
+- z-ai/glm-5.3-flash: skill 12 · no-skill 0 · tie 0 · inconsistent 0 · errors 0 → skill wins 100.0% of decided pairs

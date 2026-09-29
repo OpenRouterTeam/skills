@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.014115,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.028208,
   "judge_error": null,
   "assertions": [
     {
@@ -10,20 +10,20 @@
     },
     {
       "pass": true,
-      "evidence": "Final message: “Enforce the hard rules in code… Purchase age ≤90 days; requested amount ≤order total; fewer than two prior refunds… Keep date arithmetic, amounts, and refund counts in code.”",
+      "evidence": "The final message says \"Enforce the hard rules in code using trusted records. Purchase age ≤90 days; requested amount ≤order total; fewer than two prior refunds\" and \"Keep date arithmetic, amounts, and refund counts in code.\"",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message: “Use … Decisions API with a ‘noul’ question such as ‘Does this request qualify under the refund-reason policy?’ … Keep date arithmetic, amounts, and refund counts in code.”",
+      "evidence": "The model gets only the judgment: a `noul` question \"Does this request qualify under the refund-reason policy?\" with the rubric, customer explanation, and evidence, while all numeric and date checks stay in code.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Final message: “High probability → auto-approve. Everything else… → human review. A low score should not automatically deny a refund.”",
+      "pass": false,
+      "evidence": "The design has one threshold with two outcomes, \"High probability → auto-approve. Everything else... → human review,\" and it explicitly rejects auto-deny, so human review is a lower band rather than a middle band between approve and deny.",
       "graded_by": "judge"
     }
   ],
-  "passed": 4,
+  "passed": 3,
   "total": 4
 }

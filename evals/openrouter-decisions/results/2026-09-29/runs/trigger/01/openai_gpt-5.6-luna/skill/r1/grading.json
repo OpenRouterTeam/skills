@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00979625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.024908,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Plan says: 'Replace the keyword if chain with one OpenRouter Decisions API choice question.' with options: billing, engineering, support, and 'none'.",
+      "evidence": "Step 1 plans 'one OpenRouter Decisions API `choice` question' with options `billing`, `engineering`, `support`, and `none` ('insufficient or unrelated information').",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Plan states: 'Use the observed probabilities to establish named code-side thresholds or fallback rules' and 'Map none to support' and to 'fallback to support' on failures—placing threshold and fallback in code, not in the question.",
+      "evidence": "Step 6 says to 'establish named code-side thresholds or fallback rules' so low-probability results 'use the defined fallback'. Step 3 maps `none` and failures to `support` in the function, and the question criteria contain no threshold.",
       "graded_by": "judge"
     }
   ],

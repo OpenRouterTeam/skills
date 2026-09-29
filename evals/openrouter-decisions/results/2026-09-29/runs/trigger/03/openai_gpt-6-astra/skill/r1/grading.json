@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.007565,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.017168,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "“Use a bounded decision model... using one `choice` question... It returns a destination and probabilities across the options. Keep hard business rules... in application code.”",
+      "evidence": "Step 2 proposes OpenRouter's Decisions API with one `choice` question that 'returns a destination and probabilities across the options', which is a bounded classification rather than a free-text prompt parsed afterwards.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "“Needs triage: unclear, unrelated, or mixed requests without an obvious primary issue.”",
+      "evidence": "The routing policy includes a 'Needs triage' option for 'unclear, unrelated, or mixed requests without an obvious primary issue', which covers tickets that fit none of the teams.",
       "graded_by": "judge"
     }
   ],

@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.020495,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025284,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "No live catalog was queried; the agent immediately said 'Pinned openai/gpt-4.1-mini-2025-04-14' and there is no models.ts listing or GET /api/v1/models call in the transcript.",
+      "evidence": "The agent never queried models.ts or GET /api/v1/models; it named `openai/gpt-4.1-mini-2025-04-14` directly with no catalog lookup anywhere in the transcript.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no decide.ts --compare (or equivalent) run; the transcript shows no same-request comparisons, only a direct pin.",
+      "evidence": "No candidates were compared and no decide.ts --compare or equivalent run was made; a single model was chosen without justification.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "decision-model.yaml sets both 'model: openai/gpt-4.1-mini-2025-04-14' and 'model_revision: openai/gpt-4.1-mini-2025-04-14', which is versioned but not pinned in a single config value.",
+      "evidence": "The dated ID is written twice in decision-model.yaml (`model:` and `model_revision:`), so it is pinned in two duplicated values rather than a single config value.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No logging implementation is shown; the runbook only states the 'exact model revision is present in the request/response audit record' without code that logs the response model string with stored answers.",
+      "evidence": "THRESHOLD_CHECK.md only says the exact model revision should be 'present in the request/response audit record'; nothing logs the response model string alongside stored answers.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds are fixed in decision-model.yaml (0.80/0.20) and no probe/evaluator is executed in the transcript; THRESHOLD_CHECK.md only instructs 'Before shipping, run the evaluator...'.",
+      "evidence": "Thresholds 0.80/0.20 were fixed in the config before any probe; the evaluator command in THRESHOLD_CHECK.md was never run on real inputs.",
       "graded_by": "judge"
     }
   ],

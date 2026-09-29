@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0116475,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02352,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The code ranks in code from per-candidate scores: function rankCandidates(...) ... .sort((a, b) => b.score - a.score); and the design says “Rank the 20 returned probabilities in code.”",
+      "evidence": "The final message asks one `score` question per candidate. Its `rankCandidates` function then sorts in code by `.sort((a, b) => b.score - a.score)` rather than asking the model for an ordering.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The gating logic includes a no-duplicate path: “Below REVIEW_THRESHOLD: create a new ticket…”",
+      "evidence": "The final message states 'Below `REVIEW_THRESHOLD`: create a new ticket', which gives an explicit path for when no candidate is a duplicate.",
       "graded_by": "judge"
     }
   ],

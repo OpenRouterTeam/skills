@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.04507125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.064152,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "There is no score question object with ordered levels; the code directly computes an int (UrgencyDecision.score) via rules in _combine rather than defining a score question.",
+      "evidence": "incident_urgency.py defines no decision-model question at all; urgency comes from hand-written regex rules in `_combine` that return an int, so there is no score question with ordered levels.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "format_for_dashboard(decision) uses decision.score, which is computed in code by _combine and returned by UrgencyRater.rate; no second model call or model-generated value is used.",
+      "pass": false,
+      "evidence": "No model is called and nothing returns a score or level probabilities; `_combine` builds the integer from regex matches and weights (`base * multiplier`, clamped to 1-5).",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "UrgencyRater.rate takes separate named parameters text: str and service: str, keeping report text and service name as distinct fields.",
+      "pass": false,
+      "evidence": "`rate(self, text, service)` takes two arguments, but no decision-model state exists, and the two are merged into one string via `content = f\"{service}. {text}\"` rather than kept as named state fields.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 0,
   "total": 3
 }

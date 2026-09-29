@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01116125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.026632,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "No BM25 code or rankings were produced (files: none), and the final message says \"I couldn't find the query or the tokenized documents... I need the actual data to run it,\" so no deterministic ranking from term statistics was computed.",
+      "evidence": "The agent produced no files and computed no ranking; it only said \"BM25 is a deterministic scoring function computed entirely in code\" and asked for the query and documents, so no deterministic BM25 computation from term statistics was carried out.",
       "graded_by": "judge"
     }
   ],

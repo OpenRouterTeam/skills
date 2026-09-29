@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00805125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.0169,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "The final code only sets { maxRetries: 5 } on the SDK call and contains no retry loop or explicit backoff/jitter logic: `openai.chat.completions.create({ model, messages }, { maxRetries: 5 })`.",
+      "evidence": "The final message contains no retry loop: it passes `{ maxRetries: 5 }` to `openai.chat.completions.create` and relies on the SDK's built-in backoff, with no explicit loop, delay calculation or jitter code.",
       "graded_by": "judge"
     }
   ],

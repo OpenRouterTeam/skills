@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0201825,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.027808,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "There is no score question defined; incident_urgency.py implements a deterministic function returning an int score, and README states it 'returns an UrgencyRating containing the score'.",
+      "evidence": "incident_urgency.py is a regex rule-based scorer that adds integers ('score = 1 ... score += 1'). It defines no score question with ordered levels and calls no decision model.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "incident_urgency.py computes 'score' via rules and notes 'The function does not call an external model', and README says it returns the score for sorting.",
+      "pass": false,
+      "evidence": "No score or level probabilities are returned by any model. The urgency is built by hand-written keyword rules in rate_incident, so it is not derived from a model's returned score distribution.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "rate_incident(report: str, service_name: str) takes 'report' and 'service_name' as separate named parameters.",
+      "pass": false,
+      "evidence": "There are no named state fields for a decision model. The code concatenates the two inputs with 'text = f\"{service_name} {report}\"' and passes them as plain function arguments.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 0,
   "total": 3
 }

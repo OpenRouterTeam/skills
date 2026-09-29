@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.010485,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.0164,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The plan says to 'replace the guess with a probability-based judgment the code can act on with thresholds' and to 'Read raw probabilities per option' using a `choice` primitive via the Decisions API.",
+      "evidence": "The plan proposes a `choice` primitive with three options that returns probabilities per option (\"Take the highest-probability choice. Set a confidence floor...\"). It explicitly contrasts this with parsing generated text (\"replace the guess with a probability-based judgment\").",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "It states: 'Include a `none`/fallback criterion if any input could plausibly fit none of the three (even if you then default to `support` in code).'",
+      "evidence": "Step 3 says: \"Include a `none`/fallback criterion if any input could plausibly fit none of the three (even if you then default to `support` in code).\"",
       "graded_by": "judge"
     }
   ],

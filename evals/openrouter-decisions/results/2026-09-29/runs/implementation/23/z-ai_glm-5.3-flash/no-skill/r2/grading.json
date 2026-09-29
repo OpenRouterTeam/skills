@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.017315,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.019384,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In subscription_retention.py, the age check is coded as `if reference_date - subscription.started_on <= one_year: return SubscriptionCheck(False, None, False)` before any model logic.",
+      "evidence": "The one-year check is plain code in `check_subscription`: `if reference_date - subscription.started_on <= one_year:`, with no model involved.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The model function is `def _return_likelihood(reason: str)` and it is called as `likelihood = _return_likelihood(subscription.cancellation_reason)`, passing only the cancellation reason and no dates.",
+      "pass": false,
+      "evidence": "No model is ever called; the cancellation reason is only matched against hardcoded keyword lists in `_return_likelihood`, so no model receives the reason.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The docstring states \"Older subscriptions are classified from the cancellation reason\" and the threshold is enforced in code via the `one_year` parameter and the conditional `if reference_date - subscription.started_on <= one_year:` before querying likelihood.",
+      "pass": false,
+      "evidence": "No question is posed to any model; return likelihood comes from substring matching against `_LIKELY_RETURN_PATTERNS` and `_UNLIKELY_RETURN_PATTERNS`, not a model query about likely return.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 1,
   "total": 3
 }

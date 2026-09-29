@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00905125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.010184,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "Final message uses Math.trunc: 'return Math.trunc(amountCents * rate);' and notes 'Math.trunc(-12.8) returns -12', which yields symmetric handling for negative amounts.",
+      "evidence": "The final message replaces Math.floor with `Math.trunc(amountCents * rate)`, which rounds toward zero, so -12.8 becomes -12 just as 12.8 becomes 12.",
       "graded_by": "judge"
     }
   ],

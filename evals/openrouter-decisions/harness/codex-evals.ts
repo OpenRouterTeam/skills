@@ -112,11 +112,13 @@ function detectSkillReads(items: TranscriptItem[]): string[] {
   return [...read].sort();
 }
 const DEFAULT_MODELS = ["openai/gpt-5.6-luna", "openai/gpt-6-astra", "z-ai/glm-5.3-flash"];
-const DEFAULT_JUDGE = "openai/gpt-5";
+const DEFAULT_JUDGE = "anthropic/claude-opus-5.5";
 const DEFAULT_EFFORT = "medium";
 const RUN_TIMEOUT_MS = 20 * 60_000;
 const MAX_FILE_CHARS = 30_000;
+const MAX_FILES_TOTAL_CHARS = 400_000;
 const MAX_TRANSCRIPT_CHARS = 40_000;
+const IGNORED_DIRS = new Set([".git", ".agents", "node_modules", ".npm-cache", ".npm", ".cache", ".pytest_cache", "__pycache__", ".venv", "venv", "dist", "build"]);
 
 const args = process.argv.slice(2);
 const outDir = argValue("--out") ?? fail("--out <dir> is required");
@@ -323,7 +325,7 @@ function listProduced(workspace: string): string[] {
   const out: string[] = [];
   const walk = (dir: string): void => {
     for (const name of readdirSync(dir)) {
-      if (name === ".git" || name === ".agents" || name === "node_modules") continue;
+      if (IGNORED_DIRS.has(name)) continue;
       const full = join(dir, name);
       if (statSync(full).isDirectory()) walk(full);
       else out.push(relative(workspace, full));
@@ -331,6 +333,11 @@ function listProduced(workspace: string): string[] {
   };
   walk(workspace);
   return out.sort();
+}
+
+/** Drops files under ignored (cache, dependency, build) directories from records written before those directories were skipped. */
+function judgeVisibleFiles(files: string[]): string[] {
+  return files.filter((f) => !f.split("/").slice(0, -1).some((seg) => IGNORED_DIRS.has(seg)));
 }
 
 
@@ -474,9 +481,11 @@ async function grade(c: EvalCase, record: RunRecord, dir: string): Promise<Gradi
     if (record.error && record.final_message === "" && record.produced_files.length === 0) {
       for (const { index } of judgeItems) grades[index] = { pass: false, evidence: `run failed: ${record.error}`, graded_by: "transcript" };
     } else {
-      const files = record.produced_files
-        .map((f) => `===== ${f} =====\n${truncate(readFileSync(join(dir, "outputs", f), "utf8"), MAX_FILE_CHARS)}`)
-        .join("\n\n");
+      const visible = judgeVisibleFiles(record.produced_files);
+      const files = truncate(
+        visible.map((f) => `===== ${f} =====\n${truncate(readFileSync(join(dir, "outputs", f), "utf8"), MAX_FILE_CHARS)}`).join("\n\n"),
+        MAX_FILES_TOTAL_CHARS
+      );
       const transcript = truncate(
         record.items.map((i) => `[${i.type}] ${i.text}`).join("\n\n"),
         MAX_TRANSCRIPT_CHARS
@@ -493,7 +502,7 @@ async function grade(c: EvalCase, record: RunRecord, dir: string): Promise<Gradi
         "",
         `Final message from the agent:\n${truncate(record.final_message, MAX_FILE_CHARS)}`,
         "",
-        `Files the agent produced (${record.produced_files.length}):\n${files || "(none)"}`,
+        `Files the agent produced (${visible.length}):\n${files || "(none)"}`,
         "",
         `Transcript (commands run and messages):\n${transcript}`,
         "",

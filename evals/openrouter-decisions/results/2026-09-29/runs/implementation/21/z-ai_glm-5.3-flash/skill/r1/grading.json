@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02942125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.101772,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "src/incident-urgency.ts builds a score question with ordered levels: questions.urgency = { type: \"score\", criteria: [\"Level 1...\", ..., \"Level 5...\"] }.",
+      "evidence": "src/incident-urgency.ts builds `urgency: { type: \"score\", ... criteria: [...CRITERIA] }` with five ordered Level 1–5 descriptions, not a choice question.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "rateIncident derives the sortable value from the returned score: urgency: toLevel(scoreAnswer.score) after a single decide() call (no second call or model-generated digit).",
+      "evidence": "rateIncident computes `urgency: toLevel(scoreAnswer.score)`, where toLevel is `Math.min(5, Math.max(1, Math.round(score + 1)))` applied to the returned score in one call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "buildRequest uses separate named state fields: state = { affected_service: report.service.trim(), report: trimmedReport } (see src/incident-urgency.ts and probe/request.json).",
+      "evidence": "buildRequest sets `state: { affected_service: report.service.trim(), report: trimmedReport }`, so report text and service are separate named fields.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.04932,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.192308,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "src/rank-tickets.ts computes per-candidate noul scores and sorts them in code: sortAnswers maps answers to {ticketId, probability} and does .sort((a, b) => b.probability - a.probability).",
+      "evidence": "`sortAnswers` in src/rank-tickets.ts turns each candidate's `noul` probability into `{ ticketId, probability }` and sorts with `.sort((a, b) => b.probability - a.probability)`, so the model returns per-candidate scores and never an ordering.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "README.md states the ranker \"Allows multiple matches or all-low scores,\" and the code returns probabilities without forcing a pick, so if all scores are low there is a clear 'no duplicate' path.",
+      "pass": false,
+      "evidence": "`rankDuplicateTickets` always returns a full ranked list, with no threshold, no none option and no duplicate/no-duplicate flag; the README only says 'A first-place result can still be a poor match' and leaves thresholds to future calibration, so no code path concludes that no candidate is a duplicate (the only special case is zero candidates).",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

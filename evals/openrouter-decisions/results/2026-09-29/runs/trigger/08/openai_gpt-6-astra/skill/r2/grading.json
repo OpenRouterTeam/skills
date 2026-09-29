@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.010925,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.027088,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message: “Use OpenRouter’s Decisions API with a `noul` question… The helper calls POST https://openrouter.ai/api/alpha/decisions,” and the code uses `decide(request, \"http\", config.apiKey)` rather than a chat completion.",
+      "evidence": "The code calls `decide(request, \"http\", config.apiKey)` with a `type: \"noul\"` question, and the message says the helper calls `POST https://openrouter.ai/api/alpha/decisions` rather than a chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "In the request, `state: { question, answer: draft, passages }` shows `answer` and `passages` as separate named fields.",
+      "evidence": "The request uses `state: { question, answer: draft, passages }`, so `answer` and `passages` are separate named state fields.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0189825,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.030148,
   "judge_error": null,
   "assertions": [
     {
@@ -9,16 +9,16 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "Final message admits no implementation: \"The workspace contains no bot code or escalation data, so I haven’t changed the application.\"",
+      "pass": true,
+      "evidence": "The final message says to \"Replace the yes/no text parsing with a typed decision\" that uses OpenRouter Decisions to \"estimate whether human intervention is required\" and applies a tuned \"probability threshold.\" That is a yes/no probability question with the threshold applied by the application, though no code was written because the workspace was empty.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message: \"Tune the probability threshold against labeled examples, measuring both unnecessary handoffs and missed necessary escalations. Include non-escalated conversations to catch the latter.\"",
+      "evidence": "The plan says \"Tune the probability threshold against labeled examples, measuring both unnecessary handoffs and missed necessary escalations,\" and the agent asked where to find \"last week’s labeled escalation examples.\"",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 3,
   "total": 3
 }

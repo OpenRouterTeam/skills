@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01580375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.018356,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The payload shows model, state, and questions, and the curl uses POST to /api/alpha/decisions: 'model': 'typesafe/jev-1.13', 'state': { 'review': '...' }, 'questions': { 'is_toxic': { 'type': 'noul', ... } }, and 'curl https://openrouter.ai/api/alpha/decisions'.",
+      "evidence": "The final JSON has \"model\": \"typesafe/jev-1.13\", a \"state\" object with \"review\", and a \"questions\" object with a noul question, and the curl posts it to https://openrouter.ai/api/alpha/decisions.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is only a single noul question 'is_toxic' that combines multiple violations ('harassment, threats, abusive attacks, or deceptive/scam-like content') rather than separate noul questions per policy label.",
+      "evidence": "There is one combined noul question \"is_toxic\" whose criteria merge \"harassment, threats, abusive attacks, or deceptive/scam-like content\", not a separate noul for each policy violation.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question and criteria are semantic—'Is this review toxic under the moderation policy?' with true if it has 'harassment, threats, abusive attacks, or deceptive/scam-like content'—and do not ask about specific words.",
+      "evidence": "The question asks \"Is this review toxic under the moderation policy?\" with criteria about harassment, threats, abuse, or scam-like content, not about particular words.",
       "graded_by": "judge"
     }
   ],

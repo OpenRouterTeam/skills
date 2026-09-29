@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03744125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.050884,
   "judge_error": null,
   "assertions": [
     {
-      "pass": true,
-      "evidence": "README.md defines an ordered 1–5 scale with level descriptions (e.g., '1. Informational...' ... '5. Complete outage...'), and the code returns an integer score (UrgencyRating.score), not a multiple-choice digit label.",
+      "pass": false,
+      "evidence": "incident_urgency.py has no score question with ordered levels; urgency comes from summed regex signal weights (`base_score = 1.0 + sum(signal.weight ...)`), and no decision model is called.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "incident_urgency.py derives the sortable value in code: base_score = 1.0 + sum(...); raw_score = base_score + service_bump; score = max(1, min(5, round(raw_score))). No second call or model-generated number.",
+      "pass": false,
+      "evidence": "The score is computed in code by `max(1, min(5, round(raw_score)))` from keyword weights, not from a score or level probabilities returned by a decision model, since no model call exists.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The inputs are separate named fields: def rate_incident_report(text: str, service: str, ...), and CLI adds parser.add_argument('text', ...) and parser.add_argument('service', ...). The returned object also includes service as a separate field.",
+      "pass": false,
+      "evidence": "`rate_incident_report(text, service, ...)` takes text and service as function parameters, but there are no state fields for a decision model, because no decision model is used.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 0,
   "total": 3
 }

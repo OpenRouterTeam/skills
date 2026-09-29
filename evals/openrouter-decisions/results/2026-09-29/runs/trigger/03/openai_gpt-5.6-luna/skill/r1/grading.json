@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01085875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025244,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "“Use a Decisions API `choice` question for the primary intent” and “Accept the selected queue only when its probability and confidence meet calibrated thresholds.”",
+      "evidence": "Step 2 proposes 'a Decisions API `choice` question for the primary intent', and step 4 gates on 'probability and confidence' against calibrated thresholds, so this is bounded and probabilistic, not free-text parsing.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Includes a `needs_review` queue: “`needs_review`: ambiguous or low-confidence cases” and “Otherwise send the ticket to `needs_review` or general support.”",
+      "pass": false,
+      "evidence": "The taxonomy's extra option is `needs_review` for 'ambiguous or low-confidence cases', and step 4 is a confidence fallback; neither gives an explicit option for tickets that clearly fit none of the teams.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

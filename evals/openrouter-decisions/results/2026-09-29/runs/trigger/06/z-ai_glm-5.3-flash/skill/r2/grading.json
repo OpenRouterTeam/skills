@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02254375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01932,
   "judge_error": null,
   "assertions": [
     {
@@ -10,20 +10,20 @@
     },
     {
       "pass": true,
-      "evidence": "“Purchase within 90 days, amount ≤ order total, ≤ 2 refunds/customer/year: check these directly in code… These aren't judgments; never send them to a decision model.”",
+      "evidence": "The final message says the 90-day, amount ≤ order total, and ≤ 2 refunds/year rules are checked 'directly in code against your database fields' and 'never send them to a decision model.'",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "“What's left after the hard rules pass is: ‘Is this refund request unambiguous and consistent with its stated reason?’ — a noul question.”",
+      "evidence": "The model's only question is the noul 'Is this refund request unambiguous and consistent with its stated reason?', which is a judgment of reason plausibility.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "“Code then gates on the returned probability: is_obvious.noul >= T → auto-approve; below → human queue.”",
+      "pass": false,
+      "evidence": "The gate uses one threshold ('is_obvious.noul >= T → auto-approve; below → human queue'), so there is a single approve-or-escalate cutoff with no defined middle band between two thresholds and no auto-deny band.",
       "graded_by": "judge"
     }
   ],
-  "passed": 4,
+  "passed": 3,
   "total": 4
 }

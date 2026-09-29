@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.058265,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.232208,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "src/reviews.ts uses Decisions API and numeric probabilities in routeAnswer; there is no string matching (e.g., it checks answer.probabilities and thresholds, not out.toLowerCase().includes()).",
+      "evidence": "src/reviews.ts calls decide() with a typed choice question and routes on answer.probabilities with THRESHOLDS; there is no .includes() or other string matching on generated text.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The code uses a single choice question (src/review-question.ts) and the README says “One `choice` question defines mutually exclusive labels,” not separate noul questions for spam and abusive.",
+      "evidence": "src/review-question.ts defines a single `choice` question with mutually exclusive options (\"If both spam and abuse apply, choose spam\"), not separate noul questions, so a review cannot be both spam and abusive.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Thresholds are defined in code next to probability handling: src/reviews.ts has THRESHOLDS = { spam: 0.98, abusive: 0.98, fine: 0.98 } and routeAnswer applies them to answer.probabilities before returning.",
+      "evidence": "src/reviews.ts exports `THRESHOLDS = { spam: 0.98, abusive: 0.98, fine: 0.98 }` and routeAnswer compares `probabilities[category] >= THRESHOLDS[category]` alongside the returned probabilities.",
       "graded_by": "judge"
     }
   ],

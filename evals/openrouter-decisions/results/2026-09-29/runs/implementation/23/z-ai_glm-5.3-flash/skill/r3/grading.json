@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03113,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.085328,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription_return_check.ts computes one-year in code: const oneYearMs = 365 * 24 * 60 * 60 * 1000; if (now.getTime() - input.subscriptionStart.getTime() <= oneYearMs) return \"recent_subscription\";",
+      "evidence": "subscription_return_check.ts computes `now.getTime() - input.subscriptionStart.getTime() <= oneYearMs` and returns \"recent_subscription\" before any model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The DecisionsRequest sends only the cancellation reason: state: { cancellation_reason: input.cancellationReason }, with no dates included.",
+      "evidence": "The request state is `{ cancellation_reason: input.cancellationReason }` with no dates included.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question is a noul (questions.likely_to_return.type = \"noul\"), and the threshold is enforced in code: const RETURN_LIKELIHOOD_THRESHOLD = 0.8; return answer.noul >= RETURN_LIKELIHOOD_THRESHOLD ? ...",
+      "evidence": "The question `likely_to_return` has `type: \"noul\"`, and code applies `answer.noul >= RETURN_LIKELIHOOD_THRESHOLD` (0.8).",
       "graded_by": "judge"
     }
   ],

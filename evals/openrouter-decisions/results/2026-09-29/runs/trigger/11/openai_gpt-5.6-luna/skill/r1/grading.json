@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01292875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.009328,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "Final message shows a retry loop with exponential backoff and jitter: 'const maxRetries = 5; ... const baseDelayMs = 500 * 2 ** attempt; const jitterMs = Math.random() * baseDelayMs; await ... setTimeout(resolve, baseDelayMs + jitterMs)', and it retries on errors until 'attempt >= maxRetries'.",
+      "evidence": "The final message wraps the call in a `for` retry loop that waits `500 * 2 ** attempt` ms plus a `Math.random() * baseDelayMs` jitter term, which is exponential backoff with jitter, and caps retries with `attempt >= maxRetries` where maxRetries = 5.",
       "graded_by": "judge"
     }
   ],

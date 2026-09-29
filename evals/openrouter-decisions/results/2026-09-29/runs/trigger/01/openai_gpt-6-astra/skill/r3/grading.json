@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.011755,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02528,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": false,
-      "evidence": "They state 'The three criteria above form the answer set; support covers no-match cases,' which omits a separate no-match option (e.g., 'none_of_these').",
+      "evidence": "The plan uses one `choice` question, but step 2 says \"The three criteria above form the answer set; `support` covers no-match cases,\" so there is no separate none/no-match option.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "They write 'Keep control flow in code... Timeouts, API failures, or malformed responses produce a logged fallback to support' and 'Inspect raw probabilities... derive any threshold,' placing threshold and fallback in code, not in the question.",
+      "pass": false,
+      "evidence": "Step 5 leaves the threshold uncommitted (\"determine whether uncertain cases should fall back to `support`; derive any threshold from observed results\"), and step 2 routes no-match through the `support` option inside the question rather than a code-side fallback.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 1,
   "total": 3
 }

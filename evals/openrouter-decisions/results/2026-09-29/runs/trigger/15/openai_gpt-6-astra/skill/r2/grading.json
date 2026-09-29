@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00562875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.005724,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "No generative model was used: the transcript only shows directory searches and the final message asks 'Where are the support tickets stored...?', with no LLM call or generated summaries.",
+      "evidence": "The agent wrote no code and produced no files. It stopped after finding an empty workspace and asked 'Where are the support tickets stored...', so no generative model or chat completion was ever used for the summary.",
       "graded_by": "judge"
     }
   ],

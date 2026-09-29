@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0103175,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.026328,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message: 'one Decisions API call with one score question per candidate... Code then sorts on the returned scores' and 'Sort candidates descending by the score field'—ranking from per-candidate scores in code.",
+      "evidence": "The final message specifies \"one `score` question per candidate, keyed by a stable candidate ID ... Code then sorts on the returned scores\" and \"Sort candidates descending by the `score` field\", so the ordering comes from per-candidate scores in code, not from the model.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message: 'Use a two-band policy... below → treat as distinct,' providing a path when no candidate is a duplicate.",
+      "evidence": "The two-band policy says \"below → treat as distinct\", so when every candidate scores under `FLAG_FOR_REVIEW` none is linked, which covers the no-duplicate case.",
       "graded_by": "judge"
     }
   ],

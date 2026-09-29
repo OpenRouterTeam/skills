@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01501375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.011652,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "In bm25.py scores are computed from term statistics (e.g., \"idf = {term: log1p((count - frequency + 0.5) / (frequency + 0.5)) ...}\", and score sums with k1,b) and ranked deterministically via \"nlargest(10, ..., key=lambda result: (result[1], -result[0]))\".",
+      "evidence": "bm25.py computes scores only from term frequencies (Counter), document frequencies, idf via log1p, document length, and average length, with fixed k1=1.5 and b=0.75. It ranks with heapq.nlargest using a deterministic tie-break key (score, -index), and there is no randomness or model call.",
       "graded_by": "judge"
     }
   ],

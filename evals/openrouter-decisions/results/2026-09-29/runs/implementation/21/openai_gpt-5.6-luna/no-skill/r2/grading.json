@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03195875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025328,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "README says `rate_incident(report, service) returns an integer from 1 to 5` and the code defines def rate_incident(...) -> int, with no explicit score question object or ordered level definitions.",
+      "evidence": "incident_urgency.py has no decision model score question; urgency comes from hardcoded keyword rules that return integer literals such as `UrgencyAssessment(5, ...)`, so no score question with ordered levels exists.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The dashboard value is computed as assess_incident(report, service).score in rate_incident, deriving the sortable urgency in code.",
+      "pass": false,
+      "evidence": "No model is called and no score or level probabilities are returned; `rate_incident` just returns `assess_incident(...).score`, which comes from keyword matching, so nothing is derived from model output.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "IncidentReport dataclass has separate fields `report` and `service`, and assess_incident takes `report` and `service` as separate named parameters.",
+      "pass": false,
+      "evidence": "The `IncidentReport(report, service)` dataclass is defined but never used, and no decision-model state is built. The two strings are plain function arguments, not named state fields for a decision model.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 0,
   "total": 3
 }

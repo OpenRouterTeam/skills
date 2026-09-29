@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00371875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.005644,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "No code was written to compute metrics; the agent said 'I couldn’t find `labels.csv` in the workspace' and produced no files.",
+      "evidence": "The agent ran `rg --files -g 'labels.csv'` and `ls -la` and found no CSV, so it wrote no script and computed no metrics (\"Files the agent produced (0)\"). It only asked the user to upload the file.",
       "graded_by": "judge"
     }
   ],

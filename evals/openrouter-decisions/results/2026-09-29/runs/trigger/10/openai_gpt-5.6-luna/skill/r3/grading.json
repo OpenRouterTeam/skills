@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00997375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021296,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The code ranks in code via rankDuplicates, mapping noul probabilities and sorting: `.map(... { ticketId, probability: answer.noul } ).sort((a, b) => b.probability - a.probability)`.",
+      "evidence": "The final message defines one `noul` question per candidate and a `rankDuplicates` function that sorts by `b.probability - a.probability` in code, so the model is never asked for an ordering.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The workflow handles no-duplicate cases with `if (!top || top.probability < REVIEW_THRESHOLD) { return { action: \"no_confident_duplicate\", ranked }; }`.",
+      "evidence": "The workflow returns `{ action: \"no_confident_duplicate\", ranked }` when `!top || top.probability < REVIEW_THRESHOLD`, which gives an explicit none-are-duplicates path.",
       "graded_by": "judge"
     }
   ],

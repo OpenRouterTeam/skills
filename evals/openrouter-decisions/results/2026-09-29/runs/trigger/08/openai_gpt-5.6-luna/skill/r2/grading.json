@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01091875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02404,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The grounding check posts to https://openrouter.ai/api/alpha/decisions with a noul question; it explicitly says 'Use the Decisions API only for classification' and not a second chat completion.",
+      "evidence": "The grounding check POSTs to https://openrouter.ai/api/alpha/decisions with a `noul` question 'answer_supported', and the agent says 'use the Decisions API only for classification', not a second chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "In the Decisions request body, state includes separate named fields: user_question, draft_answer (the answer), and retrieved_passages (the passages).",
+      "evidence": "The request state holds separate named fields: `draft_answer: answer` and `retrieved_passages: passages` (plus `user_question`).",
       "graded_by": "judge"
     }
   ],

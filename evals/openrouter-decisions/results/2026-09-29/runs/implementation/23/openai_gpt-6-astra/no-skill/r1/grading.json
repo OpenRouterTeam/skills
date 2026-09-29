@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.022855,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.033164,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription.py computes an anniversary date in code and skips the model when not past it: \"anniversary = date(...); if as_of <= anniversary: return SubscriptionAssessment(False, None)\".",
+      "evidence": "In subscription.py, `assess_subscription` builds the anniversary from `started_on` using `calendar.monthrange` and checks `if as_of <= anniversary: return SubscriptionAssessment(False, None)` entirely in code, before any model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Only the cancellation reason is sent to the model: assess_subscription calls \"model(reason)\" and the test asserts model.assert_called_once_with(\"Taking a break\"); openrouter payload sets messages[1][\"content\"] to the reason.",
+      "evidence": "`openrouter_decision` sends only `{\"role\": \"user\", \"content\": cancellation_reason}`, and the test asserts `payload[\"messages\"][1][\"content\"] == \"I'll return next month\"`; no dates appear in the payload.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The model question is to classify likely return ('likely'/'unlikely'/'unclear') and is only invoked after the code threshold: system prompt says \"Classify whether a customer's cancellation reason suggests they will return\" and test_anniversary_boundary_skips_model shows the model isn’t called until past one year.",
+      "pass": false,
+      "evidence": "The model returns a final categorical label (`\"enum\": [\"likely\", \"unlikely\", \"unclear\"]`) that is passed straight through as `return_intent`, so no likelihood score is produced and no threshold is applied in code.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

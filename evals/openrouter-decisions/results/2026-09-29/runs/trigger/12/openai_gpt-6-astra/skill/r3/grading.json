@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0078075,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.005568,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "The code uses Math.trunc(amountCents * rate) to round toward zero; the transcript states '-10.5 becomes -10 instead of -11, so credit notes mirror positive charges.'",
+      "evidence": "The final message changes the body to `return Math.trunc(amountCents * rate);`, and truncation toward zero gives trunc(-x) = -trunc(x), matching the stated example that `-10.5` becomes `-10` just as 10.5 becomes 10.",
       "graded_by": "judge"
     }
   ],

@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01995,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.032536,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription.py computes tenure in code via _is_more_than_one_year_old(...) which sets an anniversary date and returns as_of > anniversary, and is used in should_target_win_back.",
+      "evidence": "In subscription.py, `_is_more_than_one_year_old(started, as_of)` computes the anniversary and returns `as_of > anniversary` in code, with no model call. The logic is flawed, though: it replaces the start year with `as_of.year` instead of `started.year + 1`.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The model-like classifier _reason_suggests_return takes only cancellation_reason and is called as _reason_suggests_return(cancellation_reason); no dates are passed to it.",
+      "pass": false,
+      "evidence": "No model is ever called: `_reason_suggests_return` does keyword and regex matching against `_RETURN_LIKELY_REASONS`/`_RETURN_LIKELY_PHRASES`, so no model receives the cancellation reason.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "_reason_suggests_return classifies the natural-language reason using regex/phrase lists (e.g., any(phrase in normalized for phrase in _RETURN_LIKELY_PHRASES)), and the thresholding logic is in code combined with the tenure gate in should_target_win_back.",
+      "pass": false,
+      "evidence": "No noul question about likely return is posed to any model. The 'decision model' is a hard-coded two-gate rule set whose second gate is a string-matching function, not a model judgment.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 1,
   "total": 3
 }

@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02634625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.033736,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In subscription.py, check_subscription computes and compares the anniversary in code ('anniversary = date(...); if today <= anniversary: return SubscriptionDecision(False, None)') before any model call.",
+      "evidence": "In subscription.py, check_subscription computes the anniversary with `date(anniversary_year, ...)` and `calendar.monthrange`, then returns early on `if today <= anniversary`, all before any model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "decide_return_intent sends only the cancellation reason as JSON ('{\"cancellation_reason\": reason}') in messages[1]['content], and the test asserts it equals {'cancellation_reason': 'Back next month'} with no dates sent.",
+      "evidence": "decide_return_intent sends only `json.dumps({\"cancellation_reason\": reason})` as the user message, and the README says 'customer identifiers and subscription dates are not sent'.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The system prompt asks a noul to classify likely return ('Classify whether the customer's cancellation reason suggests they intend to return... use likely/unlikely/unclear'), while the one-year threshold is enforced in code before calling the model.",
+      "pass": false,
+      "evidence": "The model itself picks a final category from the enum `likely`/`unlikely`/`unclear` via the JSON schema, so no score or likelihood comes back for code to compare against a threshold.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00794375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01488,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "Final message includes commentary ('The workspace doesn’t contain the detector file to edit.' and 'This matches both ...') in addition to the regex change, so it is not just a regex change and nothing else.",
+      "pass": true,
+      "evidence": "The final message gives only the widened regex `/\\d{3}[- ]\\d{3}[- ]\\d{4}/g`, a one-line note that the detector file was missing, and a statement of what it matches; it proposes no decision model or other change, even though the agent loaded the OpenRouter Decisions skill mid-transcript.",
       "graded_by": "judge"
     }
   ],
-  "passed": 0,
+  "passed": 1,
   "total": 2
 }

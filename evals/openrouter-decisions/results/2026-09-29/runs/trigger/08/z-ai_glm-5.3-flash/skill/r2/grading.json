@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01260375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.023476,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message: 'It's a separate API call from your chat completion — the decision model returns a probability, never text.' and shows client.alpha.decisions.create(...) usage.",
+      "evidence": "The agent sends the check to `client.alpha.decisions.create` with a `noul` question. It states \"It's a separate API call from your chat completion — the decision model returns a probability, never text.\"",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message request JSON shows separate named fields in state: \"state\": { \"answer\": \"<...>\", \"passages\": [ { \"id\": \"doc1\", \"text\": \"...\" }, { \"id\": \"doc2\", \"text\": \"...\" } ] }.",
+      "evidence": "State is defined as `\"state\": { \"answer\": \"...\", \"passages\": [ ... ] }`, and the code uses `state: { answer, passages }`, so they are separate named fields.",
       "graded_by": "judge"
     }
   ],

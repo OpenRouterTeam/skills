@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.016595,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.040768,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The request sets questions.urgency.type to \"score\" with five ordered criteria (URGENCY_LEVELS), and the test asserts type === \"score\" and criteria.length === 5.",
+      "evidence": "src/urgency.ts defines `urgency: { type: \"score\", ... criteria: URGENCY_LEVELS }`, where URGENCY_LEVELS is an ordered array of five impact descriptions, not a choice over digits.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The code derives the sortable urgency via levelFromAnswer(answer), preferring answer.probabilities to pick a level 1–5 and falling back to rounding answer.score; it does not ask the model for a 1–5 value or make a second call.",
+      "evidence": "levelFromAnswer() computes the 1–5 urgency in code from the argmax of `answer.probabilities`, falling back to `Math.round(answer.score)`, all within a single request.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request uses separate named state fields: state: { service: incident.service.trim(), report: incident.report.trim() }.",
+      "evidence": "The request body uses `state: { service: incident.service.trim(), report: incident.report.trim() }`, which gives the text and the service separate named fields.",
       "graded_by": "judge"
     }
   ],

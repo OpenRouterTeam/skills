@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01342625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02272,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Plan states: “one `choice` with options `billing`, `engineering`, `support` (plus a fallback if ambiguous)” and “plus a fallback option (e.g. `unclear`).”",
+      "evidence": "The plan specifies \"one `choice` with options `billing`, `engineering`, `support` (plus a fallback if ambiguous)\" and adds \"a fallback option (e.g. `unclear`) for ambiguous or empty inputs\", which is a single choice question over the three teams plus a no-match option.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Plan states: “If confidence is low (probability below a named threshold, set after probing), fall back to a default queue or escalate…” and “Kept in code: threshold comparison, fallback band…”",
+      "evidence": "The code flow says \"If confidence is low (probability below a named threshold...), fall back to a default queue\", and the plan lists \"Kept in code: threshold comparison, fallback band\", so both sit in code rather than in the question.",
       "graded_by": "judge"
     }
   ],

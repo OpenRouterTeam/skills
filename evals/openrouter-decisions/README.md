@@ -43,7 +43,8 @@ The eval prompts and assertions live with the skill in [`skills/openrouter-decis
 | Codex agent | `openai/gpt-5.6-luna`, `openai/gpt-6-astra`, `z-ai/glm-5.3-flash` via OpenRouter (`wire_api = "responses"`) | `model_reasoning_effort = "medium"`, `approval_policy = "never"`, `sandbox_mode = "workspace-write"`, no output token limit |
 | Discovery/design generators | same three models, Chat Completions | `temperature: 0`, JSON mode, no `max_tokens` |
 | Decision model | `typesafe/jev-1.13-20260917` | live Decisions API |
-| Judge (rubric and pairwise) | `openai/gpt-5` | `temperature: 0`, JSON mode (see Limitations for the 2026-09-29 fixture rubric judge) |
+| Codex assertion judge and Codex pairwise judge | `anthropic/claude-opus-5.5` | `temperature: 0`, JSON mode (the first pass used `openai/gpt-5`; see Judge below) |
+| Fixture rubric judge and design pairwise judge | `openai/gpt-5` | `temperature: 0`, JSON mode (see Limitations for the 2026-09-29 fixture rubric judge) |
 
 Requests time out after 10 minutes and are retried once; a second failure is recorded as an error for that run.
 
@@ -105,22 +106,24 @@ Every miss on the positive side is `glm-5.3-flash` skipping the skill on implici
 
 | Model | Arm | Assertions passed | Per-round pass rate mean ± sd | Time s mean ± sd | Tokens in mean | Cost/run $ |
 |---|---|---:|---:|---:|---:|---:|
-| `openai/gpt-5.6-luna` | no-skill | 15/42 | 35.7% ± 0.0% | 41 ± 9 | 109k | 0.010 |
-| `openai/gpt-5.6-luna` | skill | 36/42 | 85.7% ± 0.0% | 47 ± 16 | 168k | 0.012 |
-| `openai/gpt-6-astra` | no-skill | 23/42 | 54.8% ± 10.9% | 98 ± 36 | 120k | 0.521 |
+| `openai/gpt-5.6-luna` | no-skill | 5/42 | 11.9% ± 4.1% | 41 ± 9 | 109k | 0.010 |
+| `openai/gpt-5.6-luna` | skill | 32/42 | 76.2% ± 4.1% | 47 ± 16 | 168k | 0.012 |
+| `openai/gpt-6-astra` | no-skill | 18/42 | 42.9% ± 14.3% | 98 ± 36 | 120k | 0.521 |
 | `openai/gpt-6-astra` | skill | 42/42 | 100.0% ± 0.0% | 166 ± 53 | 399k | 1.103 |
-| `z-ai/glm-5.3-flash` | no-skill | 20/42 | 47.6% ± 4.1% | 85 ± 54 | 99k | 0.008 |
-| `z-ai/glm-5.3-flash` | skill | 34/42 | 81.0% ± 8.2% | 129 ± 79 | 334k | 0.018 |
+| `z-ai/glm-5.3-flash` | no-skill | 5/42 | 11.9% ± 4.1% | 85 ± 54 | 99k | 0.008 |
+| `z-ai/glm-5.3-flash` | skill | 33/42 | 78.6% ± 7.1% | 129 ± 79 | 334k | 0.018 |
 
-Two of the 14 assertions passed in every run of both arms (eval 21 #2 "report text and service name are separate state fields", eval 23 #0 "the two dates are compared in code") and are excluded from the marginal figure below. The other 12 all pass more often with the skill; none regressed.
+One of the 14 assertions passed in every run of both arms (eval 23 #0 "the two dates are compared in code") and is excluded from the marginal figure below. The other 13 all pass more often with the skill; none regressed.
 
-| Model | no-skill (12 discriminating assertions) | skill | Skill − no-skill per round |
+| Model | no-skill (13 discriminating assertions) | skill | Skill − no-skill per round |
 |---|---:|---:|---:|
-| `openai/gpt-5.6-luna` | 9/36 (25.0%) | 30/36 (83.3%) | +58.3% ± 0.0% |
-| `openai/gpt-6-astra` | 17/36 (47.2%) | 36/36 (100.0%) | +52.8% ± 12.7% |
-| `z-ai/glm-5.3-flash` | 14/36 (38.9%) | 28/36 (77.8%) | +38.9% ± 12.7% |
+| `openai/gpt-5.6-luna` | 2/39 (5.1%) | 29/39 (74.4%) | +69.2% ± 7.7% |
+| `openai/gpt-6-astra` | 15/39 (38.5%) | 39/39 (100.0%) | +61.5% ± 15.4% |
+| `z-ai/glm-5.3-flash` | 2/39 (5.1%) | 30/39 (76.9%) | +71.8% ± 8.9% |
 
-The largest gaps are on the model-selection prompt (eval 24): without the skill no run compared candidates on the same request (0/9), probed thresholds before fixing them (0/9), or logged the response model (0/9), and one `gpt-6-astra` run pinned `qwen/qwen3-30b-a3b-instruct-2507`, which is not a decision model. Blind pairwise on the same 36 cells: the judge preferred the skill-arm output in 31, the no-skill output in 0, and was order-inconsistent on 5.
+Most no-skill runs of the three coding prompts (21–23) never call a decision model even though every prompt asks for one: `gpt-5.6-luna` and `glm-5.3-flash` write keyword or regex rules, or a chat-completion prompt, and return their output as the "decision model"; only `gpt-6-astra` calls the Decisions API, in 2 of its 9 runs. Those runs fail every assertion that presupposes a returned probability, which is why the two smaller models sit at 5%. On the model-selection prompt (eval 24) no no-skill run took candidates from the live catalog (0/9), compared them on the same request (0/9), logged the response model (0/9), or probed thresholds before fixing them (0/9), and one `gpt-6-astra` run pinned `qwen/qwen3-30b-a3b-instruct-2507`, which is not a decision model. Blind pairwise on the same 36 cells: the judge preferred the skill-arm output in 36 of 36, with no ties and no order-inconsistent pairs.
+
+**Judge.** The Codex assertions and Codex pairwise were first graded by `openai/gpt-5` and then re-graded from the same cached transcripts and files by `anthropic/claude-opus-5.5`, which is now the default. `gpt-5` gave 25–47% (no-skill) versus 78–100% (skill) on 12 discriminating assertions and a 31–0 pairwise with 5 inconsistent pairs; it credited no-skill runs for assertions such as "separate state fields" or "the threshold is in code" when the code called no model at all, so the two arms looked closer than they are. Opus fails those runs with the reason quoted in `grading.json`. The `gpt-5` gradings are in this repository's history (commit `52a8a9c`); the trigger numbers do not depend on the judge.
 
 ### Discovery and implementation quality on the fixtures
 
@@ -151,7 +154,7 @@ What the held-out fixture shows that the in-sample one did not:
 
 | Component | Generation | Judge | Decisions |
 |---|---:|---:|---:|
-| Codex trigger + implementation (252 runs) | $43.47 (of which `gpt-6-astra` ≈ $40) | $4.68 rubric + $2.35 pairwise | — |
+| Codex trigger + implementation (252 runs) | $43.47 (of which `gpt-6-astra` ≈ $40) | $11.70 assertions + $5.56 pairwise (`claude-opus-5.5`), after $4.68 + $2.35 for the first `gpt-5` pass | — |
 | `support-ops` discovery + designs + rubric | $2.63 | $3.51 rubric + $2.99 pairwise | <$0.01 |
 | `marketplace-ops` discovery + designs + rubric | $3.03 | $3.55 rubric + $3.42 pairwise | <$0.01 |
 
@@ -162,7 +165,7 @@ Wall time at concurrency 3: 51 minutes for the 180 trigger runs and 45 minutes f
 - **Trigger workspaces are nearly empty.** Each trigger run starts in a Git repository whose only content is the skill, so a model that explores its surroundings before working reads `SKILL.md` for reasons that have nothing to do with the task. Negative-control failures therefore overstate false triggering relative to a real repository, where the skill is one directory among many. The per-category table separates this from the explicit, implicit, and contextual cases.
 - **`support-ops` is in-sample.** The skill text was tuned on failures observed on this fixture in the session that wrote the skill. Its numbers show the skill on material it was written against; `marketplace-ops` was written after the skill text was frozen and is the held-out measurement.
 - **Assertions restate the skill.** The `evals.json` assertions and the fixture rubric items are the skill's own rules as checks. Passing them shows the agent followed the skill, not that the skill's rules are the right ones. The blind pairwise judgment is the only holistic signal here, and it uses a single judge model.
-- **One judge.** All grading is `openai/gpt-5`. Judge disagreement with humans is not measured; `review/feedback.json` is the artifact for collecting that.
+- **One judge per number.** Codex assertions and Codex pairwise are graded by `anthropic/claude-opus-5.5`; the fixture rubric and design pairwise by `openai/gpt-5`. The two judges disagreed materially on the no-skill Codex runs (see Judge above), which is a reminder that these figures carry judge error. Judge disagreement with humans is not measured; `review/feedback.json` is the artifact for collecting that.
 - **The 2026-09-29 fixture rubric judge ran at the provider default temperature.** `discovery.ts` passed an empty options object to the judge call, which bypassed the helper's `temperature: 0` default; the Codex assertion judge and all pairwise judging did run at 0. The fix is in this harness, so the next iteration's rubric numbers are at temperature 0, but the `support-ops` and `marketplace-ops` rubric pass rates above carry judge sampling variance that the reported per-round standard deviation includes but does not isolate. Re-judging the 126 designs per fixture costs about $3.50 each.
 - **The 2026-09-29 discovery prompt called every fixture a "support-operations backend".** The wording was hard-coded from the first fixture, so the `marketplace-ops` discovery runs were framed with the wrong domain in both arms. Recall was 100% in both arms regardless, and both arms saw the same text, so the comparison holds; the prompt now takes the `description` field of the fixture's `sites.json`.
 - **Cached runs recorded before fingerprinting are accepted as-is.** `run.json` files from this iteration have no `run_fingerprint`; runs recorded from now on carry one and are rerun if the skill files, prompt, or reasoning effort change.

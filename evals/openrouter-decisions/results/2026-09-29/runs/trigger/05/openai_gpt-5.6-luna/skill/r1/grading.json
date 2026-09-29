@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00981375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.015176,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message flags the decision points: “- `triage.ts` — keyword-based ticket routing…”, “- `dedupe.ts` — token-overlap duplicate detection…”, and “- `approvals.ts` — blanket human review for refunds over $50.”",
+      "evidence": "The final message flags `triage.ts` (keyword-based routing), `dedupe.ts` (token-overlap detection), and `approvals.ts` (blanket human review for refunds over $50) as candidates, with reasons for each.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message explicitly excludes them under “Not candidates: - `tax.ts` — VAT-by-country lookup… - `auth/permissions.ts` — role-to-scope mapping…”",
+      "evidence": "Under 'Not candidates', the answer lists `tax.ts` as a 'deterministic policy data' lookup and `auth/permissions.ts` as a mapping that 'should remain deterministic', so neither is flagged.",
       "graded_by": "judge"
     }
   ],

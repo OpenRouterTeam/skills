@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0115,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.020224,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": true,
-      "evidence": "In vat.ts the function now returns Math.round(amountCents * rate), and vat.test.ts shows mirrored results for negative/positive amounts (e.g., -1005→-201 vs 1005→201).",
+      "pass": false,
+      "evidence": "vat.ts uses `Math.round(amountCents * rate)`, which rounds exact halves toward +infinity, so `vat(-1005, 0.5)` gives -502 while `vat(1005, 0.5)` gives 503. This is not symmetric, and it contradicts the final message's claim that negatives 'round away from zero'. The test cases include no tie values, so this was never checked.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 1,
   "total": 2
 }

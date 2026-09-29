@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02792375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.024876,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "README.md says \"rate_incident(report, affected_service) returns an integer from 1 to 5,\" and the code only implements functions (no score question object or schema), so urgency is not modeled as a score question with ordered levels.",
+      "evidence": "incident_urgency.py is a hand-written regex rule system that returns integer scores directly and defines no score question with ordered levels for any decision model.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "incident_urgency.py derives the sortable value in code: return assess_urgency(report, affected_service, critical_services=critical_services).score",
+      "pass": false,
+      "evidence": "The score comes from hardcoded if/elif rules in assess_urgency (e.g., `score = 4`), not from a score or level probabilities returned by a decision model, since no model is ever called.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Both APIs take separate named fields: def assess_urgency(report: str, affected_service: str, ...) and def rate_incident(report: str, affected_service: str, ...) in incident_urgency.py",
+      "pass": false,
+      "evidence": "`report` and `affected_service` are separate function parameters, but no decision-model state object with named fields exists, so there are no state fields to evaluate.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 0,
   "total": 3
 }

@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0262175,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.057864,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "Live catalog was queried via scripts/models.ts: output lists entries like 'typesafe/jev-1.13  typesafe/jev-1.13-20260917' and others from GET /api/v1/models (shown in the npx tsx models.ts table).",
+      "evidence": "The agent ran `npx tsx models.ts`, which printed the live catalog table (respan, kev-4b, jev-1.13, solar-decide, ~typesafe/jev-latest alias) before any model was chosen.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Same request was run against multiple candidates: for model in typesafe/jev-1.13 upstage/solar-decide jaredpalmer/kev-4b; do npx tsx decide.ts probe.json --model \"$model\"; done, with JSON results for each model.",
+      "evidence": "The same probe.json was run in a loop `for model in typesafe/jev-1.13 upstage/solar-decide jaredpalmer/kev-4b`, and the choice cites the resulting separation, latency and cost differences.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "classification-config.yaml pins a versioned build in a single value: 'model: typesafe/jev-1.13-20260917' (not an alias).",
+      "evidence": "classification-config.yaml holds a single `model: typesafe/jev-1.13-20260917` line, the dated canonical build rather than the `~typesafe/jev-latest` alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No code or config shows logging the response 'model' string together with stored answers; only console probe output includes a 'model' field.",
+      "evidence": "Neither the config nor any code logs the response `model` string alongside stored answers; the final message does not mention logging it.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Thresholds were derived from real probe runs using decide.ts on representative inputs (e.g., 'I was charged twice' -> is_billing 0.99; category payments 1.00) and recorded in classification-config.yaml comments before setting gates.",
+      "evidence": "Six representative messages (e.g. \"I was charged twice\", \"My dashboard is blank on Safari\") were run through decide.ts on jev-1.13 before thresholds of 0.70 and a 0.45–0.85 review band were written into the config.",
       "graded_by": "judge"
     }
   ],

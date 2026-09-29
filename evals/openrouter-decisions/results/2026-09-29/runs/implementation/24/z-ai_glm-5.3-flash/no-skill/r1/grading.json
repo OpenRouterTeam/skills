@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01277625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021792,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "No live catalog is listed or queried; the transcript shows no GET /api/v1/models or models.ts usage, and the final message directly names \"gpt-5.6-terra\" and \"gpt-5.6-luna\" from memory.",
+      "evidence": "No models.ts run and no GET /api/v1/models?output_modalities=decisions query; the transcript only shows reading local SKILL.md and model-selection.md, and the agent then names `gpt-5.6-terra` from docs guidance.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no decide.ts --compare (or equivalent) run in the transcript; the choice is justified by documentation text only: “Terra is the mini-tier model… a good default before considering the cheaper gpt-5.6-luna.”",
+      "evidence": "The choice between Terra and Luna rests on documentation descriptions ('designed for workloads that balance intelligence and cost'); no decide.ts --compare or equivalent side-by-side request was run, only a proposed future A/B step.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The pinned config uses \"model\": \"gpt-5.6-terra\" with \"pin_version\": true, but does not show a versioned model ID (e.g., a dated or hash-suffixed ID) in a single config value.",
+      "evidence": "The config pins `\"model\": \"gpt-5.6-terra\"`, which is a family/alias name with no dated or versioned suffix; a separate `\"pin_version\": true` flag does not make it a versioned ID.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No code or log snippet is provided; the transcript and final message contain no step that logs the response model string with stored answers.",
+      "evidence": "Neither the config nor the plan mentions logging the response model string alongside stored answers.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds are only proposed in a plan; no decide.ts probe or equivalent was executed and no real-input results are shown (Files the agent produced (0): none).",
+      "evidence": "Thresholds (e.g., '≥90% accuracy and cost < $5/1k') are only proposed as future steps; no probe was run on real inputs in the transcript.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01747125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.06288,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "src/chat.ts calls client.chat.send({...}) and the run output printed 'Hi!', indicating a chat completion (no Decisions API used).",
+      "evidence": "src/chat.ts calls `client.chat.send({ chatRequest: { model, messages, stream: false, maxTokens: 128 } })` and reads `completion.choices[0]?.message.content`, which is a chat completion; no Decisions API endpoint appears anywhere in the files or transcript.",
       "graded_by": "judge"
     }
   ],

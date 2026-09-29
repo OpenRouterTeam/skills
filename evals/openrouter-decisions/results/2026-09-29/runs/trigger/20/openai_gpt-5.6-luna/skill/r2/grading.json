@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.012845,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03284,
   "judge_error": null,
   "assertions": [
     {
@@ -9,16 +9,16 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "No change was made—'there’s nowhere to modify the handoff logic' and 'Files the agent produced (0): (none)' show the handoff was not converted to a noul with a code threshold.",
+      "pass": true,
+      "evidence": "The agent proposes to \"replace the `yes` substring check with an OpenRouter Decisions `noul`, apply a calibrated escalation-probability threshold\", and earlier says to \"let code apply a named threshold\"; that is the required design, though no code was written because the checkout had no bot source.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The agent only promises to 'apply a calibrated escalation-probability threshold' without mentioning tuning on logged escalations and produced no implementation or results.",
+      "evidence": "The agent only says the threshold will be \"calibrated\" and never mentions using last week's logged escalations to tune it.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 2,
   "total": 3
 }

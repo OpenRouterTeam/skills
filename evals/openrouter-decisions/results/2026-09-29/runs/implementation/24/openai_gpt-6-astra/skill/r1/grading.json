@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.060505,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.223512,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "Live catalog was fetched and saved (curl .../api/v1/models?output_modalities=decisions -> classification/evidence/catalog.json), and tools/models.ts lists from that API.",
+      "evidence": "The agent curled 'https://openrouter.ai/api/v1/models?output_modalities=decisions' into evidence/catalog.json and ran models.ts against request.json to produce evidence/model-fit.json. The candidates came from that output.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "classification/evidence/probes.json shows the same request run against multiple fitting candidates via --compare (typesafe/jev-1.13, jaredpalmer/kev-4b, upstage/solar-decide).",
+      "evidence": "probe.ts spawned decide.ts with '--compare' for each probe ticket. evidence/probes.json records the same requests sent to Solar, Kev, Jev and Respan, and the choice rests on the resulting 8/8 vs 7/8 vs 6/8 scores.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "classification/config.json pins a dated build: \"model\": \"typesafe/jev-1.13-20260917\" (not a latest alias).",
+      "evidence": "config.json holds a single value, \"model\": \"typesafe/jev-1.13-20260917\" (the dated canonical slug, not ~typesafe/jev-latest). The README says 'config.json is the single runtime model setting; do not replace it with a moving alias.'",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Stored probe results include the response model string with answers (e.g., \"model\": \"typesafe/jev-1.13-20260917\" in classification/evidence/probes.json and pinned-probes.json), and decide.ts logs response.model.",
+      "evidence": "The stored evidence files (probes.json, pinned-probes.json) keep the response 'model' string (e.g. \"typesafe/jev-1.13-20260917\") alongside each answer. probe.ts also throws on 'Model drift' if the resolved model differs.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They ran classification/tools/probe.ts to produce classification/evidence/probes.json and pinned-probes.json with real inputs and probabilities; thresholds remain unset in config (auto_route_min_probability_by_label: null).",
+      "evidence": "The agent ran the probe set against the pinned model ('probe.ts --pinned') and inspected the winning probabilities (0.99–1.00). Based on that, it left 'auto_route_min_probability_by_label': null rather than fixing a cutoff without evidence.",
       "graded_by": "judge"
     }
   ],

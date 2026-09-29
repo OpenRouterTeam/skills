@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.05905875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.244572,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "support-handoff/README.md states “handoff.ts replaces the chat completion plus includes('yes') with one OpenRouter Decisions noul,” and support-handoff/handoff.ts defines ESCALATION_THRESHOLD = 0.5 and routes by answer.noul >= ESCALATION_THRESHOLD.",
+      "evidence": "handoff.ts sends a `requires_human` question of type \"noul\" and routes with `answer.noul >= ESCALATION_THRESHOLD`, where `export const ESCALATION_THRESHOLD = 0.5` is set in code; this replaces the chat call plus `includes('yes')`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The final message says “The threshold remains provisional until calibrated against reviewed tickets,” and README’s Production calibration section instructs to “Replay reviewed tickets… Choose any threshold changes on calibration data,” i.e., tune the threshold on logged escalations.",
+      "evidence": "The README's 'Production calibration still required' section says to replay reviewed tickets and 'Choose any threshold changes on calibration data', and the agent said it would 'use the reviewed escalations to calibrate production behavior once they're available'.",
       "graded_by": "judge"
     }
   ],

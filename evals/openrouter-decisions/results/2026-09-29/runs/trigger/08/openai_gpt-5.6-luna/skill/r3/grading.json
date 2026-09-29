@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01076375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021692,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The final message posts to https://openrouter.ai/api/alpha/decisions with a noul question (OpenRouter Decisions API), not a chat completion: \"OpenRouter Decisions API judges whether draft is supported\" and fetch(\"https://openrouter.ai/api/alpha/decisions\", ...).",
+      "evidence": "The code POSTs to \"https://openrouter.ai/api/alpha/decisions\" with a `noul` question named `grounded`, not a second chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The request body sets state with separate named fields: state: { question, answer: draft.answer, passages: draft.passages.map(...) }.",
+      "evidence": "The state object has separate named fields: `answer: draft.answer` and `passages: draft.passages.map(...)`, plus `question`.",
       "graded_by": "judge"
     }
   ],

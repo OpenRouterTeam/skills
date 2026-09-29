@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.005425,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.008576,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "email-validator.mjs uses a local regex check — `return typeof email === 'string' && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);` — with no network calls.",
+      "evidence": "email-validator.mjs only runs a `typeof email === 'string'` check and a regex test `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/`, with no fetch, import of network modules, or external call.",
       "graded_by": "judge"
     }
   ],

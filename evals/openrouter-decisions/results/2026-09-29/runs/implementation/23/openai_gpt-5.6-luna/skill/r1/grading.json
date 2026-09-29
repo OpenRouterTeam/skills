@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02013,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.043224,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription.ts computes const moreThanOneYear = now.getTime() > addOneYear(startedAt).getTime(); and does not send dates to the model.",
+      "evidence": "subscription.ts computes `const moreThanOneYear = now.getTime() > addOneYear(startedAt).getTime();` in code, and `addOneYear` uses `setUTCFullYear`, so no date question goes to the model.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request sets state: { cancellation_reason: subscription.cancellationReason.trim() } with no date fields included.",
+      "evidence": "The request state is only `{ cancellation_reason: subscription.cancellationReason.trim() }`; `startedAt` and `now` are never included in the request.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question is defined as type: \"noul\" under questions.likely_to_return, and the code gates with RETURN_PROBABILITY_THRESHOLD = 0.70 and probability >= RETURN_PROBABILITY_THRESHOLD.",
+      "evidence": "The question `likely_to_return` has `type: \"noul\"` and asks about likely return, and code applies `probability >= RETURN_PROBABILITY_THRESHOLD` (0.70).",
       "graded_by": "judge"
     }
   ],

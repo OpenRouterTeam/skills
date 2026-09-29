@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0133275,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02256,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The final message specifies a Decisions API 'noul' check ('This is exactly what the Decisions API is built for …' and 'Insert one decision call …'), not a second chat completion.",
+      "evidence": "The final message places a 'Decisions call (grounding check)' between generation and return. The request is a Decisions API body with a `noul` question 'grounded', not a chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The example request sets state to an object with separate fields 'passages' and 'answer': \"state\": { \"passages\": [\"<passage 1 text>\"], \"answer\": \"<the generated answer text>\" }.",
+      "evidence": "The request `state` has two separate named fields: `\"passages\": [...]` and `\"answer\": \"<the generated answer text>\"`.",
       "graded_by": "judge"
     }
   ],

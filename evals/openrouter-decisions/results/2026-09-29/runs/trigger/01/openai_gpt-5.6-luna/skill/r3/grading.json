@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.015015,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.031936,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "Plan step 2: \"Replace keyword matching with one Decisions API choice question\" with options \"billing\", \"engineering\", \"support\", and \"none\".",
+      "evidence": "Step 2 specifies \"one Decisions API `choice` question\" with options `billing`, `engineering`, `support`, and `none` (\"insufficient, unrelated, or genuinely ambiguous information\").",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Plan step 6: \"Add named code-side behavior for ... low-confidence ... The exact confidence policy and any threshold will be determined...\" and step 5: \"Map the returned choice ... Return support for support or none,\" putting thresholding and fallback in code, not in the question.",
+      "pass": false,
+      "evidence": "Step 6 defers the threshold (\"The exact confidence policy and any threshold will be determined from representative probes\") and names no fallback route for low confidence, while the question itself carries fallback and ambiguity handling through `support` (\"issues that do not fit the other categories\") and `none` (\"genuinely ambiguous\").",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

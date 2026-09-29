@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.05691875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.232568,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "src/guard.ts defines injectionQuestion as a NoulQuestion (type: 'noul') and sets INJECTION_THRESHOLD = 0.5.",
+      "evidence": "src/guard.ts defines `injectionQuestion` with `type: \"noul\"`, sets `export const INJECTION_THRESHOLD = 0.5;`, and computes `action: answer.noul >= INJECTION_THRESHOLD ? \"block\" : \"allow\"`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "buildRequest(message) places the input in state: { user_message: message } and tests/guard.test.ts asserts body.state equals that, not concatenating it into the question.",
+      "evidence": "buildRequest places the message in `state: { user_message: message }`, the static question instructions only reference `user_message` by name, and a test asserts `body.state` deep-equals `{ user_message: message }`.",
       "graded_by": "judge"
     }
   ],

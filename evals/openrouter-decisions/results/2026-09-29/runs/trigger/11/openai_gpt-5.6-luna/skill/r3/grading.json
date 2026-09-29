@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0144,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.014088,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "The final code wraps the call in a retry loop and uses exponential backoff with jitter: 'const exponentialDelay = Math.min(maxDelayMs, baseDelayMs * 2 ** attempt);' and 'const delayMs = Math.random() * exponentialDelay' before setTimeout.",
+      "evidence": "The final message wraps `openai.chat.completions.create` in a `for (let attempt = 0; ; attempt++)` try/catch loop. The delay is `baseDelayMs * 2 ** attempt`, capped at `maxDelayMs`, with full jitter from `Math.random() * exponentialDelay`, and the loop throws once `attempt >= maxRetries` (5).",
       "graded_by": "judge"
     }
   ],

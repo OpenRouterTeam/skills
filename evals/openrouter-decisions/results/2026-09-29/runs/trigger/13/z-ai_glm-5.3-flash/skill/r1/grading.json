@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01449125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01832,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "validateEmail.cjs implements only deterministic regex/string checks (e.g., 'if (!/^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(localPart))' and 'return /^[A-Za-z0-9].../.test(domain);') and exports the function with 'module.exports = validateEmail;', with no network calls.",
+      "evidence": "validateEmail.cjs relies only on typeof checks, trim, lastIndexOf/slice, includes(\"..\"), and two regex .test() calls, with no fetch, http, DNS, or other network or model call.",
       "graded_by": "judge"
     }
   ],

@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01610625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03782,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription.py checks age in code: if not _is_more_than_one_year_old(started, as_of_date): return False, with _is_more_than_one_year_old computing the anniversary.",
+      "evidence": "subscription.py computes `_is_more_than_one_year_old(started, as_of_date)` in code by building an anniversary with `started.replace(year=started.year + 1)` and comparing `as_of > anniversary`; the result gates the model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request sends only the reason: request_body['state'] = {'cancellation_reason': reason}, with no dates included.",
+      "evidence": "The request body's state is only `{\"cancellation_reason\": reason}`, so the subscription dates are never sent to the model.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question is a noul ('type': 'noul' for 'may_return') and the code gates on RETURN_PROBABILITY_THRESHOLD = 0.5 via return probability >= RETURN_PROBABILITY_THRESHOLD.",
+      "evidence": "The question `may_return` has `\"type\": \"noul\"` about whether the customer may come back, and code returns `probability >= RETURN_PROBABILITY_THRESHOLD` (0.5).",
       "graded_by": "judge"
     }
   ],

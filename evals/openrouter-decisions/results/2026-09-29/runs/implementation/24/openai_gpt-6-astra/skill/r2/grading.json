@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0464525,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.134836,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The agent fetched the live catalog via models.ts and GET: ran '/tmp/.../models.ts classification/request.json --json > classification/catalog.json' and also requested https://openrouter.ai/api/v1/models?output_modalities=decisions; catalog.json lists current models.",
+      "evidence": "The agent fetched https://openrouter.ai/api/v1/models?output_modalities=decisions and ran models.ts on request.json, saving the output to classification/catalog.json; the shortlist of Jev, Kev and Solar came from that catalog.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They compared candidates by running decide.ts with --compare across the same probes and saved results in classification/probe-results.json showing model_id entries for upstage/solar-decide, jaredpalmer/kev-4b, and typesafe/jev-1.13 for each case.",
+      "evidence": "The agent ran `decide.ts - --compare` on the same nine probes against every catalog model and saved the results to probe-results.json. It chose Jev over Kev on measured correctness (9/9 vs 9/9) and median latency (140 ms vs 560 ms).",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "classification/config.json pins a versioned canonical slug in a single value: \"model\": \"typesafe/jev-1.13-20260917\" (not a ~latest alias).",
+      "evidence": "config.json holds the dated build `\"model\": \"typesafe/jev-1.13-20260917\"` as its single model value; the README calls it 'the single source of the model pin'. The `~typesafe/jev-latest` alias was not used.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The stored results include the response model string with answers, e.g., pinned-results.json entries have \"model\": \"typesafe/jev-1.13-20260917\" alongside the returned answers.",
+      "evidence": "Every entry in pinned-results.json and probe-results.json stores the response `\"model\": \"typesafe/jev-1.13-20260917\"` next to its answers, and probe.py rejects results whose returned model differs from the pin. The README also says to 'Log the returned `model`, raw answer, rubric version...'.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They probed thresholds by running real API calls over representative inputs before fixing any cutoff: classification/probe-results.json and pinned-results.json contain probabilities per label, while config.json keeps \"min_selected_probability\": null.",
+      "evidence": "The agent ran decide.ts over nine representative probes (ambiguous, negated, adversarial, empty) and inspected the probabilities. It left `min_selected_probability` null because 'nine synthetic cases cannot validate a production cutoff', and requires a calibration sweep on real labeled inputs before any cutoff is fixed.",
       "graded_by": "judge"
     }
   ],

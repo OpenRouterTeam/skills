@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01121375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.00856,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "src/validateEmail.js uses a fixed regex and returns emailPattern.test(trimmed) with no network/API calls.",
+      "evidence": "src/validateEmail.js does only a typeof check, a trim, and a regex test (`emailPattern.test(trimmed)`), with no fetch, import, or other network call, so it is deterministic local code.",
       "graded_by": "judge"
     }
   ],

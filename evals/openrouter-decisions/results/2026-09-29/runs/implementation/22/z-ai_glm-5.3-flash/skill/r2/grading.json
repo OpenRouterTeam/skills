@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02303125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.066156,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The question is phrased as \"Is this change breaking?\" in both the final message and breaking-pr-gate.ts, not about whether the text mentions breaking changes.",
+      "evidence": "The question in breaking-pr-gate.ts is `instructions: \"Is this change breaking?\"`, and its true/false criteria describe consumer impact of the change, not what the description mentions.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Code defines and uses a threshold: export const BREAKING_PROBABILITY_THRESHOLD = 0.5; and autoMergeAllowed: answer.noul < BREAKING_PROBABILITY_THRESHOLD.",
+      "evidence": "breaking-pr-gate.ts defines `export const BREAKING_PROBABILITY_THRESHOLD = 0.5;` and computes `autoMergeAllowed: answer.noul < BREAKING_PROBABILITY_THRESHOLD`.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no explicit statement or test indicating that a description saying 'no breaking changes' yields a low probability; the example request instead describes a breaking change.",
+      "evidence": "The only example in request.json is a 'BREAKING CHANGE:' description, and neither the files nor the final message address the expected probability for a description saying 'no breaking changes'.",
       "graded_by": "judge"
     }
   ],

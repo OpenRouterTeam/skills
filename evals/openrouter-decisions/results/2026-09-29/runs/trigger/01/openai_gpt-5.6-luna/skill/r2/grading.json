@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01243,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.031076,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "Plan step 1: \"one Decisions API `choice` question\" with options \"billing\", \"engineering\", \"support\", and \"none\".",
+      "evidence": "Step 1 plans \"one Decisions API `choice` question over `ticket.text`\" with the options `billing`, `engineering`, `support`, and a `none` option for \"empty, unintelligible, or unrelated input.\"",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Plan step 2: \"Map `none`... to the existing safe fallback, `support`.\" and step 5: \"Set any confidence or fallback thresholds from those observed probabilities.\" The request snippet includes only instructions/criteria, not thresholds.",
+      "pass": false,
+      "evidence": "Step 2 puts the `support` fallback in code, but step 5 leaves the confidence threshold optional (\"Set any confidence or fallback thresholds...\") and says \"The initial implementation can use the returned `choice` directly,\" so the plan never commits to a code-side confidence gate.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

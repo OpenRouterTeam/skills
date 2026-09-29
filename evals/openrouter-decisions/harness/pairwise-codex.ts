@@ -8,7 +8,7 @@
  *
  * Usage:
  *   npx tsx pairwise-codex.ts --iteration ../results/2026-09-29
- *   npx tsx pairwise-codex.ts --iteration <dir> --judge openai/gpt-5 --out <file>
+ *   npx tsx pairwise-codex.ts --iteration <dir> --judge anthropic/claude-opus-5.5 --out <file>
  */
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -31,7 +31,7 @@ type PairResult = {
 const args = process.argv.slice(2);
 const iteration = argValue("--iteration") ?? fail("--iteration <dir> is required");
 const outPath = argValue("--out") ?? join(iteration, "codex-runs.pairwise.json");
-const judgeModel = argValue("--judge") ?? "openai/gpt-5";
+const judgeModel = argValue("--judge") ?? "anthropic/claude-opus-5.5";
 const apiKey = process.env.OPENROUTER_API_KEY ?? fail("OPENROUTER_API_KEY is not set");
 const random = seededRandom(Number(argValue("--seed") ?? "7"));
 

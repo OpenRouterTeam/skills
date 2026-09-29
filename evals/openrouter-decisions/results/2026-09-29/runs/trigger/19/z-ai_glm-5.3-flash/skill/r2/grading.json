@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00604,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.00802,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "Final message includes explanation and an alternative regex: 'This matches `415-555-0199` and `415 555 0199`. If you also need compact digits (`4155550199`), use:'—not just a regex change.",
+      "pass": true,
+      "evidence": "The final message contains only the widened regex `/\\d{3}[- ]\\d{3}[- ]\\d{4}/g`, one line on what it matches, and an optional regex variant for compact digits; it adds no other code, logic, or file changes.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 2,
   "total": 2
 }

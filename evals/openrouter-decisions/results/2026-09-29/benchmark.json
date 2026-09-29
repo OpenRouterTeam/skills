@@ -1,6 +1,6 @@
 {
   "iteration": "results/2026-09-29",
-  "generated_at": "2026-09-29T04:58:58.736Z",
+  "generated_at": "2026-09-29T07:17:05.652Z",
   "trigger": {
     "openai/gpt-5.6-luna": {
       "runs": 60,
@@ -499,16 +499,16 @@
   "implementation": {
     "openai/gpt-5.6-luna / no-skill": {
       "runs": 12,
-      "passed": 15,
+      "passed": 5,
       "total": 42,
       "per_round_pass_rate": {
-        "mean": 0.35714285714285715,
-        "sd": 0,
+        "mean": 0.11904761904761903,
+        "sd": 0.041239304942116126,
         "n": 3,
         "values": [
-          0.35714285714285715,
-          0.35714285714285715,
-          0.35714285714285715
+          0.07142857142857142,
+          0.14285714285714285,
+          0.14285714285714285
         ]
       },
       "duration_s": {
@@ -592,16 +592,16 @@
     },
     "openai/gpt-5.6-luna / skill": {
       "runs": 12,
-      "passed": 36,
+      "passed": 32,
       "total": 42,
       "per_round_pass_rate": {
-        "mean": 0.8571428571428571,
-        "sd": 0,
+        "mean": 0.7619047619047619,
+        "sd": 0.041239304942116105,
         "n": 3,
         "values": [
-          0.8571428571428571,
-          0.8571428571428571,
-          0.8571428571428571
+          0.7857142857142857,
+          0.7857142857142857,
+          0.7142857142857143
         ]
       },
       "duration_s": {
@@ -685,16 +685,16 @@
     },
     "openai/gpt-6-astra / no-skill": {
       "runs": 12,
-      "passed": 23,
+      "passed": 18,
       "total": 42,
       "per_round_pass_rate": {
-        "mean": 0.5476190476190476,
-        "sd": 0.10910894511799622,
+        "mean": 0.42857142857142855,
+        "sd": 0.14285714285714285,
         "n": 3,
         "values": [
+          0.2857142857142857,
           0.42857142857142855,
-          0.5714285714285714,
-          0.6428571428571429
+          0.5714285714285714
         ]
       },
       "duration_s": {
@@ -871,16 +871,16 @@
     },
     "z-ai/glm-5.3-flash / no-skill": {
       "runs": 12,
-      "passed": 20,
+      "passed": 5,
       "total": 42,
       "per_round_pass_rate": {
-        "mean": 0.4761904761904762,
-        "sd": 0.04123930494211614,
+        "mean": 0.11904761904761903,
+        "sd": 0.041239304942116126,
         "n": 3,
         "values": [
-          0.5,
-          0.5,
-          0.42857142857142855
+          0.07142857142857142,
+          0.14285714285714285,
+          0.14285714285714285
         ]
       },
       "duration_s": {
@@ -964,14 +964,14 @@
     },
     "z-ai/glm-5.3-flash / skill": {
       "runs": 12,
-      "passed": 34,
+      "passed": 33,
       "total": 42,
       "per_round_pass_rate": {
-        "mean": 0.8095238095238094,
-        "sd": 0.08247860988423221,
+        "mean": 0.7857142857142857,
+        "sd": 0.0714285714285714,
         "n": 3,
         "values": [
-          0.8571428571428571,
+          0.7857142857142857,
           0.7142857142857143,
           0.8571428571428571
         ]
@@ -1060,23 +1060,23 @@
     {
       "eval_id": 21,
       "assertion_index": 0,
-      "no_skill": "3/9",
+      "no_skill": "1/9",
       "skill": "9/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 21,
       "assertion_index": 1,
-      "no_skill": "7/9",
+      "no_skill": "1/9",
       "skill": "9/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 21,
       "assertion_index": 2,
-      "no_skill": "9/9",
+      "no_skill": "3/9",
       "skill": "9/9",
-      "verdict": "passes in both arms: does not measure the skill"
+      "verdict": "discriminates"
     },
     {
       "eval_id": 22,
@@ -1088,14 +1088,14 @@
     {
       "eval_id": 22,
       "assertion_index": 1,
-      "no_skill": "8/9",
+      "no_skill": "2/9",
       "skill": "9/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 22,
       "assertion_index": 2,
-      "no_skill": "2/9",
+      "no_skill": "3/9",
       "skill": "7/9",
       "verdict": "discriminates"
     },
@@ -1109,21 +1109,21 @@
     {
       "eval_id": 23,
       "assertion_index": 1,
-      "no_skill": "7/9",
+      "no_skill": "3/9",
       "skill": "8/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 23,
       "assertion_index": 2,
-      "no_skill": "6/9",
+      "no_skill": "0/9",
       "skill": "9/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 24,
       "assertion_index": 0,
-      "no_skill": "2/9",
+      "no_skill": "0/9",
       "skill": "9/9",
       "verdict": "discriminates"
     },
@@ -1137,15 +1137,15 @@
     {
       "eval_id": 24,
       "assertion_index": 2,
-      "no_skill": "4/9",
-      "skill": "9/9",
+      "no_skill": "5/9",
+      "skill": "8/9",
       "verdict": "discriminates"
     },
     {
       "eval_id": 24,
       "assertion_index": 3,
       "no_skill": "0/9",
-      "skill": "7/9",
+      "skill": "3/9",
       "verdict": "discriminates"
     },
     {
@@ -1158,49 +1158,48 @@
   ],
   "implementation_marginal": {
     "excluded_assertions": [
-      "21:2",
       "23:0"
     ],
     "per_model": {
       "openai/gpt-5.6-luna": {
-        "no_skill": "9/36",
-        "skill": "30/36",
+        "no_skill": "2/39",
+        "skill": "29/39",
         "delta_per_round": {
-          "mean": 0.5833333333333334,
-          "sd": 0,
+          "mean": 0.6923076923076924,
+          "sd": 0.07692307692307693,
           "n": 3,
           "values": [
-            0.5833333333333334,
-            0.5833333333333334,
-            0.5833333333333334
+            0.7692307692307693,
+            0.6923076923076923,
+            0.6153846153846154
           ]
         }
       },
       "openai/gpt-6-astra": {
-        "no_skill": "17/36",
-        "skill": "36/36",
+        "no_skill": "15/39",
+        "skill": "39/39",
         "delta_per_round": {
-          "mean": 0.5277777777777778,
-          "sd": 0.12729376930432895,
+          "mean": 0.6153846153846154,
+          "sd": 0.1538461538461538,
           "n": 3,
           "values": [
-            0.6666666666666667,
-            0.5,
-            0.41666666666666663
+            0.7692307692307692,
+            0.6153846153846154,
+            0.46153846153846156
           ]
         }
       },
       "z-ai/glm-5.3-flash": {
-        "no_skill": "14/36",
-        "skill": "28/36",
+        "no_skill": "2/39",
+        "skill": "30/39",
         "delta_per_round": {
-          "mean": 0.38888888888888884,
-          "sd": 0.12729376930432892,
+          "mean": 0.717948717948718,
+          "sd": 0.08882311833686547,
           "n": 3,
           "values": [
-            0.4166666666666667,
-            0.24999999999999994,
-            0.5
+            0.7692307692307693,
+            0.6153846153846154,
+            0.7692307692307692
           ]
         }
       }
@@ -2071,37 +2070,37 @@
   },
   "implementation_pairwise": {
     "source": "results/2026-09-29/codex-runs.json",
-    "judge": "openai/gpt-5",
+    "judge": "anthropic/claude-opus-5.5",
     "pairs": 36,
     "no-skill": 0,
-    "skill": 31,
+    "skill": 36,
     "tie": 0,
-    "inconsistent": 5,
+    "inconsistent": 0,
     "errors": 0,
     "skill_win_rate_of_decided": 1,
     "per_model": {
       "openai/gpt-5.6-luna": {
         "no-skill": 0,
-        "skill": 11,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 1,
+        "inconsistent": 0,
         "errors": 0
       },
       "openai/gpt-6-astra": {
         "no-skill": 0,
-        "skill": 10,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 2,
+        "inconsistent": 0,
         "errors": 0
       },
       "z-ai/glm-5.3-flash": {
         "no-skill": 0,
-        "skill": 10,
+        "skill": 12,
         "tie": 0,
-        "inconsistent": 2,
+        "inconsistent": 0,
         "errors": 0
       }
     },
-    "cost": 2.3518125000000003
+    "cost": 5.559523999999999
   }
 }

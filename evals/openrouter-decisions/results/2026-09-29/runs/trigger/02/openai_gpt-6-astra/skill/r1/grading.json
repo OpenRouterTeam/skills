@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02003875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03908,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The agent shows 'POST https://openrouter.ai/api/alpha/decisions' with a JSON body containing 'model', 'state', and 'questions' fields.",
+      "evidence": "The final message shows a POST to https://openrouter.ai/api/alpha/decisions whose body has \"model\": \"typesafe/jev-1.13-20260917\", a \"state\" object with \"review\", and a \"questions\" object holding a well-formed noul question with true/false criteria.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "They state 'Use one `noul` question' and the request includes only 'is_toxic' rather than separate noul questions per policy label.",
+      "evidence": "The agent used a single combined question (\"Use one `noul` question\", key \"is_toxic\") that folds insults, harassment, hateful abuse and threats into one noul rather than one noul per policy label.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The only question is 'Is the review in `review` abusive?' with no separate question asking whether the review is a scam.",
+      "evidence": "The question asks about a semantic property, not word presence (\"Is the review in `review` abusive?\"), but it never asks whether the review is a scam. Its false criterion explicitly allows \"a fraud complaint\", so the abusive-or-scam question is not clearly met.",
       "graded_by": "judge"
     }
   ],

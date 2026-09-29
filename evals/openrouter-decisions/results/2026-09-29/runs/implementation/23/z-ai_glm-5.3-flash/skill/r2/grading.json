@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02943125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.07248,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In subscription-check.ts the code computes oneYearAgo and compares dates (isMoreThanOneYearOld = start < oneYearAgo) and short-circuits before calling the model if false.",
+      "evidence": "subscription-check.ts does the one-year check in code: `oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); const isMoreThanOneYearOld = start < oneYearAgo;`, and it returns before calling the model when this is false.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The request state sent to the model includes subscription_start_date: start.toISOString(), i.e., the raw date is passed along with the cancellation reason.",
+      "evidence": "The request state still sends the raw date to the model: `subscription_start_date: start.toISOString()` sits alongside `cancellation_reason`, so the model gets the date, not only the reason.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The model question is likely_to_return with type \"noul\", and the code defines LIKELY_RETURN_THRESHOLD = 0.5 and uses the noul probability to gate likelyToReturn.",
+      "evidence": "The question `likely_to_return` has `type: \"noul\"` and asks whether the customer is likely to subscribe again, and code gates it with `answer.noul >= LIKELY_RETURN_THRESHOLD` where the constant is 0.5.",
       "graded_by": "judge"
     }
   ],

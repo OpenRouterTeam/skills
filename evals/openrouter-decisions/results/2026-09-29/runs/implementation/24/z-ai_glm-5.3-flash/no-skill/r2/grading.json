@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.018315,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.020164,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "The transcript never queries a live catalog (no models.ts or GET /api call); instead it says 'The arxiv paper mentions \"Jev\"...' and pins 'jev-1.13.0' directly.",
+      "evidence": "The agent never ran models.ts or queried /api/v1/models; it chose 'jev-1.13.0' from an arxiv paper mention, and no catalog listing shows up in the transcript.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No decide.ts --compare (or equivalent) was run; the choice rests on description only (e.g., 'Jev 1.13.0 is a strong fit — well-calibrated, cheap').",
+      "evidence": "No comparison run was made against multiple candidates; the choice rests on the description 'Well-calibrated... cheapest per-call' and only a planned future cost check.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "config/decision-model.yaml pins a versioned ID in one place: 'model:\\n  id: jev-1.13.0'.",
+      "evidence": "config/decision-model.yaml pins the versioned ID in a single value, `model.id: jev-1.13.0`, not a latest alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no code or transcript showing the response model string logged with stored answers; only a static config with 'model: id: jev-1.13.0'.",
+      "evidence": "Neither the config nor the final message logs the response model string alongside stored answers.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds are fixed in YAML ('auto_classify_min: 0.85', 'auto_classify_max: 0.97') and only a plan to probe is described; no decide.ts probe (or equivalent) was actually run on real inputs.",
+      "evidence": "Thresholds 0.85/0.97 were written into config without any probe run; the confirmation steps are listed only as a plan and were never executed.",
       "graded_by": "judge"
     }
   ],

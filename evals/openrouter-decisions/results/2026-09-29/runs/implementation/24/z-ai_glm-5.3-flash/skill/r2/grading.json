@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03034875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.083872,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "They ran the live catalog script and listed candidates (e.g., models.ts output shows 'typesafe/jev-1.13', 'upstage/solar-decide', 'jaredpalmer/kev-4b', 'respan/span-01*').",
+      "evidence": "The agent ran `npx tsx models.ts` and `models.ts --json` against the live catalog and got a table listing respan, kev-4b, jev-1.13, solar-decide and the ~jev-latest alias, then chose from that list.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "They only probed 'typesafe/jev-1.13-20260917' (e.g., npx tsx decide.ts ... --model typesafe/jev-1.13-20260917) and did not run the same request against other candidates or use --compare.",
+      "evidence": "Several candidates fit (kev-4b, jev-1.13, solar-decide), but the agent never ran `decide.ts --compare` or sent the same request to each; it chose jev-1.13 on context size, price and description, then probed only the pinned build.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Config pins a versioned build slug in a single value: export const DECISION_MODEL = \"typesafe/jev-1.13-20260917\"; and the final message says never the ~typesafe/jev-latest alias.",
+      "evidence": "config.ts contains `export const DECISION_MODEL = \"typesafe/jev-1.13-20260917\"; // canonical build slug, never the alias`.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No code or persisted log is shown; they only state 'Log the response `model` field with every stored answer' without implementing or demonstrating it.",
+      "evidence": "Logging the response model string appears only as a comment and as advice in the final message (\"Log the response `model` field with every stored answer\"); no code logs it with stored answers.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They ran decide.ts on four real probe inputs and then set thresholds in config (comment: 'Confirmed on step-8 probe set...'; outputs show probabilities and costs for each case).",
+      "evidence": "The first config marked thresholds as \"Step-8 probe pending\" at 0.5; the agent then ran decide.ts on four ticket inputs (positive, negative, ambiguous, off-topic) before setting CLASSIFY_ACCEPT_THRESHOLD = 0.90 in the updated config.",
       "graded_by": "judge"
     }
   ],

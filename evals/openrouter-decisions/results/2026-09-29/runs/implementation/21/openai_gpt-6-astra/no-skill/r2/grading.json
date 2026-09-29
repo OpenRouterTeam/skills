@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03509375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.041916,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "incident_urgency.py prompts, \"Assign exactly one integer urgency\" and the response_format schema restricts to an integer enum [1, 2, 3, 4, 5], making it a digit choice rather than a score question with ordered levels.",
+      "evidence": "incident_urgency.py sends a chat completion whose response_format schema is `\"urgency\": {\"type\": \"integer\", \"enum\": [1, 2, 3, 4, 5]}`, which is a pick over the digits, not a score question with ordered levels.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "rate() returns the model’s integer directly: urgency = result[\"urgency\"]; return urgency; there is no derivation from score/level probabilities.",
+      "evidence": "The model writes the number itself (`urgency = result[\"urgency\"] ... return urgency`), and the code only validates it rather than deriving it from a score or level probabilities.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The user message sends json.dumps({\"service\": service, \"report\": report}), keeping report text and service name as separate named fields; the CLI also takes --service and reads the report from stdin.",
+      "evidence": "The user message content is `json.dumps({\"service\": service, \"report\": report})`, so report text and service name are separate named fields.",
       "graded_by": "judge"
     }
   ],

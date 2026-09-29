@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00896125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.019608,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "The final message includes a retry loop using 'BASE_DELAY_MS * 2 ** retry' for exponential backoff and 'await sleep(Math.random() * exponentialDelay);' for jitter around the OpenAI call.",
+      "evidence": "The final message contains a `for (let retry = 0; ; retry++)` loop that computes `BASE_DELAY_MS * 2 ** retry` (exponential, capped at MAX_DELAY_MS) and sleeps for `Math.random() * exponentialDelay` (full jitter), with `MAX_RETRIES = 5`.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00947375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021252,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message lists as Candidates: 'triage.ts — Keyword-based ticket routing', 'dedupe.ts — Fixed token-overlap threshold', and 'approvals.ts — Human review for every refund over $50'.",
+      "evidence": "Under 'Candidates' the final message lists `triage.ts` (keyword-based routing), `dedupe.ts` (fixed token-overlap threshold), and `approvals.ts` (human review for every refund over $50).",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message places 'tax.ts' and 'auth/permissions.ts' under 'Not strong candidates', explaining they are deterministic lookups and should remain deterministic.",
+      "evidence": "`tax.ts` and `auth/permissions.ts` appear under 'Not strong candidates', described as a deterministic policy lookup and an explicit authorization policy that should stay deterministic.",
       "graded_by": "judge"
     }
   ],

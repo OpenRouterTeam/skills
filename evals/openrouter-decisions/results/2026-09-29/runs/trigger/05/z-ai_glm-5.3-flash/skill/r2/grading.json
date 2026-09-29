@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0099625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.019168,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message flags: “`triage.ts` — keyword router for tickets,” “`dedupe.ts` — token-overlap duplicate flag,” and “`approvals.ts` — refunds over $50 wait for a human.”",
+      "evidence": "The final message lists triage.ts (keyword router), dedupe.ts (token-overlap ≥ 0.6), and approvals.ts (refunds over $50 wait for a human) as candidates, with reasons for each.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message explicitly lists non-candidates: “`auth/permissions.ts` — role→scope mapping is a non-candidate” and “`tax.ts` — VAT by country table is also a non-candidate.”",
+      "evidence": "The final message explicitly marks both auth/permissions.ts and tax.ts as '**non-candidate**', calling them static lookups and deterministic facts.",
       "graded_by": "judge"
     }
   ],

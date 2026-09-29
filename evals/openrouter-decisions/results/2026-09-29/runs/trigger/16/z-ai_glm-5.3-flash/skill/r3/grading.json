@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00491125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.010116,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "Final message: “I can compute BM25 and return the top 10, but the tokenized documents and query aren’t present in the workspace,” and no files were produced, so no deterministic ranking was computed.",
+      "evidence": "The agent produced 0 files and computed no ranking; its final message only says it 'can compute BM25' and asks for the tokenized documents and query, so no deterministic term-statistics ranking exists.",
       "graded_by": "judge"
     }
   ],

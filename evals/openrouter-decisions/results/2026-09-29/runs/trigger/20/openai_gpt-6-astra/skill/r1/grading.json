@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0114725,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.029072,
   "judge_error": null,
   "assertions": [
     {
@@ -9,16 +9,16 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "\"This workspace contains no bot code or escalation records, so I haven’t changed the application.\"",
+      "pass": true,
+      "evidence": "The final message says to 'Replace the yes/no text check with a typed probability from OpenRouter's Decisions API' and to tune an 'escalation threshold'; that is a yes-probability (noul) compared against a threshold instead of parsing 'yes' from chat output, though no code was written because the workspace had none.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "\"Tune the escalation threshold against reviewed tickets, tracking both unnecessary handoffs and missed necessary escalations.\"",
+      "evidence": "The plan states 'Tune the escalation threshold against reviewed tickets, tracking both unnecessary handoffs and missed necessary escalations,' and the agent asks for 'last week's reviewed escalations' to do this.",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 3,
   "total": 3
 }

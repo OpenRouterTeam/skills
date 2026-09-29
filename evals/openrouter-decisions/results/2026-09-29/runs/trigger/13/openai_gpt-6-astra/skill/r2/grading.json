@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00485375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.004824,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "Final message defines isValidEmail using a fixed regex (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/) and contains no network calls.",
+      "evidence": "The final function `isValidEmail` performs only a `typeof` check and a regex `.test(email)`, with no fetch, API, or network call, and the agent notes it 'doesn't verify that the mailbox exists.'",
       "graded_by": "judge"
     }
   ],

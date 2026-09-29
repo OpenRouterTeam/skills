@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00424625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.00482,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "Transcript shows 'sed: can't read labels.csv: No such file or directory' and the final message says 'I can’t find `labels.csv`...', with no code executing metrics or any produced files.",
+      "evidence": "The agent looked for labels.csv, got 'sed: can't read labels.csv: No such file or directory', produced no files, and computed no metrics in code.",
       "graded_by": "judge"
     }
   ],

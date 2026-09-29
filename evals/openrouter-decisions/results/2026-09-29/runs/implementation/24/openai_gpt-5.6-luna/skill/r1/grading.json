@@ -1,34 +1,34 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0278925,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03996,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "They queried the live catalog: [command_execution] curl -sS 'https://openrouter.ai/api/v1/models?output_modalities=decisions'.",
+      "evidence": "The agent ran `curl -sS 'https://openrouter.ai/api/v1/models?output_modalities=decisions'` and then pulled the Jev endpoints listing, and it cites catalog figures (32k context, $0.042/M) for its pick.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "They did not run a compare; they only proposed it: \"Run the same request against Jev and any remaining catalog candidates: npx tsx scripts/decide.ts probes.json --compare\".",
+      "evidence": "The catalog returned several candidates (e.g. upstage/solar-decide with 524k context at a lower price), but the agent picked Jev without running any comparison; `decide.ts probes.json --compare` appears only as a future step after the choice.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "They pinned a dated build in a single config value: \"decision_model: typesafe/jev-1.13-20260917\" and wrote \"Pin the dated build, not the moving alias\".",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "They state \"For each candidate, record the exact returned `model`, latency, cost, selected label, probabilities, and confidence,\" indicating the response model string is logged with answers.",
+      "evidence": "The config pins the dated build in one value, `decision_model: typesafe/jev-1.13-20260917`, and says to use it rather than the moving alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No probe run is shown; they only outline steps like \"Build a labeled probe set...\" and \"Run... decide.ts probes.json --compare,\" while setting a provisional constant in code.",
+      "evidence": "The gating code stores only the route and never logs `response.model`; recording the returned model is mentioned only as part of the probe comparison, not alongside stored answers.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No probe was run: `REVIEW_CONFIDENCE = 0.70` is hardcoded as 'provisional', and threshold sweeping over probe inputs is only described as a later step.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 5
 }

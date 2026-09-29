@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.013455,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025468,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription_retention.py contains \"if today <= started + timedelta(days=365): return False\", performing the one-year date comparison in code.",
+      "evidence": "subscription_retention.py computes the age gate in code with `if today <= started + timedelta(days=365): return False`, and no model is consulted for it.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no model invocation; the function regex-matches cancellation_reason locally and never sends any dates or reasons to a model.",
+      "evidence": "No decision model is called anywhere; the cancellation reason is only matched against the hardcoded `_LIKELY_TO_RETURN_PATTERNS` regex list, so no model receives it.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No natural-language prompt/noul is used anywhere, while the threshold is hard-coded as timedelta(days=365) in subscription_retention.py.",
+      "evidence": "No model is asked any question about likely return; `is_likely_to_return` returns a boolean from `any(re.search(pattern, reason) ...)`, so there is no model output for a code threshold to apply to.",
       "graded_by": "judge"
     }
   ],

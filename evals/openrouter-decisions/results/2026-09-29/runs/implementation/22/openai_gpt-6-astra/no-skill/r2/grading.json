@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02499375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.045324,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "The question is phrased as: \"Does the PR description explicitly state that this change is breaking or backward-incompatible?\" (final message and merge_gate.py QUESTION), which asks about what the description states, not whether the change itself is breaking.",
+      "evidence": "The question reads \"Does the PR description explicitly state that this change is breaking or backward-incompatible? Classify only what the description says; do not infer whether the code actually breaks compatibility,\" which asks what the description states, not whether the change is breaking.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The code defines ALLOW_BELOW = 0.10 and uses it in evaluate to allow when probability < ALLOW_BELOW (merge_gate.py).",
+      "evidence": "merge_gate.py defines `ALLOW_BELOW = 0.10` and computes `\"allow_auto_merge\": probability < ALLOW_BELOW`, so the threshold is in code.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The false criteria say: \"This includes an explicit 'no breaking changes'...\" indicating such a description should yield a low yes probability (merge_gate.py QUESTION.criteria.false).",
+      "evidence": "The noul criteria's \"false\" case says it \"includes an explicit 'no breaking changes'\", so such a description is expected to yield a low yes-probability.",
       "graded_by": "judge"
     }
   ],

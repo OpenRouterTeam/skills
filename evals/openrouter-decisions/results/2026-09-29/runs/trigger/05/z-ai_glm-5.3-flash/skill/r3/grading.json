@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01138625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.0158,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message lists \"triage.ts keyword router\", \"dedupe.ts token-overlap > 0.6\", and \"approvals.ts refunds > $50\" as Candidates.",
+      "evidence": "Under 'Candidates' the final message lists `triage.ts` keyword router, `dedupe.ts` token-overlap > 0.6, and `approvals.ts` refunds > $50, each with a reason it could be handled better.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Final message includes \"auth/permissions.ts role→scope mapping — Only if ...\" under Candidates, which flags the role-to-scope mapping (even though it also says \"tax.ts VAT table — Not a candidate\").",
+      "evidence": "The VAT table is marked 'Not a candidate', but `auth/permissions.ts` role→scope mapping sits in the 'Candidates' list as a conditional candidate ('Only if the mapping is being used to judge *contextual* access'), so it is not clearly left alone.",
       "graded_by": "judge"
     }
   ],

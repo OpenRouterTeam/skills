@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0062675,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01174,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "The agent did not compute metrics; the final message says it couldn’t because `labels.csv` is missing, and no files were produced.",
+      "evidence": "The agent found no labels.csv, produced no files, and wrote no code; its final message says it 'couldn’t compute the metrics' and asks for the file.",
       "graded_by": "judge"
     }
   ],

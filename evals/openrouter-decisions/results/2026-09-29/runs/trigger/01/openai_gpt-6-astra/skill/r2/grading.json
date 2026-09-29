@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0149425,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.03118,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Plan uses one Decisions API choice question and lists choices billing, engineering, support, and none: “Replace the keyword chain with one Decisions API `choice` question…,” with a rubric containing `billing`, `engineering`, `support`, and `none`.",
+      "evidence": "The plan specifies \"one Decisions API `choice` question\" and a rubric table with `billing`, `engineering`, `support`, and `none` (\"No actionable issue, unrelated content, or no identifiable primary issue\").",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "It states “The model judges ownership; code handles routing and fallback,” and “Keep the request minimal… plus the ownership question and criteria,” then “Use observed probabilities… to establish when ambiguous tickets should fall back to support,” placing thresholds and fallback in code, not in the question.",
+      "evidence": "The plan states \"The model judges ownership; code handles routing and fallback,\" maps `none` to support, and sets the fallback to support from observed probabilities in step 5 rather than writing any threshold into the question text.",
       "graded_by": "judge"
     }
   ],

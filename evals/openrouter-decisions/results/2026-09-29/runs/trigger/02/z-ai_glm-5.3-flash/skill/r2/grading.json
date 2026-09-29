@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01682625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02922,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The provided request JSON includes \"model\", a \"state\" object with the review, and a \"questions\" object: {\"model\":\"<pinned-decision-model-canonical-slug>\", \"state\":{\"review\":\"<the review text>\"}, \"questions\":{\"is_toxic\":{\"type\":\"noul\",...}}}.",
+      "evidence": "The JSON request has `model`, `state` as an object with a `review` field, and `questions` keyed by ID, using the noul shape from the referenced decisions-api.md; the model slug is left as the placeholder `<pinned-decision-model-canonical-slug>`.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Only a single noul question is defined—\"questions\": { \"is_toxic\": { \"type\": \"noul\", ... } }—rather than separate noul questions for each policy label.",
+      "evidence": "The agent uses a single combined `is_toxic` noul ('Single `noul` — one independent condition, one gate') rather than separate noul questions for abuse, scam, threats, and so on.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question asks \"Is this review toxic?\" and explicitly says \"not isolated keyword matches\" and that it's not toxic \"even when it uses words like 'kill', 'scam', or 'idiot' figuratively,\" focusing on abusive/deceptive content rather than specific words.",
+      "evidence": "The instructions say 'Judge the author's actual stance... not isolated keyword matches', and the true criterion describes 'insulting, dehumanizing, threatening, or maliciously deceptive content', which is behavior rather than word presence.",
       "graded_by": "judge"
     }
   ],

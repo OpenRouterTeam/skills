@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00647375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.009684,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "No BM25 ranking was computed—no files were produced and the final message states: “I don’t have the search corpus or query yet.”",
+      "evidence": "The agent wrote no files and no code. Its final message only asks for the query, the documents, and BM25 parameters, so no deterministic ranking from term statistics was ever computed.",
       "graded_by": "judge"
     }
   ],

@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0219975,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.04732,
   "judge_error": null,
   "assertions": [
     {
+      "pass": false,
+      "evidence": "The agent did fetch the live /api/v1/models catalog, but it filtered by hardcoded name substrings ('haiku', 'gemini-2.5-flash', 'gpt-4.1-mini') rather than by output_modalities=decisions, so the candidates came from memory.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No request was run against each candidate; Haiku 4.5 was chosen from catalog metadata alone, and CLASSIFICATION.md admits 'No paid inference or accuracy evaluation has been performed.'",
+      "graded_by": "judge"
+    },
+    {
       "pass": true,
-      "evidence": "Transcript shows live catalog fetch: python opened 'https://openrouter.ai/api/v1/models' and printed entries (see command output listing ids and canonical_slug).",
+      "evidence": "classification.config.json sets \"model\": \"anthropic/claude-haiku-4.5\", a versioned ID rather than the '~anthropic/claude-haiku-latest' alias, and guards it with the dated canonical slug.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No same-request comparison was run; the transcript only lists the catalog and pins Claude Haiku 4.5, with no decide.ts --compare or equivalent execution.",
+      "evidence": "There is no logging code; CLASSIFICATION.md only advises in prose to 'Record the model, provider, prompt/schema versions...' and never logs the response's model string with stored answers.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "classification.config.json uses \"model\": \"anthropic/claude-haiku-4.5\" and a separate \"expected_canonical_slug\": \"anthropic/claude-4.5-haiku-20251001\"; the versioned ID is not pinned in a single config value.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": false,
-      "evidence": "No code logs the response model with stored answers; verify_model_pin.py only prints a PASS line and the docs merely recommend recording it.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": false,
-      "evidence": "No probe or decide.ts run on real inputs; the agent states 'classification performance remains untested' and the pin script prints 'Classification thresholds are NOT validated.'",
+      "evidence": "The 0.90 and 0.15 thresholds were set as 'provisional' in the config without running any probe on real inputs; only verify_model_pin.py, a catalog check, was executed.",
       "graded_by": "judge"
     }
   ],

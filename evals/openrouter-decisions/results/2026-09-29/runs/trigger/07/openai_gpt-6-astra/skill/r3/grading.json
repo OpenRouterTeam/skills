@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.05095625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.20142,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "src/question.ts defines the question as type 'noul', and src/guard.ts sets INJECTION_THRESHOLD = 0.5 and uses it to block when answer.noul >= INJECTION_THRESHOLD.",
+      "evidence": "src/question.ts defines `prompt_injection: { type: 'noul', ... }`, and src/guard.ts sets `export const INJECTION_THRESHOLD = 0.5;` and uses `answer.noul >= INJECTION_THRESHOLD ? 'block' : 'allow'`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "src/question.ts places the user input in state: { user_message: message } and the instructions reference `user_message`; test/guard.test.ts asserts request.state equals { user_message: message }, showing the message is not concatenated into the question.",
+      "evidence": "src/question.ts sets `state: { user_message: message }`, and the instructions only refer to `user_message` by name without interpolating the message; the test also asserts `request.state` deep-equals `{ user_message: message }`.",
       "graded_by": "judge"
     }
   ],

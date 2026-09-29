@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0089175,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.028036,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "signupValidation.cjs defines isValidEmail using a regex test (return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);) with no imports or network calls.",
+      "evidence": "signupValidation.cjs decides validity using only a type check, `value.trim()`, a length check (`email.length > 254`), and the regex `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)`; it has no fetch, HTTP, or decision-model call, and the agent never invoked the openrouter-decisions skill scripts.",
       "graded_by": "judge"
     }
   ],

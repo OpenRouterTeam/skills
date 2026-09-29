@@ -1,34 +1,34 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.03007875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.049044,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "Transcript queries the live catalog: curl -sS 'https://openrouter.ai/api/v1/models?output_modalities=decisions' and then inspects Jev’s live endpoint details.",
+      "evidence": "The agent ran `curl 'https://openrouter.ai/api/v1/models?output_modalities=decisions'` and then queried the `typesafe/jev-1.13` endpoints listing to confirm the canonical build before recommending it.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No cross-model compare was run; only a single-model probe is suggested: npx tsx scripts/decide.ts request.json --model typesafe/jev-1.13-20260917.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "Config pins a versioned ID in one value: \"decision_model\": \"typesafe/jev-1.13-20260917\" and states “Pin the canonical build—not the moving alias.”",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "They commit to logging the response model with answers: “I’d record each raw probability, chosen label, latency, cost, and exact returned `model`.”",
+      "evidence": "The catalog returned several decision models (e.g. upstage/solar-decide, respan/span-01), yet no `decide.ts --compare` or equivalent same-request run across them happened; Jev was chosen on catalog fields alone.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "They only propose probing (“Before shipping, I’d run… decide.ts …”) but the transcript shows no actual probe execution or results before fixing thresholds.",
+      "evidence": "The versioned ID `typesafe/jev-1.13-20260917` sits in the config's `decision_model`, but the request JSON and the TS check each hardcode their own copy of the literal instead of reading one config value.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The code only throws when `response.model` differs from the pinned build; nothing logs the model string alongside stored answers, and 'I'd record ... exact returned model' is a plan for probing only.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The 0.85 and 0.15 thresholds were written into config and code with no probe run on real inputs; the `decide.ts` probe is only described as something the agent 'would' run.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 1,
   "total": 5
 }

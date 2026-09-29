@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02241,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.031912,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In subscription/subscription.py, the code computes age = reference_date - start_date and is_old = age.days > 365, performing the one-year check in code.",
+      "evidence": "In subscription/subscription.py the age check is plain code, `age = reference_date - start_date` and `is_old = age.days > 365`, with no model involved.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No model is invoked; the function only does in-code keyword checks on cancellation_reason (words & RETURN_SIGNALS/NEGATIVE_SIGNALS), so there is no evidence of a model receiving only the reason.",
+      "evidence": "No model is ever called: `may_return` comes from keyword set intersections (`words & RETURN_SIGNALS.keys()`), so nothing hands the cancellation reason to a model.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The implementation uses rule-based keyword matching and does not pose a noul question to a model; while the >365 threshold is in code, no noul is used.",
+      "evidence": "No question is posed to a model; the return judgment is a hardcoded keyword match (`RETURN_SIGNALS` / `NEGATIVE_SIGNALS`), not a model-scored question about likely return with a threshold applied in code.",
       "graded_by": "judge"
     }
   ],

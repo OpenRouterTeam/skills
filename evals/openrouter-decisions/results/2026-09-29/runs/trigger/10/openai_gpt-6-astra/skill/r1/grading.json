@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0449275,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.164424,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "In src/rank-tickets.ts each candidate gets an independent noul score and is sorted in code: rankings.sort((a, b) => b.probabilitySameIssue - a.probabilitySameIssue); tests/rank-tickets.test.ts verifies ranking from raw probabilities.",
+      "evidence": "In src/rank-tickets.ts, each candidate gets its own `noul` question, and the code runs `rankings.sort((a, b) => b.probabilitySameIssue - a.probabilitySameIssue)`, so the model never outputs an ordering.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "README.md states \"Allows multiple matches or none,\" and there is no forced positive in code (tests/rank-tickets.test.ts: \"rank raw probabilities without normalization or a forced positive\"); probe-no-match.json demonstrates the no-duplicate case with all low probabilities.",
+      "evidence": "Each candidate gets an independent probability with no forced positive; the test 'rank raw probabilities without normalization or a forced positive' covers this, and probe-no-match.json shows all candidates scoring ≤0.06.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00806875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025116,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "\"Compute hard rules in application code: within_90_days = ..., amount_valid = ..., annual_limit_ok = ... These facts should never be delegated to the model.\"",
+      "evidence": "The final message lists `within_90_days = purchase_date >= now - 90 days`, `amount_valid = refund_amount <= order_total`, and `annual_limit_ok = prior_refunds_this_calendar_year < 2` under 'Compute hard rules in application code', and says 'These facts should never be delegated to the model.'",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "\"ask a decision model only about judgment-based ambiguity... Is this a routine, legitimate refund request?... Use independent `noul` questions rather than asking the model to calculate amounts, dates, or counts.\"",
+      "evidence": "Step 2 asks the model only judgment questions (legitimacy, abuse/fraud, whether the stated reason is clear and consistent) and says to 'Use independent `noul` questions rather than asking the model to calculate amounts, dates, or counts.'",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "\"Gate the result in code: ... else if legitimate_probability >= APPROVE_THRESHOLD ... auto_approve else: human_review\"",
+      "evidence": "The code gate auto-approves only when `legitimate_probability >= APPROVE_THRESHOLD and abuse_probability <= ABUSE_THRESHOLD`, and its `else: human_review` sends the uncertain remainder to a human instead of denying it.",
       "graded_by": "judge"
     }
   ],

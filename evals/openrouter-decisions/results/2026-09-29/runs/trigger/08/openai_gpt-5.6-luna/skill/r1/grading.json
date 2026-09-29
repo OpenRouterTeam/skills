@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01054,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.022256,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The code calls POST https://openrouter.ai/api/alpha/decisions with noul questions (“Decisions API: is each claim entailed by the passages?”), not a chat completion.",
+      "evidence": "The check is a POST to https://openrouter.ai/api/alpha/decisions with `noul` questions, and the result is read as `result.noul`, which is a probability, not a second chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The request body sets state: { answer, claims, passages }, keeping the answer and passages as separate named fields.",
+      "evidence": "The request body sets `state: { answer, claims, passages }`, so the answer and the passages are separate named fields in state.",
       "graded_by": "judge"
     }
   ],

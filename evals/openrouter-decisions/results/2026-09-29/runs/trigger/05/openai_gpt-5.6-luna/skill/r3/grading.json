@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0109,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021088,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message flags the decision points: 'triage.ts — Keyword-based ticket routing', 'dedupe.ts — Token-overlap duplicate detection', and 'approvals.ts — Refund review triggered solely by amount'.",
+      "evidence": "The final message flags triage.ts ('Keyword-based ticket routing. A decision model could classify intent'), dedupe.ts ('Token-overlap duplicate detection. Semantic similarity would better identify...'), and approvals.ts ('refund legitimacy, fraud risk, and exceptions are judgment work suitable for approve/deny/escalate decisions').",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message does not flag them, stating: 'tax.ts — ... is not a candidate' and 'auth/permissions.ts — ... is not a suitable model candidate'.",
+      "evidence": "The final message says 'The country-to-VAT table itself is not a candidate' and 'Role-to-scope mapping is not a suitable model candidate', so neither is flagged.",
       "graded_by": "judge"
     }
   ],

@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02325875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.052932,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The noul question is \"Judging this pull request as a whole, is the change breaking?\" in request.json and src/auto-merge-gate.ts, which asks about the change itself.",
+      "evidence": "The noul instructions read \"Judging this pull request as a whole, is the change breaking?\", which asks about the change itself rather than whether the description mentions or states breaking changes.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "src/auto-merge-gate.ts defines \"export const BREAKING_GATE = 0.5;\" and compares noul against it to gate merges.",
+      "evidence": "src/auto-merge-gate.ts defines `export const BREAKING_GATE = 0.5;` and computes `const isBreaking = answer.noul >= BREAKING_GATE;` in code.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The safe-request.json description says \"No APIs, schemas, or workflows change.\" and the run output shows \"probability\":0.03 with action \"allow_auto_merge\", indicating a low probability.",
+      "evidence": "The safe-request.json description contains the negation \"No APIs, schemas, or workflows change.\" and the live probe returned `\"probability\":0.03` with `allow_auto_merge`, though the literal phrase \"no breaking changes\" was not tested.",
       "graded_by": "judge"
     }
   ],

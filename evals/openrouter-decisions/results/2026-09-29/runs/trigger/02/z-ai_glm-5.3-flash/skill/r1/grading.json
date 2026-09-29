@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0180725,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02698,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The provided request JSON includes \"model\", a \"state\" object with the review, and \"questions\" containing an noul question.",
+      "evidence": "The request JSON includes \"model\": \"typesafe/jev-1.13\", a \"state\" object with \"review\", and a \"questions\" object containing a typed noul question, which matches the documented POST /api/alpha/decisions shape.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "They explicitly say “replace it with one noul question” and only include a single 'is_toxic' noul question, not separate questions per policy label.",
+      "evidence": "The agent collapsed all violations into a single `is_toxic` noul (\"replace it with one `noul` question\") instead of separate noul questions for policies such as abuse, scam, and threats.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The instructions ask, “Does this product review contain toxic, abusive, or harmful language…?” and the criteria mention “accusations of fraud,” focusing on abuse/scam semantics rather than specific words.",
+      "evidence": "The instructions ask \"Does this product review contain toxic, abusive, or harmful language directed at people or companies?\", which is a semantic judgment about abuse rather than a check for the BANNED words, and the agent notes \"the model judges meaning, not substring matches.\"",
       "graded_by": "judge"
     }
   ],

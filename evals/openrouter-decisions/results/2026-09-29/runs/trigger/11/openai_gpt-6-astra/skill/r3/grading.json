@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00588,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.013436,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "Final message only sets { maxRetries: 5 } and says 'No additional retry wrapper is needed'; no explicit retry loop with exponential backoff and jitter was implemented.",
+      "evidence": "The final message sets the SDK's `{ maxRetries: 5 }` option and states \"No additional retry wrapper is needed\"; it contains no retry loop and no explicit exponential-backoff or jitter logic.",
       "graded_by": "judge"
     }
   ],

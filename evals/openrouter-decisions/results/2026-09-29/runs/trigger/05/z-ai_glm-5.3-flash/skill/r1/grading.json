@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01165375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.013804,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message lists triage.ts (keyword ticket router), dedupe.ts (token-overlap > 0.6), and approvals.ts (every refund over $50 waits for a human) as judgment candidates.",
+      "evidence": "The final message names `triage.ts`, `dedupe.ts`, and `approvals.ts` as candidates, and its summary table marks all three 'Yes' for judgment work.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message states 'tax.ts — VAT-by-country table: this is actually not a judgment problem' and 'auth/permissions.ts — role-to-scope mapping: also not judgment work', thus not flagging them.",
+      "evidence": "The final message says `tax.ts` is 'not a judgment problem' and `auth/permissions.ts` is 'also not judgment work', and the summary table marks both 'No'.",
       "graded_by": "judge"
     }
   ],

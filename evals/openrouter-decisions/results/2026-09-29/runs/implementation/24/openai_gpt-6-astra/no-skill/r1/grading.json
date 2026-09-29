@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02340875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.043516,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "They queried the live catalog but only to fetch a single hardcoded id: code filters if model['id']=='qwen/qwen3-30b-a3b-instruct-2507' and prints that model, not a set of candidates.",
+      "evidence": "The agent queried /api/v1/models only to filter for one ID it had already chosen (`if model['id']=='qwen/qwen3-30b-a3b-instruct-2507'`), so no candidate list came from the catalog.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No compare run was executed; the agent says 'Task accuracy remains untested' and shows no decide.ts --compare or equivalent requests.",
+      "evidence": "No request was run against multiple candidates; VALIDATION.md states 'no inference or quality evaluation has been run.'",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "decision-model.json pins \"model\": \"qwen/qwen3-30b-a3b-instruct-2507\" (a versioned ID) in a single config value, and the check asserts request['model']=='qwen/qwen3-30b-a3b-instruct-2507'.",
+      "evidence": "decision-model.json pins the dated ID `\"model\": \"qwen/qwen3-30b-a3b-instruct-2507\"` in the single field api.request.model, not a latest alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No code or config shows logging the response model string with stored answers; only VALIDATION.md and decision-model.json were produced.",
+      "evidence": "Neither the config nor VALIDATION.md logs the response's model string with each stored answer; only release-time 'model/provider settings' are saved as artifacts.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds were not probed; the files state 'No inference or quality evaluation has been run.' and the final message calls 0.1/0.9 'provisional'.",
+      "evidence": "The 0.1/0.9 thresholds were written into config as 'candidate' values and no probe was run on real inputs; the final message says 'Task accuracy remains untested.'",
       "graded_by": "judge"
     }
   ],

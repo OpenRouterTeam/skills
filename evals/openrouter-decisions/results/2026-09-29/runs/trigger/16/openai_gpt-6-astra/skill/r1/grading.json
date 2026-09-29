@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02118625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.01346,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "bm25.py computes BM25 scores from term frequencies/lengths and IDF (idf = log1p((count - df + 0.5)/(df + 0.5)); score sums idf*tf*(k1+1)/(tf+normalization)) and ranks deterministically with nlargest using key=(score(index), -index) for stable ties.",
+      "evidence": "bm25.py builds a score for each document from term frequencies (Counter), document frequencies, the Robertson IDF via log1p, and length normalization with k1=1.5 and b=0.75. It then sorts deterministically with nlargest keyed on (score, -index), with no model or randomness involved.",
       "graded_by": "judge"
     }
   ],

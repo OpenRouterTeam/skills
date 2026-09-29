@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01692875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.066256,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "src/index.ts calls client.chat.completions.create(...), and the run logs show a request to https://openrouter.ai/api/v1/chat/completions, not a Decisions API endpoint.",
+      "evidence": "src/index.ts calls `client.chat.completions.create({ model: \"openai/gpt-4o-mini\", messages: [...] })` against `https://openrouter.ai/api/v1`, and no Decisions API endpoint or call appears anywhere in the files or transcript.",
       "graded_by": "judge"
     }
   ],

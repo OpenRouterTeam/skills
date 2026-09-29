@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0057675,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.014196,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "Final message flags: \"triage.ts — candidate.\", \"dedupe.ts — candidate.\", and \"approvals.ts — conditional candidate.\"",
+      "evidence": "The final message flags triage.ts ('candidate'), dedupe.ts ('candidate') and approvals.ts ('conditional candidate'), giving a reason for each.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Final message: \"Not candidates: `tax.ts` is a deterministic VAT lookup; `auth/permissions.ts` is an explicit authorization mapping.\"",
+      "evidence": "The final message states '**Not candidates:** `tax.ts` is a deterministic VAT lookup; `auth/permissions.ts` is an explicit authorization mapping. Both belong in code.'",
       "graded_by": "judge"
     }
   ],

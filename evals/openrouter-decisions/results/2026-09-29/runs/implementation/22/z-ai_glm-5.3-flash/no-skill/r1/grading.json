@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0170925,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.025372,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "The question text says “decide whether it explicitly states that the change is breaking” (gate.py/README), which asks about the description’s statement rather than whether the change itself is breaking.",
-      "graded_by": "judge"
-    },
-    {
-      "pass": true,
-      "evidence": "In gate.py, decide_auto_merge returns classification['decision'] == 'non-breaking', implementing the merge gate threshold in code.",
+      "evidence": "The QUESTION_TEMPLATE in gate.py asks the model to \"decide whether it explicitly states that the change is breaking\", which is about what the description states rather than whether the change is breaking.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The implementation is a binary classifier with no probabilities, and nothing indicates that 'no breaking changes' should yield a low probability.",
+      "evidence": "The model makes a categorical \"breaking\"/\"non-breaking\" decision, and `decide_auto_merge` only checks `classification[\"decision\"] == \"non-breaking\"`, so no numeric merge threshold exists in code.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The model returns no probability at all, and no test or rule addresses a description saying 'no breaking changes' producing a low probability.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 0,
   "total": 3
 }

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0157925,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.041128,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "src/promptInjectionGuard.ts defines a noul question and a code threshold: questions.is_prompt_injection = { type: \"noul\", ... } and export const PROMPT_INJECTION_BLOCK_THRESHOLD = 0.85;",
+      "evidence": "src/promptInjectionGuard.ts defines the question `is_prompt_injection` with `type: \"noul\"`, and code-owned thresholds (`PROMPT_INJECTION_BLOCK_THRESHOLD = 0.85`, `PROMPT_INJECTION_REVIEW_THRESHOLD = 0.35`) are applied in `actionFor`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request sends the message as a named state field: state: { user_message: message }, and the message is not concatenated into the instructions.",
+      "evidence": "The request body uses `state: { user_message: message }`, and the question `instructions`/`criteria` are static strings that do not interpolate the message.",
       "graded_by": "judge"
     }
   ],

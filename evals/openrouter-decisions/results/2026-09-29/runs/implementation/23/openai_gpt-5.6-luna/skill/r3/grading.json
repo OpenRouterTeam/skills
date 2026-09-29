@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01740875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.048596,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscriptionReactivation.ts computes age in code via isMoreThanOneYearOld(startedAt, now) and only proceeds if olderThanOneYear is true before any model call.",
+      "evidence": "subscriptionReactivation.ts computes the one-year check in code via `isMoreThanOneYearOld(startedAt, now)`, using `setFullYear(... + 1)` and `now > anniversary`, before any model call.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions request sets state: { cancellation_reason: reason } and does not include any dates.",
+      "evidence": "The decide request sets `state: { cancellation_reason: reason }` and contains no startedAt or now dates.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The question is defined as type: \"noul\" with instructions about returning, and the threshold is enforced in code via RETURN_PROBABILITY_THRESHOLD and answer.noul >= RETURN_PROBABILITY_THRESHOLD.",
+      "evidence": "The question `suggests_return` has `type: \"noul\"` and asks whether the customer may return; code applies `answer.noul >= RETURN_PROBABILITY_THRESHOLD` (0.65).",
       "graded_by": "judge"
     }
   ],

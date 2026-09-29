@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01894125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.052492,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "The noul question is “Is the proposed software change a breaking change based on `pull_request_description`? Judge the change described, not merely whether the words 'breaking change' appear.” (pr-breaking-change-gate.mjs, lines 14–16).",
+      "evidence": "The instructions ask 'Is the proposed software change a breaking change based on `pull_request_description`? Judge the change described, not merely whether the words 'breaking change' appear.', which frames breaking as a property of the change.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The code sets and uses a threshold: const BREAKING_THRESHOLD = 0.5; and blocks when probability >= BREAKING_THRESHOLD (pr-breaking-change-gate.mjs, lines 5 and 37–40).",
+      "evidence": "pr-breaking-change-gate.mjs defines `const BREAKING_THRESHOLD = 0.5;` and blocks with `if (probability >= BREAKING_THRESHOLD)`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "A probe with “This is explicitly not a breaking change...” produced P=0.040 and passed the gate (command execution output).",
+      "evidence": "The false criterion covers descriptions that say the change is 'backward-compatible, non-breaking', and the explicit-negation probe ('This is explicitly not a breaking change...') returned P=0.040, which the README records as expected behavior.",
       "graded_by": "judge"
     }
   ],

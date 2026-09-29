@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01928125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.075988,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "Files the agent produced (0): (none), and repository searches show no chat completion code (e.g., rg -n \"chat/completions|completions/create|openai|OpenAI|generat|llm\" returned no relevant hits), so there is no evidence that a generative model was used to create the summary.",
+      "pass": true,
+      "evidence": "The final message says the implementation 'calls chat completions, treats customer text as data, and stores the returned one-paragraph summary on the configured Zendesk custom field', which is a generative model rather than the Decisions API.",
       "graded_by": "judge"
     }
   ],
-  "passed": 0,
+  "passed": 1,
   "total": 2
 }

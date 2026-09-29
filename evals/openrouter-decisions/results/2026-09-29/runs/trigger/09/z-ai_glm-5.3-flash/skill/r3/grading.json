@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01754,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.0277,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "In lead_routing.ts, classifyLead checks headcount/regions first: `if (lead.headcount > 1000 || new Set(lead.regions).size >= 3) { return Promise.resolve('enterprise'); }` and only otherwise calls `decideCompanyWideRollout(lead.lookingFor)`.",
+      "evidence": "In lead_routing.ts, `classifyLead` checks `lead.headcount > 1000 || new Set(lead.regions).size >= 3` and returns \"enterprise\" before `decideCompanyWideRollout` is ever called.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "makeJevRolloutChecker posts to `https://openrouter.ai/api/alpha/decisions` with `model: \"typesafe/jev-1.13\"` (a pinned version) in the request body.",
+      "evidence": "`makeJevRolloutChecker` POSTs to \"https://openrouter.ai/api/alpha/decisions\" with `model: \"typesafe/jev-1.13\"`, a version-pinned model ID.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The request `state` is `{ looking_for: lookingFor }`, containing only the free-text; no headcount or region fields are sent.",
+      "evidence": "The request body sends `state: { looking_for: lookingFor }`, so neither headcount nor region data reaches the model.",
       "graded_by": "judge"
     }
   ],

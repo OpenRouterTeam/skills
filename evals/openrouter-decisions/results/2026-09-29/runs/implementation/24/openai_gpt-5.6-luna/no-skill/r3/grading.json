@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01972,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.029628,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "No live catalog query appears in the transcript (no models.ts or GET /api/v1/models), and the final message hardcodes \"I picked `openai/gpt-4.1-mini`\".",
+      "evidence": "The agent never queried models.ts or GET /api/v1/models; it wrote the hardcoded `id: openai/gpt-4.1-mini` straight into classification-job.yaml.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no run of decide.ts --compare (or equivalent) in the transcript; the agent selected a model without executing the same request against multiple candidates.",
+      "evidence": "No candidates were compared, and no decide.ts --compare or equivalent request was run against multiple models; the agent simply stated 'I picked `openai/gpt-4.1-mini`'.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "The config splits the pin across fields rather than a single versioned ID: \"id: openai/gpt-4.1-mini\" with a separate \"revision: 2025-04-14\" in classification-job.yaml.",
+      "evidence": "The config splits the pin across `id: openai/gpt-4.1-mini` (an unversioned alias) and a separate `revision: 2025-04-14` field, so there is no single versioned model ID value.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No code or config logs the response model string with stored answers; classification-job.yaml contains model and thresholds but no logging, and the transcript shows no logging implementation.",
+      "evidence": "Neither the config nor the transcript sets up logging of the response model string with stored answers; the final message only lists 'Returned provider/model revision exactly matches the pin' as a pre-ship check.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds are fixed in the file (\"accept_if: score >= 0.90\", etc.) and the agent only says \"Before shipping, I would run...\" without executing any decide.ts probe or equivalent on real inputs.",
+      "evidence": "The thresholds `accept_if: score >= 0.90` and `reject_if: score < 0.60` were written into the config without running any probe on real inputs; the holdout evaluation is only proposed ('I would run the locked model against a held-out...').",
       "graded_by": "judge"
     }
   ],

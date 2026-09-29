@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0247525,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.036168,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription_retention.py computes age in code via _is_more_than_one_year_old (anniversary = start.replace(year=start.year + 1); return anniversary <= as_of) and uses it in should_target_for_return before any reasoning.",
+      "evidence": "`_is_more_than_one_year_old` in subscription_retention.py computes `start.replace(year=start.year + 1)` and returns `anniversary <= as_of` entirely in code.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "Only the cancellation_reason text is used for the model-like scoring (reason = (subscription.cancellation_reason or '').lower(); term-in-reason sums), and no raw dates are provided to this logic.",
+      "pass": false,
+      "evidence": "No decision model is ever called: the reason is only substring-matched against the hard-coded sets `RETURN_POSITIVE_TERMS` and `RETURN_NEGATIVE_TERMS`, so no model receives the cancellation reason.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The decision is a likely-return vs unlikely-return classification based on coded thresholds (if positive_score and positive_score > negative_score: RETURN_LIKELY else RETURN_UNLIKELY) with the one-year cutoff enforced in code before scoring.",
+      "pass": false,
+      "evidence": "No question is posed to any model; the outcome comes from comparing keyword counts (`positive_score > negative_score`), so there is no model-produced assessment of likely return with a threshold applied in code.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 1,
   "total": 3
 }

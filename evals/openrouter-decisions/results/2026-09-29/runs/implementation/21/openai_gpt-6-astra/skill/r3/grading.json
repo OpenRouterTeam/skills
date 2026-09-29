@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.05014125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.199892,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In src/urgency.ts, buildUrgencyRequest defines questions.urgency with type: \"score\" and a five-item ordered criteria array; test/urgency.test.ts also asserts the question is a score with 5 levels.",
+      "evidence": "src/urgency.ts defines `urgency: { type: \"score\", ... criteria: [\"Routine...\", \"Low...\", \"Moderate...\", \"High...\", \"Critical...\"] }` with five ordered levels, not a choice over digits.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "In src/urgency.ts, toUrgencyRating derives urgency in code as (Math.round(answer.score) + 1), and README.md states the API returns 0–4 and code rounds and adds one; no second call is made.",
+      "evidence": "toUrgencyRating computes `urgency: (Math.round(answer.score) + 1) as Urgency` from the returned score in a single decide call, and compareUrgency sorts on that derived value.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "buildUrgencyRequest sets state to { service: input.service.trim(), report: input.text.trim() }, and test/urgency.test.ts verifies request.state equals { service: \"api\", report: \"outage\" }.",
+      "evidence": "buildUrgencyRequest sends `state: { service: input.service.trim(), report: input.text.trim() }`, so the service name and report text are separate named fields.",
       "graded_by": "judge"
     }
   ],

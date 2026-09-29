@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00601375,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.00882,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "Final message provides deterministic regex code with no network calls: function isValidEmail(email) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.trim()); }.",
+      "evidence": "The final message's `isValidEmail` only runs a local regex test (`/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.trim())`), with no network or decision-model call, so it is deterministic.",
       "graded_by": "judge"
     }
   ],

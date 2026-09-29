@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01060625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.021516,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "The code uses client.alpha.decisions.create to call POST https://openrouter.ai/api/alpha/decisions and explicitly says it's a Decisions API call, not text generation.",
+      "evidence": "The check calls `client.alpha.decisions.create` against the Decisions API endpoint with a `noul` question rather than making a second chat completion.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The decisionsRequest.state object contains separate named fields: state: { answer, passages }.",
+      "evidence": "State is `{ answer, passages }`, which gives the generated answer and the retrieved passages each their own named field.",
       "graded_by": "judge"
     }
   ],

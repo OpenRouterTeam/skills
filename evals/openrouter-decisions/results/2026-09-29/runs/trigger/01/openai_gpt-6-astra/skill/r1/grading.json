@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01290625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.036276,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": false,
-      "evidence": "The plan lists only billing, engineering, and support and states “Support remains the catch-all, so a separate `none` option isn’t necessary,” omitting a no-match option.",
+      "evidence": "The plan explicitly drops the no-match option: \"Support remains the catch-all, so a separate `none` option isn't necessary,\" leaving only billing, engineering and support.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "The plan says “Code will own validation, fallback behavior, and probability thresholds” and later “Set any thresholds as named constants,” and routes failures to support in code.",
+      "pass": false,
+      "evidence": "Code partly owns the fallback (\"Timeouts, API failures, or invalid responses should return support\") and the threshold is deferred (\"without inventing a confidence cutoff\"), but the question itself encodes the fallback by defining `support` as \"unclear requests, and anything outside the other categories.\"",
       "graded_by": "judge"
     }
   ],
-  "passed": 2,
+  "passed": 1,
   "total": 3
 }

@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0283675,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.103152,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "In src/incident-urgency.ts, URGENCY_QUESTION is defined with type \"score\" and a five-level ordered criteria array; the test asserts criteria length is 5.",
+      "evidence": "`URGENCY_QUESTION` has `type: \"score\"` and a `criteria` array of five ordered levels, from \"No operational impact\" up to \"Critical outage or immediate harm\"; it is not a choice over the digits 1 to 5.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "parseResponse computes urgency in code via \"urgency: roundToLevel(score)\" and sortForOnCallDashboard sorts by that urgency; there is a single API call in rateIncident and no second call or model-generated integer.",
+      "evidence": "`parseResponse` sets `urgency: roundToLevel(score)` from the single returned score answer. `roundToLevel` clamps `Math.round(score)` in code, and there is no second call. The mapping looks off by one if score is 0-indexed, but the value is still computed in code.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "buildRequest sets state to separate named fields: { affected_service: normalized.service, report_text: normalized.text } in src/incident-urgency.ts.",
+      "evidence": "`buildRequest` sends `state: { affected_service: normalized.service, report_text: normalized.text }`, and the first test asserts both fields.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0067725,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.009036,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "No generative summary was produced—the final message says 'I can’t implement this yet...' and the run produced no files (Files the agent produced: none).",
+      "evidence": "The agent produced no files and no code; its final message says \"I can’t implement this yet\" and asks for the project, so no generative model was used to create the summary.",
       "graded_by": "judge"
     }
   ],

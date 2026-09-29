@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01837625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.043164,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "duplicate-ticket-ranker.ts ranks by code using per-candidate noul probabilities: scored.sort((a, b) => b.probability - a.probability || a.index - b.index).",
+      "evidence": "duplicate-ticket-ranker.ts asks one independent `noul` question per candidate, then orders them in code with `scored.sort((a, b) => b.probability - a.probability || a.index - b.index)`; the model never outputs an ordering.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No 'none' choice or threshold logic is implemented; the function only returns a ranked list. The final message notes thresholds “should be calibrated” but none are in code.",
+      "evidence": "The code always returns every candidate ranked, with no merge threshold and no 'none' option, so nothing handles the case where no candidate is a duplicate; the final message only says thresholds 'should be calibrated,' and the only early return is `if (candidates.length === 0) return [];`, which covers an empty input rather than no duplicate.",
       "graded_by": "judge"
     }
   ],

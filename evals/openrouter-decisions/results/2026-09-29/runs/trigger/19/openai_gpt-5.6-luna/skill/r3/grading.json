@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0056075,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.005788,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "The final message includes explanatory text in addition to the regex change: \"Use a character class for either hyphens or spaces:\" and \"This matches both `415-555-0199` and `415 555 0199`.\"",
+      "pass": true,
+      "evidence": "The final message gives only a revised regex `/\\d{3}[- ]\\d{3}[- ]\\d{4}/g` and one short line saying it matches both formats. It adds no code or unrelated changes.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 2,
   "total": 2
 }

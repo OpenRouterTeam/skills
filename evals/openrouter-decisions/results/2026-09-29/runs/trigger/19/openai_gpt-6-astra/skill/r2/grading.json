@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.00350625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.00418,
   "judge_error": null,
   "assertions": [
     {
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "The final message includes an explanation ('`[- ]` matches a hyphen or a space...') in addition to the regex change.",
+      "pass": true,
+      "evidence": "The final message contains only the widened regex `/\\d{3}[- ]\\d{3}[- ]\\d{4}/g` plus a one-line explanation of `[- ]`, with no other code, files, or unrelated changes.",
       "graded_by": "judge"
     }
   ],
-  "passed": 1,
+  "passed": 2,
   "total": 2
 }

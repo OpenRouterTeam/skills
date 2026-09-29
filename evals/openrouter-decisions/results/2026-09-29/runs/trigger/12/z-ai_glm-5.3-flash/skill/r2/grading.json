@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01754625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.020792,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": false,
-      "evidence": "The final code uses `return Math.round(amountCents * rate);`, while the agent claims 'with a result of -16.5, it returns -17', which Math.round does not do—so negative rounding is not handled symmetrically.",
+      "evidence": "The main fix is `Math.round(amountCents * rate)`, which is not symmetric at .5 ties (JS gives Math.round(16.5)=17 but Math.round(-16.5)=-16). The agent's claim that it returns `-17` is wrong, and its phrase \"if you need symmetric half-away-from-zero rounding instead\" shows the proposed fix itself is not the symmetric one.",
       "graded_by": "judge"
     }
   ],

@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0091225,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.008612,
   "judge_error": null,
   "assertions": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "pass": true,
-      "evidence": "They changed to Math.trunc and verified with tests that 109*0.2 -> 21 and -109*0.2 -> -21 ('All six rounding checks passed.'), showing symmetric handling for negatives.",
+      "evidence": "The final message replaces Math.floor with `Math.trunc(amountCents * rate)`, which rounds toward zero so that `-109 * 0.2` gives `-21`, mirroring `21` for the positive amount; the node check confirmed the ±109 and ±100 pairs.",
       "graded_by": "judge"
     }
   ],

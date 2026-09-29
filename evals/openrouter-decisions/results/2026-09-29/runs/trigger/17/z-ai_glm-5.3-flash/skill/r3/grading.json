@@ -1,7 +1,7 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0,
-  "judge_error": "Generator HTTP 400: {\"message\":\"This endpoint's maximum context length is 400000 tokens. However, you requested about 411008 tokens (411008 of text input). Please reduce the length of either one, or use the context-compression plugin to compress your prompt automatically.\",\"code\":400,\"metadata\":{\"provider_name\":null}}",
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.078672,
+  "judge_error": null,
   "assertions": [
     {
       "pass": false,
@@ -9,11 +9,11 @@
       "graded_by": "transcript"
     },
     {
-      "pass": false,
-      "evidence": "judge error: Generator HTTP 400: {\"message\":\"This endpoint's maximum context length is 400000 tokens. However, you requested about 411008 tokens (411008 of text input). Please reduce the length of either one, or use the context-compression plugin to compress your prompt automatically.\",\"code\":400,\"metadata\":{\"provider_name\":null}}",
+      "pass": true,
+      "evidence": "src/chat.ts calls `client.chat.send({ chatRequest: { model: \"google/gemini-3.1-flash-lite\", messages: [...] } })`, a chat completion. The agent explicitly declined the Decisions skill, saying it 'explicitly doesn't apply' to chat completions.",
       "graded_by": "judge"
     }
   ],
-  "passed": 0,
+  "passed": 1,
   "total": 2
 }

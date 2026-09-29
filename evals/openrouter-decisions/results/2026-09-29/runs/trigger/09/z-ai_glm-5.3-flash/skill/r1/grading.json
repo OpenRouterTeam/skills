@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0216925,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.058532,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "In src/leadRouting.ts, routeLead checks headcount and regions before any model call: if (lead.headcount > ENTERPRISE_HEADCOUNT) ...; if (lead.regions.length >= ENTERPRISE_REGION_COUNT) ...; only otherwise does it call client.alpha.decisions.create(...).",
+      "evidence": "In src/leadRouting.ts, `routeLead` returns enterprise early for `lead.headcount > ENTERPRISE_HEADCOUNT` and for `lead.regions.length >= ENTERPRISE_REGION_COUNT`, and only after both checks does it call `client.alpha.decisions.create`.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The code pins the model ID and uses the Decisions API: const MODEL = \"typesafe/jev-1.13-20260917\"; then client.alpha.decisions.create({ decisionsRequest: { model: MODEL, ... } }).",
+      "evidence": "The code calls `client.alpha.decisions.create` from `@openrouter/sdk` with `model: MODEL`, where `MODEL = \"typesafe/jev-1.13-20260917\"`, which is the pinned ID listed in the catalog's `pin` column.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The state sent excludes headcount and regions: state: { lead: { company: lead.company, free_text: lead.freeText } } in src/leadRouting.ts.",
+      "evidence": "The request `state` contains only `lead: { company: lead.company, free_text: lead.freeText }`, with no headcount or regions fields.",
       "graded_by": "judge"
     }
   ],

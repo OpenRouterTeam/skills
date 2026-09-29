@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01270625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.024032,
   "judge_error": null,
   "assertions": [
     {
@@ -10,17 +10,17 @@
     },
     {
       "pass": true,
-      "evidence": "The code uses numeric outputs: `const probability = answer.probabilities?.[answer.choice] ?? answer.confidence;` with no `includes(...)` string matching.",
+      "evidence": "The final code calls client.alpha.decisions.create and reads answer.probabilities/answer.choice, with no `includes(\"spam\")` or other string matching on generated text.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "It uses a single `choice` question (“mutually exclusive options”) with `type: \"choice\"`, not separate `noul` questions for spam and abusive.",
+      "evidence": "The agent used a single `choice` question with spam/abusive/fine options and explicitly said 'not separate `noul`s', so a review cannot be both spam and abusive.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "Thresholds are defined and applied in code: `const THRESHOLD = 0.5;` and `if (probability < THRESHOLD) { ... }` next to the returned probabilities.",
+      "evidence": "`const THRESHOLD = 0.5` is defined in code and compared directly against the returned probability (`if (probability < THRESHOLD)`).",
       "graded_by": "judge"
     }
   ],

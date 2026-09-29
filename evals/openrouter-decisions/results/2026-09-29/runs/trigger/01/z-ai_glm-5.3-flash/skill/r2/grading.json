@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01099125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.016912,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": false,
-      "evidence": "The plan’s Primitive lists only 'one choice with options billing, engineering, support' and does not include a no-match/none_of_these option.",
+      "evidence": "The plan specifies 'one `choice` with options `billing`, `engineering`, `support`' and never adds a none_of_these or other no-match option.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Gate says 'route returns the top choice when confidence clears a threshold… below it, return support… Threshold as a named constant next to the call,' which puts the threshold and fallback in code rather than in the question.",
+      "evidence": "The Gate bullet says `route` returns the top choice when confidence clears a threshold, falls back to `support` below it, and keeps the 'Threshold as a named constant next to the call', so both live in code rather than in the question.",
       "graded_by": "judge"
     }
   ],

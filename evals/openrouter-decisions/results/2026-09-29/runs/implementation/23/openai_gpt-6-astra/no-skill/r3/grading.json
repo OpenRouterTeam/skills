@@ -1,24 +1,24 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0276875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.035576,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "subscription.py computes the anniversary in code (anniversary = date(...); if today <= anniversary: return False) and only then calls decision_model.",
+      "evidence": "In subscription.py, the anniversary is computed with `calendar.monthrange` and checked with `if today <= anniversary ... return False`, all before `decision_model` is called.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "OpenRouterDecisionModel sends only the cancellation reason: messages user content is {'cancellation_reason': reason}, and tests assert payload['messages'][1]['content'] equals that JSON with no dates.",
+      "evidence": "`result = decision_model(cancellation_reason.strip())` sends only the reason, and the OpenRouter payload's user message is `json.dumps({\"cancellation_reason\": reason})`, with no dates included.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "RETURN_INTENT_INSTRUCTIONS asks for a boolean likely_to_return classification, and the >1-year threshold is enforced in code before calling the model (age gate returns False until after anniversary).",
+      "pass": false,
+      "evidence": "\"Noul\" is not a defined term, so this can't be confirmed. The model is asked directly for a boolean `likely_to_return`, which leaves no code-side threshold on a model output; only the one-year age threshold is in code.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

@@ -3,3 +3,4 @@ results/**/stderr.log
 results/**/outputs/.npm-cache/
 results/**/outputs/node_modules/
 results/**/outputs/.git/
+results/**/outputs/__pycache__/

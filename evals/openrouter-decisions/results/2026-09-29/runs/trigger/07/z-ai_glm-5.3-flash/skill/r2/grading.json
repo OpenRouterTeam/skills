@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.0270425,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.084036,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": false,
-      "evidence": "guardrail/prompt-injection.ts defines the decision as a choice question (questions.prompt_injection.type: \"choice\"), not a noul question, although a code threshold exists (const INJECTION_THRESHOLD = 0.5).",
+      "evidence": "The shipped `guardrail/prompt-injection.ts` sends `type: \"choice\"` with `injection`/`benign` criteria rather than a `noul` question; `INJECTION_THRESHOLD = 0.5` is in code, but the question type does not match.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The request body places the untrusted text in a named state field (state: { message }) and uses fixed instructions/criteria without concatenating the message into the question.",
+      "evidence": "The request body uses `state: { message }` and the question instructions are the fixed string \"Classify the customer message.\", so the user text is never concatenated into the question.",
       "graded_by": "judge"
     }
   ],

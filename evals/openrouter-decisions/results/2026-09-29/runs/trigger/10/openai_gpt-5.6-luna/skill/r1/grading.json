@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02458625,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.049608,
   "judge_error": null,
   "assertions": [
     {
@@ -10,15 +10,15 @@
     },
     {
       "pass": true,
-      "evidence": "duplicate-ticket-ranker.ts computes per-candidate scores and then sorts in code: `return ranked.sort((a, b) => b.score - a.score || ... )`, with one `score` question per candidate, rather than asking the model to output an ordering.",
+      "evidence": "duplicate-ticket-ranker.ts asks one `score` question per candidate and then sorts in code with `ranked.sort((a, b) => b.score - a.score || ...)`; the model is never asked for an ordering.",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "README usage provides a no-duplicate path via a threshold: `const duplicate = ranked[0]?.score >= 0.75 ? ranked[0] : undefined;`",
+      "pass": false,
+      "evidence": "The module always returns a sorted list and has no threshold or 'none' outcome; the only no-match handling is the usage snippet `ranked[0]?.score >= 0.75 ? ranked[0] : undefined` in the README and final message, plus the README advice to 'Add a review/“no duplicate” fallback', which is a recommendation rather than implemented code.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 3
 }

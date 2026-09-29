@@ -1,21 +1,21 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.022885,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.078416,
   "judge_error": null,
   "assertions": [
     {
       "pass": true,
-      "evidence": "src/incident-urgency.ts defines URGENCY_QUESTION with type: \"score\" and a five-level criteria array (URGENCY_RUBRIC), not a choice over digits.",
+      "evidence": "URGENCY_QUESTION is defined as `type: \"score\"` with `criteria: URGENCY_RUBRIC`, an ordered array of five descriptive levels, rather than a choice over the digits 1 to 5.",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "rateIncidentUrgency derives urgency in code via toLevel(answer.score), and sortIncidentReportsByUrgency sorts by rating.urgency; no second model call is made.",
+      "evidence": "The sort key is computed in code as `const urgency = toLevel((answer as ScoreAnswer).score)` from one Decisions call; it is not model-generated text or a second request, though the 0-indexed score is not shifted (probe shows level 5 at probability 1 yet urgency 4).",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "The Decisions API request sets state: { report_text: report.text, affected_service: report.affectedService }, keeping report text and service as separate named fields.",
+      "evidence": "The request body sends `state: { report_text: report.text.trim(), affected_service: report.affectedService.trim() }`, so the report text and service name are separate named fields.",
       "graded_by": "judge"
     }
   ],

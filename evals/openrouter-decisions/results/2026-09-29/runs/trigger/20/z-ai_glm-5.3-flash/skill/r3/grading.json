@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01597875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.050912,
   "judge_error": null,
   "assertions": [
     {
@@ -10,12 +10,12 @@
     },
     {
       "pass": true,
-      "evidence": "lib.ts defines a NoulQuestion and verifies `answer.type !== \"noul\"`, then routes with `gate(answer.noul)`; thresholds are code-defined in gates.ts (`ESCALATE_THRESHOLD = 0.8`, `HANDOFF_THRESHOLD = 0.2`).",
+      "evidence": "lib.ts defines `escalationQuestion` as `type: \"noul\"` and routes on `gate(answer.noul)`, and the thresholds are the code constants `ESCALATE_THRESHOLD = 0.8` / `HANDOFF_THRESHOLD = 0.2` in gates.ts, replacing the chat 'yes' string check.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "There is no implementation or plan to tune thresholds on logged escalations; README notes conservative default thresholds in gates.ts and does not mention using past escalation logs.",
+      "evidence": "The README only says thresholds are 'conservative defaults' chosen 'before real probing', and neither the files nor the final message mention tuning them against last week's logged escalations.",
       "graded_by": "judge"
     }
   ],

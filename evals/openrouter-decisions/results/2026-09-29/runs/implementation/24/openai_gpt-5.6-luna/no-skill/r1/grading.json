@@ -1,31 +1,31 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.02625125,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.040728,
   "judge_error": null,
   "assertions": [
     {
       "pass": false,
-      "evidence": "The transcript curls OpenAI docs (developers.openai.com/api/docs/models*.md) and then picks gpt-5.6-luna; there is no listing from models.ts or GET /api/v1/models?output_modalities=decisions.",
+      "evidence": "Candidates were read from OpenAI's documentation page (developers.openai.com/api/docs/models.md), not from models.ts or GET /api/v1/models?output_modalities=decisions, so no live decision-model catalog was queried.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "No decide.ts --compare (or equivalent) run appears; the agent states “The official OpenAI model catalog describes GPT-5.6 Luna… I’ll pin that exact identifier,” selecting by description, not by the same request run across candidates.",
+      "evidence": "No request was run against any candidate model; the agent picked gpt-5.6-luna because the docs describe it as 'optimized for cost-sensitive, high-volume workloads'.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "classification-job.yaml sets model: gpt-5.6-luna, which is an unversioned alias; the assertion requires a versioned model ID pinned in a single config value.",
+      "evidence": "The config pins `model: gpt-5.6-luna`, which the model page gives as the 'Default snapshot' name rather than a dated or versioned snapshot ID, so it can move like an alias.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Neither the transcript nor files show any code or config that logs the response model string with stored answers; classification-job.yaml has no logging of the model string.",
+      "evidence": "Neither classification-job.yaml nor THRESHOLDS.md logs the response model string alongside stored answers; THRESHOLDS.md only mentions recording the model ID in a release record.",
       "graded_by": "judge"
     },
     {
       "pass": false,
-      "evidence": "Thresholds (0.95/0.05) are fixed in classification-job.yaml, and THRESHOLDS.md only instructs to evaluate later; there is no decide.ts probe or any run over real inputs shown in the transcript.",
+      "evidence": "The thresholds 0.95/0.05 were written into classification-job.yaml without any probe run on real inputs; THRESHOLDS.md only describes a future holdout evaluation, and none was executed.",
       "graded_by": "judge"
     }
   ],

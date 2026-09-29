@@ -1,6 +1,6 @@
 {
-  "judge": "openai/gpt-5",
-  "judge_cost": 0.01234875,
+  "judge": "anthropic/claude-opus-5.5",
+  "judge_cost": 0.02456,
   "judge_error": null,
   "assertions": [
     {
@@ -10,20 +10,20 @@
     },
     {
       "pass": true,
-      "evidence": "“Deterministic gate (code, not model)… Evaluate the three hard rules in code: Days since purchase ≤ 90; Refund amount ≤ order total…; Refunds by this customer in the trailing 365 days < 2.”",
+      "evidence": "Under \"Deterministic gate (code, not model)\" the agent lists \"Days since purchase ≤ 90\", \"Refund amount ≤ order total\" and \"Refunds by this customer in the trailing 365 days < 2\", and says \"No model needed; these are facts.\"",
       "graded_by": "judge"
     },
     {
       "pass": true,
-      "evidence": "“Decision model (judgment on the ambiguous remainder)… typed questions: ‘Is this a straightforward refund…?’ and ‘Is there anything ambiguous…?’” and “your hard rules are never trusted to a model.”",
+      "evidence": "The model questions are only judgment calls, \"Is this a straightforward refund where the customer clearly deserves their money back?\" and \"Is there anything ambiguous...\", and the agent states \"The model only answers 'is this obvious or ambiguous?'\"",
       "graded_by": "judge"
     },
     {
-      "pass": true,
-      "evidence": "“Threshold-based routing in code — straightforward.noul ≥ threshold → auto-approve; Otherwise → human queue,” with “Any rule that fails → auto-deny,” creating auto-approve, human-review, and auto-deny bands.",
+      "pass": false,
+      "evidence": "Routing on the model output is one threshold: \"`straightforward.noul ≥ threshold` → auto-approve\" and \"Otherwise → human queue\". No probability band bounded on both sides (e.g., approve / human / deny) is defined, so the human queue is just the fallback of a single gate.",
       "graded_by": "judge"
     }
   ],
-  "passed": 3,
+  "passed": 2,
   "total": 4
 }
