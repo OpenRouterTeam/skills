@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0234725,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "src/auto-merge.ts asks: \"Is the proposed pull request change breaking for existing users... Judge the change described in `pull_request.description`, not whether the author merely uses the word breaking.\"",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "src/auto-merge.ts defines and uses a code threshold: \"const BREAKING_PROBABILITY_TO_BLOCK = 0.8;\" and \"const autoMerge = breakingProbability < BREAKING_PROBABILITY_TO_BLOCK;\"",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The false criteria state: \"...or the description explicitly says it is not breaking,\" indicating a 'no breaking changes' description should yield low probability.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

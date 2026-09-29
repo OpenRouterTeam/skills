@@ -1,0 +1,1 @@
+I can’t implement this yet because the workspace contains no application code, support-ticket data, or persistence layer—only the OpenRouter Decisions skill documentation. Please provide or mount the ticketing project (and specify the LLM provider if one isn’t already configured).

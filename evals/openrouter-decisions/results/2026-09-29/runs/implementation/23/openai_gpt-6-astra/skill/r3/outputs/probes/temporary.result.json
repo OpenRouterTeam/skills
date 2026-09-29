@@ -1,0 +1,65 @@
+{
+  "expected": true,
+  "comparison": [
+    {
+      "model_id": "upstage/solar-decide",
+      "model": "upstage/solar-decide-20260928",
+      "latency_ms": 510,
+      "usage": {
+        "input_tokens": 505,
+        "output_tokens": 1,
+        "cost": 0.00002525
+      },
+      "answers": {
+        "intends_to_return": {
+          "type": "noul",
+          "noul": 0.965568
+        }
+      }
+    },
+    {
+      "model_id": "respan/span-01",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "respan/span-01-lite",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "respan/span-01-lite:free",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "jaredpalmer/kev-4b",
+      "model": "jaredpalmer/kev-4b-20260924",
+      "latency_ms": 537,
+      "usage": {
+        "input_tokens": 143,
+        "output_tokens": 25,
+        "cost": 0.000006006
+      },
+      "answers": {
+        "intends_to_return": {
+          "type": "noul",
+          "noul": 0.9699
+        }
+      }
+    },
+    {
+      "model_id": "typesafe/jev-1.13",
+      "model": "typesafe/jev-1.13-20260917",
+      "latency_ms": 291,
+      "usage": {
+        "input_tokens": 423,
+        "output_tokens": 23,
+        "cost": 0.000017766
+      },
+      "answers": {
+        "intends_to_return": {
+          "type": "noul",
+          "noul": 0.92
+        }
+      }
+    }
+  ]
+}

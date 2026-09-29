@@ -1,0 +1,22 @@
+name: Auto-merge gate
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  breaking-change-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Classify PR description
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > pr-description.txt
+          ./auto_merge_gate.py \
+            --title "$PR_TITLE" \
+            --description-file pr-description.txt

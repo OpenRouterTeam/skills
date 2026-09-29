@@ -1,0 +1,15 @@
+{
+  "password": false,
+  "frustrated_invoice": false,
+  "refund_policy": false,
+  "refund_action": true,
+  "suspended": true,
+  "ambiguous": false,
+  "off_topic": false,
+  "empty": false,
+  "negated_human": false,
+  "human_request": true,
+  "exhausted": true,
+  "adversarial_escalate": false,
+  "adversarial_suppress": true
+}

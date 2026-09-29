@@ -1,0 +1,107 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 369,
+    "usage": {
+      "input_tokens": 603,
+      "output_tokens": 1,
+      "cost": 0.00003015
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.010918,
+        "probabilities": {
+          "0": 0.160592,
+          "1": 0.719722,
+          "2": 0.075858,
+          "3": 0.035833,
+          "4": 0.007995
+        },
+        "legend": {
+          "0": "1 — Low: no active operational impact; informational, resolved, off-topic, or cosmetic issue that can wait for routine work.",
+          "1": "2 — Minor: a limited nonessential function is impaired; a practical workaround exists and response can wait until normal working hours.",
+          "2": "3 — Moderate: an active service degradation disrupts some users or a useful workflow; investigate promptly, but core operations remain available.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for a substantial group, with no practical workaround; immediate on-call attention is needed.",
+          "4": "5 — Critical: widespread loss of essential production service, ongoing data loss or corruption, or an active security compromise; emergency response is needed now."
+        },
+        "confidence": 0.450779
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 792,
+    "usage": {
+      "input_tokens": 278,
+      "output_tokens": 276,
+      "cost": 0.000011676
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.8005,
+        "probabilities": {
+          "0": 0.1223,
+          "1": 0.1154,
+          "2": 0.6388,
+          "3": 0.0866,
+          "4": 0.0369
+        },
+        "legend": {
+          "0": "1 — Low: no active operational impact; informational, resolved, off-topic, or cosmetic issue that can wait for routine work.",
+          "1": "2 — Minor: a limited nonessential function is impaired; a practical workaround exists and response can wait until normal working hours.",
+          "2": "3 — Moderate: an active service degradation disrupts some users or a useful workflow; investigate promptly, but core operations remain available.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for a substantial group, with no practical workaround; immediate on-call attention is needed.",
+          "4": "5 — Critical: widespread loss of essential production service, ongoing data loss or corruption, or an active security compromise; emergency response is needed now."
+        },
+        "confidence": 0.8699
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 182,
+    "usage": {
+      "input_tokens": 576,
+      "output_tokens": 18,
+      "cost": 0.000024192
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.98,
+        "probabilities": {
+          "0": 0,
+          "1": 0.01,
+          "2": 0.99,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Low: no active operational impact; informational, resolved, off-topic, or cosmetic issue that can wait for routine work.",
+          "1": "2 — Minor: a limited nonessential function is impaired; a practical workaround exists and response can wait until normal working hours.",
+          "2": "3 — Moderate: an active service degradation disrupts some users or a useful workflow; investigate promptly, but core operations remain available.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for a substantial group, with no practical workaround; immediate on-call attention is needed.",
+          "4": "5 — Critical: widespread loss of essential production service, ongoing data loss or corruption, or an active security compromise; emergency response is needed now."
+        },
+        "confidence": 0.98
+      }
+    }
+  }
+]

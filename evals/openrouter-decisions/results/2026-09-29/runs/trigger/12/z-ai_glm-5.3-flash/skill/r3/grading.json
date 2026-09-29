@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0115,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "In vat.ts the function now returns Math.round(amountCents * rate), and vat.test.ts shows mirrored results for negative/positive amounts (e.g., -1005→-201 vs 1005→201).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

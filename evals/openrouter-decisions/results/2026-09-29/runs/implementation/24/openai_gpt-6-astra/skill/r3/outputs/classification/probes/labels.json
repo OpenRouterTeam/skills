@@ -1,0 +1,11 @@
+{
+  "billing": "billing",
+  "account": "account",
+  "bug": "bug",
+  "ambiguous": "none",
+  "no-match": "none",
+  "empty": "none",
+  "off-topic": "none",
+  "negated": "account",
+  "adversarial": "bug"
+}

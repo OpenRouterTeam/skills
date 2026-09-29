@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0048675,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "Final message includes explanatory text and two code blocks: 'Use a character class to allow spaces...' and 'This matches `415 555 0199`...'; not solely a regex change.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

@@ -1,0 +1,13 @@
+{
+  "name": "incident-urgency-decider",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test test/incident-urgency.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

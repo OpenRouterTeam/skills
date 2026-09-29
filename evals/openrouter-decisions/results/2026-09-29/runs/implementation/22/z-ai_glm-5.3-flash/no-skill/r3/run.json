@@ -1,0 +1,97 @@
+{
+  "id": 22,
+  "kind": "implementation",
+  "category": "implementation",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "no-skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T03:19:05.277Z",
+  "duration_ms": 58448,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 84386,
+    "cached_input_tokens": 35008,
+    "output_tokens": 2935,
+    "reasoning_output_tokens": 627
+  },
+  "estimated_cost": 0.00992444,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "I’ll inspect the workspace to find the auto-merge and decision-model integration points."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg --files -g 'AGENTS.md' -g '\"'!node_modules'\"' | head -50 && printf '\\\\n--- files ---\\\\n' && rg --files | head -120\"\n<output>\n\n--- files ---\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace is empty, so I’m checking git context before choosing a minimal implementation."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'pwd; git status --short --branch; ls -la'\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/z-ai_glm-5.3-flash/no-skill/r3/workspace\n## master\ntotal 12\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 03:19 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 03:19 ..\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 03:19 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 03:19 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 03:19 .git\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "I’ll add a focused auto-merge gate with a pluggable decision model, a model prompt, and tests."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"apply_patch <<'PATCH'\n*** Begin Patch\n*** Add File: automerge.py\n+#\"'!/usr/bin/env python3\n+\"\"\"Gate auto-merge on whether a PR description declares a breaking change.\"\"\"\n+\n+from __future__ import annotations\n+\n+import argparse\n+import json\n+import sys\n+from collections.abc import Mapping, Sequence\n+from dataclasses import dataclass\n+from typing import Any\n+\n+\n+DECISION_QUESTION = \"\"\"'\"\\\\\n+Does this pull request description explicitly say that the change is breaking, \\\\\n+contains breaking changes, introduces a breaking change, or requires a major \\\\\n+version bump? Answer with JSON only: {\\\"is_breaking\\\": true} or \\\\\n+{\\\"is_breaking\\\": false}.\n+\n+Pull request description:\n+{description}\\\"\\\"\\\"\n+\n+ALLOWED_PREFIXES = (\\\"breaking\\\", \\\"BREAKING\\\", \\\"BREAKING CHANGE\\\", \\\"BREAKING CHANGES\\\")\n+ALLOWED_PHRASES = (\n+    \\\"breaking change\\\",\n+    \\\"breaking changes\\\",\n+    \\\"is breaking\\\",\n+    \\\"not backwards compatible\\\",\n+    \\\"not backward compatible\\\",\n+    \\\"major version bump\\\",\n+)\n+\n+\n+@dataclass(frozen=True)\n+class Decision:\n+    is_breaking: bool\n+    reason: str\n+\n+\n+def build_question(description: str) -> str:\n+    return DECISION_QUESTION.format(description=description)\n+\n+\n+def reference_decision_model(description: str) -> Decision:\n+    \\\"\\\"\\\"A deterministic stand-in for an LLM decision model.\n+\n+    In production, send \"'`build_question` to the model and validate that its\n+    response is `{\"is_breaking\": true}` or `{\"is_breaking\": false}`.\n+    \"\"\"\n+    compact = \" \".join(description.lower().split())\n+\n+    if compact.startswith(\"breaking\") or \"breaking change\" in compact:\n+        return Decision(True, \"description explicitly declares a breaking change\")\n+\n+    phrases = (\"is breaking\", \"not backwards compatible\", \"not backward compatible\")\n+    if any(phrase in compact for phrase in phrases):\n+        return Decision(True, \"description explicitly declares the change breaking\")\n+\n+    return Decision(False, \"description does not declare a breaking change\")\n+\n+\n+def should_auto_merge(\n+    pull_request: Mapping[str, Any],\n+    decision_model=reference_decision_model,\n+) -> tuple[bool, Decision]:\n+    if pull_request.get(\"draft\", False):\n+        return False, Decision(True, \"draft pull requests cannot be merged\")\n+\n+    description = str(pull_request.get(\"description\") or pull_request.get(\"body\") or \"\")\n+    decision = decision_model(description)\n+    return not decision.is_breaking, decision\n+\n+\n+def extract_pull_request(payload: Mapping[str, Any]) -> Mapping[str, Any]:\n+    pull_request = payload.get(\"pull_request\")\n+    if isinstance(pull_request, Mapping):\n+        return pull_request\n+    return payload\n+\n+\n+def main(argv: Sequence[str] | None = None) -> int:\n+    parser = argparse.ArgumentParser(description=__doc__)\n+    parser.add_argument(\"pr_event\", nargs=\"?\", help=\"PR JSON or GitHub pull_request event JSON\")\n+    parser.add_argument(\"--show-question\", action=\"store_true\", help=\"print the decision-model prompt\")\n+    args = parser.parse_args(argv)\n+\n+    if args.show_question:\n+        print(build_question(\"<PR description>\"))\n+\n+    if args.pr_event is None:\n+        return 0 if args.show_question else parser.error(\"pr_event is required\")\n+\n+    payload = json.load(open(args.pr_event, encoding=\"utf-8\"))\n+    allowed, decision = should_auto_merge(extract_pull_request(payload))\n+    result = {\"auto_merge\": allowed, \"is_breaking\": decision.is_breaking, \"reason\": decision.reason}\n+    print(json.dumps(result))\n+    return 0 if allowed else 1\n+\n+\n+if __name__ == \"__main__\":\n+    sys.exit(main())\n*** Add File: test_automerge.py\n+import json\n+import subprocess\n+import tempfile\n+from pathlib import Path\n+\n+import automerge\n+\n+\n+def test_description_declaring_breaking_change_blocks_merge():\n+    allowed, decision = automerge.should_auto_merge(\n+        {\"description\": \"This release includes a breaking change to the public API.\"}\n+    )\n+    assert not allowed\n+    assert decision.is_breaking\n+\n+\n+def test_non_breaking_description_allows_merge():\n+    allowed, decision = automerge.should_auto_merge(\n+        {\"body\": \"Adds a backward-compatible helper function.\"}\n+    )\n+    assert allowed\n+    assert not decision.is_breaking\n+\n+\n+def test_question_is_rendered():\n+    question = automerge.build_question(\"Refactor internal types.\")\n+    assert \"breaking\" in question\n+    assert \"Refactor internal types.\" in question\n+\n+\n+def test_cli_allows_non_breaking_pull_request():\n+    with tempfile.NamedTemporaryFile(\"w\", delete=False) as event_file:\n+        json.dump({\"pull_request\": {\"body\": \"Documentation fix.\"}}, event_file)\n+        path = Path(event_file.name)\n+\n+    process = subprocess.run(\n+        [\"python\", \"automerge.py\", str(path)], capture_output=True, text=True, check=True\n+    )\n+    assert json.loads(process.stdout) == {\n+        \"auto_merge\": True,\n+        \"is_breaking\": False,\n+        \"reason\": \"description does not declare a breaking change\",\n+    }\n*** End Patch\nPATCH\npython -m pytest -q test_automerge.py'\n<output>\n..F.                                                                     [100%]\n=================================== FAILURES ===================================\n__________________________ test_question_is_rendered ___________________________\n\n    def test_question_is_rendered():\n>       question = automerge.build_question(\"Refactor internal types.\")\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\ntest_automerge.py:26: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ndescription = 'Refactor internal types.'\n\n    def build_question(description: str) -> str:\n>       return DECISION_QUESTION.format(description=description)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       KeyError: '\"is_breaking\"'\n\nautomerge.py:41: KeyError\n=========================== short test summary info ============================\nFAILED test_automerge.py::test_question_is_rendered - KeyError: '\"is_breaking\"'\n1 failed, 3 passed in 0.05s\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "One prompt-format bug surfaced in tests; I’m fixing the JSON braces and rerunning."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"apply_patch <<'PATCH'\n*** Begin Patch\n*** Update File: automerge.py\n@@\n-version bump? Answer with JSON only: {\\\"is_breaking\\\": true} or \\\\\n-{\\\"is_breaking\\\": false}.\n+version bump? Answer with JSON only: {{\\\"is_breaking\\\": true}} or \\\\\n+{{\\\"is_breaking\\\": false}}.\n*** End Patch\nPATCH\npython -m pytest -q test_automerge.py && python automerge.py --show-question\"\n<output>\n....                                                                     [100%]\n4 passed in 0.04s\nDoes this pull request description explicitly say that the change is breaking, contains breaking changes, introduces a breaking change, or requires a major version bump? Answer with JSON only: {\"is_breaking\": true} or {\"is_breaking\": false}.\n\nPull request description:\n<PR description>\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The gate now blocks breaking changes; tests pass, so I’m cleaning out unused constants."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"apply_patch <<'PATCH'\n*** Begin Patch\n*** Update File: automerge.py\n@@\n-ALLOWED_PREFIXES = (\\\"breaking\\\", \\\"BREAKING\\\", \\\"BREAKING CHANGE\\\", \\\"BREAKING CHANGES\\\")\n-ALLOWED_PHRASES = (\n-    \\\"breaking change\\\",\n-    \\\"breaking changes\\\",\n-    \\\"is breaking\\\",\n-    \\\"not backwards compatible\\\",\n-    \\\"not backward compatible\\\",\n-    \\\"major version bump\\\",\n-)\n-\n-\n @dataclass(frozen=True)\n@@\n-    phrases = (\\\"is breaking\\\", \\\"not backwards compatible\\\", \\\"not backward compatible\\\")\n-    if any(phrase in compact for phrase in phrases):\n+    phrases = (\\\"is breaking\\\", \\\"not backwards compatible\\\", \\\"not backward compatible\\\")\n*** End Patch\nPATCH\npython -m pytest -q test_automerge.py\"\n<output>\n\n==================================== ERRORS ====================================\n______________________ ERROR collecting test_automerge.py ______________________\n/home/ubuntu/.pyenv/versions/3.12.13/lib/python3.12/site-packages/_pytest/python.py:498: in importtestmodule\n    mod = import_path(\n/home/ubuntu/.pyenv/versions/3.12.13/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n/home/ubuntu/.pyenv/versions/3.12.13/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n/home/ubuntu/.pyenv/versions/3.12.13/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\ntest_automerge.py:6: in <module>\n    import automerge\nE     File \"/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/z-ai_glm-5.3-flash/no-skill/r3/workspace/automerge.py\", line 45\nE       return Decision(True, \"description explicitly declares the change breaking\")\nE   IndentationError: unexpected indent\n=========================== short test summary info ============================\nERROR test_automerge.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.11s\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The cleanup patch left a dangling branch; I’m inspecting and repairing it."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"nl -ba automerge.py | sed -n '30,55p'\"\n<output>\n    30\t    return DECISION_QUESTION.format(description=description)\n    31\t\n    32\t\n    33\tdef reference_decision_model(description: str) -> Decision:\n    34\t    \"\"\"A deterministic stand-in for an LLM decision model.\n    35\t\n    36\t    In production, send `build_question` to the model and validate that its\n    37\t    response is `{\"is_breaking\": true}` or `{\"is_breaking\": false}`.\n    38\t    \"\"\"\n    39\t    compact = \" \".join(description.lower().split())\n    40\t\n    41\t    if compact.startswith(\"breaking\") or \"breaking change\" in compact:\n    42\t        return Decision(True, \"description explicitly declares a breaking change\")\n    43\t\n    44\t    phrases = (\"is breaking\", \"not backwards compatible\", \"not backward compatible\")\n    45\t        return Decision(True, \"description explicitly declares the change breaking\")\n    46\t\n    47\t    return Decision(False, \"description does not declare a breaking change\")\n    48\t\n    49\t\n    50\tdef should_auto_merge(\n    51\t    pull_request: Mapping[str, Any],\n    52\t    decision_model=reference_decision_model,\n    53\t) -> tuple[bool, Decision]:\n    54\t    if pull_request.get(\"draft\", False):\n    55\t        return False, Decision(True, \"draft pull requests cannot be merged\")\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"apply_patch <<'PATCH'\n*** Begin Patch\n*** Update File: automerge.py\n@@\n     phrases = (\\\"is breaking\\\", \\\"not backwards compatible\\\", \\\"not backward compatible\\\")\n-        return Decision(True, \\\"description explicitly declares the change breaking\\\")\n+    if any(phrase in compact for phrase in phrases):\n+        return Decision(True, \\\"description explicitly declares the change breaking\\\")\n*** End Patch\nPATCH\npython -m pytest -q test_automerge.py\"\n<output>\n....                                                                     [100%]\n4 passed in 0.04s\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Implemented the auto-merge gate:\n\n- `automerge.py:24` — `should_auto_merge` uses a decision-model result and blocks when `is_breaking` is true.\n- `automerge.py:17` — `build_question` renders the exact prompt for the model.\n- `automerge.py:33` — deterministic reference model plus CLI handling for GitHub-style payloads.\n- `test_automerge.py:1` — four passing tests.\n\nDecision-model question:\n\n```text\nDoes this pull request description explicitly say that the change is breaking, contains breaking changes, introduces a breaking change, or requires a major version bump? Answer with JSON only: {\"is_breaking\": true} or {\"is_breaking\": false}.\n\nPull request description:\n<PR description>\n```"
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "Implemented the auto-merge gate:\n\n- `automerge.py:24` — `should_auto_merge` uses a decision-model result and blocks when `is_breaking` is true.\n- `automerge.py:17` — `build_question` renders the exact prompt for the model.\n- `automerge.py:33` — deterministic reference model plus CLI handling for GitHub-style payloads.\n- `test_automerge.py:1` — four passing tests.\n\nDecision-model question:\n\n```text\nDoes this pull request description explicitly say that the change is breaking, contains breaking changes, introduces a breaking change, or requires a major version bump? Answer with JSON only: {\"is_breaking\": true} or {\"is_breaking\": false}.\n\nPull request description:\n<PR description>\n```",
+  "produced_files": [
+    ".pytest_cache/.gitignore",
+    ".pytest_cache/CACHEDIR.TAG",
+    ".pytest_cache/README.md",
+    ".pytest_cache/v/cache/lastfailed",
+    ".pytest_cache/v/cache/nodeids",
+    "__pycache__/automerge.cpython-312.pyc",
+    "__pycache__/test_automerge.cpython-312-pytest-8.4.2.pyc",
+    "automerge.py",
+    "test_automerge.py"
+  ]
+}

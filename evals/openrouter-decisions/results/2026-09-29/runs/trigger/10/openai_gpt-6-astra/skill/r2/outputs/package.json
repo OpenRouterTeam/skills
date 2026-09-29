@@ -1,0 +1,13 @@
+{
+  "name": "ticket-duplicate-ranker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit",
+    "probe:prepare": "tsx scripts/prepare-probe.ts",
+    "probe": "tsx scripts/decide.ts test/probe-request.json --compare"
+  },
+  "dependencies": { "@openrouter/sdk": "^1.3.23" },
+  "devDependencies": { "@types/node": "^24.0.0", "tsx": "^4.0.0", "typescript": "^5.9.0" }
+}

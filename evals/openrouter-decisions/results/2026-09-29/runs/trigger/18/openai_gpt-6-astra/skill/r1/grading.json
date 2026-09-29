@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0036075,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "No files were produced and the agent stated: 'I couldn’t find `labels.csv` in the workspace,' so no code computed metrics from the CSV.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

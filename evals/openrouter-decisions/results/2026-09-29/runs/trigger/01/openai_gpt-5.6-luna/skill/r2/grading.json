@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01243,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan step 1: \"one Decisions API `choice` question\" with options \"billing\", \"engineering\", \"support\", and \"none\".",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan step 2: \"Map `none`... to the existing safe fallback, `support`.\" and step 5: \"Set any confidence or fallback thresholds from those observed probabilities.\" The request snippet includes only instructions/criteria, not thresholds.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

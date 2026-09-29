@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01762125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The final message shows \"POST https://openrouter.ai/api/alpha/decisions\" with a JSON body that includes \"model\", \"state\", and \"questions\".",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Only one noul question \"is_toxic\" is defined; there are no separate noul questions for each policy violation.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The question is framed as \"Is `review` toxic?\" with toxicity defined as abuse or threats, and it even says \"allegations of fraud... do not by themselves count,\" so it does not ask whether the review is a scam.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 4
+}

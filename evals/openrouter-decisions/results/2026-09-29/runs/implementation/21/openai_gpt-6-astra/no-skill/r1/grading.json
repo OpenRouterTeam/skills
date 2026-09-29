@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.039015,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "incident_urgency.py defines the response schema as an integer enum [1, 2, 3, 4, 5] and the rubric says “Classify the incident using exactly one integer,” making it a choice over digits.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "In UrgencyRater.rate, the code sets urgency = decision[\"urgency\"] and returns it directly, deriving nothing from scores or level probabilities.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model input packs separate fields with json.dumps({\"service\": service, \"report\": report}) and main() validates input has exactly {\"service\", \"report\"}.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 3
+}

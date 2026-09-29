@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00660125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "Final message states “I can’t implement this yet…” and there are no generated summaries or chat completion calls, with 0 files produced.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 2
+}

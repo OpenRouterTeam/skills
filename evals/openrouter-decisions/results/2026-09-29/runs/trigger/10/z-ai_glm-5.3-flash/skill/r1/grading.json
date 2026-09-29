@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01313125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: “Rank in code. Sort by the probability-weighted score (or P(likely_duplicate) + P(same_ticket)) … Code owns ordering, thresholds…”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: “Gate with bands… middle band → show as ‘possible duplicate’… low → new ticket.” indicating a path when no candidate is a duplicate.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

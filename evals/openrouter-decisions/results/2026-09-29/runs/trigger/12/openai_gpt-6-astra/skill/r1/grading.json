@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00710875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message changes to Math.trunc and states '10.5 becomes 10, and -10.5 becomes -10 instead of -11,' making negative amounts symmetric toward zero.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

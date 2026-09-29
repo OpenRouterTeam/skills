@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.04716625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "question.ts asks “Is this change breaking? Use only `pr.description` as evidence…”—it judges the change itself, not whether the text mentions breaking changes.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "gate.ts hard-codes REVIEW_MIN = 0.25 and BREAKING_MIN = 0.75 and routeProbability uses these thresholds to pass/review/block.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "In probes/results.json the “negation” case ('No breaking changes…') has noul 0.03, and the live CLI call printed probability 0.03 for that description.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

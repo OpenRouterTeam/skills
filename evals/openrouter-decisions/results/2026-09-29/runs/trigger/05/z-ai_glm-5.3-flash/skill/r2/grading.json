@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0099625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message flags: “`triage.ts` — keyword router for tickets,” “`dedupe.ts` — token-overlap duplicate flag,” and “`approvals.ts` — refunds over $50 wait for a human.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message explicitly lists non-candidates: “`auth/permissions.ts` — role→scope mapping is a non-candidate” and “`tax.ts` — VAT by country table is also a non-candidate.”",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

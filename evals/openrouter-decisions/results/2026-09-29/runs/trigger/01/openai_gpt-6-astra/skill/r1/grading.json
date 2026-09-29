@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01290625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "The plan lists only billing, engineering, and support and states “Support remains the catch-all, so a separate `none` option isn’t necessary,” omitting a no-match option.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The plan says “Code will own validation, fallback behavior, and probability thresholds” and later “Set any thresholds as named constants,” and routes failures to support in code.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

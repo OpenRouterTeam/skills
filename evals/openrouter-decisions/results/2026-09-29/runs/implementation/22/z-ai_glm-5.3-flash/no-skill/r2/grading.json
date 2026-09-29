@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.03739875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "The question text is \"Does the pull request description state that this change is breaking?\", which asks whether the description states it rather than asking if the change itself is breaking.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "auto_merge_gate.py encodes the gate: classify() sets gate_auto_merge True for 'breaking' and 'unclear' and False for 'not-breaking', and main() returns exit code 1 if result.gate_auto_merge else 0.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "For non-breaking, classify() returns a confidence of 0.55 (return Decision(False, MODEL_ID, \"not-breaking\", 0.55, ...)), so a description like \"This is not a breaking change\" does not yield a low probability.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 3
+}

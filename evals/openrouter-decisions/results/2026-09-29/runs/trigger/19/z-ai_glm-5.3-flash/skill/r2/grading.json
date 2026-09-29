@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00604,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "Final message includes explanation and an alternative regex: 'This matches `415-555-0199` and `415 555 0199`. If you also need compact digits (`4155550199`), use:'—not just a regex change.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

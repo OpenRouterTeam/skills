@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01928125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "Files the agent produced (0): (none), and repository searches show no chat completion code (e.g., rg -n \"chat/completions|completions/create|openai|OpenAI|generat|llm\" returned no relevant hits), so there is no evidence that a generative model was used to create the summary.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 2
+}

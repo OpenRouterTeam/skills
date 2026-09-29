@@ -1,0 +1,84 @@
+{
+  "id": 9,
+  "kind": "trigger",
+  "category": "trigger-contextual",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:34:17.911Z",
+  "duration_ms": 61341,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 123092,
+    "cached_input_tokens": 104832,
+    "output_tokens": 1491,
+    "reasoning_output_tokens": 79
+  },
+  "estimated_cost": 0.00662946,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/z-ai_glm-5.3-flash/skill/r3/workspace/.agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "I'll check the Decisions API request shape, then write the lead-routing integration."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/z-ai_glm-5.3-flash/skill/r3/workspace/.agents/skills/openrouter-decisions/references/decisions-api.md && printf '\\\\n--- lib ---\\\\n' && sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/z-ai_glm-5.3-flash/skill/r3/workspace/.agents/skills/openrouter-decisions/scripts/lib.ts\"\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"ls -a && find . -name AGENTS.md -not -path './.git/*' && rg --files -g '*.ts' -g '*.py' | head -20\"\n<output>\n.\n..\n.agents\n.codex\n.git\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace is empty, so I'll add a small standalone module. The headcount/region rules stay in code; only the free-text rollout judgment goes to Jev, with an `inconclusive` fallback."
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/z-ai_glm-5.3-flash/skill/r3/workspace/lead_routing.ts"
+    },
+    {
+      "type": "agent_message",
+      "text": "Code's in place. Let me typecheck it quickly."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx -y typescript tsc --noEmit --strict lead_routing.ts 2>&1 || npx -y -p typescript tsc --noEmit --strict lead_routing.ts'\n<output>\nerror TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.\nerror TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx -y typescript tsc --noEmit --strict --ignoreConfig lead_routing.ts'\n<output>\nerror TS6231: Could not resolve the path 'tsc' with the extensions: '.ts', '.tsx', '.d.ts', '.cts', '.d.cts', '.mts', '.d.mts'.\n  The file is in the program because:\n    Root file specified for compilation\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx -y tsc --noEmit --strict lead_routing.ts'\n<output>\nerror TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx -y tsc --noEmit --strict --ignoreConfig lead_routing.ts'\n<output>\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Here's the code in `lead_routing.ts:1`:\n\n- `classifyLead` (`lead_routing.ts:31`) applies your deterministic rules first — headcount > 1000 or 3+ regions → Enterprise, skipping the model entirely.\n- Free-text leads go to Jev via a `noul` question (`lead_routing.ts:44`): \"Does the free text describe a company-wide rollout?\" The state sends only the raw `lookingFor` string.\n- The result gates at `noul >= 0.5` (`lead_routing.ts:27`). A network error, missing answer, or non-numeric result falls through to **SMB** — the safe default — rather than guessing Enterprise.\n- Typecheck passes cleanly.\n\nBefore trusting the 0.5 gate, run a probe set (clear team-pilot, clear \"roll out company-wide\", ambiguous, adversarial) through `decide.ts --compare` per the skill's step 8 to confirm the threshold from observed probabilities."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decisions-api.md"
+  ],
+  "read_skill": true,
+  "final_message": "Here's the code in `lead_routing.ts:1`:\n\n- `classifyLead` (`lead_routing.ts:31`) applies your deterministic rules first — headcount > 1000 or 3+ regions → Enterprise, skipping the model entirely.\n- Free-text leads go to Jev via a `noul` question (`lead_routing.ts:44`): \"Does the free text describe a company-wide rollout?\" The state sends only the raw `lookingFor` string.\n- The result gates at `noul >= 0.5` (`lead_routing.ts:27`). A network error, missing answer, or non-numeric result falls through to **SMB** — the safe default — rather than guessing Enterprise.\n- Typecheck passes cleanly.\n\nBefore trusting the 0.5 gate, run a probe set (clear team-pilot, clear \"roll out company-wide\", ambiguous, adversarial) through `decide.ts --compare` per the skill's step 8 to confirm the threshold from observed probabilities.",
+  "produced_files": [
+    "lead_routing.ts"
+  ]
+}

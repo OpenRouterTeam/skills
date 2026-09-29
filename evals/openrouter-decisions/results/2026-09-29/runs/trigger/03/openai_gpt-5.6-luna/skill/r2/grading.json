@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0097975,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The plan says to 'use an OpenRouter Decisions `choice` question over the four destinations' and to 'Preserve the raw probabilities,' emphasizing a 'bounded choice and probabilities.'",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The taxonomy includes an '`unclear`' category and step 4 states: 'Add an explicit `unclear` option. Do not force every ticket into a department.'",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

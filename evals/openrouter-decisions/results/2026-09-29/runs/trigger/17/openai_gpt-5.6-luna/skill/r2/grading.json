@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02487125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "src/index.ts calls openrouter.chat.send({ chatRequest: { model: \"openai/gpt-4o-mini\", messages: [...] } }), and there are no Decisions API calls.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

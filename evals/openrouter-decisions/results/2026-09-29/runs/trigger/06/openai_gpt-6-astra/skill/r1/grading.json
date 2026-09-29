@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.014115,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: “Enforce the hard rules in code… Purchase age ≤90 days; requested amount ≤order total; fewer than two prior refunds… Keep date arithmetic, amounts, and refund counts in code.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: “Use … Decisions API with a ‘noul’ question such as ‘Does this request qualify under the refund-reason policy?’ … Keep date arithmetic, amounts, and refund counts in code.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: “High probability → auto-approve. Everything else… → human review. A low score should not automatically deny a refund.”",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

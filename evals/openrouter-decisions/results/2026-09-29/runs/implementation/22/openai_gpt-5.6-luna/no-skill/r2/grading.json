@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01957875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "The question says: 'Read this pull request description and decide whether the change is breaking,' asking about the change itself, not whether the text mentions breaking changes.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Workflow code gates on a boolean: 'if: steps.decision.outputs.breaking == 'false'' enables auto-merge; '== 'true'' disables it.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The implementation returns only a boolean {'breaking': true|false} with no probabilities; there is no stated expectation about 'no breaking changes' yielding a low probability.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

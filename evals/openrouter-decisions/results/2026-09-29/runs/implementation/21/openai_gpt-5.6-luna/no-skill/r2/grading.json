@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.03195875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "README says `rate_incident(report, service) returns an integer from 1 to 5` and the code defines def rate_incident(...) -> int, with no explicit score question object or ordered level definitions.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The dashboard value is computed as assess_incident(report, service).score in rate_incident, deriving the sortable urgency in code.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "IncidentReport dataclass has separate fields `report` and `service`, and assess_incident takes `report` and `service` as separate named parameters.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

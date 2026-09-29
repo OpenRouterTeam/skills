@@ -1,0 +1,29 @@
+{
+  "id": 15,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:04:14.150Z",
+  "duration_ms": 725526,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 5079957,
+    "cached_input_tokens": 4936448,
+    "output_tokens": 20320,
+    "reasoning_output_tokens": 2355
+  },
+  "estimated_cost": 0.17977979,
+  "items": [],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "[withheld: this run escaped its workspace and read a private repository checkout on the harness host; its raw transcript, tool output, and final message are not published. Grading is in grading.json.]",
+  "produced_files": [],
+  "withheld": "escaped workspace, read private repository"
+}

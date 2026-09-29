@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.03018375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "incident_urgency.py defines URGENCY_THRESHOLDS = ((11, 5), (8, 4), (5, 3), (2, 2)) and otherwise returns 1, yielding five ordered levels derived from a score rather than a direct digit choice.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "In rate_incident, urgency is computed in code from the score via: for threshold, urgency in URGENCY_THRESHOLDS: if score >= threshold: return UrgencyRating(urgency, score, evidence) (incident_urgency.py).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The function signature uses separate named fields: def rate_incident(report: str, service: str) and the docstring describes both 'report' and 'service' (incident_urgency.py).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 536,
+    "usage": {
+      "input_tokens": 444,
+      "output_tokens": 1,
+      "cost": 0.0000222
+    },
+    "answers": {
+      "category": {
+        "type": "choice",
+        "choice": "account",
+        "probabilities": {
+          "account": 0.996616,
+          "billing": 0.00218,
+          "bug": 0.000909,
+          "none": 0.000295
+        },
+        "confidence": 0.981605
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 558,
+    "usage": {
+      "input_tokens": 123,
+      "output_tokens": 74,
+      "cost": 0.000005166
+    },
+    "answers": {
+      "category": {
+        "type": "choice",
+        "choice": "account",
+        "probabilities": {
+          "billing": 0.0009,
+          "account": 0.9548,
+          "bug": 0.0112,
+          "none": 0.0332
+        },
+        "confidence": 0.9397
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 143,
+    "usage": {
+      "input_tokens": 430,
+      "output_tokens": 45,
+      "cost": 0.00001806
+    },
+    "answers": {
+      "category": {
+        "type": "choice",
+        "choice": "account",
+        "probabilities": {
+          "none": 0,
+          "account": 1,
+          "billing": 0,
+          "bug": 0
+        },
+        "confidence": 1
+      }
+    }
+  }
+]

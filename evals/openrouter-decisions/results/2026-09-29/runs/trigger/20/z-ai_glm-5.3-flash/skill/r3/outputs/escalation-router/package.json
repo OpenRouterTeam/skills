@@ -1,0 +1,14 @@
+{
+  "name": "escalation-router",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "npm install && npx tsx test.ts"
+  },
+  "dependencies": {
+    "@openrouter/sdk": "^1.3.23"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

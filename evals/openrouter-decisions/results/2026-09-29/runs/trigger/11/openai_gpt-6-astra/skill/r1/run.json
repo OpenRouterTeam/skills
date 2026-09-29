@@ -1,0 +1,47 @@
+{
+  "id": 11,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:01:46.047Z",
+  "duration_ms": 18200,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 52226,
+    "cached_input_tokens": 36328,
+    "output_tokens": 617,
+    "reasoning_output_tokens": 50
+  },
+  "estimated_cost": 0.226158,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll check the SDK’s retry behavior so the five-retry limit is applied correctly. I’m using the openai-docs skill for this."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/work/codex-home/skills/.system/openai-docs/SKILL.md'\n<output>\n---\nname: \"openai-docs\"\ndescription: \"Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex.\"\nmetadata:\n  short-description: \"Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only.\"\n---\n\n# OpenAI Docs\n\nProvide current, cited OpenAI product, API, model, and Codex guidance. Read zero or one primary reference.\n\n**First substantive action:** Search the user's exact requested official OpenAI documentation topic and any explicitly named model using a concise, topic-specific query of 2-6 essential terms. When an already-available direct official documentation search and page-retrieval capability is present, use it first: search, then fetch or open the matching official page before general web search. Otherwise, immediately use official-domain web search, then actually open or fetch the relevant official page. Complete this source order before reading a reference, inspecting local or repository files, running a Codex manual or model resolver, drafting a plan, or answering from memory. Use the actual fetched page, not a search snippet or an unopened link. If one official search or page does not establish the answer, search another appropriate official domain and actually open or fetch the result. Preserve the exact requested model; never substitute a newer model.\n\n**Only exception:** An explicitly requested, genuinely broad, cross-topic Codex setup, orientation, or system-map synthesis may use the manual first when shell execution and an allowed temporary cache are ava"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -L --max-time 20 -s https://developers.openai.com/api/docs/libraries -o /tmp/openai-libraries.html && python - <<'PY'\nfrom html.parser import HTMLParser\nclass Text(HTMLParser):\n def handle_data(self, s):\n  if s.strip(): print(s.strip())\np=Text(); p.feed(open('/tmp/openai-libraries.html').read())\nPY\"\n<output>\n(function(){const siteVariantDomains = [{\"id\":\"chatgpt-docs\",\"domains\":[\"learn.chatgpt.com\",\"learn.chatgpt-staging.com\",\"learn-chatgpt-preview.localhost\"]}];\nconst forcedSiteVariantId = undefined;\nconst siteVariantQueryParam = \"site_variant\";\nconst chatGptSiteVariant = \"chatgpt\";\nconst chatGptDocsVariantId = \"chatgpt-docs\";\nconst developersOpenAiHostname = \"developers.openai.com\";\n\n  (() => {\n    const hostname = window.location.hostname.toLowerCase().replace(/\\.$/, \"\");\n    const queryVariant =\n      hostname !== developersOpenAiHostname &&\n      new URLSearchParams(window.location.search).get(siteVariantQueryParam) ===\n        chatGptSiteVariant\n        ? chatGptDocsVariantId\n        : undefined;\n    const hostnameVariant = siteVariantDomains.find((variant) =>\n      variant.domains.some(\n        (domain) => domain.toLowerCase().replace(/\\.$/, \"\") === hostname\n      )\n    )?.id;\n    const activeVariantId =\n      forcedSiteVariantId || hostnameVariant || queryVariant;\n\n    if (forcedSiteVariantId) {\n      document.documentElement.dataset.siteVariantForced = forcedSiteVariantId;\n    } else {\n      delete document.documentElement.dataset.siteVariantForced;\n    }\n\n    if (activeVariantId) {\n      document.documentElement.dataset.siteVariant = activeVariantId;\n    } else {\n      delete document.documentElement.dataset.siteVariant;\n    }\n  })();\n})();\n@layer theme, base, components, utilities;\nSDKs and CLI | OpenAI API\nhtml{scrollbar-gutter:stable}[data-radix-popper-content-wrapper]{z-index:70!important}:root,:where([data-theme]){--shadow-hairline:0 0 0 var(--shadow-hairline-width) var(--shadow-hairline-color)}:where(:root),:where([data-theme=light]){--shadow-hairline-width:1px;--shadow-hairline-color:#00000014;--shadow:0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a}@media (resolution>=150dpi),(resolution>=1.5x){:where(:root),:where([data-theme=light]){--shadow-hairline-width:.5px;--shadow-hairline-color:#0000001a}}:where([data-theme=dark]){--shadow-hairline-width:"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nfrom html.parser import HTMLParser\nclass Text(HTMLParser):\n def handle_data(self,s):\n  if any(w in s.lower() for w in ['retries','backoff','jitter','maxretries']): print(s[:2500])\np=Text();p.feed(open('/tmp/openai-libraries.html').read())\nPY\ncurl -L --max-time 20 -s https://developers.openai.com/api/docs/guides/rate-limits -o /tmp/openai-rate-limits.html\npython - <<'PY'\nfrom html.parser import HTMLParser\nclass Text(HTMLParser):\n def handle_data(self,s):\n  if any(w in s.lower() for w in ['retries','backoff','jitter','maxretries']): print(s[:2000])\np=Text();p.feed(open('/tmp/openai-rate-limits.html').read())\nPY\"\n<output>\n is missing, increase the delay between retries and add a small random delay.\nRetrying with exponential backoff\n automatically retries eligible \nIf a valid server delay exceeds the supported or configured maximum retry delay, stop retrying and defer the request rather than retrying sooner. An SDK can return the original HTTP error when it declines a delay above its limit. Continue to handle cancellation and timeout errors separately: a canceled request or expired deadline can stop retries without returning that HTTP error. A timeout for each attempt isn’t necessarily a deadline for the entire operation.\n when the header is present and contains a valid value. If it’s missing or invalid, fall back to exponential backoff with jitter. Limit both the number of attempts and the total time spent retrying. If you manage retries in your application, disable SDK retries or account for them in those limits so nested retry loops don’t multiply requests. Don’t retry quota, billing, or other errors that require you to take action.\nExponential backoff means waiting briefly after an unsuccessful request, then increasing the delay after each unsuccessful retry. This continues until the request succeeds or reaches a configured retry limit.\nAutomatic retries means you can recover from rate limit errors without crashes or missing data\nExponential backoff means that your first retries can be tried quickly, while still benefiting from longer delays if your first few retries fail\nAdding random jitter to the delay helps retries from all hitting at the same time.\nThe Python examples below demonstrate fallback backoff. They don’t inspect \n: before using them, add handling for valid server hints so the wrappers don’t retry sooner than requested. Disable SDK retries or account for them in your application’s retry limits.\nTenacity is an Apache 2.0 licensed general-purpose retrying library, written in Python, to simplify the task of adding retry behavior to just about anything.\nTo add exponentia"
+    },
+    {
+      "type": "agent_message",
+      "text": "The OpenAI SDK already uses exponential backoff with jitter. Set `maxRetries` per request:\n\n```ts\nconst res = await openai.chat.completions.create(\n  { model, messages },\n  { maxRetries: 5 },\n);\n```\n\nThis allows **five retries after the initial attempt**—six attempts maximum—for retryable errors. See [OpenAI’s retry guidance](https://developers.openai.com/api/docs/guides/rate-limits#retrying-with-exponential-backoff)."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "The OpenAI SDK already uses exponential backoff with jitter. Set `maxRetries` per request:\n\n```ts\nconst res = await openai.chat.completions.create(\n  { model, messages },\n  { maxRetries: 5 },\n);\n```\n\nThis allows **five retries after the initial attempt**—six attempts maximum—for retryable errors. See [OpenAI’s retry guidance](https://developers.openai.com/api/docs/guides/rate-limits#retrying-with-exponential-backoff).",
+  "produced_files": []
+}

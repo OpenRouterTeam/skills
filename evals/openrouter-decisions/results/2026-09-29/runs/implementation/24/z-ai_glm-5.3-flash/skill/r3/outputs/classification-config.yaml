@@ -1,0 +1,46 @@
+# Pinned decision model for the message classification job.
+# Pinned to a versioned build (never an alias) so probabilities stay stable.
+# Thresholds trace to live probe runs on 2026-09-29 (decide.ts --model typesafe/jev-1.13).
+
+model: typesafe/jev-1.13-20260917
+
+# Probe observations (is_billing.noul):
+#   "I can't log into my account"            -> 0.02 (no)
+#   "How do I change my profile picture?"    -> 0.01 (no)
+#   "My dashboard is blank on Safari"        -> 0.02 (no)
+#   "Do you offer refunds for annual plans?" -> 0.96 (yes)
+#   "I was charged twice"                    -> 0.99 (yes)
+#   Checkout-blank-screen (ambig)            -> 0.98 (yes)
+#
+# Clear cases sit at <= 0.02 or >= 0.96; the 0.70 gate keeps ~0.28 of margin on
+# both sides and routes anything in between to review rather than auto-routing.
+thresholds:
+  is_billing_noul: 0.70
+  review_band: [0.45, 0.85]
+
+# Probe observations (category.probabilities):
+#   account  -> 1.00, 0.99
+#   frontend -> 1.00, 0.95
+#   payments -> 1.00, 0.95, 1.00
+#   none     -> 0 (never chosen in probe set)
+#
+# Top-option gate: accept the argmax only at >= 0.70; 0.45-0.85 goes to review.
+thresholds_category:
+  top_option_min: 0.70
+  review_band: [0.45, 0.85]
+
+# Consequences of mistakes:
+#   False billing (auto-route to payments) - wastes agent time, recoverable.
+#   Missed billing (review queue)          - adds latency, safe.
+#   Wrong category (review queue)          - adds latency, safe.
+# Bias the gate toward review, not toward a wrong auto-route.
+
+# Probe set to rerun verbatim before shipping or after any model change:
+#   1. "I can't log into my account"            -> is_billing no, category account
+#   2. "Do you offer refunds for annual plans?" -> is_billing yes, category payments
+#   3. "My dashboard is blank on Safari"        -> is_billing no, category frontend
+#   4. "How do I change my profile picture?"    -> is_billing no, category account
+#   5. "I was charged twice"                    -> is_billing yes, category payments
+#   6. Checkout-blank-screen (payments/frontend ambiguous) -> is_billing yes;
+#      route to review if category top probability < 0.85
+# Confirm each observed noul/probability against the thresholds above, then ship.

@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00986875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "They state 'Replace the chat-model yes/no prompt with a Decisions API noul question: should_escalate' and show code gating with 'const AUTO_RESOLVE_THRESHOLD = 0.7' and 'const shouldAutoResolve = answer.noul >= AUTO_RESOLVE_THRESHOLD;'.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "They propose 'Probe representative historical escalations before choosing 0.7; tune using observed probabilities...' and to 'Log ... for later threshold review,' which uses logged escalations to tune the threshold.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

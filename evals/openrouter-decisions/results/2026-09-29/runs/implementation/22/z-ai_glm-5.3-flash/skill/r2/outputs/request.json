@@ -1,0 +1,16 @@
+{
+  "model": "typesafe/jev-1.13",
+  "state": {
+    "pr.description": "# Summary\n\nBREAKING CHANGE: `createClient()` now requires an explicit `baseUrl` option and no longer reads the default environment variable.\n\n# Test plan\n\n- Updated the client tests for the new required option.\n- Added a migration note to `README.md`."
+  },
+  "questions": {
+    "is_breaking": {
+      "type": "noul",
+      "instructions": "Is this change breaking?",
+      "criteria": {
+        "true": "The change requires consumers to update calling code, configuration, credentials, data, or integration behavior.",
+        "false": "Existing consumers can continue using the current calling code and configuration without changes."
+      }
+    }
+  }
+}

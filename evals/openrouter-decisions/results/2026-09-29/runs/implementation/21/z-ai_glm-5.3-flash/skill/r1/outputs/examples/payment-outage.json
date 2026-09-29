@@ -1,0 +1,4 @@
+{
+  "report": "All card payments are failing in production since the last deploy. Customers cannot buy anything.",
+  "service": "payments"
+}

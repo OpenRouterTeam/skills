@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0060975,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "Final message includes extra text ('No application source file...' and 'It matches both ...') in addition to the regex change.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

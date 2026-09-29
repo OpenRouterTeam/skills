@@ -1,0 +1,43 @@
+{
+  "id": 11,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:35:54.242Z",
+  "duration_ms": 17873,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 42180,
+    "cached_input_tokens": 26147,
+    "output_tokens": 1055,
+    "reasoning_output_tokens": 517
+  },
+  "estimated_cost": 0.00499554,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m checking the OpenAI API guidance first so the retry behavior matches the SDK’s error and request patterns."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/work/codex-home/skills/.system/openai-docs/SKILL.md\"\n<output>\n---\nname: \"openai-docs\"\ndescription: \"Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex.\"\nmetadata:\n  short-description: \"Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only.\"\n---\n\n# OpenAI Docs\n\nProvide current, cited OpenAI product, API, model, and Codex guidance. Read zero or one primary reference.\n\n**First substantive action:** Search the user's exact requested official OpenAI documentation topic and any explicitly named model using a concise, topic-specific query of 2-6 essential terms. When an already-available direct official documentation search and page-retrieval capability is present, use it first: search, then fetch or open the matching official page before general web search. Otherwise, immediately use official-domain web search, then actually open or fetch the relevant official page. Complete this source order before reading a reference, inspecting local or repository files, running a Codex manual or model resolver, drafting a plan, or answering from memory. Use the actual fetched page, not a search snippet or an unopened link. If one official search or page does not establish the answer, search another appropriate official domain and actually open or fetch the result. Preserve the exact requested model; never substitute a newer model.\n\n**Only exception:** An explicitly requested, genuinely broad, cross-topic Codex setup, orientation, or system-map synthesis may use the manual first when shell execution and an allowed temporary cache are ava"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -L --max-time 10 -sS https://developers.openai.com/api/docs/guides/rate-limits | sed -n '1,80p'\"\n<output>\n<!DOCTYPE html><html lang=\"en\"> <head><!-- Global Metadata --> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">  <script>(function(){const siteVariantDomains = [{\"id\":\"chatgpt-docs\",\"domains\":[\"learn.chatgpt.com\",\"learn.chatgpt-staging.com\",\"learn-chatgpt-preview.localhost\"]}];\nconst forcedSiteVariantId = undefined;\nconst siteVariantQueryParam = \"site_variant\";\nconst chatGptSiteVariant = \"chatgpt\";\nconst chatGptDocsVariantId = \"chatgpt-docs\";\nconst developersOpenAiHostname = \"developers.openai.com\";\n\n  (() => {\n    const hostname = window.location.hostname.toLowerCase().replace(/\\.$/, \"\");\n    const queryVariant =\n      hostname !== developersOpenAiHostname &&\n      new URLSearchParams(window.location.search).get(siteVariantQueryParam) ===\n        chatGptSiteVariant\n        ? chatGptDocsVariantId\n        : undefined;\n    const hostnameVariant = siteVariantDomains.find((variant) =>\n      variant.domains.some(\n        (domain) => domain.toLowerCase().replace(/\\.$/, \"\") === hostname\n      )\n    )?.id;\n    const activeVariantId =\n      forcedSiteVariantId || hostnameVariant || queryVariant;\n\n    if (forcedSiteVariantId) {\n      document.documentElement.dataset.siteVariantForced = forcedSiteVariantId;\n    } else {\n      delete document.documentElement.dataset.siteVariantForced;\n    }\n\n    if (activeVariantId) {\n      document.documentElement.dataset.siteVariant = activeVariantId;\n    } else {\n      delete document.documentElement.dataset.siteVariant;\n    }\n  })();\n})();</script> <link rel=\"icon\" type=\"image/png\" href=\"/favicon.png\"> <meta name=\"generator\" content=\"Astro v7.3.1\"> <link rel=\"preconnect\" href=\"https://cdn.openai.com\" crossorigin> <link rel=\"preload\" href=\"https://cdn.openai.com/common/fonts/openai-sans/v2/OpenAISans-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin> <style>\n  @layer theme, base, components, utilities;\n</style> <!-- Canonical URL --> <link rel=\"canonical\" href=\"https://developers.openai.com/api/"
+    },
+    {
+      "type": "agent_message",
+      "text": "```ts\nconst maxRetries = 5;\nconst baseDelayMs = 500;\nconst maxDelayMs = 30_000;\n\nlet res;\n\nfor (let attempt = 0; ; attempt++) {\n  try {\n    res = await openai.chat.completions.create({ model, messages });\n    break;\n  } catch (error) {\n    const status = (error as { status?: number }).status;\n    const retryable = status === 429 || status === undefined || status >= 500;\n\n    if (!retryable || attempt >= maxRetries) {\n      throw error;\n    }\n\n    // Exponential backoff with full jitter.\n    const exponentialDelay = Math.min(\n      maxDelayMs,\n      baseDelayMs * 2 ** attempt,\n    );\n    const delayMs = Math.random() * exponentialDelay;\n\n    await new Promise((resolve) => setTimeout(resolve, delayMs));\n  }\n}\n```\n\nThis performs the initial request plus up to five retries. It retries rate limits, connection errors, and server errors, while immediately propagating other failures."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "```ts\nconst maxRetries = 5;\nconst baseDelayMs = 500;\nconst maxDelayMs = 30_000;\n\nlet res;\n\nfor (let attempt = 0; ; attempt++) {\n  try {\n    res = await openai.chat.completions.create({ model, messages });\n    break;\n  } catch (error) {\n    const status = (error as { status?: number }).status;\n    const retryable = status === 429 || status === undefined || status >= 500;\n\n    if (!retryable || attempt >= maxRetries) {\n      throw error;\n    }\n\n    // Exponential backoff with full jitter.\n    const exponentialDelay = Math.min(\n      maxDelayMs,\n      baseDelayMs * 2 ** attempt,\n    );\n    const delayMs = Math.random() * exponentialDelay;\n\n    await new Promise((resolve) => setTimeout(resolve, delayMs));\n  }\n}\n```\n\nThis performs the initial request plus up to five retries. It retries rate limits, connection errors, and server errors, while immediately propagating other failures.",
+  "produced_files": []
+}

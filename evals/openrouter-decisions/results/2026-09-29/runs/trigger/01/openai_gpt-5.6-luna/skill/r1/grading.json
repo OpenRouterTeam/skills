@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00979625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan says: 'Replace the keyword if chain with one OpenRouter Decisions API choice question.' with options: billing, engineering, support, and 'none'.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan states: 'Use the observed probabilities to establish named code-side thresholds or fallback rules' and 'Map none to support' and to 'fallback to support' on failures—placing threshold and fallback in code, not in the question.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

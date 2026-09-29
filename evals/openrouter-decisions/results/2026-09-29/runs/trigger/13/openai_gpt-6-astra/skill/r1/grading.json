@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00623375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message defines a local regex-based validator with no network calls: function isValidEmail(value) { return (typeof value === \"string\" && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value.trim())); }",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

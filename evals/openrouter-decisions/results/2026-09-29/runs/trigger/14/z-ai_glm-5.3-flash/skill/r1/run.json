@@ -1,0 +1,75 @@
+{
+  "id": 14,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:03:34.107Z",
+  "duration_ms": 40028,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 109699,
+    "cached_input_tokens": 90240,
+    "output_tokens": 733,
+    "reasoning_output_tokens": 200
+  },
+  "estimated_cost": 0.005992549999999999,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "I’ll locate the chat completion handler and current response flow first."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg -n \\\"chat|completion|OpenAI|completions\\\" -S --glob '\"'!node_modules'\"' --glob '\"'!dist'\"' . | head -120\"\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd; rg --files -g '\"'!node_modules'\"' | head -100; printf '\\\\n--- dirs ---\\\\n'; ls -la\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/14/z-ai_glm-5.3-flash/skill/r1/workspace\n\n--- dirs ---\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:03 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:03 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:03 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:03 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:03 .git\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no source files—checking git history and metadata for the intended project location."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short; git log --oneline -5; find . -maxdepth 3 -type f -not -path './.git/*' -print | head -50; find .agents -maxdepth 4 -type f -print\"\n<output>\n3f08f5f baseline\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' .agents/skills/openrouter-decisions/scripts/decide.ts; printf '\\\\n--- lib ---\\\\n'; sed -n '1,240p' .agents/skills/openrouter-decisions/scripts/lib.ts\"\n<output>\n#!/usr/bin/env -S npx tsx\n/**\n * Send one Decisions request and print the typed answers.\n *\n * Usage:\n *   npx tsx decide.ts request.json --model <model-id>   # raw HTTP to /api/alpha/decisions\n *   npx tsx decide.ts request.json --sdk                # through @openrouter/sdk\n *   npx tsx decide.ts request.json --compare            # same request to every pinned model in the catalog\n *   cat request.json | npx tsx decide.ts -              # read the request from stdin\n *\n * request.json: { \"state\": ..., \"questions\": { ... } } plus an optional \"model\".\n * Model precedence: --model, then request.model, then DECISION_MODEL. --compare ignores all three.\n */\nimport { readFileSync } from \"node:fs\";\nimport {\n  decide,\n  listDecisionModels,\n  parseRequest,\n  parseRequestBody,\n  requireApiKey,\n  withModel,\n  type DecisionsRequestBody,\n  type DecisionsResponse,\n  type Transport,\n} from \"./lib.ts\";\n\ntype ComparisonRow =\n  | {\n      model_id: string;\n      model: string;\n      latency_ms: number;\n      usage: DecisionsResponse[\"usage\"];\n      answers: DecisionsResponse[\"answers\"];\n    }\n  | { model_id: string; error: string };\n\nconst args = process.argv.slice(2);\nconst transport: Transport = args.includes(\"--sdk\") ? \"sdk\" : \"http\";\nconst compare = args.includes(\"--compare\");\nconst modelFlagIndex = args.indexOf(\"--model\");\nconst modelValueIndex = modelFlagIndex === -1 ? -1 : modelFlagIndex + 1;\nconst modelFlag = modelValueIndex === -1 ? undefined : args[modelValueIndex];\nconst source = args.find((a, i) => !a.startsWith(\"--\") && i !== modelValueIndex);\n\nif (\n  !source ||\n  (modelFlagIndex !== -1 && (!modelFlag || modelFlag.startsWith(\"--\"))) ||\n  (compare && modelFlagIndex !== -1)\n) {\n  console.error(\"Usage: npx tsx decide.ts <request.json | -> [--sdk] [--model <model-id> | --compare]\");\n  process.exit(1);\n}\n\nconst rawText = source === \"-\" ? readFileSync(0, \"utf8\") : readFileSync(source, \"utf8\");\nconst raw: unknown = JSON.parse(rawText);\nconst apiKey = requireApiKey();\n\nif (compa"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git ls-tree -r --name-only HEAD | head -100; sed -n '1,260p' .agents/skills/openrouter-decisions/scripts/lib.ts | tail -180; cat .agents/skills/openrouter-decisions/scripts/package.json\"\n<output>\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/package.json\n    endpointsUrl: `${SDK_SERVER_URL}${detailsPath ?? `/api/v1/models/${id}/endpoints`}`,\n  };\n}\n\nfunction parseEndpoint(modelId: string, entry: unknown): ModelEndpoint {\n  if (!isRecord(entry)) throw new Error(`Endpoint of ${modelId} is not an object`);\n  const quantization = entry.quantization;\n  const uptime = entry.uptime_last_30m;\n  const maxPrompt = entry.max_prompt_tokens;\n  return {\n    providerName: stringField(modelId, entry, \"provider_name\"),\n    contextLength: finiteField(`Endpoint of ${modelId}`, \"context_length\", entry.context_length),\n    maxPromptTokens: typeof maxPrompt === \"number\" && Number.isFinite(maxPrompt) ? maxPrompt : undefined,\n    quantization: typeof quantization === \"string\" && quantization !== \"unknown\" ? quantization : undefined,\n    uptimeLast30m: typeof uptime === \"number\" && Number.isFinite(uptime) ? uptime : undefined,\n  };\n}\n\nfunction stringField(owner: string, obj: Record<string, unknown>, field: string): string {\n  const value = obj[field];\n  if (typeof value !== \"string\" || value.length === 0) throw new Error(`${owner} has no ${field}`);\n  return value;\n}\n\nfunction priceField(modelId: string, pricing: Record<string, unknown>, field: string): number {\n  const value = pricing[field];\n  const parsed = typeof value === \"string\" ? Number(value) : value;\n  if (typeof parsed !== \"number\" || !Number.isFinite(parsed)) {\n    throw ne"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg -n \\\"chat.completion|chat/completions|OpenAI|server|endpoint|res\\\\.\\\" README.md SKILL.md references scripts | head -160\"\n<output>\nrg: README.md: No such file or directory (os error 2)\nrg: SKILL.md: No such file or directory (os error 2)\nrg: references: No such file or directory (os error 2)\nrg: scripts: No such file or directory (os error 2)\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'rg -n \"chat|completion|SSE|stream|endpoint\" .agents/skills/openrouter-decisions | head -160'\n<output>\n.agents/skills/openrouter-decisions/scripts/lib.ts:23:  completionPricePerToken: number;\n.agents/skills/openrouter-decisions/scripts/lib.ts:25:  endpointsUrl: string;\n.agents/skills/openrouter-decisions/scripts/lib.ts:47:  const res = await fetch(model.endpointsUrl, {\n.agents/skills/openrouter-decisions/scripts/lib.ts:53:  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {\n.agents/skills/openrouter-decisions/scripts/lib.ts:54:    throw new Error(`Endpoints API response for ${model.id} has no data.endpoints array`);\n.agents/skills/openrouter-decisions/scripts/lib.ts:56:  return raw.data.endpoints.map((entry) => parseEndpoint(model.id, entry));\n.agents/skills/openrouter-decisions/scripts/lib.ts:79:    completionPricePerToken: priceField(id, pricing, \"completion\"),\n.agents/skills/openrouter-decisions/scripts/lib.ts:81:    endpointsUrl: `${SDK_SERVER_URL}${detailsPath ?? `/api/v1/models/${id}/endpoints`}`,\n.agents/skills/openrouter-decisions/scripts/models.ts:10: * Reads GET /api/v1/models?output_modalities=decisions and each model's endpoints. Needs no API key.\n.agents/skills/openrouter-decisions/scripts/models.ts:36:  endpoints_error?: string;\n.agents/skills/openrouter-decisions/scripts/models.ts:77:  const endpoints = listed.endpoints;\n.agents/skills/openrouter-decisions/scripts/models.ts:78:  const uptimes = endpoints.map((e) => e.uptimeLast30m).filter((u): u is number => u !== undefined);\n.agents/skills/openrouter-decisions/scripts/models.ts:79:  const maxInput = listed.error === undefined ? maxInputTokens(model, endpoints) : undefined;\n.agents/skills/openrouter-decisions/scripts/models.ts:88:    usd_per_million_output_tokens: perMillion(model.completionPricePerToken),\n.agents/skills/openrouter-decisions/scripts/models.ts:89:    providers: unique(endpoints.map(providerLabel)),\n.agents/skills/openrouter-decisions/scripts/models.ts:90:    endpoints_error: listed.error,\n.agents/skills/openrouter-decisions/scripts/models.ts:99:async func"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '220,420p' .agents/skills/openrouter-decisions/scripts/lib.ts; wc -l .agents/skills/openrouter-decisions/scripts/lib.ts\"\n<output>\n  for (const key of expected) {\n    const question = request.questions[key];\n    const answer = response.answers[key];\n    if (question.type !== answer.type) {\n      throw new Error(`Answer ${key} is a ${answer.type}, question is a ${question.type}`);\n    }\n    if (question.type === \"choice\" && answer.type === \"choice\") {\n      if (answer.probabilities) assertSameKeys(key, Object.keys(question.criteria), answer.probabilities);\n      if (!(answer.choice in question.criteria)) {\n        throw new Error(`Answer ${key} chose ${answer.choice}, which is not an option`);\n      }\n    }\n    if (question.type === \"score\" && answer.type === \"score\") {\n      const levels = question.criteria.map((_, i) => String(i));\n      if (answer.probabilities) assertSameKeys(key, levels, answer.probabilities);\n      if (answer.legend) assertSameKeys(key, levels, answer.legend);\n    }\n  }\n}\n\nfunction assertSameKeys(key: string, options: string[], map: Record<string, unknown>): void {\n  const missing = options.filter((option) => !(option in map));\n  const extra = Object.keys(map).filter((option) => !options.includes(option));\n  if (missing.length > 0) throw new Error(`Answer ${key} has no entry for ${missing.join(\", \")}`);\n  if (extra.length > 0) throw new Error(`Answer ${key} has entries for unknown ${extra.join(\", \")}`);\n}\n\nasync function decideViaHttp(\n  request: DecisionsRequest,\n  apiKey: string\n): Promise<DecisionsResponse> {\n  const res = await fetch(DECISIONS_URL, {\n    method: \"POST\",\n    headers: {\n      Authorization: `Bearer ${apiKey}`,\n      \"Content-Type\": \"application/json\",\n    },\n    body: JSON.stringify(request),\n  });\n  const text = await res.text();\n  if (!res.ok) {\n    throw new Error(`Decisions API ${res.status}: ${text}`);\n  }\n  return parseResponse(JSON.parse(text));\n}\n\nasync function decideViaSdk(\n  request: DecisionsRequest,\n  apiKey: string\n): Promise<DecisionsResponse> {\n  const client = new OpenRouter({ apiKey, serverURL: SDK_SERVER_URL });\n  const result = await "
+    },
+    {
+      "type": "agent_message",
+      "text": "I couldn’t find a chat completion endpoint in this workspace. The repository only contains the OpenRouter Decisions CLI skill; there’s no server, route handler, or application source to modify.\n\nPlease share the repo/path containing the endpoint (or copy the server code here), and I’ll switch it to SSE token streaming."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "I couldn’t find a chat completion endpoint in this workspace. The repository only contains the OpenRouter Decisions CLI skill; there’s no server, route handler, or application source to modify.\n\nPlease share the repo/path containing the endpoint (or copy the server code here), and I’ll switch it to SSE token streaming.",
+  "produced_files": []
+}

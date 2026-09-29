@@ -1,0 +1,19 @@
+{
+  "state": {
+    "affected_service": "FILL_IN",
+    "report": "FILL_IN"
+  },
+  "questions": {
+    "urgency": {
+      "type": "score",
+      "instructions": "How urgent is this incident for the on-call team, based on the current impact described in `report` for `affected_service`?",
+      "criteria": [
+        "Level 1: Scheduled or cosmetic issue. No user, data, or revenue impact right now; normal backlog handles it.",
+        "Level 2: Minor degradation or early warning. Workarounds exist and the service remains usable.",
+        "Level 3: Serious degradation or limited outage. A real group of users or a critical workflow is affected.",
+        "Level 4: Major outage or data-loss risk. Broad user impact or an important production workflow is down.",
+        "Level 5: Company-critical emergency. Total outage, data loss in progress, security breach, or revenue is actively stopped."
+      ]
+    }
+  }
+}

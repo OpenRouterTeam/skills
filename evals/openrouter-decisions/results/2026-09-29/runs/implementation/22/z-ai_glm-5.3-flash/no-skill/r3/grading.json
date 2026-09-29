@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0317675,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "The question is: \"Does this pull request description explicitly say that the change is breaking...\" (automerge.py DECISION_QUESTION), which asks about the description mentioning breaking, not whether the change is breaking.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The gate is implemented in code: should_auto_merge returns not decision.is_breaking (automerge.py: return not decision.is_breaking, decision).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "reference_decision_model marks any text containing \"breaking change\" as breaking (automerge.py: if ... \"breaking change\" in compact: return Decision(True,...)), so \"no breaking changes\" would be flagged as breaking rather than low probability.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 3
+}

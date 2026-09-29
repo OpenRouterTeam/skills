@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.017315,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "In subscription_retention.py, the age check is coded as `if reference_date - subscription.started_on <= one_year: return SubscriptionCheck(False, None, False)` before any model logic.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model function is `def _return_likelihood(reason: str)` and it is called as `likelihood = _return_likelihood(subscription.cancellation_reason)`, passing only the cancellation reason and no dates.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The docstring states \"Older subscriptions are classified from the cancellation reason\" and the threshold is enforced in code via the `one_year` parameter and the conditional `if reference_date - subscription.started_on <= one_year:` before querying likelihood.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

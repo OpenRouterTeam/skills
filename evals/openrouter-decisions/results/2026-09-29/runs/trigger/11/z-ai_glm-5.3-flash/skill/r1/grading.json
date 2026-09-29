@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00818625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The snippet shows a retry loop `for (let attempt = 0; attempt <= maxRetries; attempt++)` with exponential backoff `const base = Math.pow(2, attempt) * 1000;` and jitter `const delay = base + Math.random() * base;`.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00585875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "No generative model call appears in the transcript; the final message only asks for info—'The workspace is empty... Where are the support tickets stored, and which ticket field should hold the one-paragraph summary?'—and no files were produced.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

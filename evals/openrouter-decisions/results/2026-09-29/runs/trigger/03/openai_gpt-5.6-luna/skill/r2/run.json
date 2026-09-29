@@ -1,0 +1,41 @@
+{
+  "id": 3,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:11:12.120Z",
+  "duration_ms": 10219,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 17117,
+    "cached_input_tokens": 7343,
+    "output_tokens": 826,
+    "reasoning_output_tokens": 124
+  },
+  "estimated_cost": 0.00309286,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions guidance because this is a classification/routing problem. I’ll inspect the relevant instructions, then give you a no-code implementation plan."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/03/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "I’d replace the keyword map with a layered classifier:\n\n1. Define the routing taxonomy clearly:\n   - `billing`: charges, duplicate charges, refunds, invoices, payment failures, subscriptions\n   - `engineering`: crashes, bugs, errors, outages, broken functionality\n   - `support`: account help, how-to questions, general requests\n   - `unclear`: insufficient information or genuinely ambiguous cases\n\n2. Keep deterministic rules for unambiguous signals already available in structured data, such as an existing billing ticket form, account event, or payment transaction ID.\n\n3. For remaining tickets, use an OpenRouter Decisions `choice` question over the four destinations. Give the model the ticket text and concise definitions, including paraphrases such as:\n\n   - “you took money from me twice” → `billing`\n   - “I was charged twice” → `billing`\n   - “the app crashes when I log in” → `engineering`\n   - “how do I change my password?” → `support`\n\n   The model should classify the customer’s actual issue, not merely look for exact words.\n\n4. Add an explicit `unclear` option. Do not force every ticket into a department; low-probability or ambiguous cases should go to a small human-review queue or a general triage queue.\n\n5. Let code apply the routing policy:\n   - High-confidence billing → billing\n   - High-confidence engineering → engineering\n   - High-confidence support → support\n   - Close probabilities or low confidence → review/fallback\n   - Preserve the raw probabilities and selected model version for auditing\n\n6. Build a probe set from historical tickets, including exact keyword cases, paraphrases, negations, mixed issues, empty messages, and adversarial or quoted text. Measure per-route precision and especially the cost of misrouting billing tickets.\n\n7. Tune thresholds from those results. Billing misroutes may deserve a stricter escalation policy than harmless support misroutes. Monitor confusion rates, review volume, reassignment rate, and customer resolution time.\n\n8. Roll it out gradually:\n   - Shadow-classify tickets while the keyword router remains active\n   - Compare predictions with actual destinations and human corrections\n   - Canary the new router on a small percentage\n   - Retain a kill switch and fallback route\n\nThe key correction is to classify intent semantically with a bounded choice and probabilities. “You took money from me twice” expresses a duplicate-charge problem even though it contains neither “invoice” nor “charge.”"
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "I’d replace the keyword map with a layered classifier:\n\n1. Define the routing taxonomy clearly:\n   - `billing`: charges, duplicate charges, refunds, invoices, payment failures, subscriptions\n   - `engineering`: crashes, bugs, errors, outages, broken functionality\n   - `support`: account help, how-to questions, general requests\n   - `unclear`: insufficient information or genuinely ambiguous cases\n\n2. Keep deterministic rules for unambiguous signals already available in structured data, such as an existing billing ticket form, account event, or payment transaction ID.\n\n3. For remaining tickets, use an OpenRouter Decisions `choice` question over the four destinations. Give the model the ticket text and concise definitions, including paraphrases such as:\n\n   - “you took money from me twice” → `billing`\n   - “I was charged twice” → `billing`\n   - “the app crashes when I log in” → `engineering`\n   - “how do I change my password?” → `support`\n\n   The model should classify the customer’s actual issue, not merely look for exact words.\n\n4. Add an explicit `unclear` option. Do not force every ticket into a department; low-probability or ambiguous cases should go to a small human-review queue or a general triage queue.\n\n5. Let code apply the routing policy:\n   - High-confidence billing → billing\n   - High-confidence engineering → engineering\n   - High-confidence support → support\n   - Close probabilities or low confidence → review/fallback\n   - Preserve the raw probabilities and selected model version for auditing\n\n6. Build a probe set from historical tickets, including exact keyword cases, paraphrases, negations, mixed issues, empty messages, and adversarial or quoted text. Measure per-route precision and especially the cost of misrouting billing tickets.\n\n7. Tune thresholds from those results. Billing misroutes may deserve a stricter escalation policy than harmless support misroutes. Monitor confusion rates, review volume, reassignment rate, and customer resolution time.\n\n8. Roll it out gradually:\n   - Shadow-classify tickets while the keyword router remains active\n   - Compare predictions with actual destinations and human corrections\n   - Canary the new router on a small percentage\n   - Retain a kill switch and fallback route\n\nThe key correction is to classify intent semantically with a bounded choice and probabilities. “You took money from me twice” expresses a duplicate-charge problem even though it contains neither “invoice” nor “charge.”",
+  "produced_files": []
+}

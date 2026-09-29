@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02254375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "“Purchase within 90 days, amount ≤ order total, ≤ 2 refunds/customer/year: check these directly in code… These aren't judgments; never send them to a decision model.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "“What's left after the hard rules pass is: ‘Is this refund request unambiguous and consistent with its stated reason?’ — a noul question.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "“Code then gates on the returned probability: is_obvious.noul >= T → auto-approve; below → human queue.”",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

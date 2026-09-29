@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00997375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The code ranks in code via rankDuplicates, mapping noul probabilities and sorting: `.map(... { ticketId, probability: answer.noul } ).sort((a, b) => b.probability - a.probability)`.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The workflow handles no-duplicate cases with `if (!top || top.probability < REVIEW_THRESHOLD) { return { action: \"no_confident_duplicate\", ranked }; }`.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

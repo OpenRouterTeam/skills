@@ -1,0 +1,12 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "endpoint": "https://openrouter.ai/api/alpha/decisions",
+  "rubric_version": "support-routing-v1",
+  "mode": "shadow",
+  "auto_route_enabled": false,
+  "thresholds": {
+    "min_selected_probability_by_label": null,
+    "min_top_two_margin": null
+  },
+  "fallback": "review"
+}

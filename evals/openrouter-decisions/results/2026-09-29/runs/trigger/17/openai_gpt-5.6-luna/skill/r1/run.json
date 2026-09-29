@@ -1,0 +1,116 @@
+{
+  "id": 17,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:05:14.106Z",
+  "duration_ms": 60036,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 226804,
+    "cached_input_tokens": 207581,
+    "output_tokens": 4008,
+    "reasoning_output_tokens": 490
+  },
+  "estimated_cost": 0.012805819999999999,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this request involves OpenRouter setup; I’ll first inspect its required workflow and the project, then configure the TypeScript SDK and make a safe first call using the project’s existing conventions."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n---FILES---\\\\n' && rg --files -g '\"'!node_modules'\"' -g '\"'!dist'\"' | head -200\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "The available skill is specifically for OpenRouter’s Decisions API and explicitly excludes ordinary chat completions, so it does not govern the implementation here. The workspace is empty; I’m going to create a minimal TypeScript project with `@openrouter/sdk`, environment-based credentials, and a runnable chat example, then test the call if an API key is available."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"ls -la && env | rg '\"'^(OPENROUTER|OPENAI|NODE|NPM)'\"' || true\"\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:05 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:05 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:05 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:05 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:05 .git\nNODE=/home/ubuntu/.nvm/versions/node/v24.17.0/bin/node\nOPENROUTER_API_KEY=sk-or-v1-<redacted>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm view @openrouter/sdk version description'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/.env.example, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/src/chat.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/tsconfig.json"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm_config_cache=/tmp/openrouter-npm-cache npm install'\n<output>\n\nadded 9 packages, and audited 10 packages in 2s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nnpm notice\nnpm notice New major version of npm available! 11.13.0 -> 12.1.0\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0\nnpm notice To update run: npm install -g npm@12.1.0\nnpm notice\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The project scaffold and dependencies are in place. I’m checking the installed SDK’s actual TypeScript surface now, then I’ll run the example against OpenRouter using the supplied environment key and report the model response without exposing the credential."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run typecheck && npm run chat'\n<output>\nsrc/chat.ts(20,3): error TS2769: No overload matches this call.\n  Overload 1 of 3, '(request: SendChatCompletionRequestRequest & { chatRequest: { stream?: false | undefined; }; }, options?: RequestOptions | undefined): Promise<...>', gave the following error.\n    Object literal may only specify known properties, and 'model' does not exist in type 'SendChatCompletionRequestRequest & { chatRequest: { stream?: false | undefined; }; }'.\n  Overload 2 of 3, '(request: SendChatCompletionRequestRequest & { chatRequest: { stream: true; }; }, options?: RequestOptions | undefined): Promise<...>', gave the following error.\n    Object literal may only specify known properties, and 'model' does not exist in type 'SendChatCompletionRequestRequest & { chatRequest: { stream: true; }; }'.\n  Overload 3 of 3, '(request: SendChatCompletionRequestRequest, options?: RequestOptions | undefined): Promise<SendChatCompletionRequestResponse>', gave the following error.\n    Object literal may only specify known properties, and 'model' does not exist in type 'SendChatCompletionRequestRequest'.\nsrc/chat.ts(29,22): error TS2339: Property 'choices' does not exist on type 'SendChatCompletionRequestResponse'.\n  Property 'choices' does not exist on type 'EventStream<ChatStreamChunk>'.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg -n \\\"class OpenRouter|chat|SendChatCompletionRequest\\\" node_modules/@openrouter/sdk/dist -g '*.d.ts' | head -80\"\n<output>\nrg: node_modules/@openrouter/sdk/dist: IO error for operation on node_modules/@openrouter/sdk/dist: No such file or directory (os error 2)\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'find node_modules/@openrouter/sdk -maxdepth 3 -type f | head -80'\n<output>\nnode_modules/@openrouter/sdk/package.json\nnode_modules/@openrouter/sdk/RUNTIMES.md\nnode_modules/@openrouter/sdk/jsr.json\nnode_modules/@openrouter/sdk/LICENSE.md\nnode_modules/@openrouter/sdk/_speakeasy/.github/action-security-config.json\nnode_modules/@openrouter/sdk/_speakeasy/.github/action-inputs-config.json\nnode_modules/@openrouter/sdk/FUNCTIONS.md\nnode_modules/@openrouter/sdk/esm/funcs/organizationListMembers.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/privateEndpointsEnable.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/batchDelete.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/presetsList.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/endpointsList.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/chatSend.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/observabilityDelete.js\nnode_modules/@openrouter/sdk/esm/funcs/containersListContainerFiles.js\nnode_modules/@openrouter/sdk/esm/funcs/privateEndpointsDisable.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/guardrailsBulkUnassignKeys.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/oAuthCreateSHA256CodeChallenge.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/analyticsGetUserActivity.js\nnode_modules/@openrouter/sdk/esm/funcs/byokList.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/internsDeleteIntern.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/vaultListInternVaultSecrets.js\nnode_modules/@openrouter/sdk/esm/funcs/presetsCreatePresetsResponses.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/byokCreate.js\nnode_modules/@openrouter/sdk/esm/funcs/modelsCount.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/privateEndpointsUpdate.js\nnode_modules/@openrouter/sdk/esm/funcs/internsUpdateIntern.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/workspacesUpdate.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/datasetsGetAppRankings.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/workspacesSetBudget.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/internsInvoke.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/generationsGetGeneration.d.ts\nnode_modules/@openrouter/sdk/esm/funcs/privateEndpointsVa"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' node_modules/@openrouter/sdk/esm/funcs/chatSend.d.ts; rg -n \\\"type SendChatCompletionRequestRequest|interface SendChatCompletionRequestRequest|chatRequest\\\" node_modules/@openrouter/sdk/esm -g '*.d.ts' | head -40\"\n<output>\nimport { OpenRouterCore } from \"../core.js\";\nimport { RequestOptions } from \"../lib/sdks.js\";\nimport { ConnectionError, InvalidRequestError, RequestAbortedError, RequestTimeoutError, UnexpectedClientError } from \"../models/errors/httpclienterrors.js\";\nimport * as errors from \"../models/errors/index.js\";\nimport { OpenRouterError } from \"../models/errors/openroutererror.js\";\nimport { ResponseValidationError } from \"../models/errors/responsevalidationerror.js\";\nimport { SDKValidationError } from \"../models/errors/sdkvalidationerror.js\";\nimport * as operations from \"../models/operations/index.js\";\nimport { APIPromise } from \"../types/async.js\";\nimport { Result } from \"../types/fp.js\";\n/**\n * Create a chat completion\n *\n * @remarks\n * Sends a request for a model response for the given chat conversation. Supports both streaming and non-streaming modes.\n */\nexport declare function chatSend(client: OpenRouterCore, request: operations.SendChatCompletionRequestRequest & {\n    chatRequest: {\n        stream?: false;\n    };\n}, options?: RequestOptions): APIPromise<Result<operations.SendChatCompletionRequestResponse, errors.BadRequestResponseError | errors.UnauthorizedResponseError | errors.PaymentRequiredResponseError | errors.ForbiddenResponseError | errors.NotFoundResponseError | errors.RequestTimeoutResponseError | errors.PayloadTooLargeResponseError | errors.UnprocessableEntityResponseError | errors.TooManyRequestsResponseError | errors.InternalServerResponseError | errors.BadGatewayResponseError | errors.ServiceUnavailableResponseError | errors.EdgeNetworkTimeoutResponseError | errors.ProviderOverloadedResponseError | OpenRouterError | ResponseValidationError | ConnectionError | RequestAbortedError | RequestTimeoutError | InvalidRequestError | UnexpectedClientError | SDKValidationError>>;\nexport declare function chatSend(client: OpenRouterCore, request: operations.SendChatCompletionRequestRequest & {\n    chatRequest: {\n        stream: true;\n    };\n}, options?: RequestOption"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,90p' node_modules/@openrouter/sdk/esm/models/operations/sendchatcompletionrequest.d.ts; sed -n '1,60p' node_modules/@openrouter/sdk/esm/sdk/chat.d.ts; sed -n '1,100p' node_modules/@openrouter/sdk/esm/models/chatrequest.d.ts\"\n<output>\nimport * as z from \"zod/v4\";\nimport { EventStream } from \"../../lib/event-streams.js\";\nimport { Result as SafeParseResult } from \"../../types/fp.js\";\nimport { SDKValidationError } from \"../errors/sdkvalidationerror.js\";\nimport * as models from \"../index.js\";\nexport type SendChatCompletionRequestGlobals = {\n    /**\n     * The app identifier should be your app's URL and is used as the primary identifier for rankings.\n     *\n     * @remarks\n     * This is used to track API usage per application.\n     */\n    httpReferer?: string | undefined;\n    /**\n     * The app display name allows you to customize how your app appears in OpenRouter's dashboard.\n     *\n     * @remarks\n     */\n    appTitle?: string | undefined;\n    /**\n     * Comma-separated list of app categories (e.g. \"cli-agent,cloud-agent\"). Used for marketplace rankings.\n     *\n     * @remarks\n     */\n    appCategories?: string | undefined;\n};\nexport type SendChatCompletionRequestRequest = {\n    /**\n     * The app identifier should be your app's URL and is used as the primary identifier for rankings.\n     *\n     * @remarks\n     * This is used to track API usage per application.\n     */\n    httpReferer?: string | undefined;\n    /**\n     * The app display name allows you to customize how your app appears in OpenRouter's dashboard.\n     *\n     * @remarks\n     */\n    appTitle?: string | undefined;\n    /**\n     * Comma-separated list of app categories (e.g. \"cli-agent,cloud-agent\"). Used for marketplace rankings.\n     *\n     * @remarks\n     */\n    appCategories?: string | undefined;\n    /**\n     * Opt-in to surface routing metadata on the response under `openrouter_metadata`. Defaults to `disabled`. The legacy header `X-OpenRouter-Experimental-Metadata` is also accepted for backward compatibility.\n     */\n    xOpenRouterMetadata?: models.MetadataLevel | undefined;\n    chatRequest: models.ChatRequest;\n};\nexport type SendChatCompletionRequestResponse = models.ChatResult | EventStream<models.ChatStreamChunk>;\n/** @interna"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/src/chat.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run typecheck && npm run chat'\n<output>\nsrc/chat.ts(32,22): error TS2339: Property 'choices' does not exist on type 'SendChatCompletionRequestResponse'.\n  Property 'choices' does not exist on type 'EventStream<ChatStreamChunk>'.\n"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/src/chat.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run typecheck && npm run chat'\n<output>\n\n> openrouter-typescript-example@1.0.0 chat\n> tsx src/chat.ts\n\nOpenRouter provides a platform for users to access and integrate various AI models and services for natural language processing tasks.\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The first live chat completion succeeded through the installed TypeScript SDK, and the project type-checks cleanly. I’m doing one final workspace check so I can hand back the exact files and run command, including the generated lockfile."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short && git diff --stat && sed -n '1,180p' src/chat.ts\"\n<output>\n?? .env.example\n?? .gitignore\n?? package-lock.json\n?? package.json\n?? src/\n?? tsconfig.json\nimport \"dotenv/config\";\nimport { OpenRouter } from \"@openrouter/sdk\";\n\nconst apiKey = process.env.OPENROUTER_API_KEY;\nif (!apiKey) {\n  throw new Error(\"OPENROUTER_API_KEY is required\");\n}\n\nconst openrouter = new OpenRouter({\n  apiKey,\n  ...(process.env.OPENROUTER_SITE_URL\n    ? { httpReferer: process.env.OPENROUTER_SITE_URL }\n    : {}),\n  ...(process.env.OPENROUTER_APP_NAME\n    ? { appTitle: process.env.OPENROUTER_APP_NAME }\n    : {}),\n});\n\nconst response = await openrouter.chat.send({\n  chatRequest: {\n    model: process.env.OPENROUTER_MODEL ?? \"openai/gpt-4o-mini\",\n    messages: [\n      {\n        role: \"user\",\n        content: \"In one short sentence, explain what OpenRouter does.\",\n      },\n    ],\n    stream: false,\n  },\n});\n\nif (\"choices\" in response) {\n  console.log(response.choices[0]?.message?.content ?? \"No response content\");\n} else {\n  throw new Error(\"Expected a non-streaming chat response\");\n}\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Set up successfully.\n\nAdded:\n\n- [package.json](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/package.json)\n- [src/chat.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/src/chat.ts)\n- [.env.example](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/.env.example)\n- [tsconfig.json](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/tsconfig.json)\n\nVerified:\n\n- TypeScript type-check passes.\n- First live chat completion succeeded using `@openrouter/sdk`.\n- Response: “OpenRouter provides a platform for users to access and integrate various AI models and services…”"
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "Set up successfully.\n\nAdded:\n\n- [package.json](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/package.json)\n- [src/chat.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/src/chat.ts)\n- [.env.example](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/.env.example)\n- [tsconfig.json](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/17/openai_gpt-5.6-luna/skill/r1/workspace/tsconfig.json)\n\nVerified:\n\n- TypeScript type-check passes.\n- First live chat completion succeeded using `@openrouter/sdk`.\n- Response: “OpenRouter provides a platform for users to access and integrate various AI models and services…”",
+  "produced_files": [
+    ".env.example",
+    ".gitignore",
+    "package-lock.json",
+    "package.json",
+    "src/chat.ts",
+    "tsconfig.json"
+  ]
+}

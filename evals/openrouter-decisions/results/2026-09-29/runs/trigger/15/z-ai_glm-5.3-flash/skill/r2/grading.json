@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.013545,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "scripts/summarize-tickets.mjs sends a POST to OpenRouter’s chat completions endpoint (https://openrouter.ai/api/v1/chat/completions) with messages and takes choices[0].message.content as the one-paragraph summary.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 2
+}

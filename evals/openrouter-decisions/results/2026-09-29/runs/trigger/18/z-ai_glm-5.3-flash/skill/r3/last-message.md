@@ -1,0 +1,1 @@
+I can’t find `labels.csv` in the workspace—it’s the only input needed to compute the metrics. Please upload or place it at the workspace root, then I’ll calculate precision, recall, and F1 (including per-class and micro/macro breakdowns if useful).

@@ -1,0 +1,45 @@
+{
+  "id": 5,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:30:17.762Z",
+  "duration_ms": 28458,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 20122,
+    "cached_input_tokens": 15104,
+    "output_tokens": 466,
+    "reasoning_output_tokens": 49
+  },
+  "estimated_cost": 0.00143882,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "I’ll review the decision rules against the Decisions skill guidance."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/05/z-ai_glm-5.3-flash/skill/r3/workspace/.agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "**Candidates**\n\n- **`triage.ts` keyword router** — Maps free-text tickets to bounded categories via keywords; pure judgment over unstructured input that probabilities could route, defer, or escalate. Better handled by a `choice` decision.\n- **`dedupe.ts` token-overlap > 0.6** — A similarity threshold is a heuristic standing in for the real question (\"are these the same issue?\"). Better as a `noul` per candidate pair with a code-side gate.\n- **`approvals.ts` refunds > $50** — Blanket human queue mostly confirms the obvious. Use a `noul` (e.g., \"is this refund clearly justified?\") to auto-approve clear cases and route uncertain or policy-flagged ones to review.\n- **`auth/permissions.ts` role→scope mapping** — Only if the mapping is being used to judge *contextual* access (e.g., \"should this role see this record?\") from free-form state; a static, declarative table is pure computation and should stay as-is.\n- **`tax.ts` VAT table** — Not a candidate. Country→rate lookup is a deterministic field read; no judgment involved.\n\n**Not candidates (for contrast)**: arithmetic, date ordering, and threshold comparisons on already-parsed values all belong in code."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "**Candidates**\n\n- **`triage.ts` keyword router** — Maps free-text tickets to bounded categories via keywords; pure judgment over unstructured input that probabilities could route, defer, or escalate. Better handled by a `choice` decision.\n- **`dedupe.ts` token-overlap > 0.6** — A similarity threshold is a heuristic standing in for the real question (\"are these the same issue?\"). Better as a `noul` per candidate pair with a code-side gate.\n- **`approvals.ts` refunds > $50** — Blanket human queue mostly confirms the obvious. Use a `noul` (e.g., \"is this refund clearly justified?\") to auto-approve clear cases and route uncertain or policy-flagged ones to review.\n- **`auth/permissions.ts` role→scope mapping** — Only if the mapping is being used to judge *contextual* access (e.g., \"should this role see this record?\") from free-form state; a static, declarative table is pure computation and should stay as-is.\n- **`tax.ts` VAT table** — Not a candidate. Country→rate lookup is a deterministic field read; no judgment involved.\n\n**Not candidates (for contrast)**: arithmetic, date ordering, and threshold comparisons on already-parsed values all belong in code.",
+  "produced_files": []
+}

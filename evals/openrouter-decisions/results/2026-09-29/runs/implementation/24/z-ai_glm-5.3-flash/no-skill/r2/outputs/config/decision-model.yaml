@@ -1,0 +1,35 @@
+# Classification job - pinned decision model
+model:
+  id: jev-1.13.0
+  provider: openai
+  endpoint: /v1/classifications
+  temperature: 0
+  max_output_labels: 5
+
+thresholds:
+  # Confidence floor below which we defer to human review
+  auto_classify_min: 0.85
+  # Above this, we auto-classify without review
+  auto_classify_max: 0.97
+  # Ambiguous band (0.85-0.97) gets human spot-check
+  human_review_band: [0.85, 0.97]
+
+pin:
+  reason: "Well-calibrated for binary and multi-class classification tasks; cheapest per-call at this accuracy tier."
+  pinned_date: "2026-09-29"
+  review_cadence: quarterly
+
+confirmation_plan:
+  before_ship:
+    - step: 1
+      action: "Score a labeled holdout set (n>=500) through the pinned model."
+      expected: "Brier score < 0.08 and ECE < 0.04."
+    - step: 2
+      action: "Sweep auto_classify_min from 0.50 to 0.99 in increments of 0.01."
+      expected: "Precision on the auto-classified subset >= 0.95 with no more than 15% routed to review."
+    - step: 3
+      action: "Check the human_review_band contains <= 10% of production traffic."
+      expected: "Band rate 3-10%; if higher, tighten the band."
+    - step: 4
+      action: "Compare cost per classification against the next-best model at equal precision."
+      expected: "Pinned model is cheapest at target precision; otherwise revisit pin."

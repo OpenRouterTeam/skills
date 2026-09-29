@@ -1,0 +1,31 @@
+{
+  "id": 19,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:08:27.388Z",
+  "duration_ms": 5510,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 10069,
+    "cached_input_tokens": 0,
+    "output_tokens": 170,
+    "reasoning_output_tokens": 102
+  },
+  "estimated_cost": 0.10919,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "```ts\nconst PHONE = /\\d{3}[- ]\\d{3}[- ]\\d{4}/g;\n```\n\n`[- ]` matches a hyphen or a space, so this accepts both `415-555-0199` and `415 555 0199`."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "```ts\nconst PHONE = /\\d{3}[- ]\\d{3}[- ]\\d{4}/g;\n```\n\n`[- ]` matches a hyphen or a space, so this accepts both `415-555-0199` and `415 555 0199`.",
+  "produced_files": []
+}

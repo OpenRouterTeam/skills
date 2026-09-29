@@ -1,0 +1,12 @@
+{
+  "name": "support-agent-prompt-injection-guard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test src/prompt-injection-guard.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

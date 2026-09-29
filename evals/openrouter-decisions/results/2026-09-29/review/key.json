@@ -1,0 +1,638 @@
+{
+  "codex-21-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-21-openai_gpt-5.6-luna-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-21-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-21-openai_gpt-6-astra-r1": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-21-openai_gpt-6-astra-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-21-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-21-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-21-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-21-z-ai_glm-5.3-flash-r3": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-22-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-22-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-22-openai_gpt-5.6-luna-r3": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-22-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-22-openai_gpt-6-astra-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-22-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-22-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-22-z-ai_glm-5.3-flash-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-22-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-openai_gpt-5.6-luna-r1": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-23-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-openai_gpt-6-astra-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-23-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-23-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-24-openai_gpt-5.6-luna-r1": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-openai_gpt-5.6-luna-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-24-openai_gpt-6-astra-r1": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-openai_gpt-6-astra-r2": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-openai_gpt-6-astra-r3": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-z-ai_glm-5.3-flash-r1": {
+    "A": "no-skill",
+    "B": "skill"
+  },
+  "codex-24-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "codex-24-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "no-skill"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-catalog_condition-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-returns_reason-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-reviews_quality-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-kb_suggest-openai_gpt-5.6-luna-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-kb_suggest-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-kb_suggest-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-kb_suggest-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-kb_suggest-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-kb_suggest-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-kb_suggest-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-kb_suggest-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-kb_suggest-z-ai_glm-5.3-flash-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-leads_route-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-leads_route-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-leads_route-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-leads_route-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-leads_route-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-leads_route-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-leads_route-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-leads_route-z-ai_glm-5.3-flash-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-leads_route-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-moderation_reviews-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-moderation_reviews-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-refunds_approve-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-refunds_approve-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-refunds_approve-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_categorize-openai_gpt-5.6-luna-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-openai_gpt-6-astra-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-6-astra-r1": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_duplicates-openai_gpt-6-astra-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_urgency-openai_gpt-5.6-luna-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-openai_gpt-5.6-luna-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-openai_gpt-5.6-luna-r3": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_urgency-openai_gpt-6-astra-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-openai_gpt-6-astra-r2": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-openai_gpt-6-astra-r3": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r1": {
+    "A": "api-only",
+    "B": "skill"
+  },
+  "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r2": {
+    "A": "skill",
+    "B": "api-only"
+  },
+  "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r3": {
+    "A": "skill",
+    "B": "api-only"
+  }
+}

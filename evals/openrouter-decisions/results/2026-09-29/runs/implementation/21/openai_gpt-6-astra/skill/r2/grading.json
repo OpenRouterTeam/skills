@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.06354125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "src/urgency.ts builds a single score question: questions.urgency = { type: \"score\", criteria: [\"1 — Low\", ..., \"5 — Critical\"] }, and test/urgency.test.ts asserts questions.urgency.type === \"score\" with 5 ordered levels.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The sortable value is computed in code from the model’s score: in rateIncident, urgency = Math.round(answer.score) + 1 and sortScore = answer.score + 1; compareUrgency then sorts by b.sortScore - a.sortScore.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "buildRequest sends separate named fields under state: { incident: { service: report.service.trim(), text: report.text.trim() } }; the test deep-equals body.state to { incident: report }.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.013385,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "In the code, deterministic checks run before the model call: `if (lead.headcount > 1000) { ... }` and `if (new Set(lead.regions).size >= 3) { ... }` precede the fetch to the Decisions API.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model is called via `POST https://openrouter.ai/api/alpha/decisions` with `model: \"typesafe/jev-1.13\"`, which is a version-pinned ID.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The request `state` only includes `{ looking_for: lead.lookingFor }`, omitting headcount and region count.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

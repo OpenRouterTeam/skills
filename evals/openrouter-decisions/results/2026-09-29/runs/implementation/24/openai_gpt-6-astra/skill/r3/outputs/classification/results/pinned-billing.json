@@ -1,0 +1,23 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "transport": "http",
+  "latency_ms": 178,
+  "usage": {
+    "input_tokens": 429,
+    "output_tokens": 45,
+    "cost": 0.000018018
+  },
+  "answers": {
+    "category": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "bug": 0,
+        "account": 0,
+        "billing": 1,
+        "none": 0
+      },
+      "confidence": 1
+    }
+  }
+}

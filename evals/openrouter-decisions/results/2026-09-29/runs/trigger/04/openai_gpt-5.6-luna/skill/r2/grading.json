@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01392375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The code reads answer.probabilities from a Decisions API response and never string-matches model text (e.g., const probabilities = answer.probabilities as Record<Label, number>;).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "It uses a single choice question with mutually exclusive categories: questions.classification.type = \"choice\" and instructions say \"Classify the product review into exactly one category,\" so there are no separate noul questions for spam and abusive.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Thresholds are hardcoded in the function (const MIN_PROBABILITY = 0.80; const MIN_MARGIN = 0.15;) and the function returns both the decided label and the probabilities.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "service": "marketing-site",
+    "report": "The footer copyright year is still showing last year. Scheduled CSS fix for the next release.",
+    "expected": 1
+  },
+  {
+    "service": "internal-analytics",
+    "report": "Some report pages load slowly in the morning. Users can still get the data after a refresh.",
+    "expected": 2
+  },
+  {
+    "service": "checkout-api",
+    "report": "About 10% of mobile users cannot submit an order right now; desktop checkout still works.",
+    "expected": 3
+  },
+  {
+    "service": "payments",
+    "report": "All card payments are failing in production since the last deploy. Customers cannot buy anything.",
+    "expected": 5
+  },
+  {
+    "service": "user-database",
+    "report": "A delete job is running out of control and users are being removed right now.",
+    "expected": 5
+  },
+  {
+    "service": "notifications",
+    "report": "This is not an outage and nothing is broken. The old ticket said critical, but current service is healthy and a review is planned next week.",
+    "expected": 1
+  }
+]

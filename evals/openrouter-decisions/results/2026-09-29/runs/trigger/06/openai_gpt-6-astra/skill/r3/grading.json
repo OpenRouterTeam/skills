@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.017015,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The final message says 'Enforce the rules in code using trusted records' and 'Keep date calculations, amounts, and refund counts in code' with bullets for the 90-day window, amount cap, and refund-count rule.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "It proposes a Decisions API 'noul' question—'Does this request’s reason qualify under the refund-reason policy?'—and explicitly keeps date/amount/refund-count checks in code.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "It defines a review band: 'Above a validated approval threshold → auto-approve; Everything else, including API errors → human review,' not a single yes/no gate.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

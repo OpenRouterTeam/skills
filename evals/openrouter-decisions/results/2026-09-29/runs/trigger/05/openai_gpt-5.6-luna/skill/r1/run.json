@@ -1,0 +1,57 @@
+{
+  "id": 5,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T01:54:54.654Z",
+  "duration_ms": 18011,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 47860,
+    "cached_input_tokens": 37295,
+    "output_tokens": 1210,
+    "reasoning_output_tokens": 323
+  },
+  "estimated_cost": 0.0043108999999999995,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because these files contain routing, classification, deduplication, approval, and policy-mapping decisions. I’ll inspect the skill guidance and the listed files, then return only the strongest candidates with concise rationale—no code changes."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/05/openai_gpt-5.6-luna/skill/r1/workspace/.agents/skills/openrouter-decisions/SKILL.md\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg --files -g 'triage.ts' -g 'tax.ts' -g 'dedupe.ts' -g 'approvals.ts' -g 'permissions.ts' -g '\"'!node_modules'\"' | sort\"\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"find . -maxdepth 4 -type f -not -path './.git/*' -print | sort\"\n<output>\n./.agents/skills/openrouter-decisions/README.md\n./.agents/skills/openrouter-decisions/SKILL.md\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace currently contains only the decision-skill instructions; none of the five requested TypeScript files are present at the stated workspace path. I’m checking the repository metadata and nearby tracked paths once to make sure this isn’t just a layout issue."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short && git ls-tree -r --name-only HEAD | sed -n '1,160p' && find .. -type f \\\\( -name 'triage.ts' -o -name 'tax.ts' -o -name 'dedupe.ts' -o -name 'approvals.ts' -o -name 'permissions.ts' \\\\) -print\"\n<output>\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/package.json\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The requested files aren’t present in the workspace, so these candidates are based on your descriptions:\n\n- `triage.ts` — keyword-based ticket routing. Use a `choice` decision for the ticket category; keywords miss paraphrases, context, and ambiguous requests.\n\n- `dedupe.ts` — token-overlap duplicate detection. Use a duplicate/not-duplicate judgment (`noul`), since lexical overlap can miss semantic duplicates and flag unrelated tickets with shared boilerplate.\n\n- `approvals.ts` — blanket human review for refunds over $50. Use a model to assess refund legitimacy or risk, with uncertain/high-risk cases still escalated. The $50 threshold itself should remain deterministic.\n\nNot candidates:\n\n- `tax.ts` — VAT-by-country lookup is deterministic policy data; keep it as code/configuration unless the input requires interpreting unstructured tax rules.\n\n- `auth/permissions.ts` — role-to-scope mapping is an explicit authorization policy and should remain deterministic. A probabilistic model would make access control less predictable and auditable."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "The requested files aren’t present in the workspace, so these candidates are based on your descriptions:\n\n- `triage.ts` — keyword-based ticket routing. Use a `choice` decision for the ticket category; keywords miss paraphrases, context, and ambiguous requests.\n\n- `dedupe.ts` — token-overlap duplicate detection. Use a duplicate/not-duplicate judgment (`noul`), since lexical overlap can miss semantic duplicates and flag unrelated tickets with shared boilerplate.\n\n- `approvals.ts` — blanket human review for refunds over $50. Use a model to assess refund legitimacy or risk, with uncertain/high-risk cases still escalated. The $50 threshold itself should remain deterministic.\n\nNot candidates:\n\n- `tax.ts` — VAT-by-country lookup is deterministic policy data; keep it as code/configuration unless the input requires interpreting unstructured tax rules.\n\n- `auth/permissions.ts` — role-to-scope mapping is an explicit authorization policy and should remain deterministic. A probabilistic model would make access control less predictable and auditable.",
+  "produced_files": []
+}

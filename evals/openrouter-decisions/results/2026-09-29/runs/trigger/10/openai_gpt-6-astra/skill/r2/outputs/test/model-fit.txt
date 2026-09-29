@@ -1,0 +1,13 @@
+id                        pin                            ctx     max in  $/M in  providers          uptime30m  released    fit
+------------------------  -----------------------------  ------  ------  ------  -----------------  ---------  ----------  ---
+respan/span-01-lite       respan/span-01-lite-20260925   0       0       0.000   Respan             100%       2026-09-26  no 
+respan/span-01-lite:free  respan/span-01-lite-20260925   0       0       0.000   Respan             100%       2026-09-26  no 
+respan/span-01            respan/span-01-20260925        0       0       0.020   Respan             100%       2026-09-26  no 
+jaredpalmer/kev-4b        jaredpalmer/kev-4b-20260924    8192    8192    0.042   SiliconFlow (fp8)  100%       2026-09-25  ok 
+typesafe/jev-1.13         typesafe/jev-1.13-20260917     32000   32000   0.042   TypeSafe           100%       2026-09-18  ok 
+upstage/solar-decide      upstage/solar-decide-20260928  524288  524288  0.050   Upstage            100%       2026-09-28  ok 
+~typesafe/jev-latest      alias -> typesafe/jev-1.13     32000   32000   0.042   none               -          2026-09-18  ok 
+
+Estimated input tokens for this request: 2262 (state and questions at 4 chars per token, a lower bound; the probe's usage.input_tokens is the real number)
+
+Next: npx tsx decide.ts request.json --compare

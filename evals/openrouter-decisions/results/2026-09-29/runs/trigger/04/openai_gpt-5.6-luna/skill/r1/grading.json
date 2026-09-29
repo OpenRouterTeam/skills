@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02073,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "review-classifier.ts reads typed noul fields (e.g., const spamProbability = result.answers.spam.noul) and the final message says it “Validates the API response instead of parsing generated text.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The request defines two independent noul questions (questions: { spam: { type: \"noul\", ... }, abusive: { type: \"noul\", ... } }), and the final message notes “Independently scores spam and abuse, allowing both to co-occur.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Thresholds are code constants next to usage (const SPAM_THRESHOLD = 0.8; const ABUSE_THRESHOLD = 0.8; followed by spamProbability >= SPAM_THRESHOLD and abusiveProbability >= ABUSE_THRESHOLD).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

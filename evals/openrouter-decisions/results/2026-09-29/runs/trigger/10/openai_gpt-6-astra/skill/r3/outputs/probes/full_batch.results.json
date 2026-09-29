@@ -1,0 +1,92 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "transport": "http",
+  "latency_ms": 252,
+  "usage": {
+    "input_tokens": 5166,
+    "output_tokens": 374,
+    "cost": 0.000216972
+  },
+  "answers": {
+    "candidate_0": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_1": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_2": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_3": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_4": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_5": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_6": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_7": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_8": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_9": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_10": {
+      "type": "noul",
+      "noul": 0.03
+    },
+    "candidate_11": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_12": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_13": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_14": {
+      "type": "noul",
+      "noul": 0.04
+    },
+    "candidate_15": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_16": {
+      "type": "noul",
+      "noul": 0.05
+    },
+    "candidate_17": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_18": {
+      "type": "noul",
+      "noul": 0.11
+    },
+    "candidate_19": {
+      "type": "noul",
+      "noul": 0.96
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0156575,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "lead_router.ts checks if (lead.headcount > 1000) and if (lead.regions.length >= 3) and returns before calling client.alpha.decisions.create(...).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "lead_router.ts calls OpenRouter's Decisions API via client.alpha.decisions.create with model: \"typesafe/jev-1.13\" (a pinned version ID).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "decisionsRequest.state only includes { company: lead.company, request: lead.lookingFor } and omits headcount and regions.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

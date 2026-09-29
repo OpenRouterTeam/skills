@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01114,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The final message specifies using OpenRouter’s Decisions API with a 'noul' question and calls 'POST https://openrouter.ai/api/alpha/decisions', not a chat completion.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The code sets state with separate named fields: state: { question, answer: draft, passages }.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

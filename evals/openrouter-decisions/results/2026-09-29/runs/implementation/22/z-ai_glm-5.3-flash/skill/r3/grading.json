@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0166375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "The question is: \"Does this pull request introduce a breaking change?\"—it asks about the change itself, not whether the description mentions breaking changes.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Threshold is implemented in code: `const BREAKING_GATE = 0.5;` and used as `if (answers.is_breaking.noul >= BREAKING_GATE) { blockAutoMerge(...) }`.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Nowhere does the message state that a description saying \"no breaking changes\" should yield a low probability; the criteria only add that \"the author states that it is breaking\" under true, without the inverse explicitly described.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

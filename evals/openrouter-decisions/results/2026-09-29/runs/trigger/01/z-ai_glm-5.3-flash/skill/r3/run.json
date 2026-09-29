@@ -1,0 +1,45 @@
+{
+  "id": 1,
+  "kind": "trigger",
+  "category": "trigger-explicit",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:27:21.565Z",
+  "duration_ms": 21337,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 20049,
+    "cached_input_tokens": 15104,
+    "output_tokens": 483,
+    "reasoning_output_tokens": 27
+  },
+  "estimated_cost": 0.00143637,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "I’ll load the skill instructions, then outline a plan-only migration."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/01/z-ai_glm-5.3-flash/skill/r3/workspace/.agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "**Migration Plan**\n- **Primitive**: one `choice` with options `billing`, `engineering`, `support` (plus a fallback if ambiguous), because the outcomes are mutually exclusive labels over unstructured ticket text.\n- **State**: send a single named field, e.g. `ticket.text` with the raw user message. Don’t pre-lowercase or extract keywords — the judgment belongs to the model.\n- **Question instructions**: ask “Which team should handle this ticket?” with inclusion rules per team: `billing` = invoices, charges, payments, refunds; `engineering` = bugs, crashes, errors, technical failures; `support` = general help, account access, questions.\n- **Criteria**: each option gets a short standalone rubric line, plus a fallback option (e.g. `unclear`) for ambiguous or empty inputs.\n- **Code flow**: build state → call Decisions API → read `choice` and `probabilities` → route on `choice`. If confidence is low (probability below a named threshold, set after probing), fall back to a default queue or escalate rather than guessing.\n- **Model**: select from the live Decisions catalog at implementation time (`scripts/models.ts` or `GET /api/v1/models?output_modalities=decisions`), pin the chosen `canonical_slug` in config, keep the API key server-side.\n- **Probing**: run representative inputs (clear billing, clear engineering, clear support, ambiguous, empty/off-topic, negated, adversarial) through `decide.ts --compare`, then set the confidence threshold from observed probabilities.\n- **Kept in code**: threshold comparison, fallback band, logging of resolved model string. All business rules stay deterministic; only the text→label judgment moves to the decision model.\n\nReady to implement in TypeScript when you give the go-ahead."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "**Migration Plan**\n- **Primitive**: one `choice` with options `billing`, `engineering`, `support` (plus a fallback if ambiguous), because the outcomes are mutually exclusive labels over unstructured ticket text.\n- **State**: send a single named field, e.g. `ticket.text` with the raw user message. Don’t pre-lowercase or extract keywords — the judgment belongs to the model.\n- **Question instructions**: ask “Which team should handle this ticket?” with inclusion rules per team: `billing` = invoices, charges, payments, refunds; `engineering` = bugs, crashes, errors, technical failures; `support` = general help, account access, questions.\n- **Criteria**: each option gets a short standalone rubric line, plus a fallback option (e.g. `unclear`) for ambiguous or empty inputs.\n- **Code flow**: build state → call Decisions API → read `choice` and `probabilities` → route on `choice`. If confidence is low (probability below a named threshold, set after probing), fall back to a default queue or escalate rather than guessing.\n- **Model**: select from the live Decisions catalog at implementation time (`scripts/models.ts` or `GET /api/v1/models?output_modalities=decisions`), pin the chosen `canonical_slug` in config, keep the API key server-side.\n- **Probing**: run representative inputs (clear billing, clear engineering, clear support, ambiguous, empty/off-topic, negated, adversarial) through `decide.ts --compare`, then set the confidence threshold from observed probabilities.\n- **Kept in code**: threshold comparison, fallback band, logging of resolved model string. All business rules stay deterministic; only the text→label judgment moves to the decision model.\n\nReady to implement in TypeScript when you give the go-ahead.",
+  "produced_files": []
+}

@@ -1,0 +1,53 @@
+{
+  "id": 19,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:08:07.633Z",
+  "duration_ms": 12261,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 38119,
+    "cached_input_tokens": 27435,
+    "output_tokens": 961,
+    "reasoning_output_tokens": 397
+  },
+  "estimated_cost": 0.0038387,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this is a PII detection/classification rule, and I’ll inspect the local implementation and tests before updating the pattern."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' .agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n--- files ---\\\\n' && rg --files -g '\"'!node_modules'\"' -g '\"'!dist'\"' | head -80 && printf '\\\\n--- phone references ---\\\\n' && rg -n \\\"PHONE|phone|PII|415|555\\\" . -g '\"'!node_modules'\"' -g '\"'!dist'\"'\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no visible source or test files containing this detector, so I’m checking the repository state and top-level contents to locate the intended target before making the smallest safe edit."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd; ls -la; git status --short; git log -1 --oneline --all 2>/dev/null || true; rg --hidden --files -g '\"'!.git'\"' | head -100\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/19/openai_gpt-5.6-luna/skill/r1/workspace\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:08 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:08 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:08 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:08 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:08 .git\nd904281 baseline\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/SKILL.md\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git ls-tree -r --name-only HEAD; git status --short'\n<output>\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/package.json\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace doesn’t contain the detector file to edit. Update the regex to:\n\n```ts\nconst PHONE = /\\d{3}[- ]\\d{3}[- ]\\d{4}/g;\n```\n\nThis matches both `415-555-0199` and `415 555 0199`."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "The workspace doesn’t contain the detector file to edit. Update the regex to:\n\n```ts\nconst PHONE = /\\d{3}[- ]\\d{3}[- ]\\d{4}/g;\n```\n\nThis matches both `415-555-0199` and `415 555 0199`.",
+  "produced_files": []
+}

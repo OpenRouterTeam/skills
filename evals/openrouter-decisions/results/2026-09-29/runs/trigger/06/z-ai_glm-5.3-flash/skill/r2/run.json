@@ -1,0 +1,41 @@
+{
+  "id": 6,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:15:04.738Z",
+  "duration_ms": 14070,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 19979,
+    "cached_input_tokens": 15104,
+    "output_tokens": 414,
+    "reasoning_output_tokens": 64
+  },
+  "estimated_cost": 0.0013913699999999998,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/06/z-ai_glm-5.3-flash/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "Here's the approach, split into what code decides outright and what the decision model judges.\n\n**Hard Rules (Code Only)**\n- Purchase within 90 days, amount ≤ order total, ≤ 2 refunds/customer/year: check these directly in code against your database fields.\n- Any failure → human queue, skip the model entirely.\n- These aren't judgments; never send them to a decision model.\n\n**Judgment (Decision Model)**\n- What's left after the hard rules pass is: *\"Is this refund request unambiguous and consistent with its stated reason?\"* — a `noul` question.\n- State sent to the model: the refund reason text, order line items, amounts, product names, and any customer-provided context. Filtered and structured in code first.\n- Code then gates on the returned probability: `is_obvious.noul >= T` → auto-approve; below → human queue.\n\n**Threshold & Rollout**\n- Start conservatively (`T ≈ 0.85`), send everything near the gate to humans, and probe with real refund reasons (clear cases, vague reasons, adversarial justifications) before trusting the gate.\n- Log every auto-approval with the model, probability, and inputs so you can audit and tune later.\n- The 90-day, amount, and frequency checks stay as named constants in code — the model never sees or re-judges them."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "Here's the approach, split into what code decides outright and what the decision model judges.\n\n**Hard Rules (Code Only)**\n- Purchase within 90 days, amount ≤ order total, ≤ 2 refunds/customer/year: check these directly in code against your database fields.\n- Any failure → human queue, skip the model entirely.\n- These aren't judgments; never send them to a decision model.\n\n**Judgment (Decision Model)**\n- What's left after the hard rules pass is: *\"Is this refund request unambiguous and consistent with its stated reason?\"* — a `noul` question.\n- State sent to the model: the refund reason text, order line items, amounts, product names, and any customer-provided context. Filtered and structured in code first.\n- Code then gates on the returned probability: `is_obvious.noul >= T` → auto-approve; below → human queue.\n\n**Threshold & Rollout**\n- Start conservatively (`T ≈ 0.85`), send everything near the gate to humans, and probe with real refund reasons (clear cases, vague reasons, adversarial justifications) before trusting the gate.\n- Log every auto-approval with the model, probability, and inputs so you can audit and tune later.\n- The 90-day, amount, and frequency checks stay as named constants in code — the model never sees or re-judges them.",
+  "produced_files": []
+}

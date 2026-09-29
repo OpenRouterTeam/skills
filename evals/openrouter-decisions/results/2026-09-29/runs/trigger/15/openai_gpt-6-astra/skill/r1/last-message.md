@@ -1,0 +1,1 @@
+The workspace is empty, so I don’t have access to the tickets or application code yet. Where are the support tickets stored, and which ticket field should hold the one-paragraph summary?

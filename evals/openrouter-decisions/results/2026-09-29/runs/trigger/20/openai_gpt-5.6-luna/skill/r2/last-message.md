@@ -1,0 +1,3 @@
+I can do this, but the checkout contains no support-bot code—only the generic decision skill—so there’s nowhere to modify the handoff logic.
+
+Please provide the bot repository or the file containing the escalation prompt/parser. I’ll replace the `yes` substring check with an OpenRouter Decisions `noul`, apply a calibrated escalation-probability threshold, and route uncertain/API-error cases safely to human review.

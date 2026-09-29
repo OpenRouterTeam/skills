@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.052885,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "review-classifier.ts uses Decisions probabilities (readScores validates answer.probabilities and labelFromScores thresholds them) with no string matching like .includes on generated text.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "reviewRequest defines a single choice question with options { spam, abusive, fine } (not separate noul questions), and README says “one choice over spam, abusive, and fine… If it is both spam and abusive, select spam.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Threshold constant export const MIN_CATEGORY_PROBABILITY = 0.75 is in review-classifier.ts and labelFromScores compares probabilities against it right next to the returned probabilities.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

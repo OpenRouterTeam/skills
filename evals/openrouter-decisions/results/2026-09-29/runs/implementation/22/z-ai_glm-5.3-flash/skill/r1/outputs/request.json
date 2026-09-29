@@ -1,0 +1,17 @@
+{
+  "model": "typesafe/jev-1.13",
+  "state": {
+    "title": "Update public UserSettings type",
+    "body": "This changes the public UserSettings interface and removes the theme field. Existing applications may need to migrate to the new shape."
+  },
+  "questions": {
+    "is_breaking_change": {
+      "type": "noul",
+      "instructions": "Judging this pull request as a whole, is the change breaking?",
+      "criteria": {
+        "true": "The change can require consumers, integrations, operators, or documented workflows to update their behavior, configuration, API usage, data schema, or code.",
+        "false": "The change is backward compatible or does not change an interface, contract, runtime behavior, migration path, or documented workflow."
+      }
+    }
+  }
+}

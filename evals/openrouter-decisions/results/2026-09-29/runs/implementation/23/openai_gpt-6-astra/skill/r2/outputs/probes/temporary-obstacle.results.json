@@ -1,0 +1,62 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 569,
+    "usage": {
+      "input_tokens": 502,
+      "output_tokens": 1,
+      "cost": 0.0000251
+    },
+    "answers": {
+      "returns": {
+        "type": "noul",
+        "noul": 0.947264
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 1139,
+    "usage": {
+      "input_tokens": 138,
+      "output_tokens": 22,
+      "cost": 0.000005796
+    },
+    "answers": {
+      "returns": {
+        "type": "noul",
+        "noul": 0.9398
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 278,
+    "usage": {
+      "input_tokens": 419,
+      "output_tokens": 20,
+      "cost": 0.000017598
+    },
+    "answers": {
+      "returns": {
+        "type": "noul",
+        "noul": 0.93
+      }
+    }
+  }
+]

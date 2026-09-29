@@ -1,0 +1,1 @@
+I can’t make the change because this workspace contains no application files—only Git metadata and agent configuration. Please provide or mount the repository containing the chat completion endpoint.

@@ -1,0 +1,38 @@
+name: Gate automatic merge
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  breaking-change-check:
+    # Do not run on drafts, and never merge a PR when the model cannot decide.
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the trusted base revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Ask the decision model about the PR description
+        id: decision
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_DECISION_MODEL || 'openai/gpt-4o-mini' }}
+          PR_DESCRIPTION: ${{ github.event.pull_request.body || '' }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: python3 scripts/check-breaking-change.py
+
+      - name: Enable auto-merge only for non-breaking changes
+        if: ${{ steps.decision.outputs.is_breaking == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh pr merge "$PR_NUMBER" --auto --squash --repo "$REPOSITORY"

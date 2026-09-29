@@ -1,0 +1,13 @@
+{
+  "name": "support-injection-guard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "probe": "tsx scripts/probe.ts",
+    "probe:selected": "tsx scripts/probe-selected.ts"
+  },
+  "dependencies": { "@openrouter/sdk": "^1.3.23" },
+  "devDependencies": { "@types/node": "^24.0.0", "tsx": "^4.0.0", "typescript": "^5.9.0" }
+}

@@ -1,0 +1,80 @@
+{
+  "id": 16,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:04:14.788Z",
+  "duration_ms": 48549,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 127704,
+    "cached_input_tokens": 111091,
+    "output_tokens": 3660,
+    "reasoning_output_tokens": 1028
+  },
+  "estimated_cost": 0.00993642,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because the task involves ranking/search decisions; I’ll first inspect its instructions and the workspace, then implement and verify the BM25 top-10 behavior."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/16/openai_gpt-5.6-luna/skill/r1/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n--- files ---\\\\n' && rg --files -g '\"'!node_modules'\"' -g '\"'!dist'\"' | head -200\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'pwd; ls -la; find . -maxdepth 3 -type f -print'\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/16/openai_gpt-5.6-luna/skill/r1/workspace\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:04 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:04 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:04 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:04 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:04 .git\n./.git/hooks/pre-rebase.sample\n./.git/hooks/commit-msg.sample\n./.git/hooks/post-update.sample\n./.git/hooks/pre-commit.sample\n./.git/hooks/pre-merge-commit.sample\n./.git/hooks/push-to-checkout.sample\n./.git/hooks/update.sample\n./.git/hooks/pre-receive.sample\n./.git/hooks/pre-applypatch.sample\n./.git/hooks/applypatch-msg.sample\n./.git/hooks/pre-push.sample\n./.git/hooks/fsmonitor-watchman.sample\n./.git/hooks/prepare-commit-msg.sample\n./.git/COMMIT_EDITMSG\n./.git/info/exclude\n./.git/HEAD\n./.git/logs/HEAD\n./.git/description\n./.git/config\n./.git/index\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git status --short; git log --oneline --all -5; find .codex .agents -type f -maxdepth 4 -print'\n<output>\nad09081 baseline\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,220p' .agents/skills/openrouter-decisions/README.md; sed -n '1,180p' .agents/skills/openrouter-decisions/references/models.md\"\n<output>\n# openrouter-decisions\n\nFind where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.\n\n## Install\n\nWith the [GitHub CLI](https://cli.github.com/) (v2.90.0+):\n\n```bash\ngh skill install OpenRouterTeam/skills openrouter-decisions\n```\n\nWorks with Claude Code, Cursor, Codex, OpenCode, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install). Add `--scope user` to install across every project for your current agent, or `--agent claude-code` to target a specific agent.\n\nFor other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) see the [root README](../../README.md#installing).\n\n## Prerequisites\n\n`OPENROUTER_API_KEY` must be set to any valid OpenRouter API key. Get one at [openrouter.ai/keys](https://openrouter.ai/keys). Reading the skill needs no key.\n\n## What it covers\n\n[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.\n\n## Scripts\n\n```bash\ncd scripts && npm install\nnpx tsx models.ts request.js"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace is a blank baseline, so I’m adding a small deterministic BM25 module with a clear API: tokenized query plus tokenized documents in, the highest-scoring 10 original documents out, with stable input-order tie-breaking and an optional scored form for callers that need scores."
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/16/openai_gpt-5.6-luna/skill/r1/workspace/bm25.py"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nfrom bm25 import rank_search_results, rank_search_results_with_scores\n\ndocs = [[\\\"apple\\\", \\\"banana\\\"], [\\\"apple\\\"]] + [[\\\"noise\\\"]] * 12\nassert rank_search_results([\\\"apple\\\"], docs) == [docs[1], docs[0]] + docs[2:10]\nassert len(rank_search_results([\\\"apple\\\"], docs)) == 10\nassert rank_search_results([], docs, top_k=2) == docs[:2]\nassert rank_search_results([\\\"missing\\\"], docs, top_k=3) == docs[:3]\nassert rank_search_results_with_scores([\\\"apple\\\"], docs)[0][0] == docs[1]\nprint(\\\"BM25 smoke tests passed\\\")\nPY\npython -m py_compile bm25.py\ngit diff --check\ngit diff --stat\ngit status --short\"\n<output>\n?? __pycache__/\n?? bm25.py\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git diff --check; git status --short; sed -n '1,240p' bm25.py\"\n<output>\n?? __pycache__/\n?? bm25.py\n\"\"\"BM25 ranking for already-tokenized search data.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections import Counter\nfrom math import log\nfrom typing import Hashable, Sequence, TypeVar\n\n\nT = TypeVar(\"T\")\n\n\ndef rank_search_results(\n    query: Sequence[Hashable],\n    documents: Sequence[Sequence[Hashable]],\n    *,\n    top_k: int = 10,\n    k1: float = 1.2,\n    b: float = 0.75,\n) -> list[Sequence[Hashable]]:\n    \"\"\"Return the top ``top_k`` documents ranked with Okapi BM25.\n\n    ``query`` and every document must already be tokenized.  The returned\n    values are the original document objects, in descending score order.\n    Equal scores retain their original input order.\n    \"\"\"\n    if top_k <= 0 or not documents:\n        return []\n    if k1 < 0:\n        raise ValueError(\"k1 must be non-negative\")\n    if not 0 <= b <= 1:\n        raise ValueError(\"b must be between 0 and 1\")\n\n    query_terms = set(query)\n    if not query_terms:\n        return list(documents[:top_k])\n\n    document_lengths = [len(document) for document in documents]\n    average_length = sum(document_lengths) / len(documents)\n    document_frequency = Counter(\n        token for document in documents for token in set(document)\n    )\n    document_count = len(documents)\n\n    scored = []\n    for index, document in enumerate(documents):\n        term_frequencies = Counter(document)\n        length_factor = (\n            1 - b + b * document_lengths[index] / average_length\n            if average_length\n            else 1\n        )\n        score = 0.0\n        for term in query_terms:\n            frequency = term_frequencies.get(term, 0)\n            if not frequency:\n                continue\n            df = document_frequency[term]\n            idf = log(1 + (document_count - df + 0.5) / (df + 0.5))\n            score += idf * (frequency * (k1 + 1)) / (\n                frequency + k1 * length_factor\n            )\n        scored.append((score, index, document))\n\n    scored.sort(key=lambda "
+    },
+    {
+      "type": "agent_message",
+      "text": "The implementation is in place and the smoke checks pass: BM25 scoring, top-10 truncation, empty/missing query handling, and stable ties all behave as intended. I’m doing a final cleanup/check of the generated workspace artifacts now."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'find __pycache__ -type f -delete 2>/dev/null || true; rmdir __pycache__ 2>/dev/null || true; git diff --check; git status --short'\n<output>\n?? bm25.py\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Implemented BM25 ranking in [bm25.py](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/16/openai_gpt-5.6-luna/skill/r1/workspace/bm25.py).\n\nIt supports:\n\n- Tokenized queries and documents\n- Okapi BM25 scoring\n- Top-10 results by default\n- Stable tie-breaking\n- Optional scored results via `rank_search_results_with_scores`\n\nSmoke tests and syntax checks pass."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Implemented BM25 ranking in [bm25.py](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/16/openai_gpt-5.6-luna/skill/r1/workspace/bm25.py).\n\nIt supports:\n\n- Tokenized queries and documents\n- Okapi BM25 scoring\n- Top-10 results by default\n- Stable tie-breaking\n- Optional scored results via `rank_search_results_with_scores`\n\nSmoke tests and syntax checks pass.",
+  "produced_files": [
+    "bm25.py"
+  ]
+}

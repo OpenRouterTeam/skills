@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02792375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "README.md says \"rate_incident(report, affected_service) returns an integer from 1 to 5,\" and the code only implements functions (no score question object or schema), so urgency is not modeled as a score question with ordered levels.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "incident_urgency.py derives the sortable value in code: return assess_urgency(report, affected_service, critical_services=critical_services).score",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Both APIs take separate named fields: def assess_urgency(report: str, affected_service: str, ...) and def rate_incident(report: str, affected_service: str, ...) in incident_urgency.py",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

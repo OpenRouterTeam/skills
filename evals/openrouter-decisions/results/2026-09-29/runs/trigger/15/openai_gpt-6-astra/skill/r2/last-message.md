@@ -1,0 +1,1 @@
+The workspace has no app code or ticket data. Where are the support tickets stored, and how can I access them to generate and save a one-paragraph summary on each ticket?

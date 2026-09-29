@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0096075,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "No generative model was invoked; the final message says 'I can do this, but the workspace currently contains only the OpenRouter skill documentation—no ticket data, application code, or storage integration to modify' and no files were produced.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 2
+}

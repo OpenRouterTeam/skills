@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.058265,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "src/reviews.ts uses Decisions API and numeric probabilities in routeAnswer; there is no string matching (e.g., it checks answer.probabilities and thresholds, not out.toLowerCase().includes()).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The code uses a single choice question (src/review-question.ts) and the README says “One `choice` question defines mutually exclusive labels,” not separate noul questions for spam and abusive.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Thresholds are defined in code next to probability handling: src/reviews.ts has THRESHOLDS = { spam: 0.98, abusive: 0.98, fine: 0.98 } and routeAnswer applies them to answer.probabilities before returning.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

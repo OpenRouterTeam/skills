@@ -1,0 +1,41 @@
+{
+  "id": 6,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:30:30.342Z",
+  "duration_ms": 14344,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 17117,
+    "cached_input_tokens": 7336,
+    "output_tokens": 974,
+    "reasoning_output_tokens": 364
+  },
+  "estimated_cost": 0.0032717199999999992,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this is a bounded approval-gate problem: hard-rule validation plus a probabilistic model for routing obvious versus ambiguous refunds. I’ll keep this at the architecture/design level."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/06/openai_gpt-5.6-luna/skill/r3/workspace/.agents/skills/openrouter-decisions/SKILL.md\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "Use a two-stage gate: deterministic policy first, Decisions API second.\n\n1. Compute hard rules in application code:\n\n```text\nwithin_90_days = purchase_date >= now - 90 days\namount_valid = refund_amount <= order_total\nannual_limit_ok = prior_refunds_this_calendar_year < 2\n```\n\nThese facts should never be delegated to the model. If a rule fails, do not auto-approve. Route to the policy outcome—typically automatic denial with an appeal path, or human review if your policy requires it.\n\n2. For requests that pass, ask a decision model only about judgment-based ambiguity, such as:\n\n- Is this a routine, legitimate refund request?\n- Is there evidence of abuse, fraud, or an exceptional pattern?\n- Is the customer’s stated reason sufficiently clear and consistent with the order context?\n\nUse independent `noul` questions rather than asking the model to calculate amounts, dates, or counts.\n\n3. Gate the result in code:\n\n```text\nif any_hard_rule_fails:\n    deny_or_review\nelse if legitimate_probability >= APPROVE_THRESHOLD\n        and abuse_probability <= ABUSE_THRESHOLD:\n    auto_approve\nelse:\n    human_review\n```\n\nStart conservatively. Since approval errors may be more costly than unnecessary review, optimize for high precision on auto-approval, not maximum queue reduction. Set thresholds from a labeled sample of historical refunds, including clear approvals, ambiguous cases, denials, edge cases, and adversarial customer text.\n\nThe request state should contain only judgment-relevant fields: refund reason, order/item context, customer history signals, and relevant fraud indicators. Keep computed rule results and all enforcement logic in code. Log the pinned model version, raw probabilities, thresholds, final route, and eventual human decision so you can measure false approvals, review rate, and queue reduction.\n\nA sensible rollout is shadow mode first, then a small percentage of auto-approvals, with automatic rollback if false approvals exceed the agreed safety threshold."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "Use a two-stage gate: deterministic policy first, Decisions API second.\n\n1. Compute hard rules in application code:\n\n```text\nwithin_90_days = purchase_date >= now - 90 days\namount_valid = refund_amount <= order_total\nannual_limit_ok = prior_refunds_this_calendar_year < 2\n```\n\nThese facts should never be delegated to the model. If a rule fails, do not auto-approve. Route to the policy outcome—typically automatic denial with an appeal path, or human review if your policy requires it.\n\n2. For requests that pass, ask a decision model only about judgment-based ambiguity, such as:\n\n- Is this a routine, legitimate refund request?\n- Is there evidence of abuse, fraud, or an exceptional pattern?\n- Is the customer’s stated reason sufficiently clear and consistent with the order context?\n\nUse independent `noul` questions rather than asking the model to calculate amounts, dates, or counts.\n\n3. Gate the result in code:\n\n```text\nif any_hard_rule_fails:\n    deny_or_review\nelse if legitimate_probability >= APPROVE_THRESHOLD\n        and abuse_probability <= ABUSE_THRESHOLD:\n    auto_approve\nelse:\n    human_review\n```\n\nStart conservatively. Since approval errors may be more costly than unnecessary review, optimize for high precision on auto-approval, not maximum queue reduction. Set thresholds from a labeled sample of historical refunds, including clear approvals, ambiguous cases, denials, edge cases, and adversarial customer text.\n\nThe request state should contain only judgment-relevant fields: refund reason, order/item context, customer history signals, and relevant fraud indicators. Keep computed rule results and all enforcement logic in code. Log the pinned model version, raw probabilities, thresholds, final route, and eventual human decision so you can measure false approvals, review rate, and queue reduction.\n\nA sensible rollout is shadow mode first, then a small percentage of auto-approvals, with automatic rollback if false approvals exceed the agreed safety threshold.",
+  "produced_files": []
+}

@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.04299375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "incident_urgency.py defines a Score question with ordered levels: \"questions\": {\"urgency\": {\"type\": \"score\", \"criteria\": list(URGENCY_LEVELS)}}; tests confirm type == 'score' and 5 criteria.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The sortable value is computed in code from the model’s score/probabilities: urgency = math.floor(raw_score + 0.5) + 1 and score = raw_score + 1, with expected_score = sum((level - 1) * p ...) validating probabilities.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Report and service are separate state fields in the request: \"state\": {\"report\": report, \"service\": service}, and the test asserts body['state'] == {'report': report, 'service': 'checkout'}.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

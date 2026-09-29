@@ -1,0 +1,50 @@
+{
+  "id": 5,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:30:11.438Z",
+  "duration_ms": 12834,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 36377,
+    "cached_input_tokens": 22740,
+    "output_tokens": 414,
+    "reasoning_output_tokens": 35
+  },
+  "estimated_cost": 0.17981,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll use the openrouter-decisions skill to distinguish judgment-based candidates from deterministic business rules, and check the listed files if they’re available."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg --files -g 'AGENTS.md' -g 'triage.ts' -g 'tax.ts' -g 'dedupe.ts' -g 'approvals.ts' -g 'permissions.ts'\"\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decision-model-limits.md'\n<output>\n# Decision model limits and the code-side pattern for each\n\nA decision model maps state and a question to a probability distribution over a fixed answer set, so it has no scratchpad for arithmetic, no loop for counting, and no output channel for text. Treat every row as the default for any decision model until your own probe of that model shows otherwise, and reprobe when you change models. The rows were verified on Jev 1.13 (https://docs.typesafe.ai/model-jaggedness/jev-1.13.md); a vendor's own limits page for another model, when it publishes one, is the place to check for additions.\n\n| Limit | What goes wrong | Do instead |\n| --- | --- | --- |\n| Literal reading | Loose wording such as \"is this about billing\" matches broadly. Presence questions (\"does it mention\", \"does it contain\") ignore negation and read true for \"No breaking changes\". Questions about what the text \"states\" or \"says\" suppress inference the other way and read low when the fact is plain but not spelled out. | Ask about the fact with the exact condition, as a property of the thing judged, and let the model infer it from the state. |\n| Math and numbers | Cannot add, compare magnitudes, or judge closeness of numeric values such as hex colors, RGB triples, or amounts. Semantic forms beat numeric ones. | Compute in code, then pass the result or a named bucket (`over_limit: true`, `color_name: \"red\"`). |\n| Score used as a number | The `score` expectation is not calibrated between levels. Interpolating a magnitude from it is unreliable. | Use `score` to pick a level or pass a threshold. Never reconstruct a quantity from it. |\n| Counting | Cannot count items or occurrences reliably. | Ask one `noul` per item (`Is items[3] a fruit?`) and count the yeses in code. |\n| Date and time comparison | Reads dates as text. Which comes first, how far apart, and inside-a-window are unreliable, and worse with mixed formats or relative references. | Extract each date part as a `choice` over its closed set (month, day, y"
+    },
+    {
+      "type": "agent_message",
+      "text": "Based on your descriptions—the files weren’t available locally:\n\n- **triage.ts — candidate.** Ticket routing requires understanding intent; keywords miss paraphrases and context. A decision model could choose a destination, with ambiguous cases deferred.\n- **dedupe.ts — candidate.** Token overlap measures shared wording, not whether tickets describe the same underlying issue. A decision model could assess duplicate likelihood for retrieved open tickets; code would apply the flagging threshold.\n- **approvals.ts — conditional candidate.** Routine refund judgments could be automated where policy permits. Keep amount comparisons in code and retain human review for uncertain cases. If human approval above $50 is mandatory policy, the model must not bypass it.\n\n**Not candidates:** `tax.ts` is a deterministic VAT lookup; `auth/permissions.ts` is an explicit authorization mapping. Both belong in code."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md"
+  ],
+  "read_skill": true,
+  "final_message": "Based on your descriptions—the files weren’t available locally:\n\n- **triage.ts — candidate.** Ticket routing requires understanding intent; keywords miss paraphrases and context. A decision model could choose a destination, with ambiguous cases deferred.\n- **dedupe.ts — candidate.** Token overlap measures shared wording, not whether tickets describe the same underlying issue. A decision model could assess duplicate likelihood for retrieved open tickets; code would apply the flagging threshold.\n- **approvals.ts — conditional candidate.** Routine refund judgments could be automated where policy permits. Keep amount comparisons in code and retain human review for uncertain cases. If human approval above $50 is mandatory policy, the model must not bypass it.\n\n**Not candidates:** `tax.ts` is a deterministic VAT lookup; `auth/permissions.ts` is an explicit authorization mapping. Both belong in code.",
+  "produced_files": []
+}

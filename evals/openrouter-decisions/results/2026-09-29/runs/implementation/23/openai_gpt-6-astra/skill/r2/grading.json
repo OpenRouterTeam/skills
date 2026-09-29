@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.053585,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "src/subscription.ts computes the anniversary in UTC and returns early if now <= anniversary: setUTCFullYear(+1), Feb 29 adjust, then `if (now <= anniversary) return { moreThanOneYearOld: false, ... }`, so the one-year check is done in code, not by the model.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The Decisions request sends only the reason: `state: { cancellationReason: reason }` (src/subscription.ts), and the test asserts `body.state` equals `{ cancellationReason: \"I'll return\" }` (src/subscription.test.ts), with no dates included.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The question is defined as a noul: `export const RETURN_INTENT_QUESTION: NoulQuestion = { type: \"noul\", instructions: \"Is the customer likely to resume...\" }` and the threshold is in code via `RETURN_INTENT_THRESHOLD = 0.5` and `answer.noul >= RETURN_INTENT_THRESHOLD` (src/subscription.ts); the test checks `result.suggestsReturn === (probability >= 0.5)` (src/subscription.test.ts).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

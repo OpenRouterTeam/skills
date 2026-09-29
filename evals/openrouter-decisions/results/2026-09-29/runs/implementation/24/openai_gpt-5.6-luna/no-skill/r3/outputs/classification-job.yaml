@@ -1,0 +1,34 @@
+# Production classification job. The score is a calibrated probability for
+# the positive class; it must not be treated as the model's raw self-report.
+name: customer-message-routing
+model:
+  # Keep this exact model/provider pair in the lock file; do not let the
+  # router silently substitute a newer model or a fallback provider.
+  id: openai/gpt-4.1-mini
+  provider: openai
+  revision: 2025-04-14
+  allow_fallbacks: false
+  temperature: 0
+  response_format: json_schema
+
+output:
+  schema_version: 1
+  fields:
+    label: [positive, negative]
+    score: probability_positive
+    rationale: string
+
+decision:
+  # These are release-controlled, calibrated thresholds.
+  accept_if: score >= 0.90
+  review_if: 0.60 <= score < 0.90
+  reject_if: score < 0.60
+  on_missing_or_invalid_output: review
+
+release_gate:
+  calibration_set: evals/classification_holdout.jsonl
+  min_accept_precision: 0.98
+  min_positive_recall: 0.95
+  max_expected_calibration_error: 0.05
+  max_review_rate: 0.30
+  confidence_level: 0.95

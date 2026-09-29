@@ -1,0 +1,34 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0464525,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "The agent fetched the live catalog via models.ts and GET: ran '/tmp/.../models.ts classification/request.json --json > classification/catalog.json' and also requested https://openrouter.ai/api/v1/models?output_modalities=decisions; catalog.json lists current models.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "They compared candidates by running decide.ts with --compare across the same probes and saved results in classification/probe-results.json showing model_id entries for upstage/solar-decide, jaredpalmer/kev-4b, and typesafe/jev-1.13 for each case.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "classification/config.json pins a versioned canonical slug in a single value: \"model\": \"typesafe/jev-1.13-20260917\" (not a ~latest alias).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The stored results include the response model string with answers, e.g., pinned-results.json entries have \"model\": \"typesafe/jev-1.13-20260917\" alongside the returned answers.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "They probed thresholds by running real API calls over representative inputs before fixing any cutoff: classification/probe-results.json and pinned-results.json contain probabilities per label, while config.json keeps \"min_selected_probability\": null.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

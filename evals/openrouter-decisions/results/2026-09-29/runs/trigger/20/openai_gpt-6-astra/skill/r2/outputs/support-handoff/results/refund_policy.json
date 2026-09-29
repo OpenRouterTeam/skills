@@ -1,0 +1,62 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 554,
+    "usage": {
+      "input_tokens": 705,
+      "output_tokens": 1,
+      "cost": 0.00003525
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.213332
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 912,
+    "usage": {
+      "input_tokens": 367,
+      "output_tokens": 23,
+      "cost": 0.000015414
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.4148
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 152,
+    "usage": {
+      "input_tokens": 685,
+      "output_tokens": 22,
+      "cost": 0.00002877
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.12
+      }
+    }
+  }
+]

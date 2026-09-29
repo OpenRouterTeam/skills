@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02241,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "In subscription/subscription.py, the code computes age = reference_date - start_date and is_old = age.days > 365, performing the one-year check in code.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No model is invoked; the function only does in-code keyword checks on cancellation_reason (words & RETURN_SIGNALS/NEGATIVE_SIGNALS), so there is no evidence of a model receiving only the reason.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The implementation uses rule-based keyword matching and does not pose a noul question to a model; while the >365 threshold is in code, no noul is used.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 3
+}

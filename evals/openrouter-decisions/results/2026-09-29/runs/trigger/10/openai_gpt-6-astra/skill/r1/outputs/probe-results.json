@@ -1,0 +1,146 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 902,
+    "usage": {
+      "input_tokens": 6472,
+      "output_tokens": 8,
+      "cost": 0.0003236
+    },
+    "answers": {
+      "candidate_0": {
+        "type": "noul",
+        "noul": 0.537088
+      },
+      "candidate_1": {
+        "type": "noul",
+        "noul": 0.7877
+      },
+      "candidate_2": {
+        "type": "noul",
+        "noul": 0.190603
+      },
+      "candidate_3": {
+        "type": "noul",
+        "noul": 0.06221
+      },
+      "candidate_4": {
+        "type": "noul",
+        "noul": 0.206627
+      },
+      "candidate_5": {
+        "type": "noul",
+        "noul": 0.160068
+      },
+      "candidate_6": {
+        "type": "noul",
+        "noul": 0.503635
+      },
+      "candidate_7": {
+        "type": "noul",
+        "noul": 0.277115
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 609,
+    "usage": {
+      "input_tokens": 1689,
+      "output_tokens": 191,
+      "cost": 0.000070938
+    },
+    "answers": {
+      "candidate_0": {
+        "type": "noul",
+        "noul": 0.9519
+      },
+      "candidate_1": {
+        "type": "noul",
+        "noul": 0.9577
+      },
+      "candidate_2": {
+        "type": "noul",
+        "noul": 0.0842
+      },
+      "candidate_3": {
+        "type": "noul",
+        "noul": 0.1235
+      },
+      "candidate_4": {
+        "type": "noul",
+        "noul": 0.6522
+      },
+      "candidate_5": {
+        "type": "noul",
+        "noul": 0.794
+      },
+      "candidate_6": {
+        "type": "noul",
+        "noul": 0.1384
+      },
+      "candidate_7": {
+        "type": "noul",
+        "noul": 0.8771
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 170,
+    "usage": {
+      "input_tokens": 2166,
+      "output_tokens": 148,
+      "cost": 0.000090972
+    },
+    "answers": {
+      "candidate_0": {
+        "type": "noul",
+        "noul": 0.99
+      },
+      "candidate_1": {
+        "type": "noul",
+        "noul": 0.98
+      },
+      "candidate_2": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "candidate_3": {
+        "type": "noul",
+        "noul": 0.01
+      },
+      "candidate_4": {
+        "type": "noul",
+        "noul": 0.22
+      },
+      "candidate_5": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "candidate_6": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "candidate_7": {
+        "type": "noul",
+        "noul": 0.28
+      }
+    }
+  }
+]

@@ -1,0 +1,167 @@
+{
+  "id": 22,
+  "kind": "implementation",
+  "category": "implementation",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:50:22.522Z",
+  "duration_ms": 185315,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 301221,
+    "cached_input_tokens": 266316,
+    "output_tokens": 5793,
+    "reasoning_output_tokens": 439
+  },
+  "estimated_cost": 0.905016,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll inspect the auto-merge workflow and use the OpenRouter decisions skill to add the gate and show its decision question."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd && rg --files -g 'AGENTS.md' -g '\"'!node_modules'\"' -g '\"'!vendor'\"' -g '\"'!package-lock.json'\"' -g '\"'!pnpm-lock.yaml'\"' -g '\"'!yarn.lock'\"' -g '\"'!'\"\\\\.git'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decisions-api.md .agents/skills/openrouter-decisions/references/models.md .agents/skills/openrouter-decisions/references/decision-model-limits.md'\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"ls -la && rg --files --hidden -g '\"'!.git/**'\"' -g '\"'!.agents/**'\"' -g '\"'!node_modules/**'\"'\"\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:50 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:50 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:50 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:50 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:50 .git\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/scripts/lib.ts && cat .agents/skills/openrouter-decisions/scripts/package.json'\n<output>\nimport { OpenRouter } from \"@openrouter/sdk\";\n\nexport const DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\";\nexport const SDK_SERVER_URL = \"https://openrouter.ai\";\nexport const MODELS_URL = \"https://openrouter.ai/api/v1/models?output_modalities=decisions\";\n\nexport function withModel(raw: unknown, flag: string | undefined): unknown {\n  if (!isRecord(raw)) return raw;\n  if (flag !== undefined) return { ...raw, model: flag };\n  if (\"model\" in raw) return raw;\n  const fromEnv = process.env.DECISION_MODEL;\n  return fromEnv === undefined ? raw : { ...raw, model: fromEnv };\n}\n\nexport type DecisionModel = {\n  id: string;\n  name: string;\n  buildSlug: string;\n  aliasTarget?: string;\n  createdAt: Date;\n  contextLength: number;\n  promptPricePerToken: number;\n  completionPricePerToken: number;\n  description: string;\n  endpointsUrl: string;\n};\n\nexport type ModelEndpoint = {\n  providerName: string;\n  contextLength: number;\n  maxPromptTokens?: number;\n  quantization?: string;\n  uptimeLast30m?: number;\n};\n\nexport async function listDecisionModels(): Promise<DecisionModel[]> {\n  const res = await fetch(MODELS_URL);\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Models API ${res.status}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !Array.isArray(raw.data)) throw new Error(\"Models API response has no data array\");\n  return raw.data.filter(isDecisionsEntry).map(parseModel);\n}\n\nexport async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {\n  const apiKey = process.env.OPENROUTER_API_KEY;\n  const res = await fetch(model.endpointsUrl, {\n    headers: apiKey === undefined ? {} : { Authorization: `Bearer ${apiKey}` },\n  });\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {\n    throw new Error(`Endpoints API response"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'node --version && npm --version && if [ -n \"$OPENROUTER_API_KEY\" ]; then echo OPENROUTER_API_KEY_is_set; else echo OPENROUTER_API_KEY_is_unset; fi'\n<output>\nv24.17.0\n11.13.0\nOPENROUTER_API_KEY_is_set\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short && curl --max-time 25 -fsS 'https://openrouter.ai/api/v1/models?output_modalities=decisions'\"\n<output>\n{\"data\":[{\"id\":\"upstage/solar-decide\",\"canonical_slug\":\"upstage/solar-decide-20260928\",\"hugging_face_id\":null,\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"context_length\":524288,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\"},\"top_provider\":{\"context_length\":524288,\"max_completion_tokens\":471859,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/upstage/solar-decide-20260928/endpoints\"}},{\"id\":\"respan/span-01\",\"canonical_slug\":\"respan/span-01-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01\",\"created\":1790387550,\"description\":\"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\"context_length\":0,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000002\",\"completion\":\"0\"},\"top_provider\":{\"context_length\":0,\"max_completion_tokens\":0,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/respan/span-01-20260925/endpoints\"}},{\"id\":\"respan/span-01-lite\",\"canonical_slug\":\"respan/span-01-lite-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01 Lite\",\"created\":1790387542,\"description\":\"Span-01 Lite is the free, lighter tier of Span-"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no existing auto-merge workflow, so I’ll add a standalone gate that can run before the merge step. The question will ask whether the change is breaking, using the PR description as evidence; “No breaking changes” should pass. I’ll test negated, ambiguous, and adversarial descriptions against the available models."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'mkdir -p src scripts test && cp .agents/skills/openrouter-decisions/scripts/lib.ts src/decisions.ts && cp .agents/skills/openrouter-decisions/scripts/decide.ts scripts/decide.ts && cp .agents/skills/openrouter-decisions/scripts/lib.ts scripts/lib.ts && cat .agents/skills/openrouter-decisions/scripts/decide.ts'\n<output>\n#!/usr/bin/env -S npx tsx\n/**\n * Send one Decisions request and print the typed answers.\n *\n * Usage:\n *   npx tsx decide.ts request.json --model <model-id>   # raw HTTP to /api/alpha/decisions\n *   npx tsx decide.ts request.json --sdk                # through @openrouter/sdk\n *   npx tsx decide.ts request.json --compare            # same request to every pinned model in the catalog\n *   cat request.json | npx tsx decide.ts -              # read the request from stdin\n *\n * request.json: { \"state\": ..., \"questions\": { ... } } plus an optional \"model\".\n * Model precedence: --model, then request.model, then DECISION_MODEL. --compare ignores all three.\n */\nimport { readFileSync } from \"node:fs\";\nimport {\n  decide,\n  listDecisionModels,\n  parseRequest,\n  parseRequestBody,\n  requireApiKey,\n  withModel,\n  type DecisionsRequestBody,\n  type DecisionsResponse,\n  type Transport,\n} from \"./lib.ts\";\n\ntype ComparisonRow =\n  | {\n      model_id: string;\n      model: string;\n      latency_ms: number;\n      usage: DecisionsResponse[\"usage\"];\n      answers: DecisionsResponse[\"answers\"];\n    }\n  | { model_id: string; error: string };\n\nconst args = process.argv.slice(2);\nconst transport: Transport = args.includes(\"--sdk\") ? \"sdk\" : \"http\";\nconst compare = args.includes(\"--compare\");\nconst modelFlagIndex = args.indexOf(\"--model\");\nconst modelValueIndex = modelFlagIndex === -1 ? -1 : modelFlagIndex + 1;\nconst modelFlag = modelValueIndex === -1 ? undefined : args[modelValueIndex];\nconst source = args.find((a, i) => !a.startsWith(\"--\") && i !== modelValueIndex);\n\nif (\n  !source ||\n  (modelFlagIndex !== -1 && (!modelFlag || modelFlag.startsWith(\"--\"))) ||\n  (compare && modelFlagIndex !== -1)\n) {\n  console.error(\"Usage: npx tsx decide.ts <request.json | -> [--sdk] [--model <model-id> | --compare]\");\n  process.exit(1);\n}\n\nconst rawText = source === \"-\" ? readFileSync(0, \"utf8\") : readFileSync(source, \"utf8\");\nconst raw: unknown = JSON.parse(rawText);\nconst apiKey = requireApiKey();\n\nif (compa"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/scripts/probe.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/src/question.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"printf \\\"export * from '../src/decisions.ts';\\\\n\\\" > scripts/lib.ts\nnpm install\"\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --cache /tmp/pr-gate-npm-cache'\n<output>\n\nadded 5 packages, and audited 6 packages in 1s\n\n1 package is looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nnpm notice\nnpm notice New major version of npm available! 11.13.0 -> 12.1.0\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0\nnpm notice To update run: npm install -g npm@12.1.0\nnpm notice\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --max-time 20 -fsS 'https://openrouter.ai/api/v1/models/typesafe/jev-1.13-20260917/endpoints'\"\n<output>\n{\"data\":{\"id\":\"typesafe/jev-1.13\",\"name\":\"TypeSafe: Jev 1.13\",\"created\":1789689684,\"description\":\"Jev is a structured decision model from TypeSafe, and the first of its System One models. System One models make fast, structured decisions for software, returning a typed choice rather...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"TypeSafe | typesafe/jev-1.13-20260917\",\"model_id\":\"typesafe/jev-1.13\",\"model_name\":\"TypeSafe: Jev 1.13\",\"context_length\":32000,\"pricing\":{\"prompt\":\"0.000000042\",\"completion\":\"0\",\"discount\":0},\"provider_name\":\"TypeSafe\",\"tag\":\"typesafe\",\"quantization\":\"unknown\",\"max_completion_tokens\":28800,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":100,\"uptime_last_1d\":100,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --max-time 20 -fsS 'https://openrouter.ai/api/v1/models/jaredpalmer/kev-4b-20260924/endpoints' && curl --max-time 20 -fsS 'https://openrouter.ai/api/v1/models/upstage/solar-decide-20260928/endpoints'\"\n<output>\n{\"data\":{\"id\":\"upstage/solar-decide\",\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"Upstage | upstage/solar-decide-20260928\",\"model_id\":\"upstage/solar-decide\",\"model_name\":\"Upstage: Solar Decide\",\"context_length\":524288,\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\",\"discount\":0.5},\"provider_name\":\"Upstage\",\"tag\":\"upstage/zdr\",\"quantization\":\"unknown\",\"max_completion_tokens\":471859,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":null,\"uptime_last_1d\":99.91313503553567,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null},{\"name\":\"Upstage | upstage/solar-decide-20260928\",\"model_id\":\"upstage/solar-decide\",\"model_name\":\"Upstage: Solar Decide\",\"context_length\":524288,\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\",\"discount\":0.5},\"provider_name\":\"Upstage\",\"tag\":\"upstage\",\"quantization\":\"unknown\",\"max_completion_tokens\":471859,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":null,\"uptime_last_1d\":99.89917366240711,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python3 - <<'PY'\nimport glob,json\nfor f in sorted(glob.glob('probes/*.result.json')):\n print(f)\n for r in json.load(open(f)):\n  print(r['model_id'],r.get('answers',r.get('error')),r.get('latency_ms'),r.get('usage',{}).get('cost'))\nPY\"\n<output>\nprobes/ambiguous.result.json\nupstage/solar-decide {'is_breaking': {'type': 'noul', 'noul': 0.053718}} 711 2.59e-05\nrespan/span-01 Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}} None None\nrespan/span-01-lite Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}} None None\nrespan/span-01-lite:free Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}} None None\njaredpalmer/kev-4b {'is_breaking': {'type': 'noul', 'noul': 0.7736}} 538 6.594e-06\ntypesafe/jev-1.13 {'is_breaking': {'type': 'noul', 'noul': 0.51}} 143 1.8354e-05\nprobes/breaking.result.json\nupstage/solar-decide {'is_breaking': {'type': 'noul', 'noul': 0.988983}} 546 2.62e-05\nrespan/span-01 Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}} None None\nrespan/span-01-lite Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}} None None\nrespan/span-01-lite:free Decisions API 400: {\"error\":{\"message\":\"Respan state must be a"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe > /tmp/pr-gate-probe.log 2>&1'\n<output>\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/src/cli.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/src/decisions.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/src/gate.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/test/gate.test.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm test'\n<output>\n✔ gate uses Decisions HTTP request and blocks at threshold (14.657336ms)\n✔ missing or oversized input and missing credentials skip the model (0.139252ms)\n✔ malformed responses, model drift and API errors cannot enable auto-merge (1.889985ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 832.580792\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python3 - <<'PY'\nimport glob,json\nfor f in sorted(glob.glob('probes/*.result.json')):\n print(f,[(r['model_id'],r.get('answers',{}).get('is_breaking',{}).get('noul')) for r in json.load(open(f)) if 'answers' in r])\nPY\"\n<output>\nprobes/adversarial.result.json [('upstage/solar-decide', 0.958559), ('jaredpalmer/kev-4b', 0.9337), ('typesafe/jev-1.13', 0.96)]\nprobes/ambiguous.result.json [('upstage/solar-decide', 0.053718), ('jaredpalmer/kev-4b', 0.7736), ('typesafe/jev-1.13', 0.51)]\nprobes/breaking.result.json [('upstage/solar-decide', 0.988983), ('jaredpalmer/kev-4b', 0.9557), ('typesafe/jev-1.13', 0.97)]\nprobes/compatible.result.json [('upstage/solar-decide', 0.028819), ('jaredpalmer/kev-4b', 0.0243), ('typesafe/jev-1.13', 0.03)]\nprobes/empty.result.json [('upstage/solar-decide', 0.045967), ('jaredpalmer/kev-4b', 0.3521), ('typesafe/jev-1.13', 0.14)]\nprobes/implicit.result.json [('upstage/solar-decide', 0.979949), ('jaredpalmer/kev-4b', 0.9182), ('typesafe/jev-1.13', 0.96)]\nprobes/negated.result.json [('upstage/solar-decide', 0.042099), ('jaredpalmer/kev-4b', 0.0219), ('typesafe/jev-1.13', 0.02)]\nprobes/no_match.result.json [('upstage/solar-decide', 0.064611), ('jaredpalmer/kev-4b', 0.135), ('typesafe/jev-1.13', 0.03)]\nprobes/off_topic.result.json [('upstage/solar-decide', 0.024179), ('jaredpalmer/kev-4b', 0.2098), ('typesafe/jev-1.13', 0.02)]\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The selected model scored “No breaking changes” at 0.02, explicit and implicit breaking changes at 0.97 and 0.96, and the adversarial breaking example at 0.96. The gate blocks at 0.5 and also blocks on missing descriptions or API failures. Local tests pass; I’m checking the pinned model through the command-line gate and documenting how to connect it to auto-merge."
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/22/openai_gpt-6-astra/skill/r1/workspace/README.md"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git diff --check && git status --short'\n<output>\n?? .gitignore\n?? README.md\n?? package-lock.json\n?? package.json\n?? probes/\n?? scripts/\n?? src/\n?? test/\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"printf '%s' 'No breaking changes. This fixes a typo in the documentation.' | npm run --silent gate\"\n<output>\n{\"allowAutoMerge\":true,\"reason\":\"no_breaking_evidence\",\"model\":\"typesafe/jev-1.13-20260917\",\"probabilityBreaking\":0.03}\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"printf '%s' 'BREAKING: Remove the v1 API. Existing integrations must migrate to v2.' | npm run --silent gate\"\n<output>\n{\"allowAutoMerge\":false,\"reason\":\"breaking\",\"model\":\"typesafe/jev-1.13-20260917\",\"probabilityBreaking\":0.97}\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Added a standalone decision-model gate. It blocks auto-merge when `P(breaking) >= 0.5`, or when input/API validation fails.\n\nThe question sent is:\n\n> Is this change breaking for existing users? Use only `pr.description` as evidence about the change.\n\nThe full criteria distinguish incompatibility from “No breaking changes” and template headings.\n\nVerified with nine live probe cases and passing local tests.\n\nNo merge workflow existed here. Run the gate before your merge step:\n\n```sh\nnpm run --silent gate < pr-description.txt\n```\n\nExit `0` permits continuation; exit `1` blocks. See [README.md](README.md) for integration details."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Added a standalone decision-model gate. It blocks auto-merge when `P(breaking) >= 0.5`, or when input/API validation fails.\n\nThe question sent is:\n\n> Is this change breaking for existing users? Use only `pr.description` as evidence about the change.\n\nThe full criteria distinguish incompatibility from “No breaking changes” and template headings.\n\nVerified with nine live probe cases and passing local tests.\n\nNo merge workflow existed here. Run the gate before your merge step:\n\n```sh\nnpm run --silent gate < pr-description.txt\n```\n\nExit `0` permits continuation; exit `1` blocks. See [README.md](README.md) for integration details.",
+  "produced_files": [
+    ".gitignore",
+    "README.md",
+    "package-lock.json",
+    "package.json",
+    "probes/adversarial.request.json",
+    "probes/adversarial.result.json",
+    "probes/ambiguous.request.json",
+    "probes/ambiguous.result.json",
+    "probes/breaking.request.json",
+    "probes/breaking.result.json",
+    "probes/compatible.request.json",
+    "probes/compatible.result.json",
+    "probes/empty.request.json",
+    "probes/empty.result.json",
+    "probes/implicit.request.json",
+    "probes/implicit.result.json",
+    "probes/negated.request.json",
+    "probes/negated.result.json",
+    "probes/no_match.request.json",
+    "probes/no_match.result.json",
+    "probes/off_topic.request.json",
+    "probes/off_topic.result.json",
+    "scripts/decide.ts",
+    "scripts/lib.ts",
+    "scripts/probe.ts",
+    "src/cli.ts",
+    "src/decisions.ts",
+    "src/gate.ts",
+    "src/question.ts",
+    "test/gate.test.ts"
+  ]
+}

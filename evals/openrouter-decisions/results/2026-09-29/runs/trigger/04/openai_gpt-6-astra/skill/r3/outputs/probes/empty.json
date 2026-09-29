@@ -1,0 +1,5 @@
+{
+  "review": "",
+  "expected": "reject-in-code",
+  "action": "reject-in-code; no model call"
+}

@@ -1,0 +1,105 @@
+{
+  "id": 20,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:41:38.525Z",
+  "duration_ms": 55807,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 241726,
+    "cached_input_tokens": 218614,
+    "output_tokens": 5022,
+    "reasoning_output_tokens": 1527
+  },
+  "estimated_cost": 0.01502108,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this is a routing/classification decision currently implemented as a generative yes/no prompt. I’ll inspect the existing handoff path, then replace it with a probability-based decision and verify the behavior."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n--- workspace ---\\\\n' && rg --files -g '\"'!*.lock'\"' -g '\"'!node_modules'\"' . | head -200\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd; rg --files -a -g '\"'!*.lock'\"' -g '\"'!node_modules'\"' .; find . -maxdepth 3 -type f -print\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace\n./.git/hooks/pre-rebase.sample\n./.git/hooks/commit-msg.sample\n./.git/hooks/post-update.sample\n./.git/hooks/pre-commit.sample\n./.git/hooks/pre-merge-commit.sample\n./.git/hooks/push-to-checkout.sample\n./.git/hooks/update.sample\n./.git/hooks/pre-receive.sample\n./.git/hooks/pre-applypatch.sample\n./.git/hooks/applypatch-msg.sample\n./.git/hooks/pre-push.sample\n./.git/hooks/fsmonitor-watchman.sample\n./.git/hooks/prepare-commit-msg.sample\n./.git/COMMIT_EDITMSG\n./.git/info/exclude\n./.git/HEAD\n./.git/logs/HEAD\n./.git/description\n./.git/config\n./.git/index\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git status --short; git log --oneline -5; git ls-tree -r HEAD'\n<output>\n22a40ce baseline\n100644 blob d58107b10c7ca5103fb539c3b748f428c465561e\t.agents/skills/openrouter-decisions/README.md\n100644 blob ab6a60541b0b60e112e96b9fb9ba0458fed8a417\t.agents/skills/openrouter-decisions/SKILL.md\n100644 blob cd513c9804899c7f7d2bbe2a0e4cf8ba2421a86a\t.agents/skills/openrouter-decisions/agents/openai.yaml\n100644 blob a4946b5cabeb9bcad30bcb3a5872ed66f79a8dab\t.agents/skills/openrouter-decisions/references/decision-model-limits.md\n100644 blob 5958d611367222b38b400aabcb7c0764ae404bce\t.agents/skills/openrouter-decisions/references/decisions-api.md\n100644 blob 88231fe0cf75b1df9fbb9a5f32889d699afdce62\t.agents/skills/openrouter-decisions/references/models.md\n100644 blob 62e2d5dc6aa4227266e7e87a07cd89b76b68765c\t.agents/skills/openrouter-decisions/scripts/decide.ts\n100644 blob d29746111653596cc44b6833c901eaa178781caf\t.agents/skills/openrouter-decisions/scripts/lib.ts\n100644 blob 18686c6dbdb116a8f36a50a4cb66ca11edada64a\t.agents/skills/openrouter-decisions/scripts/models.ts\n100644 blob 0a5bddf55f2090507ccc7ca2196acc24adc0e5b1\t.agents/skills/openrouter-decisions/scripts/package-lock.json\n100644 blob 159ffb1d41797ba89cbb362d74016f32bf1826f0\t.agents/skills/openrouter-decisions/scripts/package.json\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' .agents/skills/openrouter-decisions/README.md; sed -n '1,260p' .agents/skills/openrouter-decisions/references/decisions-api.md; sed -n '1,220p' .agents/skills/openrouter-decisions/scripts/lib.ts\"\n<output>\n# openrouter-decisions\n\nFind where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.\n\n## Install\n\nWith the [GitHub CLI](https://cli.github.com/) (v2.90.0+):\n\n```bash\ngh skill install OpenRouterTeam/skills openrouter-decisions\n```\n\nWorks with Claude Code, Cursor, Codex, OpenCode, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install). Add `--scope user` to install across every project for your current agent, or `--agent claude-code` to target a specific agent.\n\nFor other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) see the [root README](../../README.md#installing).\n\n## Prerequisites\n\n`OPENROUTER_API_KEY` must be set to any valid OpenRouter API key. Get one at [openrouter.ai/keys](https://openrouter.ai/keys). Reading the skill needs no key.\n\n## What it covers\n\n[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.\n\n## Scripts\n\n```bash\ncd scripts && npm install\nnpx tsx models.ts request.js"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace contains only the decision skill and no support-bot application or existing handoff code, so there is nothing to patch in place. I’m checking the skill’s model/API guidance and repository history to confirm this is not a hidden or ignored app before adding the smallest reusable handoff implementation."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short --untracked-files=all; git branch -a; sed -n '1,220p' .agents/skills/openrouter-decisions/references/models.md; sed -n '1,180p' .agents/skills/openrouter-decisions/scripts/package.json\"\n<output>\n* master\n# Choosing a decision model on OpenRouter\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, so an integration written against one runs against any other with a config change. What differs is in the catalog (context length, price, providers, release date) or only shows up when you probe (how a model answers your questions, its latency, how spread its probabilities are). This page is the criteria. The catalog is the inventory, and it changes without this page changing.\n\n## Read the live catalog\n\n```bash\nnpx tsx scripts/models.ts request.json      # table with fit for this request\nnpx tsx scripts/models.ts --json            # every field below\ncurl -s \"https://openrouter.ai/api/v1/models?output_modalities=decisions\"\n```\n\nOnly entries whose `architecture.output_modalities` contains `decisions` accept `POST /api/alpha/decisions`. Per entry:\n\n| Field | Use |\n| --- | --- |\n| `id` | The model ID a request sends. A leading `~` marks an alias. |\n| `alias_target.slug` | Set on aliases only. The pinned model the alias currently resolves to. |\n| `canonical_slug` | The dated build behind the ID, such as `vendor/model-1.2-20260917`. Requests accept it, and the response `model` field returns it. |\n| `context_length` | Tokens of state plus questions the model reads. |\n| `pricing.prompt`, `pricing.completion` | USD per token as strings. Multiply by 1,000,000 for the per-million figure. |\n| `created` | Unix seconds of the release. |\n| `description` | The vendor's account of what the model is trained for and built on. Read it, do not trust it over a probe. |\n| `links.details` | Path of the endpoints listing: provider names, per-provider context length, quantization, and recent uptime. |\n\n## Criteria, in order\n\n1. **Pinned, not aliased.** Production config holds a `canonical_slug` or a versioned `id`, never an alias, because an alias moves to a new build and the thresholds you set in step 8 belong to the build you probed. Log the r"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -fsSL 'https://openrouter.ai/api/v1/models?output_modalities=decisions' | head -c 12000\"\n<output>\n{\"data\":[{\"id\":\"upstage/solar-decide\",\"canonical_slug\":\"upstage/solar-decide-20260928\",\"hugging_face_id\":null,\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"context_length\":524288,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\"},\"top_provider\":{\"context_length\":524288,\"max_completion_tokens\":471859,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/upstage/solar-decide-20260928/endpoints\"}},{\"id\":\"respan/span-01\",\"canonical_slug\":\"respan/span-01-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01\",\"created\":1790387550,\"description\":\"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\"context_length\":0,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000002\",\"completion\":\"0\"},\"top_provider\":{\"context_length\":0,\"max_completion_tokens\":0,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/respan/span-01-20260925/endpoints\"}},{\"id\":\"respan/span-01-lite\",\"canonical_slug\":\"respan/span-01-lite-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01 Lite\",\"created\":1790387542,\"description\":\"Span-01 Lite is the free, lighter tier of Span-"
+    },
+    {
+      "type": "agent_message",
+      "text": "There is no existing app to integrate, so I’m adding a small TypeScript handoff module that can be dropped into the bot. It will ask one typed `noul` question, use the returned probability with a named conservative threshold, and fail closed to human review on API/schema errors. I’ll pin the currently served dated model rather than an alias."
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/support-handoff.ts"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/support-handoff.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,260p' support-handoff.ts; git diff --check; git diff --stat\"\n<output>\n/**\n * Human-handoff gate for a support bot.\n *\n * This deliberately uses OpenRouter's Decisions API instead of asking a chat\n * model to emit text that application code has to parse.\n */\n\nconst DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\";\n\n// Keep this pinned to the build used during calibration. Re-probe before\n// changing either this model or the threshold.\nexport const DECISION_MODEL = \"typesafe/jev-1.13-20260917\";\n\n// Escalate only when the model is strongly convinced a human is required.\n// The old implementation escalated on the generated token \"yes\"; this gate\n// leaves uncertain cases with the bot, which is the desired direction here.\nexport const ESCALATION_THRESHOLD = 0.85;\n\nexport type HandoffDecision = {\n  escalate: boolean;\n  probabilityHumanRequired: number;\n  model: string;\n  error?: string;\n};\n\ntype DecisionsResponse = {\n  model?: unknown;\n  answers?: {\n    requires_human?: {\n      type?: unknown;\n      noul?: unknown;\n    };\n  };\n};\n\n/**\n * Return whether the conversation needs a human. API and response failures\n * are escalated conservatively because silently keeping a case with the bot\n * is the riskier failure mode.\n */\nexport async function shouldEscalate(\n  conversation: string,\n  apiKey = process.env.OPENROUTER_API_KEY,\n): Promise<HandoffDecision> {\n  try {\n    if (!apiKey) throw new Error(\"OPENROUTER_API_KEY is required\");\n\n    const response = await fetch(DECISIONS_URL, {\n    method: \"POST\",\n    headers: {\n      Authorization: `Bearer ${apiKey}`,\n      \"Content-Type\": \"application/json\",\n    },\n    body: JSON.stringify({\n      model: DECISION_MODEL,\n      state: { conversation },\n      questions: {\n        requires_human: {\n          type: \"noul\",\n          instructions:\n            \"Does this support conversation require a human agent instead of a normal bot answer?\",\n          criteria: {\n            true:\n              \"The bot cannot safely and completely answer from the conversation, or the issue requires human judgment"
+    },
+    {
+      "type": "agent_message",
+      "text": "The module is in place with a 0.85 escalation gate, typed response validation, pinned model, and fail-closed behavior for outages or malformed responses. I’m doing a final syntax/diff check now; live probability calibration is blocked because this environment has no OpenRouter API key and there was no real escalation dataset in the workspace."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx --yes -p typescript tsc --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict support-handoff.ts'\n<output>\nerror TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'ls -la; npx --yes -p typescript tsc --ignoreConfig --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict support-handoff.ts; git diff --check; git status --short'\n<output>\nsupport-handoff.ts(43,12): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\n?? support-handoff.ts\n"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/support-handoff.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npx --yes -p typescript tsc --ignoreConfig --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext --strict support-handoff.ts; git diff --check; git status --short'\n<output>\n?? support-handoff.ts\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Added [support-handoff.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/support-handoff.ts).\n\nIt now:\n\n- Uses OpenRouter’s typed Decisions API instead of parsing “yes”.\n- Escalates only when `P(human required) >= 0.85`.\n- Pins `typesafe/jev-1.13-20260917`.\n- Validates the response schema.\n- Fails closed to human review on API or parsing errors.\n\nTypeScript validation passes. The workspace had no existing bot implementation or API key, so live threshold calibration remains to be run against your escalation examples."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Added [support-handoff.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r3/workspace/support-handoff.ts).\n\nIt now:\n\n- Uses OpenRouter’s typed Decisions API instead of parsing “yes”.\n- Escalates only when `P(human required) >= 0.85`.\n- Pins `typesafe/jev-1.13-20260917`.\n- Validates the response schema.\n- Fails closed to human review on API or parsing errors.\n\nTypeScript validation passes. The workspace had no existing bot implementation or API key, so live threshold calibration remains to be run against your escalation examples.",
+  "produced_files": [
+    "support-handoff.ts"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "judge": null,
+  "judge_cost": 0,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    }
+  ],
+  "passed": 1,
+  "total": 1
+}

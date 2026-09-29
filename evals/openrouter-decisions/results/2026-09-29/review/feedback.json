@@ -1,0 +1,1433 @@
+[
+  {
+    "pair": "codex-21-openai_gpt-5.6-luna-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-openai_gpt-5.6-luna-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-openai_gpt-5.6-luna-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-openai_gpt-6-astra-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-openai_gpt-6-astra-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-openai_gpt-6-astra-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-z-ai_glm-5.3-flash-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-z-ai_glm-5.3-flash-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-21-z-ai_glm-5.3-flash-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-5.6-luna-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-5.6-luna-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-5.6-luna-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-6-astra-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-6-astra-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-openai_gpt-6-astra-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-z-ai_glm-5.3-flash-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-z-ai_glm-5.3-flash-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-22-z-ai_glm-5.3-flash-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-5.6-luna-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-5.6-luna-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-5.6-luna-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-6-astra-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-6-astra-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-openai_gpt-6-astra-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-z-ai_glm-5.3-flash-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-z-ai_glm-5.3-flash-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-23-z-ai_glm-5.3-flash-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-5.6-luna-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-5.6-luna-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-5.6-luna-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-6-astra-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-6-astra-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-openai_gpt-6-astra-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-z-ai_glm-5.3-flash-r1",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-z-ai_glm-5.3-flash-r2",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "codex-24-z-ai_glm-5.3-flash-r3",
+    "source": "codex",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-kb_suggest-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-leads_route-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-refunds_approve-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-5.6-luna-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-5.6-luna-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-5.6-luna-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-6-astra-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-6-astra-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-openai_gpt-6-astra-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r1",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r2",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  },
+  {
+    "pair": "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r3",
+    "source": "discovery",
+    "reviewer": null,
+    "preference": null,
+    "notes": "",
+    "reviewed_at": null,
+    "arm_labels_visible": false
+  }
+]

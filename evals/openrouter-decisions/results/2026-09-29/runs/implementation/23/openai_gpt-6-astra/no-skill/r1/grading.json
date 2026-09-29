@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.022855,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "subscription.py computes an anniversary date in code and skips the model when not past it: \"anniversary = date(...); if as_of <= anniversary: return SubscriptionAssessment(False, None)\".",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Only the cancellation reason is sent to the model: assess_subscription calls \"model(reason)\" and the test asserts model.assert_called_once_with(\"Taking a break\"); openrouter payload sets messages[1][\"content\"] to the reason.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model question is to classify likely return ('likely'/'unlikely'/'unclear') and is only invoked after the code threshold: system prompt says \"Classify whether a customer's cancellation reason suggests they will return\" and test_anniversary_boundary_skips_model shows the model isn’t called until past one year.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

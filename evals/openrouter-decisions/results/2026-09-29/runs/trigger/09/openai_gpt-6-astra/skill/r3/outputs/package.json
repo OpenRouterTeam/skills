@@ -1,0 +1,11 @@
+{
+  "name": "jev-lead-routing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test lead-routing.test.ts",
+    "probe": "tsx probe.ts"
+  },
+  "dependencies": { "@openrouter/sdk": "^1.3.23" },
+  "devDependencies": { "tsx": "^4.0.0" }
+}

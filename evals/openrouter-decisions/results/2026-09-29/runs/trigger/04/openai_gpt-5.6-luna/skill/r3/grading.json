@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0113925,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The code calls the Decisions API and uses numeric probabilities (const probabilities = answer.probabilities as Record<Label, number>;) with no string .includes() parsing.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "It uses a single choice question (type: \"choice\") with criteria { spam, abusive, fine }, not separate noul questions, so a review cannot be both spam and abusive.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "A threshold constant is defined in code next to where probabilities are handled (const MIN_CONFIDENCE = 0.8; ... return { label: probabilities[label] >= MIN_CONFIDENCE ? label : \"review\", probabilities }).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

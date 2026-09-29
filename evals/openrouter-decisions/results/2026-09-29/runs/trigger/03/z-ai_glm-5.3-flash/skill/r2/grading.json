@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0086475,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan says: \"Replace raw keyword matching with an intent classification step that returns routing probabilities/confidence.\"",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan includes: \"Define decision thresholds: high-confidence intents route automatically; low-confidence cases escalate or send to general support.\"",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

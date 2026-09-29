@@ -1,0 +1,19 @@
+name: Breaking change gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  breaking-change:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Classify PR description
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PR_DESCRIPTION: ${{ github.event.pull_request.body }}
+        run: node pr-breaking-change-gate.mjs

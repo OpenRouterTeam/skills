@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01894125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "The noul question is “Is the proposed software change a breaking change based on `pull_request_description`? Judge the change described, not merely whether the words 'breaking change' appear.” (pr-breaking-change-gate.mjs, lines 14–16).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The code sets and uses a threshold: const BREAKING_THRESHOLD = 0.5; and blocks when probability >= BREAKING_THRESHOLD (pr-breaking-change-gate.mjs, lines 5 and 37–40).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "A probe with “This is explicitly not a breaking change...” produced P=0.040 and passed the gate (command execution output).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

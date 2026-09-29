@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01355625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "“Enforce the hard rules in code… Purchase is within 90 days… Requested amount is at or below the order total… Customer has fewer than two refunds….” and “Keep date calculations, dollar comparisons, and refund counts in code.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "“For that remaining judgment, use OpenRouter’s Decisions API… a ‘noul’ question could ask: ‘Does this refund reason qualify under the refund-reason policy?’… Keep date calculations, dollar comparisons, and refund counts in code.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "“Auto-approve only above a validated threshold; send everything else to humans.” and “Keep the human queue as the fallback.”",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

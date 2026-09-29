@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.04403875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "src/question.ts asks “Is this change breaking? Use only `pr.description` as evidence…”—it evaluates the change itself, not whether the text mentions breaking changes.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "src/gate.ts defines BREAKING_THRESHOLD = 0.5 and passesBreakingGate returns probability < BREAKING_THRESHOLD, i.e., the auto-merge threshold is coded.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "probes/negated.result.json shows typesafe/jev-1.13-20260917 returning 0.04 for “No breaking changes,” and the final message repeats this 0.04 result.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

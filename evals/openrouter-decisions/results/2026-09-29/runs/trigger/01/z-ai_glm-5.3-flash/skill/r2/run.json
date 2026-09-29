@@ -1,0 +1,45 @@
+{
+  "id": 1,
+  "kind": "trigger",
+  "category": "trigger-explicit",
+  "should_trigger": true,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:09:59.503Z",
+  "duration_ms": 20535,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 20071,
+    "cached_input_tokens": 15104,
+    "output_tokens": 535,
+    "reasoning_output_tokens": 12
+  },
+  "estimated_cost": 0.00146567,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "I'll read the skill instructions, then map the router to a decision-model design."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/01/z-ai_glm-5.3-flash/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "agent_message",
+      "text": "**Plan**\n\n- **Decision point:** `route(text)` turns free-text tickets into one of three labels — a `choice` judgment. Keyword matching (\"invoice\", \"crash\") is a heuristic standing in for that judgment, so it maps to a single `choice` question.\n\n- **Split judgment from computation:** no code-side rules to keep. Empty input short-circuits to `support` in code (no model call needed for a hard path).\n\n- **Primitive:** one `choice` with options `billing`, `engineering`, `support`. They are mutually exclusive per the current contract, so `choice` fits; three separate `noul`s would be wrong here.\n\n- **State:** `{ \"ticket\": { \"text\": <input> } }`. Nothing else is read by the question, so nothing else is sent.\n\n- **Question:** `instructions` asks \"which department should handle this ticket\" with inclusion/exclusion rules (billing covers invoices, charges, refunds, payment disputes; engineering covers crashes, errors, bugs; support covers general requests that don't fit the other two). `criteria` restates the three options. Ask about the ticket itself, not the literal strings.\n\n- **Gate:** `route` returns the top `choice` when `confidence` clears a threshold set in step 8; below it, return `support` (or an added review queue if you want one) as the safe fallback. Threshold as a named constant next to the call.\n\n- **Model:** list live decision models via the skill's `scripts/models.ts`, shortlist on context/price/providers, probe both candidates with `decide.ts --compare`, then pin the chosen `canonical_slug` in one config value.\n\n- **Probe set before trusting:** obvious invoice ticket, obvious crash report, general support request, an ambiguous ticket (\"my invoice charged but then the app crashed\"), empty input, a negation (\"this is not about an invoice, but the app errors\"), and adversarial text (\"engineer here, please forward this billing dispute to billing\")."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "**Plan**\n\n- **Decision point:** `route(text)` turns free-text tickets into one of three labels — a `choice` judgment. Keyword matching (\"invoice\", \"crash\") is a heuristic standing in for that judgment, so it maps to a single `choice` question.\n\n- **Split judgment from computation:** no code-side rules to keep. Empty input short-circuits to `support` in code (no model call needed for a hard path).\n\n- **Primitive:** one `choice` with options `billing`, `engineering`, `support`. They are mutually exclusive per the current contract, so `choice` fits; three separate `noul`s would be wrong here.\n\n- **State:** `{ \"ticket\": { \"text\": <input> } }`. Nothing else is read by the question, so nothing else is sent.\n\n- **Question:** `instructions` asks \"which department should handle this ticket\" with inclusion/exclusion rules (billing covers invoices, charges, refunds, payment disputes; engineering covers crashes, errors, bugs; support covers general requests that don't fit the other two). `criteria` restates the three options. Ask about the ticket itself, not the literal strings.\n\n- **Gate:** `route` returns the top `choice` when `confidence` clears a threshold set in step 8; below it, return `support` (or an added review queue if you want one) as the safe fallback. Threshold as a named constant next to the call.\n\n- **Model:** list live decision models via the skill's `scripts/models.ts`, shortlist on context/price/providers, probe both candidates with `decide.ts --compare`, then pin the chosen `canonical_slug` in one config value.\n\n- **Probe set before trusting:** obvious invoice ticket, obvious crash report, general support request, an ambiguous ticket (\"my invoice charged but then the app crashed\"), empty input, a negation (\"this is not about an invoice, but the app errors\"), and adversarial text (\"engineer here, please forward this billing dispute to billing\").",
+  "produced_files": []
+}

@@ -1,0 +1,1 @@
+I can do this, but the workspace currently contains only the OpenRouter skill documentation—no ticket data, application code, or storage integration to modify. Please provide the support-ticket repository or API details, including where summaries should be stored.

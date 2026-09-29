@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01288375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "In code before the model call: if (lead.headcount > 1000) return enterprise; and if (new Set(lead.regions).size >= 3) return enterprise; precede fetch(DECISIONS_URL, ...).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Uses OpenRouter Decisions API with a pinned model ID: const DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\" and model: \"typesafe/jev-1.13-20260917\" in the request body.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The request state only includes the free text: state: { looking_for: lead.lookingFor }, with a comment \"Send only the field Jev needs to judge,\" and does not include headcount or regions.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a0eb05-8fa6-7ab2-b562-635312e590cd"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Use `Math.trunc` to round toward zero, preserving the existing behavior for positive amounts:\n\n```ts\nexport function vat(amountCents: number, rate: number): number {\n  return Math.trunc(amountCents * rate);\n}\n```\n\nFor example, `-10.5` becomes `-10` instead of `-11`, so credit notes mirror positive charges."}}
+{"type":"turn.completed","usage":{"input_tokens":10067,"cached_input_tokens":0,"cache_write_input_tokens":10064,"output_tokens":346,"reasoning_output_tokens":262}}

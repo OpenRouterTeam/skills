@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0466725,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "The question in src/question.ts is “Is this change breaking for existing users? Use only `pr.description` as evidence about the change,” which asks about the change itself, not whether the text mentions breaking changes.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "In src/gate.ts the threshold is coded as `export const BREAKING_THRESHOLD = 0.5` and enforced via `const breaking = answer.noul >= BREAKING_THRESHOLD`.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "probes/negated.result.json shows “No breaking changes…” yielding noul 0.02 (and the CLI run printed probabilityBreaking 0.03), indicating a low probability for that description.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

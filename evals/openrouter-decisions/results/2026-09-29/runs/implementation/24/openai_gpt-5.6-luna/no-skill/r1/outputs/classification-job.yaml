@@ -1,0 +1,45 @@
+apiVersion: decisioning/v1
+kind: ClassificationJob
+metadata:
+  name: new-classification
+spec:
+  # Pin the snapshot; do not replace this with a moving alias at deploy time.
+  model: gpt-5.6-luna
+  endpoint: responses
+  reasoning_effort: low
+  temperature: 0
+  output:
+    type: json_schema
+    schema:
+      type: object
+      additionalProperties: false
+      required: [label, probability, rationale_code]
+      properties:
+        label:
+          type: string
+          enum: [positive, negative]
+        probability:
+          type: number
+          minimum: 0
+          maximum: 1
+        rationale_code:
+          type: string
+          maxLength: 64
+  decision:
+    positive_label: positive
+    thresholds:
+      auto_accept_min_probability: 0.95
+      auto_reject_max_probability: 0.05
+      otherwise: human_review
+  safety:
+    on_invalid_output: human_review
+    on_model_error: human_review
+    max_retries: 1
+  evaluation:
+    validation_dataset: validation/classification_holdout.jsonl
+    required_metrics:
+      positive_precision_at_accept: 0.98
+      negative_precision_at_reject: 0.98
+      minimum_coverage: 0.70
+      maximum_review_rate: 0.30
+      minimum_recall_by_slice: 0.90

@@ -1,0 +1,72 @@
+{
+  "id": 20,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:25:55.263Z",
+  "duration_ms": 17526,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 82644,
+    "cached_input_tokens": 63551,
+    "output_tokens": 2005,
+    "reasoning_output_tokens": 585
+  },
+  "estimated_cost": 0.00749562,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this is a binary escalation gate currently implemented as a prompt-and-parse model call. I’ll inspect the project, locate the handoff logic and tests, then replace the brittle free-form decision with a probability-based threshold while preserving a safe fallback."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n--- files ---\\\\n' && rg --files -g '\"'!node_modules'\"' -g '\"'!dist'\"' | head -200\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd; ls -la; rg --hidden --files -g '\"'!/.git/**'\"' -g '\"'!/.agents/**'\"' -g '\"'!/.codex/**'\"'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r2/workspace\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:26 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:25 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:25 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:26 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:25 .git\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,260p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/references/decisions-api.md && printf '\\\\n--- models ---\\\\n' && sed -n '1,220p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/references/models.md && printf '\\\\n--- limits ---\\\\n' && sed -n '1,220p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/20/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/references/decision-model-limits.md\"\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no visible application files yet, so I’m checking the repository history and tracked tree before making assumptions about the implementation. The skill’s key constraint here is to ask one explicit `noul` judgment (“should this be escalated?”), then let code apply a named threshold and handle uncertain/error cases deterministically."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short; git log --oneline --all -8; git ls-tree -r --name-only HEAD; find . -maxdepth 3 -type f -not -path './.git/*' -print\"\n<output>\n11fecdd baseline\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/package.json\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,260p' .agents/skills/openrouter-decisions/README.md; printf '\\\\n--- lib ---\\\\n'; sed -n '1,280p' .agents/skills/openrouter-decisions/scripts/lib.ts; printf '\\\\n--- decide ---\\\\n'; sed -n '1,260p' .agents/skills/openrouter-decisions/scripts/decide.ts; printf '\\\\n--- package ---\\\\n'; sed -n '1,160p' .agents/skills/openrouter-decisions/scripts/package.json\"\n<output>\n# openrouter-decisions\n\nFind where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.\n\n## Install\n\nWith the [GitHub CLI](https://cli.github.com/) (v2.90.0+):\n\n```bash\ngh skill install OpenRouterTeam/skills openrouter-decisions\n```\n\nWorks with Claude Code, Cursor, Codex, OpenCode, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install). Add `--scope user` to install across every project for your current agent, or `--agent claude-code` to target a specific agent.\n\nFor other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) see the [root README](../../README.md#installing).\n\n## Prerequisites\n\n`OPENROUTER_API_KEY` must be set to any valid OpenRouter API key. Get one at [openrouter.ai/keys](https://openrouter.ai/keys). Reading the skill needs no key.\n\n## What it covers\n\n[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.\n\n## Scripts\n\n```bash\ncd scripts && npm install\nnpx tsx models.ts request.js"
+    },
+    {
+      "type": "agent_message",
+      "text": "There is no support-bot source, handoff prompt, dependency manifest, or test suite in this checkout—only the generic decision skill and its API utilities. I’m doing one final check for ignored/untracked project content and available credentials; without the bot code I can’t safely wire the change into its actual runtime."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"git status --short --untracked-files=all; git branch -a; find . -maxdepth 5 -type f -not -path './.git/*' -not -path './.agents/*' -not -path './.codex/*' -print; if [ -n \\\"\"'${OPENROUTER_API_KEY:-}\" ]; then echo '\"'OPENROUTER_API_KEY=set'; else echo 'OPENROUTER_API_KEY=unset'; fi\"\n<output>\n* master\nOPENROUTER_API_KEY=set\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "I can do this, but the checkout contains no support-bot code—only the generic decision skill—so there’s nowhere to modify the handoff logic.\n\nPlease provide the bot repository or the file containing the escalation prompt/parser. I’ll replace the `yes` substring check with an OpenRouter Decisions `noul`, apply a calibrated escalation-probability threshold, and route uncertain/API-error cases safely to human review."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "I can do this, but the checkout contains no support-bot code—only the generic decision skill—so there’s nowhere to modify the handoff logic.\n\nPlease provide the bot repository or the file containing the escalation prompt/parser. I’ll replace the `yes` substring check with an OpenRouter Decisions `noul`, apply a calibrated escalation-probability threshold, and route uncertain/API-error cases safely to human review.",
+  "produced_files": []
+}

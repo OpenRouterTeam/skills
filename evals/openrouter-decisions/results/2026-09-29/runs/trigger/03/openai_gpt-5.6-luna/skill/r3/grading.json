@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0098525,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Plan says to \"Add a Decisions API classification step\" and \"Ask a single bounded choice question\" and to \"Route based on calibrated probabilities\" rather than parsing free text.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The taxonomy includes a fallback option: \"review: ambiguous or conflicting cases,\" and it routes \"low-confidence or closely competing cases to `review` or a human triage queue.\"",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01657125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "support-handoff.ts asks a 'noul' question and gates in code: type: 'noul' … and escalate: answer.noul >= ESCALATION_THRESHOLD with ESCALATION_THRESHOLD = 0.85; final message: 'Uses OpenRouter’s typed Decisions API instead of parsing “yes”.'",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: 'live threshold calibration remains to be run against your escalation examples,' and code comment: 'Keep this pinned to the build used during calibration. Re-probe before changing either this model or the threshold.'",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

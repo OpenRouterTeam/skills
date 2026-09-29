@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.05691875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "src/guard.ts defines injectionQuestion as a NoulQuestion (type: 'noul') and sets INJECTION_THRESHOLD = 0.5.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "buildRequest(message) places the input in state: { user_message: message } and tests/guard.test.ts asserts body.state equals that, not concatenating it into the question.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

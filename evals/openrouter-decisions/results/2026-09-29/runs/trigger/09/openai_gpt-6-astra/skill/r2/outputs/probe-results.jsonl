@@ -1,0 +1,10 @@
+{"name":"explicit","model":"typesafe/jev-1.13-20260917","probability":0.98,"expected":true,"passed":true,"latencyMs":239,"usage":{"input_tokens":415,"output_tokens":25,"cost":0.00001743}}
+{"name":"implicit","model":"typesafe/jev-1.13-20260917","probability":0.97,"expected":true,"passed":true,"latencyMs":124,"usage":{"input_tokens":418,"output_tokens":25,"cost":0.000017556}}
+{"name":"phased","model":"typesafe/jev-1.13-20260917","probability":0.97,"expected":true,"passed":true,"latencyMs":141,"usage":{"input_tokens":423,"output_tokens":25,"cost":0.000017766}}
+{"name":"team","model":"typesafe/jev-1.13-20260917","probability":0.03,"expected":false,"passed":true,"latencyMs":116,"usage":{"input_tokens":413,"output_tokens":25,"cost":0.000017346}}
+{"name":"ambiguous","model":"typesafe/jev-1.13-20260917","probability":0.05,"expected":false,"passed":true,"latencyMs":162,"usage":{"input_tokens":414,"output_tokens":25,"cost":0.000017388}}
+{"name":"no-match","model":"typesafe/jev-1.13-20260917","probability":0.05,"expected":false,"passed":true,"latencyMs":123,"usage":{"input_tokens":411,"output_tokens":25,"cost":0.000017262}}
+{"name":"empty","model":"typesafe/jev-1.13-20260917","probability":0.06,"expected":false,"passed":true,"latencyMs":120,"usage":{"input_tokens":405,"output_tokens":25,"cost":0.00001701}}
+{"name":"off-topic","model":"typesafe/jev-1.13-20260917","probability":0.01,"expected":false,"passed":true,"latencyMs":190,"usage":{"input_tokens":411,"output_tokens":25,"cost":0.000017262}}
+{"name":"negated","model":"typesafe/jev-1.13-20260917","probability":0.02,"expected":false,"passed":true,"latencyMs":282,"usage":{"input_tokens":422,"output_tokens":25,"cost":0.000017724}}
+{"name":"adversarial","model":"typesafe/jev-1.13-20260917","probability":0.05,"expected":false,"passed":true,"latencyMs":112,"usage":{"input_tokens":430,"output_tokens":25,"cost":0.00001806}}

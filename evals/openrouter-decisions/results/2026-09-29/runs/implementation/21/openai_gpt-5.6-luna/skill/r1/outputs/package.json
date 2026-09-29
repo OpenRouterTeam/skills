@@ -1,0 +1,8 @@
+{
+  "name": "incident-urgency-decider",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/incident-urgency.test.js"
+  }
+}

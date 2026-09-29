@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.03874875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "src/guardrail.ts defines INJECTION_THRESHOLD = 0.5 and builds a noul question: questions.prompt_injection.type === \"noul\" in injectionRequest(...).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The message is placed in state.user_message (state: { user_message: message }) and not concatenated into instructions; test asserts request.state.user_message === message (test/guardrail.test.ts).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01995,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "subscription.py computes tenure in code via _is_more_than_one_year_old(...) which sets an anniversary date and returns as_of > anniversary, and is used in should_target_win_back.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model-like classifier _reason_suggests_return takes only cancellation_reason and is called as _reason_suggests_return(cancellation_reason); no dates are passed to it.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "_reason_suggests_return classifies the natural-language reason using regex/phrase lists (e.g., any(phrase in normalized for phrase in _RETURN_LIKELY_PHRASES)), and the thresholding logic is in code combined with the tenure gate in should_target_win_back.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

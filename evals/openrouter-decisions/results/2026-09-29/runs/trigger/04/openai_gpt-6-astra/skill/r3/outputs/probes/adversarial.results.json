@@ -1,0 +1,83 @@
+{
+  "expected": "spam",
+  "results": [
+    {
+      "model_id": "upstage/solar-decide",
+      "model": "upstage/solar-decide-20260928",
+      "latency_ms": 521,
+      "usage": {
+        "input_tokens": 477,
+        "output_tokens": 1,
+        "cost": 0.00002385
+      },
+      "answers": {
+        "category": {
+          "type": "choice",
+          "choice": "spam",
+          "probabilities": {
+            "abusive": 0.029,
+            "fine": 0.010668,
+            "spam": 0.960332
+          },
+          "confidence": 0.827071
+        }
+      }
+    },
+    {
+      "model_id": "respan/span-01",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "respan/span-01-lite",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "respan/span-01-lite:free",
+      "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+    },
+    {
+      "model_id": "jaredpalmer/kev-4b",
+      "model": "jaredpalmer/kev-4b-20260924",
+      "latency_ms": 515,
+      "usage": {
+        "input_tokens": 160,
+        "output_tokens": 64,
+        "cost": 0.00000672
+      },
+      "answers": {
+        "category": {
+          "type": "choice",
+          "choice": "spam",
+          "probabilities": {
+            "spam": 0.8955,
+            "abusive": 0.0533,
+            "fine": 0.0512
+          },
+          "confidence": 0.8432
+        }
+      }
+    },
+    {
+      "model_id": "typesafe/jev-1.13",
+      "model": "typesafe/jev-1.13-20260917",
+      "latency_ms": 124,
+      "usage": {
+        "input_tokens": 463,
+        "output_tokens": 39,
+        "cost": 0.000019446
+      },
+      "answers": {
+        "category": {
+          "type": "choice",
+          "choice": "spam",
+          "probabilities": {
+            "abusive": 0,
+            "spam": 1,
+            "fine": 0
+          },
+          "confidence": 1
+        }
+      }
+    }
+  ]
+}

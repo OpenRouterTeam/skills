@@ -1,0 +1,9 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "mode": "shadow",
+  "request_file": "request.json",
+  "prediction_rule": "choice",
+  "auto_route_min_probability_by_label": null,
+  "fallback": "human_review",
+  "threshold_status": "awaiting_representative_labeled_validation"
+}

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a0eaeb-a78f-7710-8611-19e522ad04ec"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"```ts\nconst PHONE = /\\d{3}[- ]\\d{3}[- ]\\d{4}/g;\n```\n\n`[- ]` matches a hyphen or a space, so this accepts both `415-555-0199` and `415 555 0199`."}}
+{"type":"turn.completed","usage":{"input_tokens":10069,"cached_input_tokens":0,"cache_write_input_tokens":10066,"output_tokens":170,"reasoning_output_tokens":102}}

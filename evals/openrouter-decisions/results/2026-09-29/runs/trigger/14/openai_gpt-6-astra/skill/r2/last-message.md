@@ -1,0 +1,1 @@
+The workspace contains no application source code, so I can’t update the endpoint yet. Please point me to the repository or share the endpoint and client code so I can implement SSE streaming.

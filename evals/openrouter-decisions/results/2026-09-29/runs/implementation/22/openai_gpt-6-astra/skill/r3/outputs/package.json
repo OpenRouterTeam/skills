@@ -1,0 +1,11 @@
+{
+  "name": "pr-breaking-change-gate",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test gate.test.ts",
+    "gate": "tsx cli.ts"
+  },
+  "dependencies": { "@openrouter/sdk": "^1.3.23" },
+  "devDependencies": { "tsx": "^4.0.0" }
+}

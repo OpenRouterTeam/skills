@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0201825,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "There is no score question defined; incident_urgency.py implements a deterministic function returning an int score, and README states it 'returns an UrgencyRating containing the score'.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "incident_urgency.py computes 'score' via rules and notes 'The function does not call an external model', and README says it returns the score for sorting.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "rate_incident(report: str, service_name: str) takes 'report' and 'service_name' as separate named parameters.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

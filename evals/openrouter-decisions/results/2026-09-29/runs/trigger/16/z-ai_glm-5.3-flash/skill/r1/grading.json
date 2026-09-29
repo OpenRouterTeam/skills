@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01116125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "No BM25 code or rankings were produced (files: none), and the final message says \"I couldn't find the query or the tokenized documents... I need the actual data to run it,\" so no deterministic ranking from term statistics was computed.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 2
+}

@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01754625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "“Deterministic policy checks in application code… Purchase age ≤ 90 days; Refund amount ≤ order total; Customer’s annual refund count < 2… Do not ask the model to judge arithmetic, dates, or counts.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "“Ask a bounded `noul` question: ‘Is this a routine, well-supported refund request with no apparent exception, fraud signal, or policy ambiguity?’ The model returns a probability, not prose.”",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Gating code includes a human-review path: “else if P(routine_request) >= AUTO_APPROVE_THRESHOLD: auto_approve() else: human_review()” indicating a middle band routed to humans.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

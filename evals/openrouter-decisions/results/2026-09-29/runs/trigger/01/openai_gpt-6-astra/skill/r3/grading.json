@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.011755,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "They state 'The three criteria above form the answer set; support covers no-match cases,' which omits a separate no-match option (e.g., 'none_of_these').",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "They write 'Keep control flow in code... Timeouts, API failures, or malformed responses produce a logged fallback to support' and 'Inspect raw probabilities... derive any threshold,' placing threshold and fallback in code, not in the question.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

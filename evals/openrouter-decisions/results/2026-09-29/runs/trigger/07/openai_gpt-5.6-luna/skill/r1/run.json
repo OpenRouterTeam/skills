@@ -1,0 +1,118 @@
+{
+  "id": 7,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T01:56:07.682Z",
+  "duration_ms": 82626,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 331428,
+    "cached_input_tokens": 303615,
+    "output_tokens": 6408,
+    "reasoning_output_tokens": 1362
+  },
+  "estimated_cost": 0.0193245,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because this is a probability-returning guardrail/classifier in front of a tool-capable agent. I’ll inspect the workspace instructions and existing code, then wire in the smallest safe integration and run the relevant checks."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n--- files ---\\\\n' && rg --files -g '\"'!node_modules'\"' -g '\"'!dist'\"' | head -200\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'pwd; ls -la; find . -maxdepth 3 -type f -print | sort'\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 01:56 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 01:56 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 01:56 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 01:56 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 01:56 .git\n./.git/COMMIT_EDITMSG\n./.git/HEAD\n./.git/config\n./.git/description\n./.git/hooks/applypatch-msg.sample\n./.git/hooks/commit-msg.sample\n./.git/hooks/fsmonitor-watchman.sample\n./.git/hooks/post-update.sample\n./.git/hooks/pre-applypatch.sample\n./.git/hooks/pre-commit.sample\n./.git/hooks/pre-merge-commit.sample\n./.git/hooks/pre-push.sample\n./.git/hooks/pre-rebase.sample\n./.git/hooks/pre-receive.sample\n./.git/hooks/prepare-commit-msg.sample\n./.git/hooks/push-to-checkout.sample\n./.git/hooks/update.sample\n./.git/index\n./.git/info/exclude\n./.git/logs/HEAD\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git status --short; git log --oneline -5; find .agents -maxdepth 4 -type f -print'\n<output>\n222226f baseline\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,260p' .agents/skills/openrouter-decisions/references/decisions-api.md; printf '\\\\n--- models ---\\\\n'; sed -n '1,220p' .agents/skills/openrouter-decisions/references/models.md; printf '\\\\n--- lib ---\\\\n'; sed -n '1,260p' .agents/skills/openrouter-decisions/scripts/lib.ts; printf '\\\\n--- readme ---\\\\n'; sed -n '1,200p' .agents/skills/openrouter-decisions/README.md\"\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '220,520p' .agents/skills/openrouter-decisions/scripts/lib.ts; sed -n '1,220p' .agents/skills/openrouter-decisions/references/decision-model-limits.md; cat .agents/skills/openrouter-decisions/scripts/package.json\"\n<output>\n  for (const key of expected) {\n    const question = request.questions[key];\n    const answer = response.answers[key];\n    if (question.type !== answer.type) {\n      throw new Error(`Answer ${key} is a ${answer.type}, question is a ${question.type}`);\n    }\n    if (question.type === \"choice\" && answer.type === \"choice\") {\n      if (answer.probabilities) assertSameKeys(key, Object.keys(question.criteria), answer.probabilities);\n      if (!(answer.choice in question.criteria)) {\n        throw new Error(`Answer ${key} chose ${answer.choice}, which is not an option`);\n      }\n    }\n    if (question.type === \"score\" && answer.type === \"score\") {\n      const levels = question.criteria.map((_, i) => String(i));\n      if (answer.probabilities) assertSameKeys(key, levels, answer.probabilities);\n      if (answer.legend) assertSameKeys(key, levels, answer.legend);\n    }\n  }\n}\n\nfunction assertSameKeys(key: string, options: string[], map: Record<string, unknown>): void {\n  const missing = options.filter((option) => !(option in map));\n  const extra = Object.keys(map).filter((option) => !options.includes(option));\n  if (missing.length > 0) throw new Error(`Answer ${key} has no entry for ${missing.join(\", \")}`);\n  if (extra.length > 0) throw new Error(`Answer ${key} has entries for unknown ${extra.join(\", \")}`);\n}\n\nasync function decideViaHttp(\n  request: DecisionsRequest,\n  apiKey: string\n): Promise<DecisionsResponse> {\n  const res = await fetch(DECISIONS_URL, {\n    method: \"POST\",\n    headers: {\n      Authorization: `Bearer ${apiKey}`,\n      \"Content-Type\": \"application/json\",\n    },\n    body: JSON.stringify(request),\n  });\n  const text = await res.text();\n  if (!res.ok) {\n    throw new Error(`Decisions API ${res.status}: ${text}`);\n  }\n  return parseResponse(JSON.parse(text));\n}\n\nasync function decideViaSdk(\n  request: DecisionsRequest,\n  apiKey: string\n): Promise<DecisionsResponse> {\n  const client = new OpenRouter({ apiKey, serverURL: SDK_SERVER_URL });\n  const result = await "
+    },
+    {
+      "type": "agent_message",
+      "text": "The repository is an empty baseline, so I’m adding a small standalone TypeScript integration rather than guessing at an existing agent framework. The guard will ask one `noul` question (“is this message a prompt injection?”), pass only the raw user string as state, and fail closed before any refund-capable tool call if the API errors or the probability crosses a named threshold."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -sS --max-time 15 'https://openrouter.ai/api/v1/models?output_modalities=decisions' | head -c 20000\"\n<output>\n{\"data\":[{\"id\":\"upstage/solar-decide\",\"canonical_slug\":\"upstage/solar-decide-20260928\",\"hugging_face_id\":null,\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"context_length\":524288,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\"},\"top_provider\":{\"context_length\":524288,\"max_completion_tokens\":471859,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/upstage/solar-decide-20260928/endpoints\"}},{\"id\":\"respan/span-01\",\"canonical_slug\":\"respan/span-01-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01\",\"created\":1790387550,\"description\":\"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\"context_length\":0,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000002\",\"completion\":\"0\"},\"top_provider\":{\"context_length\":0,\"max_completion_tokens\":0,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/respan/span-01-20260925/endpoints\"}},{\"id\":\"respan/span-01-lite\",\"canonical_slug\":\"respan/span-01-lite-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01 Lite\",\"created\":1790387542,\"description\":\"Span-01 Lite is the free, lighter tier of Span-"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/README.md, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/src/prompt-injection-guard.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/test/prompt-injection-guard.test.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/tsconfig.json"
+    },
+    {
+      "type": "agent_message",
+      "text": "The guardrail is now in place with a pinned decision-model build, a 1.5-second timeout, explicit `noul` criteria, and fail-closed behavior. I’m checking the TypeScript contract and tests next, including that the request shape remains a Decisions request rather than a chat-completions payload."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --ignore-scripts --no-audit --no-fund && npm test && npm run typecheck'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/tsx: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'command -v node || true; command -v tsc || true; command -v tsx || true; git status --short; git diff --stat; git diff -- package.json src/prompt-injection-guard.ts test/prompt-injection-guard.test.ts README.md'\n<output>\n/home/ubuntu/.nvm/versions/node/v24.17.0/bin/node\n/home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsc\n/home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsx\n?? README.md\n?? package.json\n?? src/\n?? test/\n?? tsconfig.json\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc '/home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsx --test test/prompt-injection-guard.test.ts && /home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsc --noEmit'\n<output>\n✔ returns the noul probability and blocks above the threshold (16.117634ms)\n✔ fails closed when the Decisions API is unavailable (0.274473ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 141.734088\nsrc/prompt-injection-guard.ts(47,36): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\ntest/prompt-injection-guard.test.ts(1,20): error TS2591: Cannot find name 'node:assert/strict'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\ntest/prompt-injection-guard.test.ts(2,18): error TS2591: Cannot find name 'node:test'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'test -d /home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/@types/node && echo yes || echo no; ls /home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/@types 2>/dev/null | head'\n<output>\nyes\nnode\n"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/package.json, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/tsconfig.json"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc '/home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsx --test test/prompt-injection-guard.test.ts && /home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsc --noEmit && git status --short'\n<output>\n✔ returns the noul probability and blocks above the threshold (13.779497ms)\n✔ fails closed when the Decisions API is unavailable (0.230997ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 133.017395\n?? README.md\n?? package.json\n?? src/\n?? test/\n?? tsconfig.json\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The tests pass and the typecheck is clean. One safety edge is worth tightening before handoff: a missing API key should produce the same blocked decision shape as a network failure, so callers cannot accidentally treat an exception path as permission to continue. I’m applying that and adding a request-shape assertion."
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/src/prompt-injection-guard.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/test/prompt-injection-guard.test.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc '/home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsx --test test/prompt-injection-guard.test.ts && /home/ubuntu/repos/skills/evals/openrouter-decisions/node_modules/.bin/tsc --noEmit'\n<output>\n✔ returns the noul probability and blocks above the threshold (15.227016ms)\n✔ fails closed when no API key is configured (0.104167ms)\n✔ fails closed when the Decisions API is unavailable (0.23571ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 138.546636\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Implemented the prompt-injection guardrail.\n\n- Uses OpenRouter Decisions API with a `noul` probability, not chat completion.\n- Pinned model: `upstage/solar-decide-20260928`\n- Blocks refund-capable tools at probability ≥ `0.8`.\n- Fails closed on missing keys, timeouts, API errors, or malformed responses.\n- Added tests and TypeScript configuration.\n\nFiles:\n\n- [src/prompt-injection-guard.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/src/prompt-injection-guard.ts)\n- [README.md](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/README.md)\n\nVerification: 3 tests passed and TypeScript typechecking passed."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Implemented the prompt-injection guardrail.\n\n- Uses OpenRouter Decisions API with a `noul` probability, not chat completion.\n- Pinned model: `upstage/solar-decide-20260928`\n- Blocks refund-capable tools at probability ≥ `0.8`.\n- Fails closed on missing keys, timeouts, API errors, or malformed responses.\n- Added tests and TypeScript configuration.\n\nFiles:\n\n- [src/prompt-injection-guard.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/src/prompt-injection-guard.ts)\n- [README.md](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-5.6-luna/skill/r1/workspace/README.md)\n\nVerification: 3 tests passed and TypeScript typechecking passed.",
+  "produced_files": [
+    "README.md",
+    "package.json",
+    "src/prompt-injection-guard.ts",
+    "test/prompt-injection-guard.test.ts",
+    "tsconfig.json"
+  ]
+}

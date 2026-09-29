@@ -1,0 +1,43 @@
+# Production configuration for the new binary classification job.
+# The dated model ID is intentional: do not replace it with a moving alias.
+job: new-classification
+provider: openrouter
+model: openai/gpt-4.1-mini-2025-04-14
+model_revision: openai/gpt-4.1-mini-2025-04-14
+
+inference:
+  temperature: 0
+  top_p: 1
+  max_tokens: 32
+  seed: 7
+  response_format:
+    type: json_schema
+    strict: true
+    schema:
+      type: object
+      additionalProperties: false
+      required: [label, score]
+      properties:
+        label:
+          type: string
+          enum: [positive, negative, abstain]
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
+
+decision:
+  # score is the calibrated probability of the positive class.
+  positive_threshold: 0.80
+  negative_threshold: 0.20
+  # Scores in (0.20, 0.80) are routed for review rather than auto-decided.
+  abstain_between_thresholds: true
+
+release_gates:
+  validation_dataset: data/classification-validation.jsonl
+  min_positive_precision: 0.95
+  min_negative_precision: 0.95
+  max_abstain_rate: 0.30
+  max_expected_calibration_error: 0.05
+  max_slice_precision_drop: 0.05
+  required_slices: [language, region, traffic_source]

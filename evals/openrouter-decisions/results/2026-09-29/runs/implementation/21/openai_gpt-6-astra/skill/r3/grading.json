@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.05014125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "In src/urgency.ts, buildUrgencyRequest defines questions.urgency with type: \"score\" and a five-item ordered criteria array; test/urgency.test.ts also asserts the question is a score with 5 levels.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "In src/urgency.ts, toUrgencyRating derives urgency in code as (Math.round(answer.score) + 1), and README.md states the API returns 0–4 and code rounds and adds one; no second call is made.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "buildUrgencyRequest sets state to { service: input.service.trim(), report: input.text.trim() }, and test/urgency.test.ts verifies request.state equals { service: \"api\", report: \"outage\" }.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

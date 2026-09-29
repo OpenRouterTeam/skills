@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "pinned": true,
+  "model": {
+    "id": "z-ai/glm-4.7-flash",
+    "pin": "exact",
+    "provider": {
+      "allow_fallbacks": false,
+      "order": ["Cloudflare"]
+    },
+    "temperature": 0,
+    "max_output_tokens": 64,
+    "response_format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": ["label", "confidence"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "decision_policy": {
+    "accept": {
+      "min_confidence": 0.85
+    },
+    "review": {
+      "min_confidence": 0.75
+    },
+    "otherwise": "reject",
+    "max_latency_ms_p95": 750,
+    "schema_validation": "required"
+  },
+  "promotion_gate": {
+    "min_samples": 300,
+    "min_accuracy": 0.95,
+    "max_fpr": 0.02,
+    "max_fnr": 0.02,
+    "max_review_rate": 0.15,
+    "seed": 20260929,
+    "split": {
+      "validation": 0.2,
+      "holdout": 0.2
+    }
+  }
+}

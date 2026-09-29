@@ -1,0 +1,39 @@
+{
+  "status": "evaluation_only",
+  "gateway": "https://openrouter.ai/api/v1",
+  "request": {
+    "model": "anthropic/claude-haiku-4.5",
+    "provider": {
+      "only": ["anthropic"],
+      "allow_fallbacks": false,
+      "require_parameters": true
+    },
+    "temperature": 0,
+    "max_tokens": 1024,
+    "stream": false
+  },
+  "pin": {
+    "expected_canonical_slug": "anthropic/claude-4.5-haiku-20251001",
+    "on_mismatch": "block"
+  },
+  "classification": {
+    "labels": null,
+    "prompt_version": null,
+    "calibration_artifact": null,
+    "thresholds": {
+      "status": "provisional",
+      "default_min_calibrated_probability": 0.9,
+      "min_top_two_probability_margin": 0.15,
+      "per_label_overrides": {}
+    },
+    "on_low_confidence_or_error": "review"
+  },
+  "release_requirements": {
+    "min_precision_per_label": null,
+    "min_recall_per_label": null,
+    "max_review_rate": null,
+    "max_p95_latency_ms": null,
+    "max_cost_per_1000_items_usd": null,
+    "held_out_evaluation_report": null
+  }
+}

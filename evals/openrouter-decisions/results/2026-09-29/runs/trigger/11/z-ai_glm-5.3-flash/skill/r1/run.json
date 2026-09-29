@@ -1,0 +1,35 @@
+{
+  "id": 11,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "z-ai/glm-5.3-flash",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:02:01.785Z",
+  "duration_ms": 6957,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 8808,
+    "cached_input_tokens": 7552,
+    "output_tokens": 221,
+    "reasoning_output_tokens": 0
+  },
+  "estimated_cost": 0.0005254600000000001,
+  "items": [
+    {
+      "type": "error",
+      "text": "{\"id\":\"item_0\",\"type\":\"error\",\"message\":\"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.\"}"
+    },
+    {
+      "type": "agent_message",
+      "text": "Here's the call wrapped with exponential backoff, jitter, and a 5-retry cap:\n\n```ts\nconst maxRetries = 5;\n\nlet res;\nfor (let attempt = 0; attempt <= maxRetries; attempt++) {\n  try {\n    res = await openai.chat.completions.create({ model, messages });\n    break;\n  } catch (err) {\n    if (attempt === maxRetries) throw err;\n    const base = Math.pow(2, attempt) * 1000;\n    const delay = base + Math.random() * base;\n    await new Promise((resolve) => setTimeout(resolve, delay));\n  }\n}\n```\n\n- `attempt` runs 0–5 (6 tries total: 1 initial + 5 retries).\n- Backoff doubles each attempt (1s, 2s, 4s, 8s, 16s).\n- Jitter adds a random 0–100% of the base delay to spread concurrent retries apart.\n- The final failure is rethrown after the last retry."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "Here's the call wrapped with exponential backoff, jitter, and a 5-retry cap:\n\n```ts\nconst maxRetries = 5;\n\nlet res;\nfor (let attempt = 0; attempt <= maxRetries; attempt++) {\n  try {\n    res = await openai.chat.completions.create({ model, messages });\n    break;\n  } catch (err) {\n    if (attempt === maxRetries) throw err;\n    const base = Math.pow(2, attempt) * 1000;\n    const delay = base + Math.random() * base;\n    await new Promise((resolve) => setTimeout(resolve, delay));\n  }\n}\n```\n\n- `attempt` runs 0–5 (6 tries total: 1 initial + 5 retries).\n- Backoff doubles each attempt (1s, 2s, 4s, 8s, 16s).\n- Jitter adds a random 0–100% of the base delay to spread concurrent retries apart.\n- The final failure is rethrown after the last retry.",
+  "produced_files": []
+}

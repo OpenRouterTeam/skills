@@ -1,0 +1,56 @@
+name: Breaking change gate
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: breaking-change-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  decision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Mark decision pending
+        run: >-
+          gh api --method POST "repos/$GH_REPO/statuses/$PR_SHA"
+          -f state=pending -f context=breaking-change-decision
+          -f description='Checking PR description for breaking changes'
+
+      # pull_request_target has access to secrets. Only execute trusted base code.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Ask decision model
+        id: classify
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+        run: python3 scripts/breaking_gate.py
+
+      - name: Publish gate status
+        if: ${{ always() && !cancelled() }}
+        env:
+          DECISION_OUTCOME: ${{ steps.classify.outcome }}
+        run: |
+          state=failure
+          description='Breaking, unclear, or failed decision; review required'
+          if [ "$DECISION_OUTCOME" = success ]; then
+            state=success
+            description='PR description does not declare a breaking change'
+          fi
+          gh api --method POST "repos/$GH_REPO/statuses/$PR_SHA" \
+            -f state="$state" -f context=breaking-change-decision \
+            -f description="$description"

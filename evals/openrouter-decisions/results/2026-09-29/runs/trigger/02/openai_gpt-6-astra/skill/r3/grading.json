@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01862875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message shows POST https://openrouter.ai/api/alpha/decisions with a JSON body containing \"model\", \"state\", and \"questions\".",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "They wrote \"Use one `noul` question: is this review abusive?\" and the request includes only a single questions.is_toxic noul, not one per policy label.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Their noul asks \"Is the review ... abusive?\" and they state \"ordinary complaints such as 'this product is a scam' should remain allowed,\" so no separate scam question is included.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 4
+}

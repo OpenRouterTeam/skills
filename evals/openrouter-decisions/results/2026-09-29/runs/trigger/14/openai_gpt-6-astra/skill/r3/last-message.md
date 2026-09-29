@@ -1,0 +1,1 @@
+This workspace contains only skill files—there’s no application code or chat endpoint to modify. Where is the app repository, or can you provide the endpoint and client code so I can implement SSE streaming?

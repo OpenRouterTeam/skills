@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.04473625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "src/subscription.ts computes the UTC anniversary in code and returns early if now <= anniversary, skipping any model call (see calculation of 'anniversary' and the check 'if (now <= anniversary) return ... status: \"not_old_enough\"').",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The Decisions request state only includes the cancellation reason: returnIntentRequest builds state: { cancellation_reason: cancellationReason } with no dates (src/subscription.ts).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The question is type: 'noul' asking if the customer is likely to resume, and the boolean is derived by code via answer.noul >= RETURN_INTENT_THRESHOLD (0.5) in src/subscription.ts.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,47 @@
+{
+  "id": 11,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:21:15.591Z",
+  "duration_ms": 18602,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 48173,
+    "cached_input_tokens": 34660,
+    "output_tokens": 584,
+    "reasoning_output_tokens": 70
+  },
+  "estimated_cost": 0.19899,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll check the SDK’s retry behavior and show a version capped at five retries. I’m using the OpenAI docs skill for this.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat /home/ubuntu/work/codex-home/skills/.system/openai-docs/SKILL.md'\n<output>\n---\nname: \"openai-docs\"\ndescription: \"Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex.\"\nmetadata:\n  short-description: \"Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only.\"\n---\n\n# OpenAI Docs\n\nProvide current, cited OpenAI product, API, model, and Codex guidance. Read zero or one primary reference.\n\n**First substantive action:** Search the user's exact requested official OpenAI documentation topic and any explicitly named model using a concise, topic-specific query of 2-6 essential terms. When an already-available direct official documentation search and page-retrieval capability is present, use it first: search, then fetch or open the matching official page before general web search. Otherwise, immediately use official-domain web search, then actually open or fetch the relevant official page. Complete this source order before reading a reference, inspecting local or repository files, running a Codex manual or model resolver, drafting a plan, or answering from memory. Use the actual fetched page, not a search snippet or an unopened link. If one official search or page does not establish the answer, search another appropriate official domain and actually open or fetch the result. Preserve the exact requested model; never substitute a newer model.\n\n**Only exception:** An explicitly requested, genuinely broad, cross-topic Codex setup, orientation, or system-map synthesis may use the manual first when shell execution and an allowed temporary cache are ava"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nimport urllib.request,re\nurl='https://developers.openai.com/api/docs/guides/rate-limits'\nwith urllib.request.urlopen(url) as r:\n    html=r.read().decode()\nplain=re.sub('<[\"'^>]+>'\"', ' ', html)\nplain=re.sub(r'\\\\s+', ' ', plain)\nfor term in ['exponential backoff','maxRetries','jitter']:\n    start=0\n    for i in range(4):\n        pos=plain.lower().find(term.lower(),start)\n        if pos<0: break\n        print(plain[max(0,pos-250):pos+1100])\n        start=pos+len(term)\nPY\"\n<output>\nect against automated and high-volume misuse, set a usage limit for individual users within a specified time frame (daily, weekly, or monthly). Consider implementing a hard cap or a manual review process for users who exceed the limit. Retrying with exponential backoff When a request exceeds a temporary rate limit, the API returns a 429 error. The response can include a Retry-After header that tells you how many seconds to wait before trying again. Treat this value as a minimum: wait at least that long and add a small random delay so multiple clients don’t retry at the same time. Each official OpenAI SDK automatically retries eligible 429 and 503 responses, subject to its retry settings. Handling of Retry-After , especially long delays, varies by SDK version and configuration. Check the retry behavior of your installed version rather than assuming every server delay is supported. If a valid server delay exceeds the supported or configured maximum retry delay, stop retrying and defer the request rather than retrying sooner. An SDK can return the original HTTP error when it declines a delay above its limit. Continue to handle cancellation and timeout errors separately: a canceled request or expired deadline can stop retries without returning that HTTP error. A timeout for each attempt isn’t necessarily a deadline for the entire op\nat HTTP error. A timeout for each attempt isn’t necessarily a deadline for the entire operation. If you’re using your own HTTP client, follow Retry-After when the header is present and contains a valid value. If it’s missing or invalid, fall back to exponential backoff with jitter. Limit both the number of attempts and the total time spent retrying. If you manage retries in your application, disable SDK retries or account for them in those limits so nested retry loops don’t multiply requests. Don’t retry quota, billing, or other errors that require you to take action. Exponential backoff means waiting briefly after an unsuccessful request, t"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nimport urllib.request,re\nurl='https://developers.openai.com/api/docs/libraries'\nwith urllib.request.urlopen(url) as r: html=r.read().decode()\nplain=re.sub(r'\\\\s+',' ',re.sub('<[\"'^>]+>'\"',' ',html))\nfor term in ['maxRetries','jitter','retries']:\n    pos=plain.find(term)\n    if pos>=0: print(plain[max(0,pos-200):pos+700])\nPY\"\n<output>\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The OpenAI Node SDK already uses exponential backoff with jitter. Set `maxRetries` per call:\n\n```ts\nconst res = await openai.chat.completions.create(\n  { model, messages },\n  { maxRetries: 5 },\n);\n```\n\nThis allows **five retries after the initial attempt**—six attempts total—for retryable errors. See [OpenAI’s retry guidance](https://developers.openai.com/api/docs/guides/rate-limits#retrying-with-exponential-backoff)."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "The OpenAI Node SDK already uses exponential backoff with jitter. Set `maxRetries` per call:\n\n```ts\nconst res = await openai.chat.completions.create(\n  { model, messages },\n  { maxRetries: 5 },\n);\n```\n\nThis allows **five retries after the initial attempt**—six attempts total—for retryable errors. See [OpenAI’s retry guidance](https://developers.openai.com/api/docs/guides/rate-limits#retrying-with-exponential-backoff).",
+  "produced_files": []
+}

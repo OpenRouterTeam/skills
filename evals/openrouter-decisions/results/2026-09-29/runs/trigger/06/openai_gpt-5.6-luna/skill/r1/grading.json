@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01831375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "They code the checks: 'if purchase_age_days > 90', 'if refund_amount > order_total', 'if customer_refunds_in_last_year >= 2' and state 'These facts should come from trusted structured data, not the model.'",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The model question is 'clearly_auto_approvable' with instructions to judge eligibility and 'Do not reconsider the separately enforced age, amount, or annual-count rules.'",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Routing uses a single threshold: 'if P(...) >= AUTO_APPROVE_THRESHOLD: auto-approve else: human queue,' with no separate auto-deny band or three-way split.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

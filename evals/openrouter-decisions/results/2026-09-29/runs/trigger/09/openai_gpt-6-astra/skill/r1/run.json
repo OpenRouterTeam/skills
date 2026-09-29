@@ -1,0 +1,123 @@
+{
+  "id": 9,
+  "kind": "trigger",
+  "category": "trigger-contextual",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T01:59:15.011Z",
+  "duration_ms": 97882,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 255383,
+    "cached_input_tokens": 226060,
+    "output_tokens": 4604,
+    "reasoning_output_tokens": 133
+  },
+  "estimated_cost": 0.74949,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll use the OpenRouter Decisions skill to try Jev for detecting company-wide rollout intent, alongside your headcount and region rules. I’ll check the workspace and API format first."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd && rg --files -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"' -g '\"'!.git'\"' -g 'AGENTS.md' -g 'package.json' -g '*.ts' -g '*.py' -g 'README*' -g '*.json'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decisions-api.md .agents/skills/openrouter-decisions/references/models.md .agents/skills/openrouter-decisions/references/decision-model-limits.md'\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/scripts/lib.ts'\n<output>\nimport { OpenRouter } from \"@openrouter/sdk\";\n\nexport const DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\";\nexport const SDK_SERVER_URL = \"https://openrouter.ai\";\nexport const MODELS_URL = \"https://openrouter.ai/api/v1/models?output_modalities=decisions\";\n\nexport function withModel(raw: unknown, flag: string | undefined): unknown {\n  if (!isRecord(raw)) return raw;\n  if (flag !== undefined) return { ...raw, model: flag };\n  if (\"model\" in raw) return raw;\n  const fromEnv = process.env.DECISION_MODEL;\n  return fromEnv === undefined ? raw : { ...raw, model: fromEnv };\n}\n\nexport type DecisionModel = {\n  id: string;\n  name: string;\n  buildSlug: string;\n  aliasTarget?: string;\n  createdAt: Date;\n  contextLength: number;\n  promptPricePerToken: number;\n  completionPricePerToken: number;\n  description: string;\n  endpointsUrl: string;\n};\n\nexport type ModelEndpoint = {\n  providerName: string;\n  contextLength: number;\n  maxPromptTokens?: number;\n  quantization?: string;\n  uptimeLast30m?: number;\n};\n\nexport async function listDecisionModels(): Promise<DecisionModel[]> {\n  const res = await fetch(MODELS_URL);\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Models API ${res.status}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !Array.isArray(raw.data)) throw new Error(\"Models API response has no data array\");\n  return raw.data.filter(isDecisionsEntry).map(parseModel);\n}\n\nexport async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {\n  const apiKey = process.env.OPENROUTER_API_KEY;\n  const res = await fetch(model.endpointsUrl, {\n    headers: apiKey === undefined ? {} : { Authorization: `Bearer ${apiKey}` },\n  });\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {\n    throw new Error(`Endpoints API response"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'ls -la && find .. -name AGENTS.md -print'\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 01:59 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 01:59 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 01:59 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 01:59 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 01:59 .git\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"node --version && npm --version && python3 - <<'PY'\nimport os\nprint('OPENROUTER_API_KEY present:', bool(os.getenv('OPENROUTER_API_KEY')))\nPY\"\n<output>\nOPENROUTER_API_KEY present: True\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -fsS --max-time 20 'https://openrouter.ai/api/v1/models?output_modalities=decisions' -o /tmp/lead-routing-models.json && python3 - <<'PY'\nimport json\nwith open('/tmp/lead-routing-models.json') as f: data=json.load(f)\nfor m in data['data']:\n if 'decisions' in m.get('architecture',{}).get('output_modalities',[]):\n  print(json.dumps({k:m.get(k) for k in ['id','canonical_slug','context_length','pricing','description','links']}))\nPY\"\n<output>\n{\"id\": \"upstage/solar-decide\", \"canonical_slug\": \"upstage/solar-decide-20260928\", \"context_length\": 524288, \"pricing\": {\"prompt\": \"0.00000005\", \"completion\": \"0\", \"input_cache_read\": \"0.00000005\"}, \"description\": \"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\", \"links\": {\"details\": \"/api/v1/models/upstage/solar-decide-20260928/endpoints\"}}\n{\"id\": \"respan/span-01\", \"canonical_slug\": \"respan/span-01-20260925\", \"context_length\": 0, \"pricing\": {\"prompt\": \"0.00000002\", \"completion\": \"0\"}, \"description\": \"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\", \"links\": {\"details\": \"/api/v1/models/respan/span-01-20260925/endpoints\"}}\n{\"id\": \"respan/span-01-lite\", \"canonical_slug\": \"respan/span-01-lite-20260925\", \"context_length\": 0, \"pricing\": {\"prompt\": \"0\", \"completion\": \"0\"}, \"description\": \"Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present...\", \"links\": {\"details\": \"/api/v1/models/respan/span-01-lite-20260925/endpoints\"}}\n{\"id\": \"respan/span-01-lite:free\", \"canonical_slug\": \"respan/span-01-lite-20260925\", \"context_length\": 0, \"pricing\": {\"prompt\": \"0\", \"completion\": \"0\"}, \"description\": \"Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present...\", \"links\": {\"details\": \"/api/v1/models/respan/span-01-lite-20260925/endpoints\"}}\n{\"id\": \"jaredpalmer/kev-4b\", \"canonical_slug\": \"jaredpalmer/kev-4b-20260924\", \"context_length\": 8192, \"pricing\": {\"prompt\": \"0.000000042\", \"completion\": \"0\"}, \"description\": \"Kev 4B is a small open-weight decision mode"
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace is empty, so I’m building a standalone TypeScript example. I’ll represent regions as a list and count distinct entries. Headcount over 1,000 or at least three regions will route directly to Enterprise; Jev will judge rollout intent for the remaining nonempty requests. The live catalog lists Jev 1.13, which I’ll pin and probe."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"cat .agents/skills/openrouter-decisions/scripts/package.json && curl -fsS --max-time 20 'https://openrouter.ai/api/v1/models/typesafe/jev-1.13-20260917/endpoints'\"\n<output>\n{\n  \"name\": \"openrouter-decisions-scripts\",\n  \"type\": \"module\",\n  \"private\": true,\n  \"dependencies\": {\n    \"@openrouter/sdk\": \"^1.3.23\"\n  },\n  \"devDependencies\": {\n    \"tsx\": \"^4.0.0\"\n  }\n}\n{\"data\":{\"id\":\"typesafe/jev-1.13\",\"name\":\"TypeSafe: Jev 1.13\",\"created\":1789689684,\"description\":\"Jev is a structured decision model from TypeSafe, and the first of its System One models. System One models make fast, structured decisions for software, returning a typed choice rather...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"TypeSafe | typesafe/jev-1.13-20260917\",\"model_id\":\"typesafe/jev-1.13\",\"model_name\":\"TypeSafe: Jev 1.13\",\"context_length\":32000,\"pricing\":{\"prompt\":\"0.000000042\",\"completion\":\"0\",\"discount\":0},\"provider_name\":\"TypeSafe\",\"tag\":\"typesafe\",\"quantization\":\"unknown\",\"max_completion_tokens\":28800,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":100,\"uptime_last_1d\":100,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'mkdir -p vendor && cp .agents/skills/openrouter-decisions/scripts/lib.ts vendor/decisions.ts'\n<output>\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/lead-routing.test.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/lead-routing.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/probe.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/tsconfig.json"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --no-audit --no-fund'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --cache /tmp/lead-routing-npm-cache --no-audit --no-fund'\n<output>\n\nadded 8 packages in 2s\nnpm notice\nnpm notice New major version of npm available! 11.13.0 -> 12.1.0\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0\nnpm notice To update run: npm install -g npm@12.1.0\nnpm notice\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm test && npm run typecheck'\n<output>\n{ model: 'test', companyWideRolloutProbability: 0.5 }\n{ model: 'test', companyWideRolloutProbability: 0.49 }\n✔ strict headcount boundary, distinct regions, and empty text skip Jev (0.650813ms)\n✔ only free text is sent for judgment (0.718109ms)\n✔ probability gate, invalid responses, and provider errors (1.180724ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 789.63183\n\n> typecheck\n> tsc --noEmit\n\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe'\n<output>\n{\n  name: 'clear company-wide',\n  text: 'We need to roll this out to everyone across the whole company.',\n  expected: true,\n  probability: 0.97,\n  actual: true,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 839,\n  usage: { input_tokens: 403, output_tokens: 25, cost: 0.000016926 }\n}\n{\n  name: 'implicit company-wide',\n  text: 'Replace our shared tools with one platform for every department and employee.',\n  expected: true,\n  probability: 0.94,\n  actual: true,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 139,\n  usage: { input_tokens: 403, output_tokens: 25, cost: 0.000016926 }\n}\n{\n  name: 'phased rollout',\n  text: 'Start with finance, then deploy to all departments across the company.',\n  expected: true,\n  probability: 0.93,\n  actual: true,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 150,\n  usage: { input_tokens: 403, output_tokens: 25, cost: 0.000016926 }\n}\n{\n  name: 'team only',\n  text: 'A CRM for our sales team only.',\n  expected: false,\n  probability: 0.03,\n  actual: false,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 202,\n  usage: { input_tokens: 398, output_tokens: 25, cost: 0.000016716 }\n}\n{\n  name: 'ambiguous',\n  text: 'We want a tool that can grow with us.',\n  expected: false,\n  probability: 0.17,\n  actual: false,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 216,\n  usage: { input_tokens: 400, output_tokens: 25, cost: 0.0000168 }\n}\n{\n  name: 'no scope',\n  text: 'Please send pricing.',\n  expected: false,\n  probability: 0.05,\n  actual: false,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 137,\n  usage: { input_tokens: 394, output_tokens: 25, cost: 0.000016548 }\n}\n{\n  name: 'empty',\n  text: '',\n  expected: false,\n  probability: 0.07,\n  actual: false,\n  model: 'typesafe/jev-1.13-20260917',\n  latencyMs: 181,\n  usage: { input_tokens: 390, output_tokens: 25, cost: 0.00001638 }\n}\n{\n  name: 'off topic',\n  text: 'What is the weather tomorrow?',\n  expected: false,\n  probability: 0.02,\n  actual: false,\n  model: 'typesafe/jev-1.13-202"
+    },
+    {
+      "type": "agent_message",
+      "text": "The routing code is in place, and the boundary tests pass: exactly 1,000 employees stays SMB unless another rule qualifies, and duplicate regions count once. I’m running live Jev probes for rollout wording, negation, ambiguity, and text that tries to influence its own classification."
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/README.md, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/lead-routing.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git status --short'\n<output>\n?? .gitignore\n?? README.md\n?? lead-routing.test.ts\n?? lead-routing.ts\n?? package-lock.json\n?? package.json\n?? probe-results.json\n?? probe.ts\n?? tsconfig.json\n?? vendor/\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Implemented in [lead-routing.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/lead-routing.ts). The core routing is:\n\n```ts\nconst regionCount = new Set(\n  lead.regions.map(r => r.trim().toLowerCase())\n).size;\n\nif (lead.headcount > 1000 || regionCount >= 3) return \"Enterprise\";\nif (!lead.lookingFor.trim()) return \"SMB\";\n\nconst { response } = await decide(\n  rolloutRequest(lead.lookingFor),\n  \"http\",\n  apiKey,\n);\n\nconst answer = response.answers.company_wide_rollout;\n// Full implementation validates the response before using it.\nreturn answer.noul >= ROLLOUT_THRESHOLD ? \"Enterprise\" : \"SMB\";\n```\n\nJev receives only the free text and answers one question: **“Is the lead’s intended deployment company-wide?”** Regions are represented as an array.\n\nPinned Jev build: `typesafe/jev-1.13-20260917`. All 11 live synthetic probes passed at threshold `0.5`, including negation and adversarial wording. Unit tests and TypeScript checks passed. Accuracy on your actual leads remains unmeasured."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Implemented in [lead-routing.ts](/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/09/openai_gpt-6-astra/skill/r1/workspace/lead-routing.ts). The core routing is:\n\n```ts\nconst regionCount = new Set(\n  lead.regions.map(r => r.trim().toLowerCase())\n).size;\n\nif (lead.headcount > 1000 || regionCount >= 3) return \"Enterprise\";\nif (!lead.lookingFor.trim()) return \"SMB\";\n\nconst { response } = await decide(\n  rolloutRequest(lead.lookingFor),\n  \"http\",\n  apiKey,\n);\n\nconst answer = response.answers.company_wide_rollout;\n// Full implementation validates the response before using it.\nreturn answer.noul >= ROLLOUT_THRESHOLD ? \"Enterprise\" : \"SMB\";\n```\n\nJev receives only the free text and answers one question: **“Is the lead’s intended deployment company-wide?”** Regions are represented as an array.\n\nPinned Jev build: `typesafe/jev-1.13-20260917`. All 11 live synthetic probes passed at threshold `0.5`, including negation and adversarial wording. Unit tests and TypeScript checks passed. Accuracy on your actual leads remains unmeasured.",
+  "produced_files": [
+    ".gitignore",
+    "README.md",
+    "lead-routing.test.ts",
+    "lead-routing.ts",
+    "package-lock.json",
+    "package.json",
+    "probe-results.json",
+    "probe.ts",
+    "tsconfig.json",
+    "vendor/decisions.ts"
+  ]
+}

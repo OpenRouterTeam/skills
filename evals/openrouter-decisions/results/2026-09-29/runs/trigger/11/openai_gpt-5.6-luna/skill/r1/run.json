@@ -1,0 +1,39 @@
+{
+  "id": 11,
+  "kind": "trigger",
+  "category": "trigger-negative",
+  "should_trigger": false,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 1,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:01:30.503Z",
+  "duration_ms": 12260,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 26144,
+    "cached_input_tokens": 15935,
+    "output_tokens": 783,
+    "reasoning_output_tokens": 400
+  },
+  "estimated_cost": 0.0033000999999999994,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m checking the OpenAI API guidance so the retry behavior matches the client’s error and request semantics."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/work/codex-home/skills/.system/openai-docs/SKILL.md\"\n<output>\n---\nname: \"openai-docs\"\ndescription: \"Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex.\"\nmetadata:\n  short-description: \"Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, and self-knowledge; OpenAI APIs and ChatGPT Work. 'You'/'this app' means Codex only.\"\n---\n\n# OpenAI Docs\n\nProvide current, cited OpenAI product, API, model, and Codex guidance. Read zero or one primary reference.\n\n**First substantive action:** Search the user's exact requested official OpenAI documentation topic and any explicitly named model using a concise, topic-specific query of 2-6 essential terms. When an already-available direct official documentation search and page-retrieval capability is present, use it first: search, then fetch or open the matching official page before general web search. Otherwise, immediately use official-domain web search, then actually open or fetch the relevant official page. Complete this source order before reading a reference, inspecting local or repository files, running a Codex manual or model resolver, drafting a plan, or answering from memory. Use the actual fetched page, not a search snippet or an unopened link. If one official search or page does not establish the answer, search another appropriate official domain and actually open or fetch the result. Preserve the exact requested model; never substitute a newer model.\n\n**Only exception:** An explicitly requested, genuinely broad, cross-topic Codex setup, orientation, or system-map synthesis may use the manual first when shell execution and an allowed temporary cache are ava"
+    },
+    {
+      "type": "agent_message",
+      "text": "```ts\nconst maxRetries = 5;\n\nfor (let attempt = 0; ; attempt++) {\n  try {\n    const res = await openai.chat.completions.create({ model, messages });\n    break; // use `res` here\n  } catch (err: any) {\n    const status = err?.status;\n    const retryable =\n      !status || status === 408 || status === 409 || status === 429 || status >= 500;\n\n    if (!retryable || attempt >= maxRetries) {\n      throw err;\n    }\n\n    const baseDelayMs = 500 * 2 ** attempt;\n    const jitterMs = Math.random() * baseDelayMs;\n    await new Promise((resolve) =>\n      setTimeout(resolve, baseDelayMs + jitterMs)\n    );\n  }\n}\n```\n\nThis allows the initial request plus up to five retries, with exponential backoff and full jitter."
+    }
+  ],
+  "skill_files_read": [],
+  "read_skill": false,
+  "final_message": "```ts\nconst maxRetries = 5;\n\nfor (let attempt = 0; ; attempt++) {\n  try {\n    const res = await openai.chat.completions.create({ model, messages });\n    break; // use `res` here\n  } catch (err: any) {\n    const status = err?.status;\n    const retryable =\n      !status || status === 408 || status === 409 || status === 429 || status >= 500;\n\n    if (!retryable || attempt >= maxRetries) {\n      throw err;\n    }\n\n    const baseDelayMs = 500 * 2 ** attempt;\n    const jitterMs = Math.random() * baseDelayMs;\n    await new Promise((resolve) =>\n      setTimeout(resolve, baseDelayMs + jitterMs)\n    );\n  }\n}\n```\n\nThis allows the initial request plus up to five retries, with exponential backoff and full jitter.",
+  "produced_files": []
+}

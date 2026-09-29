@@ -1,0 +1,2114 @@
+{
+  "iteration": "results/2026-09-29",
+  "generated_at": "2026-09-29T04:33:31.908Z",
+  "trigger": {
+    "openai/gpt-5.6-luna": {
+      "runs": 60,
+      "correct": 51,
+      "per_category": {
+        "trigger-explicit": "6/6",
+        "trigger-implicit": "18/18",
+        "trigger-contextual": "9/9",
+        "trigger-negative": "18/27"
+      },
+      "per_round_accuracy": {
+        "mean": 0.85,
+        "sd": 0.09999999999999998,
+        "n": 3,
+        "values": [
+          0.75,
+          0.95,
+          0.85
+        ]
+      },
+      "misses": [
+        "#15 r1",
+        "#16 r1",
+        "#17 r1",
+        "#18 r1",
+        "#19 r1",
+        "#15 r2",
+        "#15 r3",
+        "#16 r3",
+        "#18 r3"
+      ],
+      "duration_s": {
+        "mean": 23.455949999999998,
+        "sd": 16.652710209946026,
+        "n": 60,
+        "values": [
+          20.437,
+          12.022,
+          11.886,
+          45.466,
+          18.011,
+          13.016,
+          82.626,
+          16.545,
+          21.796,
+          37.108,
+          12.26,
+          18.642,
+          37.919,
+          8.943,
+          11.703,
+          48.549,
+          60.036,
+          7.424,
+          12.261,
+          16.899,
+          21.949,
+          13.463,
+          10.219,
+          28.301,
+          21.342,
+          24.299,
+          64.825,
+          24.932,
+          15.222,
+          45.779,
+          22.44,
+          13.15,
+          12.617,
+          10.861,
+          8.778,
+          8.954,
+          41.427,
+          9.353,
+          12.58,
+          17.526,
+          15.468,
+          15.003,
+          16.175,
+          22.529,
+          18.658,
+          14.344,
+          47.665,
+          20.907,
+          15.178,
+          22.19,
+          17.873,
+          11.603,
+          37.375,
+          7.141,
+          12.013,
+          49.666,
+          49.086,
+          7.54,
+          9.57,
+          55.807
+        ]
+      },
+      "input_tokens": {
+        "mean": 73732.8,
+        "sd": 78054.63395961508,
+        "n": 60,
+        "values": [
+          30638,
+          44005,
+          17121,
+          281128,
+          47860,
+          17120,
+          331428,
+          29284,
+          48069,
+          173788,
+          26144,
+          40448,
+          99259,
+          31533,
+          47943,
+          127704,
+          226804,
+          27236,
+          38119,
+          70391,
+          30701,
+          29352,
+          17117,
+          44368,
+          50161,
+          17111,
+          333695,
+          42805,
+          29334,
+          191474,
+          55496,
+          31509,
+          31138,
+          31353,
+          25724,
+          57875,
+          178621,
+          40986,
+          40374,
+          82644,
+          30560,
+          44114,
+          30582,
+          42675,
+          60048,
+          17117,
+          183003,
+          28369,
+          29325,
+          28447,
+          42180,
+          39702,
+          99910,
+          22998,
+          35529,
+          139625,
+          131750,
+          27902,
+          30546,
+          241726
+        ]
+      },
+      "cost_usd": 0.37645386000000003,
+      "errors": 1
+    },
+    "openai/gpt-6-astra": {
+      "runs": 60,
+      "correct": 60,
+      "per_category": {
+        "trigger-explicit": "6/6",
+        "trigger-implicit": "18/18",
+        "trigger-contextual": "9/9",
+        "trigger-negative": "27/27"
+      },
+      "per_round_accuracy": {
+        "mean": 1,
+        "sd": 0,
+        "n": 3,
+        "values": [
+          1,
+          1,
+          1
+        ]
+      },
+      "misses": [],
+      "duration_s": {
+        "mean": 46.46946666666666,
+        "sd": 54.13771027962768,
+        "n": 60,
+        "values": [
+          18.121,
+          27.213,
+          15.714,
+          131.913,
+          11.385,
+          14.117,
+          167.445,
+          32.229,
+          97.882,
+          146.068,
+          18.2,
+          8.489,
+          10.432,
+          11.332,
+          12.438,
+          31.639,
+          46.906,
+          7.737,
+          5.51,
+          19.987,
+          20.067,
+          25.081,
+          18.413,
+          142.84,
+          13.035,
+          20.523,
+          164.777,
+          37.688,
+          97.694,
+          158.835,
+          18.602,
+          14.992,
+          10.009,
+          14.31,
+          10.427,
+          29.816,
+          61.473,
+          8.32,
+          5.167,
+          176.999,
+          17.738,
+          19.873,
+          21.127,
+          137.024,
+          12.834,
+          19.386,
+          185.417,
+          33.156,
+          87.66,
+          158.947,
+          15.171,
+          10.898,
+          19.058,
+          11.664,
+          8.283,
+          41.251,
+          58.676,
+          7.934,
+          4.622,
+          33.624
+        ]
+      },
+      "input_tokens": {
+        "mean": 111111.91666666667,
+        "sd": 130532.14700124889,
+        "n": 60,
+        "values": [
+          38842,
+          40506,
+          35965,
+          363673,
+          36333,
+          35947,
+          372955,
+          66739,
+          255383,
+          318940,
+          52226,
+          20331,
+          30799,
+          41535,
+          30806,
+          42632,
+          155295,
+          30716,
+          10069,
+          89556,
+          38840,
+          56672,
+          35963,
+          429530,
+          36420,
+          35764,
+          398184,
+          66542,
+          226073,
+          344061,
+          48173,
+          30890,
+          20258,
+          41550,
+          30817,
+          42363,
+          165524,
+          30594,
+          10069,
+          353502,
+          38807,
+          40455,
+          35974,
+          382249,
+          36377,
+          35941,
+          341526,
+          67065,
+          215908,
+          449193,
+          46263,
+          10067,
+          41721,
+          41837,
+          30725,
+          59698,
+          166833,
+          30712,
+          10069,
+          74258
+        ]
+      },
+      "cost_usd": 22.562566,
+      "errors": 0
+    },
+    "z-ai/glm-5.3-flash": {
+      "runs": 60,
+      "correct": 49,
+      "per_category": {
+        "trigger-explicit": "6/6",
+        "trigger-implicit": "14/18",
+        "trigger-contextual": "9/9",
+        "trigger-negative": "20/27"
+      },
+      "per_round_accuracy": {
+        "mean": 0.8166666666666668,
+        "sd": 0.02886751345948125,
+        "n": 3,
+        "values": [
+          0.8,
+          0.8,
+          0.85
+        ]
+      },
+      "misses": [
+        "#5 r1",
+        "#6 r1",
+        "#15 r1",
+        "#16 r1",
+        "#3 r2",
+        "#4 r2",
+        "#14 r2",
+        "#15 r2",
+        "#14 r3",
+        "#15 r3",
+        "#17 r3"
+      ],
+      "duration_s": {
+        "mean": 51.59406666666665,
+        "sd": 96.38276735414343,
+        "n": 60,
+        "values": [
+          23.853,
+          18.772,
+          27.705,
+          22.292,
+          19.56,
+          16.713,
+          109.98,
+          30.313,
+          119.376,
+          23.445,
+          6.957,
+          11.912,
+          59.616,
+          40.028,
+          725.526,
+          55.324,
+          138.526,
+          14.513,
+          5.921,
+          42.957,
+          20.535,
+          23.44,
+          12.077,
+          21.388,
+          30.648,
+          14.07,
+          189.305,
+          35.429,
+          75.557,
+          48.365,
+          9.84,
+          17.965,
+          13.553,
+          16.457,
+          90.249,
+          10.724,
+          101.959,
+          10.881,
+          13.081,
+          28.941,
+          21.337,
+          23.286,
+          18.162,
+          26.051,
+          28.458,
+          23.816,
+          64.212,
+          39.69,
+          61.341,
+          36.477,
+          8.758,
+          32.681,
+          18.906,
+          24.498,
+          105.526,
+          23.933,
+          124.155,
+          14.423,
+          7.902,
+          94.279
+        ]
+      },
+      "input_tokens": {
+        "mean": 161618.35,
+        "sd": 654981.7074466195,
+        "n": 60,
+        "values": [
+          33466,
+          32631,
+          19992,
+          32763,
+          27193,
+          20612,
+          279750,
+          46315,
+          260047,
+          19968,
+          8808,
+          26763,
+          69185,
+          109699,
+          5079957,
+          73399,
+          218818,
+          26892,
+          17775,
+          45058,
+          20071,
+          32723,
+          8846,
+          20793,
+          58038,
+          19979,
+          678591,
+          32628,
+          226632,
+          41713,
+          26715,
+          17723,
+          27148,
+          57037,
+          228780,
+          37508,
+          206362,
+          26680,
+          17735,
+          51697,
+          20049,
+          32659,
+          20011,
+          34131,
+          20122,
+          20010,
+          196741,
+          44334,
+          123092,
+          33722,
+          8808,
+          45482,
+          36483,
+          47570,
+          133257,
+          36905,
+          283910,
+          26744,
+          17721,
+          228860
+        ]
+      },
+      "cost_usd": 0.4787532099999999,
+      "errors": 0
+    }
+  },
+  "implementation": {
+    "openai/gpt-5.6-luna / no-skill": {
+      "runs": 12,
+      "passed": 15,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 0.35714285714285715,
+        "sd": 0,
+        "n": 3,
+        "values": [
+          0.35714285714285715,
+          0.35714285714285715,
+          0.35714285714285715
+        ]
+      },
+      "duration_s": {
+        "mean": 40.62341666666667,
+        "sd": 8.823117614934626,
+        "n": 12,
+        "values": [
+          53.489,
+          46.335,
+          34.029,
+          35.037,
+          48.224,
+          57.017,
+          34.834,
+          33.924,
+          37.737,
+          37.971,
+          27.855,
+          41.029
+        ]
+      },
+      "input_tokens": {
+        "mean": 109058.25,
+        "sd": 57691.97491714865,
+        "n": 12,
+        "values": [
+          94932,
+          104611,
+          73322,
+          189266,
+          107521,
+          256145,
+          116586,
+          59456,
+          78666,
+          90007,
+          64226,
+          73961
+        ]
+      },
+      "output_tokens": {
+        "mean": 3876.4166666666665,
+        "sd": 842.0937605250092,
+        "n": 12,
+        "values": [
+          4659,
+          4301,
+          3460,
+          3048,
+          5342,
+          4840,
+          3900,
+          2756,
+          4318,
+          3930,
+          2892,
+          3071
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 0.009566900000000001,
+        "sd": 0.002636903480289644,
+        "n": 12,
+        "values": [
+          0.009741060000000001,
+          0.009850099999999999,
+          0.007726599999999999,
+          0.013226139999999999,
+          0.0109937,
+          0.01546348,
+          0.009131040000000002,
+          0.006381459999999999,
+          0.008892419999999998,
+          0.0090644,
+          0.00683302,
+          0.007499379999999999
+        ]
+      },
+      "errors": 0,
+      "read_skill": 0
+    },
+    "openai/gpt-5.6-luna / skill": {
+      "runs": 12,
+      "passed": 36,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 0.8571428571428571,
+        "sd": 0,
+        "n": 3,
+        "values": [
+          0.8571428571428571,
+          0.8571428571428571,
+          0.8571428571428571
+        ]
+      },
+      "duration_s": {
+        "mean": 46.86566666666667,
+        "sd": 15.586742497936175,
+        "n": 12,
+        "values": [
+          53.343,
+          62.419,
+          67.234,
+          24.573,
+          52.264,
+          41.754,
+          44.172,
+          31.265,
+          41.665,
+          54.287,
+          67.937,
+          21.475
+        ]
+      },
+      "input_tokens": {
+        "mean": 167531.08333333334,
+        "sd": 64085.4925924004,
+        "n": 12,
+        "values": [
+          153380,
+          171308,
+          278421,
+          58759,
+          172843,
+          199005,
+          163094,
+          126913,
+          193252,
+          235572,
+          199169,
+          58657
+        ]
+      },
+      "output_tokens": {
+        "mean": 4339.666666666667,
+        "sd": 1310.214925695457,
+        "n": 12,
+        "values": [
+          4582,
+          6056,
+          5108,
+          2074,
+          4659,
+          4824,
+          4805,
+          2778,
+          4874,
+          5447,
+          4851,
+          2018
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 0.012244006666666666,
+        "sd": 0.0032099622653724686,
+        "n": 12,
+        "values": [
+          0.01228552,
+          0.014397759999999999,
+          0.01592766,
+          0.00636236,
+          0.01258682,
+          0.014145959999999999,
+          0.0128662,
+          0.009422,
+          0.013724240000000002,
+          0.015038639999999999,
+          0.013902099999999999,
+          0.00626882
+        ]
+      },
+      "errors": 0,
+      "read_skill": 12
+    },
+    "openai/gpt-6-astra / no-skill": {
+      "runs": 12,
+      "passed": 23,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 0.5476190476190476,
+        "sd": 0.10910894511799622,
+        "n": 3,
+        "values": [
+          0.42857142857142855,
+          0.5714285714285714,
+          0.6428571428571429
+        ]
+      },
+      "duration_s": {
+        "mean": 98.444,
+        "sd": 36.11565760417244,
+        "n": 12,
+        "values": [
+          124.014,
+          99.88,
+          65.967,
+          76.738,
+          127.062,
+          107.769,
+          71.851,
+          90.502,
+          192.055,
+          74.721,
+          68.297,
+          82.472
+        ]
+      },
+      "input_tokens": {
+        "mean": 119958.58333333333,
+        "sd": 101261.25877825172,
+        "n": 12,
+        "values": [
+          114197,
+          86473,
+          44049,
+          99492,
+          93974,
+          150229,
+          54785,
+          119724,
+          425295,
+          118827,
+          48734,
+          83724
+        ]
+      },
+      "output_tokens": {
+        "mean": 4497.083333333333,
+        "sd": 1311.3635137335168,
+        "n": 12,
+        "values": [
+          6242,
+          5030,
+          3638,
+          3361,
+          5396,
+          4138,
+          3794,
+          3718,
+          7575,
+          3436,
+          3807,
+          3830
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 0.5207215,
+        "sd": 0.2341033429086394,
+        "n": 12,
+        "values": [
+          0.580458,
+          0.479597,
+          0.350797,
+          0.41714,
+          0.507738,
+          0.590688,
+          0.371547,
+          0.447113,
+          1.221978,
+          0.488951,
+          0.368657,
+          0.423994
+        ]
+      },
+      "errors": 0,
+      "read_skill": 0
+    },
+    "openai/gpt-6-astra / skill": {
+      "runs": 12,
+      "passed": 42,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 1,
+        "sd": 0,
+        "n": 3,
+        "values": [
+          1,
+          1,
+          1
+        ]
+      },
+      "duration_s": {
+        "mean": 166.45033333333333,
+        "sd": 53.477976750559044,
+        "n": 12,
+        "values": [
+          315.981,
+          185.315,
+          168.129,
+          133.641,
+          198.604,
+          114.416,
+          158.687,
+          136.147,
+          154.428,
+          148.534,
+          166.857,
+          116.665
+        ]
+      },
+      "input_tokens": {
+        "mean": 398727.25,
+        "sd": 174103.8450925847,
+        "n": 12,
+        "values": [
+          933795,
+          301221,
+          386359,
+          422305,
+          389556,
+          291273,
+          399450,
+          319614,
+          322319,
+          363110,
+          297208,
+          358517
+        ]
+      },
+      "output_tokens": {
+        "mean": 7146.166666666667,
+        "sd": 2482.0324088915277,
+        "n": 12,
+        "values": [
+          13791,
+          5793,
+          8076,
+          5427,
+          9017,
+          4948,
+          7311,
+          5334,
+          7603,
+          6764,
+          6980,
+          4710
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 1.1025408333333335,
+        "sd": 0.3267335576528912,
+        "n": 12,
+        "values": [
+          2.077602,
+          0.905016,
+          1.160977,
+          1.051846,
+          1.216417,
+          0.831227,
+          1.111104,
+          0.935766,
+          1.040734,
+          1.010541,
+          0.975743,
+          0.913517
+        ]
+      },
+      "errors": 0,
+      "read_skill": 12
+    },
+    "z-ai/glm-5.3-flash / no-skill": {
+      "runs": 12,
+      "passed": 20,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 0.4761904761904762,
+        "sd": 0.04123930494211614,
+        "n": 3,
+        "values": [
+          0.5,
+          0.5,
+          0.42857142857142855
+        ]
+      },
+      "duration_s": {
+        "mean": 85.30891666666666,
+        "sd": 53.67233233656769,
+        "n": 12,
+        "values": [
+          45.162,
+          76.339,
+          55.884,
+          17.445,
+          144.013,
+          141.039,
+          42.93,
+          80.307,
+          80.25,
+          58.448,
+          73.072,
+          208.818
+        ]
+      },
+      "input_tokens": {
+        "mean": 99173.83333333333,
+        "sd": 89001.05876677007,
+        "n": 12,
+        "values": [
+          39065,
+          70153,
+          38618,
+          42280,
+          184944,
+          132549,
+          37351,
+          103664,
+          55755,
+          84386,
+          57905,
+          343416
+        ]
+      },
+      "output_tokens": {
+        "mean": 3209.75,
+        "sd": 2140.383021160635,
+        "n": 12,
+        "values": [
+          2116,
+          2150,
+          2507,
+          790,
+          5651,
+          3832,
+          1461,
+          1780,
+          5633,
+          2935,
+          1743,
+          7919
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 0.00807135,
+        "sd": 0.004812086054442879,
+        "n": 12,
+        "values": [
+          0.00422207,
+          0.0056843499999999995,
+          0.0031908400000000003,
+          0.006737,
+          0.011827899999999999,
+          0.01357307,
+          0.00319971,
+          0.00719288,
+          0.00858391,
+          0.00992444,
+          0.00379725,
+          0.01892278
+        ]
+      },
+      "errors": 0,
+      "read_skill": 0
+    },
+    "z-ai/glm-5.3-flash / skill": {
+      "runs": 12,
+      "passed": 34,
+      "total": 42,
+      "per_round_pass_rate": {
+        "mean": 0.8095238095238094,
+        "sd": 0.08247860988423221,
+        "n": 3,
+        "values": [
+          0.8571428571428571,
+          0.7142857142857143,
+          0.8571428571428571
+        ]
+      },
+      "duration_s": {
+        "mean": 129.25366666666665,
+        "sd": 78.53298792497482,
+        "n": 12,
+        "values": [
+          185.404,
+          79.086,
+          60.785,
+          65.288,
+          155.634,
+          109.434,
+          174.961,
+          111.583,
+          163.213,
+          20.666,
+          319.965,
+          105.025
+        ]
+      },
+      "input_tokens": {
+        "mean": 334012.75,
+        "sd": 219249.86568385022,
+        "n": 12,
+        "values": [
+          431259,
+          225760,
+          181366,
+          106234,
+          375917,
+          384430,
+          497660,
+          295608,
+          351357,
+          32863,
+          882332,
+          243367
+        ]
+      },
+      "output_tokens": {
+        "mean": 4664.666666666667,
+        "sd": 2438.0933807656615,
+        "n": 12,
+        "values": [
+          6681,
+          3824,
+          2855,
+          1733,
+          4396,
+          3690,
+          7451,
+          4877,
+          7296,
+          776,
+          8764,
+          3633
+        ]
+      },
+      "cost_usd_per_run": {
+        "mean": 0.017833925833333333,
+        "sd": 0.010830233095507525,
+        "n": 12,
+        "values": [
+          0.02377719,
+          0.01050112,
+          0.009939279999999998,
+          0.00604192,
+          0.018065869999999998,
+          0.018913019999999996,
+          0.02535946,
+          0.017042739999999997,
+          0.01925715,
+          0.00426529,
+          0.0452246,
+          0.01561947
+        ]
+      },
+      "errors": 0,
+      "read_skill": 12
+    }
+  },
+  "assertions": [
+    {
+      "eval_id": 21,
+      "assertion_index": 0,
+      "no_skill": "3/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 21,
+      "assertion_index": 1,
+      "no_skill": "7/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 21,
+      "assertion_index": 2,
+      "no_skill": "9/9",
+      "skill": "9/9",
+      "verdict": "passes in both arms: does not measure the skill"
+    },
+    {
+      "eval_id": 22,
+      "assertion_index": 0,
+      "no_skill": "1/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 22,
+      "assertion_index": 1,
+      "no_skill": "8/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 22,
+      "assertion_index": 2,
+      "no_skill": "2/9",
+      "skill": "7/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 23,
+      "assertion_index": 0,
+      "no_skill": "9/9",
+      "skill": "9/9",
+      "verdict": "passes in both arms: does not measure the skill"
+    },
+    {
+      "eval_id": 23,
+      "assertion_index": 1,
+      "no_skill": "7/9",
+      "skill": "8/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 23,
+      "assertion_index": 2,
+      "no_skill": "6/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 24,
+      "assertion_index": 0,
+      "no_skill": "2/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 24,
+      "assertion_index": 1,
+      "no_skill": "0/9",
+      "skill": "4/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 24,
+      "assertion_index": 2,
+      "no_skill": "4/9",
+      "skill": "9/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 24,
+      "assertion_index": 3,
+      "no_skill": "0/9",
+      "skill": "7/9",
+      "verdict": "discriminates"
+    },
+    {
+      "eval_id": 24,
+      "assertion_index": 4,
+      "no_skill": "0/9",
+      "skill": "5/9",
+      "verdict": "discriminates"
+    }
+  ],
+  "implementation_marginal": {
+    "excluded_assertions": [
+      "21:2",
+      "23:0"
+    ],
+    "per_model": {
+      "openai/gpt-5.6-luna": {
+        "no_skill": "9/36",
+        "skill": "30/36",
+        "delta_per_round": {
+          "mean": 0.5833333333333334,
+          "sd": 0,
+          "n": 3,
+          "values": [
+            0.5833333333333334,
+            0.5833333333333334,
+            0.5833333333333334
+          ]
+        }
+      },
+      "openai/gpt-6-astra": {
+        "no_skill": "17/36",
+        "skill": "36/36",
+        "delta_per_round": {
+          "mean": 0.5277777777777778,
+          "sd": 0.12729376930432895,
+          "n": 3,
+          "values": [
+            0.6666666666666667,
+            0.5,
+            0.41666666666666663
+          ]
+        }
+      },
+      "z-ai/glm-5.3-flash": {
+        "no_skill": "14/36",
+        "skill": "28/36",
+        "delta_per_round": {
+          "mean": 0.38888888888888884,
+          "sd": 0.12729376930432892,
+          "n": 3,
+          "values": [
+            0.4166666666666667,
+            0.24999999999999994,
+            0.5
+          ]
+        }
+      }
+    }
+  },
+  "discovery": {
+    "marketplace-ops": {
+      "file": "discovery-marketplace-ops.json",
+      "generators": [
+        "openai/gpt-6-astra",
+        "openai/gpt-5.6-luna",
+        "z-ai/glm-5.3-flash"
+      ],
+      "rounds": 3,
+      "arms": {
+        "api-only": {
+          "discovery_runs": 9,
+          "discovery_errors": 0,
+          "recall": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "precision": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "primitive_match_rate": 0.8095238095238095,
+          "misses": [],
+          "false_positives": [],
+          "designs": 63,
+          "design_errors": 0,
+          "rubric_passed": 482,
+          "rubric_total": 531,
+          "rubric_pass_rate_per_round": {
+            "mean": 0.9077212806026366,
+            "sd": 0.01816130086815995,
+            "n": 3,
+            "values": [
+              0.9152542372881356,
+              0.8870056497175142,
+              0.9209039548022598
+            ]
+          },
+          "per_item": {
+            "deterministic_in_code": {
+              "passed": 63,
+              "total": 63
+            },
+            "primitive_fit": {
+              "passed": 63,
+              "total": 63
+            },
+            "fact_not_text": {
+              "passed": 63,
+              "total": 63
+            },
+            "thresholds_in_code": {
+              "passed": 63,
+              "total": 63
+            },
+            "state_minimal": {
+              "passed": 43,
+              "total": 63
+            },
+            "strikes_rule_in_code": {
+              "passed": 6,
+              "total": 9
+            },
+            "violation_per_noul": {
+              "passed": 5,
+              "total": 9
+            },
+            "hold_on_uncertain": {
+              "passed": 9,
+              "total": 9
+            },
+            "category_as_context": {
+              "passed": 9,
+              "total": 9
+            },
+            "tracking_rules_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "amount_rule_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "single_choice": {
+              "passed": 9,
+              "total": 9
+            },
+            "escalate_on_low_confidence": {
+              "passed": 3,
+              "total": 9
+            },
+            "late_from_dates": {
+              "passed": 9,
+              "total": 9
+            },
+            "closed_set_choice": {
+              "passed": 9,
+              "total": 9
+            },
+            "no_dates_in_state": {
+              "passed": 8,
+              "total": 9
+            },
+            "verification_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "restricted_business_judged": {
+              "passed": 9,
+              "total": 9
+            },
+            "review_on_uncertain": {
+              "passed": 2,
+              "total": 9
+            },
+            "score_for_degree": {
+              "passed": 9,
+              "total": 9
+            },
+            "verified_rule_in_code": {
+              "passed": 7,
+              "total": 9
+            },
+            "placement_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "votes_not_judged": {
+              "passed": 8,
+              "total": 9
+            },
+            "new_account_rule_in_code": {
+              "passed": 4,
+              "total": 9
+            },
+            "intent_as_noul": {
+              "passed": 9,
+              "total": 9
+            },
+            "warn_block_gate_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "ordered_levels": {
+              "passed": 9,
+              "total": 9
+            },
+            "comparison_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "declared_not_in_state": {
+              "passed": 9,
+              "total": 9
+            }
+          },
+          "runtime_errors": 3,
+          "samples": 189,
+          "sample_accuracy": {
+            "correct": 141,
+            "graded": 144
+          },
+          "generation_seconds_mean": 71.74444444444445,
+          "discovery_seconds_mean": 18.866666666666667,
+          "generation_tokens": {
+            "prompt": 190440,
+            "completion": 153180,
+            "reasoning": 111409
+          },
+          "generation_cost": 1.2113057835,
+          "judge_cost": 1.745939,
+          "decisions_cost": 0.004018056000000002
+        },
+        "skill": {
+          "discovery_runs": 9,
+          "discovery_errors": 0,
+          "recall": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "precision": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "primitive_match_rate": 0.9523809523809523,
+          "misses": [],
+          "false_positives": [],
+          "designs": 63,
+          "design_errors": 1,
+          "rubric_passed": 483,
+          "rubric_total": 531,
+          "rubric_pass_rate_per_round": {
+            "mean": 0.9096045197740112,
+            "sd": 0.022598870056497133,
+            "n": 3,
+            "values": [
+              0.8870056497175142,
+              0.9096045197740112,
+              0.9322033898305084
+            ]
+          },
+          "per_item": {
+            "deterministic_in_code": {
+              "passed": 60,
+              "total": 62
+            },
+            "primitive_fit": {
+              "passed": 62,
+              "total": 62
+            },
+            "fact_not_text": {
+              "passed": 60,
+              "total": 62
+            },
+            "thresholds_in_code": {
+              "passed": 57,
+              "total": 62
+            },
+            "state_minimal": {
+              "passed": 57,
+              "total": 62
+            },
+            "strikes_rule_in_code": {
+              "passed": 8,
+              "total": 9
+            },
+            "violation_per_noul": {
+              "passed": 6,
+              "total": 9
+            },
+            "hold_on_uncertain": {
+              "passed": 6,
+              "total": 9
+            },
+            "category_as_context": {
+              "passed": 9,
+              "total": 9
+            },
+            "tracking_rules_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "amount_rule_in_code": {
+              "passed": 7,
+              "total": 9
+            },
+            "single_choice": {
+              "passed": 7,
+              "total": 9
+            },
+            "escalate_on_low_confidence": {
+              "passed": 1,
+              "total": 9
+            },
+            "late_from_dates": {
+              "passed": 8,
+              "total": 9
+            },
+            "closed_set_choice": {
+              "passed": 9,
+              "total": 9
+            },
+            "no_dates_in_state": {
+              "passed": 9,
+              "total": 9
+            },
+            "verification_in_code": {
+              "passed": 8,
+              "total": 8
+            },
+            "restricted_business_judged": {
+              "passed": 8,
+              "total": 8
+            },
+            "review_on_uncertain": {
+              "passed": 2,
+              "total": 8
+            },
+            "score_for_degree": {
+              "passed": 9,
+              "total": 9
+            },
+            "verified_rule_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "placement_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "votes_not_judged": {
+              "passed": 9,
+              "total": 9
+            },
+            "new_account_rule_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "intent_as_noul": {
+              "passed": 9,
+              "total": 9
+            },
+            "warn_block_gate_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "ordered_levels": {
+              "passed": 9,
+              "total": 9
+            },
+            "comparison_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "declared_not_in_state": {
+              "passed": 9,
+              "total": 9
+            }
+          },
+          "runtime_errors": 15,
+          "samples": 186,
+          "sample_accuracy": {
+            "correct": 125,
+            "graded": 144
+          },
+          "generation_seconds_mean": 95.02096774193548,
+          "discovery_seconds_mean": 30.244444444444436,
+          "generation_tokens": {
+            "prompt": 483939,
+            "completion": 249636,
+            "reasoning": 200039
+          },
+          "generation_cost": 1.8247072819999999,
+          "judge_cost": 1.8022592499999996,
+          "decisions_cost": 0.0036993180000000014
+        }
+      },
+      "non_discriminating_items": [
+        "primitive_fit",
+        "category_as_context",
+        "tracking_rules_in_code",
+        "closed_set_choice",
+        "verification_in_code",
+        "restricted_business_judged",
+        "score_for_degree",
+        "placement_in_code",
+        "intent_as_noul",
+        "warn_block_gate_in_code",
+        "ordered_levels",
+        "comparison_in_code",
+        "declared_not_in_state"
+      ],
+      "pairwise": {
+        "report": "results/2026-09-29/discovery-marketplace-ops.json",
+        "fixture": "marketplace-ops",
+        "judge": "openai/gpt-5",
+        "pairs": 62,
+        "api-only": 23,
+        "skill": 29,
+        "tie": 0,
+        "inconsistent": 10,
+        "errors": 0,
+        "skill_win_rate_of_decided": 0.5576923076923077,
+        "per_generator": {
+          "openai/gpt-6-astra": {
+            "api-only": 9,
+            "skill": 6,
+            "tie": 0,
+            "inconsistent": 6,
+            "errors": 0
+          },
+          "openai/gpt-5.6-luna": {
+            "api-only": 4,
+            "skill": 15,
+            "tie": 0,
+            "inconsistent": 2,
+            "errors": 0
+          },
+          "z-ai/glm-5.3-flash": {
+            "api-only": 10,
+            "skill": 8,
+            "tie": 0,
+            "inconsistent": 2,
+            "errors": 0
+          }
+        },
+        "cost": 3.4181340000000002
+      }
+    },
+    "support-ops": {
+      "file": "discovery-support-ops.json",
+      "generators": [
+        "openai/gpt-6-astra",
+        "openai/gpt-5.6-luna",
+        "z-ai/glm-5.3-flash"
+      ],
+      "rounds": 3,
+      "arms": {
+        "api-only": {
+          "discovery_runs": 9,
+          "discovery_errors": 0,
+          "recall": {
+            "mean": 0.873015873015873,
+            "sd": 0.11167656571008165,
+            "n": 9,
+            "values": [
+              1,
+              0.7142857142857143,
+              0.8571428571428571,
+              1,
+              0.8571428571428571,
+              0.7142857142857143,
+              1,
+              0.8571428571428571,
+              0.8571428571428571
+            ]
+          },
+          "precision": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "primitive_match_rate": 0.9636363636363636,
+          "misses": [
+            "openai/gpt-5.6-luna r1: src/tickets/duplicates.ts",
+            "openai/gpt-5.6-luna r1: src/kb/suggest.ts",
+            "z-ai/glm-5.3-flash r1: src/kb/suggest.ts",
+            "openai/gpt-5.6-luna r2: src/kb/suggest.ts",
+            "z-ai/glm-5.3-flash r2: src/tickets/duplicates.ts",
+            "z-ai/glm-5.3-flash r2: src/kb/suggest.ts",
+            "openai/gpt-5.6-luna r3: src/kb/suggest.ts",
+            "z-ai/glm-5.3-flash r3: src/kb/suggest.ts"
+          ],
+          "false_positives": [],
+          "designs": 63,
+          "design_errors": 0,
+          "rubric_passed": 446,
+          "rubric_total": 531,
+          "rubric_pass_rate_per_round": {
+            "mean": 0.839924670433145,
+            "sd": 0.02786939470235168,
+            "n": 3,
+            "values": [
+              0.807909604519774,
+              0.8531073446327684,
+              0.8587570621468926
+            ]
+          },
+          "per_item": {
+            "deterministic_in_code": {
+              "passed": 57,
+              "total": 63
+            },
+            "primitive_fit": {
+              "passed": 63,
+              "total": 63
+            },
+            "fact_not_text": {
+              "passed": 51,
+              "total": 63
+            },
+            "thresholds_in_code": {
+              "passed": 62,
+              "total": 63
+            },
+            "state_minimal": {
+              "passed": 25,
+              "total": 63
+            },
+            "single_choice": {
+              "passed": 9,
+              "total": 9
+            },
+            "general_is_option": {
+              "passed": 9,
+              "total": 9
+            },
+            "plan_not_in_state": {
+              "passed": 2,
+              "total": 9
+            },
+            "score_with_levels": {
+              "passed": 9,
+              "total": 9
+            },
+            "plan_cap_in_code": {
+              "passed": 2,
+              "total": 9
+            },
+            "no_regex_parse": {
+              "passed": 9,
+              "total": 9
+            },
+            "candidates_in_state": {
+              "passed": 6,
+              "total": 9
+            },
+            "none_option": {
+              "passed": 18,
+              "total": 18
+            },
+            "status_filter_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "empty_candidates_skip": {
+              "passed": 8,
+              "total": 9
+            },
+            "one_noul_per_label": {
+              "passed": 9,
+              "total": 9
+            },
+            "too_short_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "fact_not_words": {
+              "passed": 6,
+              "total": 9
+            },
+            "hard_rules_stay_in_code": {
+              "passed": 8,
+              "total": 9
+            },
+            "skip_model_when_settled": {
+              "passed": 7,
+              "total": 9
+            },
+            "reason_only_state": {
+              "passed": 6,
+              "total": 9
+            },
+            "unclear_to_review": {
+              "passed": 9,
+              "total": 9
+            },
+            "deterministic_rules_first": {
+              "passed": 9,
+              "total": 9
+            },
+            "choice_with_general": {
+              "passed": 8,
+              "total": 9
+            },
+            "employees_not_reasked": {
+              "passed": 9,
+              "total": 9
+            },
+            "retrieval_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "candidates_named": {
+              "passed": 9,
+              "total": 9
+            },
+            "no_similarity_in_state": {
+              "passed": 9,
+              "total": 9
+            }
+          },
+          "runtime_errors": 6,
+          "samples": 153,
+          "sample_accuracy": null,
+          "generation_seconds_mean": 59.82380952380954,
+          "discovery_seconds_mean": 93.77777777777777,
+          "generation_tokens": {
+            "prompt": 193840,
+            "completion": 196286,
+            "reasoning": 160352
+          },
+          "generation_cost": 1.1400734834999997,
+          "judge_cost": 1.82983125,
+          "decisions_cost": 0.002976288
+        },
+        "skill": {
+          "discovery_runs": 9,
+          "discovery_errors": 0,
+          "recall": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "precision": {
+            "mean": 1,
+            "sd": 0,
+            "n": 9,
+            "values": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          "primitive_match_rate": 1,
+          "misses": [],
+          "false_positives": [],
+          "designs": 63,
+          "design_errors": 2,
+          "rubric_passed": 502,
+          "rubric_total": 531,
+          "rubric_pass_rate_per_round": {
+            "mean": 0.9453860640301318,
+            "sd": 0.025475987304084194,
+            "n": 3,
+            "values": [
+              0.943502824858757,
+              0.9717514124293786,
+              0.9209039548022598
+            ]
+          },
+          "per_item": {
+            "deterministic_in_code": {
+              "passed": 59,
+              "total": 61
+            },
+            "primitive_fit": {
+              "passed": 61,
+              "total": 61
+            },
+            "fact_not_text": {
+              "passed": 59,
+              "total": 61
+            },
+            "thresholds_in_code": {
+              "passed": 60,
+              "total": 61
+            },
+            "state_minimal": {
+              "passed": 57,
+              "total": 61
+            },
+            "single_choice": {
+              "passed": 9,
+              "total": 9
+            },
+            "general_is_option": {
+              "passed": 9,
+              "total": 9
+            },
+            "plan_not_in_state": {
+              "passed": 9,
+              "total": 9
+            },
+            "score_with_levels": {
+              "passed": 9,
+              "total": 9
+            },
+            "plan_cap_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "no_regex_parse": {
+              "passed": 9,
+              "total": 9
+            },
+            "candidates_in_state": {
+              "passed": 8,
+              "total": 8
+            },
+            "none_option": {
+              "passed": 17,
+              "total": 17
+            },
+            "status_filter_in_code": {
+              "passed": 8,
+              "total": 8
+            },
+            "empty_candidates_skip": {
+              "passed": 8,
+              "total": 8
+            },
+            "one_noul_per_label": {
+              "passed": 9,
+              "total": 9
+            },
+            "too_short_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "fact_not_words": {
+              "passed": 8,
+              "total": 9
+            },
+            "hard_rules_stay_in_code": {
+              "passed": 8,
+              "total": 8
+            },
+            "skip_model_when_settled": {
+              "passed": 8,
+              "total": 8
+            },
+            "reason_only_state": {
+              "passed": 8,
+              "total": 8
+            },
+            "unclear_to_review": {
+              "passed": 8,
+              "total": 8
+            },
+            "deterministic_rules_first": {
+              "passed": 8,
+              "total": 9
+            },
+            "choice_with_general": {
+              "passed": 9,
+              "total": 9
+            },
+            "employees_not_reasked": {
+              "passed": 9,
+              "total": 9
+            },
+            "retrieval_in_code": {
+              "passed": 9,
+              "total": 9
+            },
+            "candidates_named": {
+              "passed": 9,
+              "total": 9
+            },
+            "no_similarity_in_state": {
+              "passed": 9,
+              "total": 9
+            }
+          },
+          "runtime_errors": 6,
+          "samples": 147,
+          "sample_accuracy": null,
+          "generation_seconds_mean": 92.97049180327868,
+          "discovery_seconds_mean": 37.644444444444446,
+          "generation_tokens": {
+            "prompt": 480286,
+            "completion": 231655,
+            "reasoning": 193393
+          },
+          "generation_cost": 1.4911340790000005,
+          "judge_cost": 1.6769115,
+          "decisions_cost": 0.0029373960000000005
+        }
+      },
+      "non_discriminating_items": [
+        "primitive_fit",
+        "single_choice",
+        "general_is_option",
+        "score_with_levels",
+        "no_regex_parse",
+        "none_option",
+        "status_filter_in_code",
+        "one_noul_per_label",
+        "too_short_in_code",
+        "unclear_to_review",
+        "employees_not_reasked",
+        "retrieval_in_code",
+        "candidates_named",
+        "no_similarity_in_state"
+      ],
+      "pairwise": {
+        "report": "results/2026-09-29/discovery-support-ops.json",
+        "fixture": "support-ops",
+        "judge": "openai/gpt-5",
+        "pairs": 61,
+        "api-only": 11,
+        "skill": 38,
+        "tie": 0,
+        "inconsistent": 12,
+        "errors": 0,
+        "skill_win_rate_of_decided": 0.7755102040816326,
+        "per_generator": {
+          "openai/gpt-6-astra": {
+            "api-only": 2,
+            "skill": 13,
+            "tie": 0,
+            "inconsistent": 6,
+            "errors": 0
+          },
+          "openai/gpt-5.6-luna": {
+            "api-only": 3,
+            "skill": 15,
+            "tie": 0,
+            "inconsistent": 3,
+            "errors": 0
+          },
+          "z-ai/glm-5.3-flash": {
+            "api-only": 6,
+            "skill": 10,
+            "tie": 0,
+            "inconsistent": 3,
+            "errors": 0
+          }
+        },
+        "cost": 2.9860714999999987
+      }
+    }
+  },
+  "implementation_pairwise": {
+    "source": "results/2026-09-29/codex-runs.json",
+    "judge": "openai/gpt-5",
+    "pairs": 36,
+    "no-skill": 0,
+    "skill": 31,
+    "tie": 0,
+    "inconsistent": 5,
+    "errors": 0,
+    "skill_win_rate_of_decided": 1,
+    "per_model": {
+      "openai/gpt-5.6-luna": {
+        "no-skill": 0,
+        "skill": 11,
+        "tie": 0,
+        "inconsistent": 1,
+        "errors": 0
+      },
+      "openai/gpt-6-astra": {
+        "no-skill": 0,
+        "skill": 10,
+        "tie": 0,
+        "inconsistent": 2,
+        "errors": 0
+      },
+      "z-ai/glm-5.3-flash": {
+        "no-skill": 0,
+        "skill": 10,
+        "tie": 0,
+        "inconsistent": 2,
+        "errors": 0
+      }
+    },
+    "cost": 2.3518125000000003
+  }
+}

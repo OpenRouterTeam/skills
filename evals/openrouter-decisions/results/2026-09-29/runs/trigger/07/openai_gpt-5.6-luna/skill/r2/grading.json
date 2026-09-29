@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01771875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "In src/prompt-injection-guard.ts the request uses a noul question (questions.is_prompt_injection.type === \"noul\") and defines thresholds in code (export const BLOCK_THRESHOLD = 0.85).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The message is sent as state: { user_message: message } and the test asserts request.state.user_message equals the input, while the instructions reference `state.user_message` (not concatenating the message into the prompt).",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,5 @@
+node_modules/
+results/**/stderr.log
+results/**/outputs/.npm-cache/
+results/**/outputs/node_modules/
+results/**/outputs/.git/

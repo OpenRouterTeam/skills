@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02051375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decision-model-limits.md, references/decisions-api.md, references/models.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "In src/prompt-injection-guard.ts, the question is defined with type: \"noul\" and the threshold is coded as export const INJECTION_THRESHOLD = 0.5;",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The request sets state: { user_message: userMessage } and does not concatenate the untrusted message into the instructions string.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

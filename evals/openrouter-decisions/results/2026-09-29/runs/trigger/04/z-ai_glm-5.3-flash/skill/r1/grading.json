@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.016665,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Code uses Decisions API and numeric outputs: e.g., 'const spam = response.answers.is_spam; ... if (spam.noul >= SPAM_T) ...' with no string matching like includes().",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Although 'is_spam' and 'is_abusive' are separate noul questions, the function returns a single ReviewVerdict and short-circuits ('if (spam.noul >= SPAM_T) return \"spam\"; if (abusive.noul >= ABUSIVE_T) return \"abusive\";'), so a review cannot be both in the output.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Thresholds are defined in code next to where probabilities are used: 'const SPAM_T = 0.7; const ABUSIVE_T = 0.7;' and then compared to 'spam.noul' and 'abusive.noul'.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

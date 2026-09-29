@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"01a0eb05-50ea-7171-8ffc-c859b0954ad0"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Model metadata for `z-ai/glm-5.3-flash` not found. Defaulting to fallback metadata; this can degrade performance and cause issues."}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Add a retry helper that retries rate limits, auth-token refresh errors, transient server errors, timeouts, and connection errors:"}}
+{"type":"turn.completed","usage":{"input_tokens":8808,"cached_input_tokens":7552,"cache_write_input_tokens":0,"output_tokens":38,"reasoning_output_tokens":15}}

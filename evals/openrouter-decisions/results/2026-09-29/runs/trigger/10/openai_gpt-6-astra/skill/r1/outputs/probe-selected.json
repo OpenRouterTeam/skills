@@ -1,0 +1,37 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "rankings": [
+    {
+      "ticketId": "paraphrase",
+      "probabilitySameIssue": 0.98
+    },
+    {
+      "ticketId": "same-issue",
+      "probabilitySameIssue": 0.98
+    },
+    {
+      "ticketId": "adversarial",
+      "probabilitySameIssue": 0.26
+    },
+    {
+      "ticketId": "ambiguous",
+      "probabilitySameIssue": 0.22
+    },
+    {
+      "ticketId": "empty",
+      "probabilitySameIssue": 0.03
+    },
+    {
+      "ticketId": "same-topic-different-failure",
+      "probabilitySameIssue": 0.02
+    },
+    {
+      "ticketId": "negated",
+      "probabilitySameIssue": 0.02
+    },
+    {
+      "ticketId": "unrelated",
+      "probabilitySameIssue": 0.01
+    }
+  ]
+}

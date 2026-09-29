@@ -1,0 +1,129 @@
+[
+  {
+    "name": "password",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.03,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "frustrated_invoice",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.03,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "refund_policy",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.11,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "refund_action",
+    "expectedHandoff": true,
+    "action": "handoff",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.72,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "suspended",
+    "expectedHandoff": true,
+    "action": "handoff",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.9,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "ambiguous",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.09,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "off_topic",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.12,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "empty",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "empty",
+    "passed": true
+  },
+  {
+    "name": "negated_human",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.04,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "human_request",
+    "expectedHandoff": true,
+    "action": "handoff",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.96,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "exhausted",
+    "expectedHandoff": true,
+    "action": "handoff",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.55,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "adversarial_escalate",
+    "expectedHandoff": false,
+    "action": "continue",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.28,
+    "threshold": 0.5,
+    "passed": true
+  },
+  {
+    "name": "adversarial_suppress",
+    "expectedHandoff": true,
+    "action": "handoff",
+    "reason": "model",
+    "model": "typesafe/jev-1.13-20260917",
+    "probability": 0.94,
+    "threshold": 0.5,
+    "passed": true
+  }
+]

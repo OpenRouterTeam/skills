@@ -1,0 +1,39 @@
+name: Gate auto-merge on breaking changes
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out workflow code
+        uses: actions/checkout@v4
+
+      - name: Classify PR description
+        id: decision
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PR_DESCRIPTION: ${{ github.event.pull_request.body }}
+        run: node scripts/gate-auto-merge.js
+
+      - name: Enable auto-merge for non-breaking change
+        if: steps.decision.outputs.should_merge == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --auto --squash
+
+      - name: Disable auto-merge when not approved
+        if: always() && steps.decision.outputs.should_merge != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --disable-auto || true
+
+      - name: Leave breaking change for manual review
+        if: always() && steps.decision.outputs.should_merge != 'true'
+        run: echo "Auto-merge remains disabled: ${{ steps.decision.outputs.reason }}"

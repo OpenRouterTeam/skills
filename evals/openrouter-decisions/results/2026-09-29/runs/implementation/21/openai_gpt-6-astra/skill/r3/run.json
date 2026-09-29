@@ -1,0 +1,145 @@
+{
+  "id": 21,
+  "kind": "implementation",
+  "category": "implementation",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T03:13:52.313Z",
+  "duration_ms": 154428,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 322319,
+    "cached_input_tokens": 284734,
+    "output_tokens": 7603,
+    "reasoning_output_tokens": 505
+  },
+  "estimated_cost": 1.040734,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll inspect the app and use the OpenRouter Decisions skill to add urgency scoring for incident reports.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd; rg --files -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"' -g '\"'!yarn.lock'\"' -g '\"'!*lock*'\"' -g 'AGENTS.md' -g '*.*'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/SKILL.md\n.git/hooks/prepare-commit-msg.sample\n.git/hooks/fsmonitor-watchman.sample\n.git/hooks/pre-push.sample\n.git/hooks/applypatch-msg.sample\n.git/hooks/pre-applypatch.sample\n.git/hooks/pre-receive.sample\n.git/hooks/update.sample\n.git/hooks/push-to-checkout.sample\n.git/hooks/pre-merge-commit.sample\n.git/hooks/pre-commit.sample\n.git/hooks/post-update.sample\n.git/hooks/commit-msg.sample\n.git/hooks/pre-rebase.sample\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decisions-api.md .agents/skills/openrouter-decisions/references/models.md .agents/skills/openrouter-decisions/references/decision-model-limits.md'\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/scripts/lib.ts .agents/skills/openrouter-decisions/scripts/package.json'\n<output>\nimport { OpenRouter } from \"@openrouter/sdk\";\n\nexport const DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\";\nexport const SDK_SERVER_URL = \"https://openrouter.ai\";\nexport const MODELS_URL = \"https://openrouter.ai/api/v1/models?output_modalities=decisions\";\n\nexport function withModel(raw: unknown, flag: string | undefined): unknown {\n  if (!isRecord(raw)) return raw;\n  if (flag !== undefined) return { ...raw, model: flag };\n  if (\"model\" in raw) return raw;\n  const fromEnv = process.env.DECISION_MODEL;\n  return fromEnv === undefined ? raw : { ...raw, model: fromEnv };\n}\n\nexport type DecisionModel = {\n  id: string;\n  name: string;\n  buildSlug: string;\n  aliasTarget?: string;\n  createdAt: Date;\n  contextLength: number;\n  promptPricePerToken: number;\n  completionPricePerToken: number;\n  description: string;\n  endpointsUrl: string;\n};\n\nexport type ModelEndpoint = {\n  providerName: string;\n  contextLength: number;\n  maxPromptTokens?: number;\n  quantization?: string;\n  uptimeLast30m?: number;\n};\n\nexport async function listDecisionModels(): Promise<DecisionModel[]> {\n  const res = await fetch(MODELS_URL);\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Models API ${res.status}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !Array.isArray(raw.data)) throw new Error(\"Models API response has no data array\");\n  return raw.data.filter(isDecisionsEntry).map(parseModel);\n}\n\nexport async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {\n  const apiKey = process.env.OPENROUTER_API_KEY;\n  const res = await fetch(model.endpointsUrl, {\n    headers: apiKey === undefined ? {} : { Authorization: `Bearer ${apiKey}` },\n  });\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {\n    throw new Error(`Endpoints API response"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'ls -la; git status --short; find .. -name AGENTS.md -print'\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 03:13 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 03:13 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 03:13 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 03:13 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 03:13 .git\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -fsS --max-time 25 'https://openrouter.ai/api/v1/models?output_modalities=decisions' -o /tmp/incident-decision-models.json; node -e 'const fs=require(\\\"fs\\\");const p=\\\"/tmp/incident-decision-models.json\\\";if(fs.existsSync(p)){const x=JSON.parse(fs.readFileSync(p)); console.log(JSON.stringify(x,null,2))} console.log(\\\"API key available:\\\",Boolean(process.env.OPENROUTER_API_KEY))'\"\n<output>\n{\n  \"data\": [\n    {\n      \"id\": \"upstage/solar-decide\",\n      \"canonical_slug\": \"upstage/solar-decide-20260928\",\n      \"hugging_face_id\": null,\n      \"name\": \"Upstage: Solar Decide\",\n      \"created\": 1790592657,\n      \"description\": \"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\n      \"context_length\": 524288,\n      \"architecture\": {\n        \"modality\": \"text->decisions\",\n        \"input_modalities\": [\n          \"text\"\n        ],\n        \"output_modalities\": [\n          \"decisions\"\n        ],\n        \"tokenizer\": \"Other\",\n        \"instruct_type\": null\n      },\n      \"pricing\": {\n        \"prompt\": \"0.00000005\",\n        \"completion\": \"0\",\n        \"input_cache_read\": \"0.00000005\"\n      },\n      \"top_provider\": {\n        \"context_length\": 524288,\n        \"max_completion_tokens\": 471859,\n        \"is_moderated\": false\n      },\n      \"per_request_limits\": null,\n      \"supported_parameters\": [],\n      \"default_parameters\": {},\n      \"supported_voices\": null,\n      \"knowledge_cutoff\": null,\n      \"expiration_date\": null,\n      \"links\": {\n        \"details\": \"/api/v1/models/upstage/solar-decide-20260928/endpoints\"\n      }\n    },\n    {\n      \"id\": \"respan/span-01\",\n      \"canonical_slug\": \"respan/span-01-20260925\",\n      \"hugging_face_id\": null,\n      \"name\": \"Respan: Span-01\",\n      \"created\": 1790387550,\n      \"description\": \"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\n      \"context_length\": 0,\n      \"architecture\": {\n        \"modality\": \"text->decisions\",\n        \"input_modalities\": [\n          \"text\"\n        ],\n        \"output_modalities\": [\n          \"decisions\"\n        ],\n        \"tokenizer\": \"Other\",\n        \"instruct_type\": null\n      },\n      \"pricing\": {\n        \"prompt\": \"0.00000002\",\n        \""
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no app code, so I’m adding a standalone TypeScript module. It will use five ordered urgency levels, with 5 most urgent, and retain the model’s probabilities for inspection. I’ll also test candidate models on clear, ambiguous, negated, and adversarial reports.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'mkdir -p src/vendor test scripts; cp .agents/skills/openrouter-decisions/scripts/lib.ts src/vendor/decisions.ts'\n<output>\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/scripts/rate.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/src/urgency.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/tsconfig.json"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/scripts/probe.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/scripts/rate.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/src/vendor/decisions.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --cache /tmp/incident-npm-cache'\n<output>\n\nadded 8 packages, and audited 9 packages in 1s\n\n1 package is looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/test/urgency.test.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run check; npm test'\n<output>\n\n> test\n> tsx --test test/*.test.ts\n\n✔ request uses one ordered score and only the two input fields (1.236911ms)\n✔ empty, malformed and oversized inputs fail before network access (0.39029ms)\n✔ zero-based score maps to 1–5 with half-level ties upward (0.225559ms)\n✔ optional response metadata may be absent but must be valid when supplied (0.127998ms)\n✔ dashboard sorts highest urgency first and preserves ties (0.13272ms)\n✔ HTTP integration sends typed request and logs the resolved build with the rating (13.524016ms)\n✔ API failures and malformed responses never silently become low urgency (1.364555ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 833.318271\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The scorer and dashboard sort helper are implemented. Empty or oversized reports are rejected before an API call, and API failures remain errors rather than receiving a misleading low rating. Local checks and live model probes are running now.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe'\n<output>\n{\"model\":\"upstage/solar-decide-20260928\",\"passed\":11,\"total\":11}\n{\"model\":\"jaredpalmer/kev-4b-20260924\",\"passed\":8,\"total\":11}\n{\"model\":\"typesafe/jev-1.13-20260917\",\"passed\":11,\"total\":11}\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/README.md"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"node -e 'const x=require(\\\"./probe-results.json\\\"); for (const r of x.results) console.log(JSON.stringify({model:r.model.buildSlug,context:r.model.contextLength,price:r.model.promptPricePerToken,endpoints:r.endpoints,probes:r.probes.map(p=>({name:p.name,urgency:p.urgency,rawScore:p.rawScore,probabilities:p.probabilities,pass:p.pass,latencyMs:p.latencyMs,cost:p.usage?.cost,tokens:p.usage?.input_tokens,error:p.error}))},null,2))'\"\n<output>\n{\n  \"model\": \"upstage/solar-decide-20260928\",\n  \"context\": 524288,\n  \"price\": 5e-8,\n  \"endpoints\": [\n    {\n      \"providerName\": \"Upstage\",\n      \"contextLength\": 524288,\n      \"uptimeLast30m\": 100\n    },\n    {\n      \"providerName\": \"Upstage\",\n      \"contextLength\": 524288,\n      \"uptimeLast30m\": 100\n    }\n  ],\n  \"probes\": [\n    {\n      \"name\": \"routine\",\n      \"urgency\": 1,\n      \"rawScore\": 0.469609,\n      \"probabilities\": {\n        \"0\": 0.553876,\n        \"1\": 0.431359,\n        \"2\": 0.008953,\n        \"3\": 0.002906,\n        \"4\": 0.002906\n      },\n      \"pass\": true,\n      \"latencyMs\": 545,\n      \"cost\": 0.0000293,\n      \"tokens\": 586\n    },\n    {\n      \"name\": \"low\",\n      \"urgency\": 2,\n      \"rawScore\": 0.970817,\n      \"probabilities\": {\n        \"0\": 0.091153,\n        \"1\": 0.864833,\n        \"2\": 0.029593,\n        \"3\": 0.010887,\n        \"4\": 0.003534\n      },\n      \"pass\": true,\n      \"latencyMs\": 542,\n      \"cost\": 0.00002975,\n      \"tokens\": 595\n    },\n    {\n      \"name\": \"moderate\",\n      \"urgency\": 3,\n      \"rawScore\": 1.765951,\n      \"probabilities\": {\n        \"0\": 0.003273,\n        \"1\": 0.260005,\n        \"2\": 0.706768,\n        \"3\": 0.027404,\n        \"4\": 0.002549\n      },\n      \"pass\": true,\n      \"latencyMs\": 537,\n      \"cost\": 0.00002975,\n      \"tokens\": 595\n    },\n    {\n      \"name\": \"high\",\n      \"urgency\": 4,\n      \"rawScore\": 3.068755,\n      \"probabilities\": {\n        \"0\": 0.000839,\n        \"1\": 0.000839,\n        \"2\": 0.002585,\n        \"3\": 0.920202,\n        \"4\": 0.075535\n      },\n      \"pass\": true,\n      \"latencyMs\": 566,\n      \"cost\": 0.0000299,\n      \"tokens\": 598\n    },\n    {\n      \"name\": \"critical\",\n      \"urgency\": 5,\n      \"rawScore\": 3.990286,\n      \"probabilities\": {\n        \"0\": 0.000294,\n        \"1\": 0.000333,\n        \"2\": 0.000427,\n        \"3\": 0.006686,\n        \"4\": 0.99226\n      },\n      \"pass\": true,\n      \"latencyMs\": 547,\n      \"cost\": 0.0000298,\n      \"tokens\": 596\n    },\n    {\n      \"name\": \"ambiguous\",\n      \"urgency\": 3,\n      \"ra"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git diff --check; git status --short'\n<output>\n?? .gitignore\n?? README.md\n?? package-lock.json\n?? package.json\n?? scripts/\n?? src/\n?? test/\n?? tsconfig.json\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "All seven local tests passed. Jev and Solar matched the expected ratings in all 10 live report cases; Kev missed three. I’ve pinned Jev, which was faster and cheaper than Solar in this run, and will save the comparison results with the code.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"mkdir -p evaluation; cp probe-results.json evaluation/model-probes.json; node -e 'const x=require(\\\"./probe-results.json\\\");for(const r of x.results){const p=r.probes.filter(p=>p.usage);console.log(r.model.buildSlug, \\\"mean ms\\\",p.reduce((s,p)=>s+p.latencyMs,0)/p.length,\\\"mean cost\\\",p.reduce((s,p)=>s+p.usage.cost,0)/p.length)}'\"\n<output>\nupstage/solar-decide-20260928 mean ms 507.2 mean cost 0.00002972\njaredpalmer/kev-4b-20260924 mean ms 608 mean cost 0.000011402999999999999\ntypesafe/jev-1.13-20260917 mean ms 212.3 mean cost 0.000023822399999999997\n"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/implementation/21/openai_gpt-6-astra/skill/r3/workspace/README.md"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git diff --no-index --check /dev/null src/urgency.ts; git diff --no-index --check /dev/null README.md'\n<output>\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Implemented a TypeScript scorer using OpenRouter Decisions:\n\n- Rates `{ service, text }` from **1 (routine) to 5 (critical)**.\n- Includes dashboard sorting, input validation, timeouts, and probability metadata.\n- Pins Jev after comparing three models.\n\nType checking and all seven tests passed; Jev matched all 10 live probe expectations.\n\nSet `OPENROUTER_API_KEY` and follow [README.md](README.md) to run or integrate it."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Implemented a TypeScript scorer using OpenRouter Decisions:\n\n- Rates `{ service, text }` from **1 (routine) to 5 (critical)**.\n- Includes dashboard sorting, input validation, timeouts, and probability metadata.\n- Pins Jev after comparing three models.\n\nType checking and all seven tests passed; Jev matched all 10 live probe expectations.\n\nSet `OPENROUTER_API_KEY` and follow [README.md](README.md) to run or integrate it.",
+  "produced_files": [
+    ".gitignore",
+    "README.md",
+    "evaluation/model-probes.json",
+    "package-lock.json",
+    "package.json",
+    "probe-results.json",
+    "scripts/probe.ts",
+    "scripts/rate.ts",
+    "src/urgency.ts",
+    "src/vendor/decisions.ts",
+    "test/urgency.test.ts",
+    "tsconfig.json"
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "id": 10,
+  "kind": "trigger",
+  "category": "trigger-contextual",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 3,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:35:30.115Z",
+  "duration_ms": 158947,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 449193,
+    "cached_input_tokens": 408318,
+    "output_tokens": 7267,
+    "reasoning_output_tokens": 457
+  },
+  "estimated_cost": 1.180418,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll use the OpenRouter Decisions skill to replace token overlap with a probability-based ranking of candidate tickets. I’ll first check the detector and its surrounding code."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd && rg --files -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"' -g '\"'!uv.lock'\"' -g '\"'!*lock*'\"' -g 'AGENTS.md' -g '*ticket*' -g 'README*' -g 'pyproject.toml' -g 'package.json' -g '*.py' -g '*.ts' -g '*.js'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/scripts/lib.ts'\n<output>\nimport { OpenRouter } from \"@openrouter/sdk\";\n\nexport const DECISIONS_URL = \"https://openrouter.ai/api/alpha/decisions\";\nexport const SDK_SERVER_URL = \"https://openrouter.ai\";\nexport const MODELS_URL = \"https://openrouter.ai/api/v1/models?output_modalities=decisions\";\n\nexport function withModel(raw: unknown, flag: string | undefined): unknown {\n  if (!isRecord(raw)) return raw;\n  if (flag !== undefined) return { ...raw, model: flag };\n  if (\"model\" in raw) return raw;\n  const fromEnv = process.env.DECISION_MODEL;\n  return fromEnv === undefined ? raw : { ...raw, model: fromEnv };\n}\n\nexport type DecisionModel = {\n  id: string;\n  name: string;\n  buildSlug: string;\n  aliasTarget?: string;\n  createdAt: Date;\n  contextLength: number;\n  promptPricePerToken: number;\n  completionPricePerToken: number;\n  description: string;\n  endpointsUrl: string;\n};\n\nexport type ModelEndpoint = {\n  providerName: string;\n  contextLength: number;\n  maxPromptTokens?: number;\n  quantization?: string;\n  uptimeLast30m?: number;\n};\n\nexport async function listDecisionModels(): Promise<DecisionModel[]> {\n  const res = await fetch(MODELS_URL);\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Models API ${res.status}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !Array.isArray(raw.data)) throw new Error(\"Models API response has no data array\");\n  return raw.data.filter(isDecisionsEntry).map(parseModel);\n}\n\nexport async function listEndpoints(model: DecisionModel): Promise<ModelEndpoint[]> {\n  const apiKey = process.env.OPENROUTER_API_KEY;\n  const res = await fetch(model.endpointsUrl, {\n    headers: apiKey === undefined ? {} : { Authorization: `Bearer ${apiKey}` },\n  });\n  const text = await res.text();\n  if (!res.ok) throw new Error(`Endpoints API ${res.status} for ${model.id}: ${text}`);\n  const raw: unknown = JSON.parse(text);\n  if (!isRecord(raw) || !isRecord(raw.data) || !Array.isArray(raw.data.endpoints)) {\n    throw new Error(`Endpoints API response"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'ls -la && find .. -name AGENTS.md -print'\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:35 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:35 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:35 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:35 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:35 .git\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decisions-api.md .agents/skills/openrouter-decisions/references/models.md .agents/skills/openrouter-decisions/references/decision-model-limits.md'\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"node --version && npm --version && python -c 'import os; print(\\\"OPENROUTER_API_KEY available:\\\", bool(os.getenv(\\\"OPENROUTER_API_KEY\\\")))' && cat .agents/skills/openrouter-decisions/scripts/package.json && git status --short\"\n<output>\nOPENROUTER_API_KEY available: True\n{\n  \"name\": \"openrouter-decisions-scripts\",\n  \"type\": \"module\",\n  \"private\": true,\n  \"dependencies\": {\n    \"@openrouter/sdk\": \"^1.3.23\"\n  },\n  \"devDependencies\": {\n    \"tsx\": \"^4.0.0\"\n  }\n}\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl -fsS --max-time 25 'https://openrouter.ai/api/v1/models?output_modalities=decisions' -o /tmp/ticket-decision-models.json && python -c 'import json; d=json.load(open(\\\"/tmp/ticket-decision-models.json\\\")); print(json.dumps(d, indent=2)[:24000])'\"\n<output>\n{\n  \"data\": [\n    {\n      \"id\": \"upstage/solar-decide\",\n      \"canonical_slug\": \"upstage/solar-decide-20260928\",\n      \"hugging_face_id\": null,\n      \"name\": \"Upstage: Solar Decide\",\n      \"created\": 1790592657,\n      \"description\": \"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\n      \"context_length\": 524288,\n      \"architecture\": {\n        \"modality\": \"text->decisions\",\n        \"input_modalities\": [\n          \"text\"\n        ],\n        \"output_modalities\": [\n          \"decisions\"\n        ],\n        \"tokenizer\": \"Other\",\n        \"instruct_type\": null\n      },\n      \"pricing\": {\n        \"prompt\": \"0.00000005\",\n        \"completion\": \"0\",\n        \"input_cache_read\": \"0.00000005\"\n      },\n      \"top_provider\": {\n        \"context_length\": 524288,\n        \"max_completion_tokens\": 471859,\n        \"is_moderated\": false\n      },\n      \"per_request_limits\": null,\n      \"supported_parameters\": [],\n      \"default_parameters\": {},\n      \"supported_voices\": null,\n      \"knowledge_cutoff\": null,\n      \"expiration_date\": null,\n      \"links\": {\n        \"details\": \"/api/v1/models/upstage/solar-decide-20260928/endpoints\"\n      }\n    },\n    {\n      \"id\": \"respan/span-01\",\n      \"canonical_slug\": \"respan/span-01-20260925\",\n      \"hugging_face_id\": null,\n      \"name\": \"Respan: Span-01\",\n      \"created\": 1790387550,\n      \"description\": \"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\n      \"context_length\": 0,\n      \"architecture\": {\n        \"modality\": \"text->decisions\",\n        \"input_modalities\": [\n          \"text\"\n        ],\n        \"output_modalities\": [\n          \"decisions\"\n        ],\n        \"tokenizer\": \"Other\",\n        \"instruct_type\": null\n      },\n      \"pricing\": {\n        \"prompt\": \"0.00000002\",\n        \""
+    },
+    {
+      "type": "agent_message",
+      "text": "The workspace has no application code, so I’ll create a standalone TypeScript ranker. It will ask one independent “same underlying issue?” question per candidate in a single request, then sort the probabilities. This allows several tickets to match—or all candidates to score low."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/scripts/decide.ts .agents/skills/openrouter-decisions/scripts/models.ts'\n<output>\n#!/usr/bin/env -S npx tsx\n/**\n * Send one Decisions request and print the typed answers.\n *\n * Usage:\n *   npx tsx decide.ts request.json --model <model-id>   # raw HTTP to /api/alpha/decisions\n *   npx tsx decide.ts request.json --sdk                # through @openrouter/sdk\n *   npx tsx decide.ts request.json --compare            # same request to every pinned model in the catalog\n *   cat request.json | npx tsx decide.ts -              # read the request from stdin\n *\n * request.json: { \"state\": ..., \"questions\": { ... } } plus an optional \"model\".\n * Model precedence: --model, then request.model, then DECISION_MODEL. --compare ignores all three.\n */\nimport { readFileSync } from \"node:fs\";\nimport {\n  decide,\n  listDecisionModels,\n  parseRequest,\n  parseRequestBody,\n  requireApiKey,\n  withModel,\n  type DecisionsRequestBody,\n  type DecisionsResponse,\n  type Transport,\n} from \"./lib.ts\";\n\ntype ComparisonRow =\n  | {\n      model_id: string;\n      model: string;\n      latency_ms: number;\n      usage: DecisionsResponse[\"usage\"];\n      answers: DecisionsResponse[\"answers\"];\n    }\n  | { model_id: string; error: string };\n\nconst args = process.argv.slice(2);\nconst transport: Transport = args.includes(\"--sdk\") ? \"sdk\" : \"http\";\nconst compare = args.includes(\"--compare\");\nconst modelFlagIndex = args.indexOf(\"--model\");\nconst modelValueIndex = modelFlagIndex === -1 ? -1 : modelFlagIndex + 1;\nconst modelFlag = modelValueIndex === -1 ? undefined : args[modelValueIndex];\nconst source = args.find((a, i) => !a.startsWith(\"--\") && i !== modelValueIndex);\n\nif (\n  !source ||\n  (modelFlagIndex !== -1 && (!modelFlag || modelFlag.startsWith(\"--\"))) ||\n  (compare && modelFlagIndex !== -1)\n) {\n  console.error(\"Usage: npx tsx decide.ts <request.json | -> [--sdk] [--model <model-id> | --compare]\");\n  process.exit(1);\n}\n\nconst rawText = source === \"-\" ? readFileSync(0, \"utf8\") : readFileSync(source, \"utf8\");\nconst raw: unknown = JSON.parse(rawText);\nconst apiKey = requireApiKey();\n\nif (compa"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'mkdir -p src scripts probes && cp .agents/skills/openrouter-decisions/scripts/lib.ts scripts/lib.ts && cp .agents/skills/openrouter-decisions/scripts/decide.ts scripts/decide.ts && cp .agents/skills/openrouter-decisions/scripts/models.ts scripts/models.ts'\n<output>\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/example.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/probes/prepare.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/src/config.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/src/rank-tickets.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/tsconfig.json"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/src/rank-tickets.test.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --cache /tmp/ticket-ranker-npm-cache'\n<output>\n\nadded 8 packages, and audited 9 packages in 1s\n\n1 package is looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The ranker is in place. Empty inputs skip the model, and API failures remain errors rather than appearing as “no duplicate.” I’m now checking paraphrases, similar wording for different issues, negated symptoms, and misleading ticket text against the available models."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm test && npm run typecheck'\n<output>\n✔ ranks independent probabilities, retaining multiple matches and stable ties (14.611955ms)\n✔ empty inputs skip the model; invalid candidate sets fail locally (0.470339ms)\n✔ missing, mistyped, invalid probabilities and HTTP failures never become no-match results (0.999197ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 814.04383\n\n> typecheck\n> tsc --noEmit\n\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe:prepare && node_modules/.bin/tsx scripts/models.ts probes/mixed.request.json --json > probes/catalog.json && node_modules/.bin/tsx scripts/decide.ts probes/mixed.request.json --compare > probes/mixed.results.json'\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat probes/catalog.json probes/mixed.results.json'\n<output>\n[\n  {\n    \"id\": \"respan/span-01-lite\",\n    \"name\": \"Respan: Span-01 Lite\",\n    \"build_slug\": \"respan/span-01-lite-20260925\",\n    \"released\": \"2026-09-26\",\n    \"context_length\": 0,\n    \"usd_per_million_input_tokens\": 0,\n    \"usd_per_million_output_tokens\": 0,\n    \"providers\": [\n      \"Respan\"\n    ],\n    \"min_uptime_last_30m\": 100,\n    \"max_input_tokens\": 0,\n    \"estimated_input_tokens\": 2229,\n    \"fit\": \"no\",\n    \"description\": \"Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present...\"\n  },\n  {\n    \"id\": \"respan/span-01-lite:free\",\n    \"name\": \"Respan: Span-01 Lite (free)\",\n    \"build_slug\": \"respan/span-01-lite-20260925\",\n    \"released\": \"2026-09-26\",\n    \"context_length\": 0,\n    \"usd_per_million_input_tokens\": 0,\n    \"usd_per_million_output_tokens\": 0,\n    \"providers\": [\n      \"Respan\"\n    ],\n    \"min_uptime_last_30m\": 100,\n    \"max_input_tokens\": 0,\n    \"estimated_input_tokens\": 2229,\n    \"fit\": \"no\",\n    \"description\": \"Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present...\"\n  },\n  {\n    \"id\": \"respan/span-01\",\n    \"name\": \"Respan: Span-01\",\n    \"build_slug\": \"respan/span-01-20260925\",\n    \"released\": \"2026-09-26\",\n    \"context_length\": 0,\n    \"usd_per_million_input_tokens\": 0.02,\n    \"usd_per_million_output_tokens\": 0,\n    \"providers\": [\n      \"Respan\"\n    ],\n    \"min_uptime_last_30m\": 100,\n    \"max_input_tokens\": 0,\n    \"estimated_input_tokens\": 2229,\n    \"fit\": \"no\",\n    \"description\": \"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\"\n  },\n  {\n    \"id\": \"jaredpalmer/kev-4b\",\n    \"name\": \"Jared Palmer: Kev 4B\",\n    \"build_slug\": \"jaredpalmer/kev-4b-2"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'node_modules/.bin/tsx scripts/decide.ts probes/negated_new.request.json --compare > probes/negated_new.results.json'\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'node_modules/.bin/tsx scripts/decide.ts probes/no_match.request.json --compare > probes/no_match.results.json'\n<output>\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run example'\n<output>\n{\n  \"model\": \"typesafe/jev-1.13-20260917\",\n  \"ranked\": [\n    {\n      \"ticketId\": \"T-101\",\n      \"probabilitySameIssue\": 0.98\n    },\n    {\n      \"ticketId\": \"T-102\",\n      \"probabilitySameIssue\": 0.02\n    },\n    {\n      \"ticketId\": \"T-103\",\n      \"probabilitySameIssue\": 0.01\n    }\n  ],\n  \"unscored\": [],\n  \"status\": \"ranked\"\n}\n{\"model\":\"typesafe/jev-1.13-20260917\",\"ranked\":[{\"ticketId\":\"T-101\",\"probabilitySameIssue\":0.98},{\"ticketId\":\"T-102\",\"probabilitySameIssue\":0.02},{\"ticketId\":\"T-103\",\"probabilitySameIssue\":0.01}],\"latencyMs\":247,\"cost\":0.000044814}\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat probes/no_match.results.json probes/negated_new.results.json'\n<output>\n[\n  {\n    \"model_id\": \"upstage/solar-decide\",\n    \"model\": \"upstage/solar-decide-20260928\",\n    \"latency_ms\": 561,\n    \"usage\": {\n      \"input_tokens\": 1962,\n      \"output_tokens\": 3,\n      \"cost\": 0.0000981\n    },\n    \"answers\": {\n      \"candidate_0\": {\n        \"type\": \"noul\",\n        \"noul\": 0.291608\n      },\n      \"candidate_1\": {\n        \"type\": \"noul\",\n        \"noul\": 0.049778\n      },\n      \"candidate_2\": {\n        \"type\": \"noul\",\n        \"noul\": 0.287067\n      }\n    }\n  },\n  {\n    \"model_id\": \"respan/span-01\",\n    \"error\": \"Decisions API 400: {\\\"error\\\":{\\\"message\\\":\\\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\\\",\\\"code\\\":400}}\"\n  },\n  {\n    \"model_id\": \"respan/span-01-lite\",\n    \"error\": \"Decisions API 400: {\\\"error\\\":{\\\"message\\\":\\\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\\\",\\\"code\\\":400}}\"\n  },\n  {\n    \"model_id\": \"respan/span-01-lite:free\",\n    \"error\": \"Decisions API 400: {\\\"error\\\":{\\\"message\\\":\\\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\\\",\\\"code\\\":400}}\"\n  },\n  {\n    \"model_id\": \"jaredpalmer/kev-4b\",\n    \"model\": \"jaredpalmer/kev-4b-20260924\",\n    \"latency_ms\": 914,\n    \"usage\": {\n      \"input_tokens\": 680,\n      \"output_tokens\": 72,\n      \"cost\": 0.00002856\n    },\n    \"answers\": {\n      \"candidate_0\": {\n        \"type\": \"noul\",\n        \"noul\": 0.2436\n      },\n      \"candidate_1\": {\n        \"type\": \"noul\",\n        \"noul\": 0.0606\n      },\n      \"candidate_2\": {\n        \"type\": \"noul\",\n        \"noul\": 0.0686\n      }\n    }\n  },\n  {"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/README.md, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/probes/prepare.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/scripts/lib.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe:prepare && node_modules/.bin/tsx scripts/decide.ts probes/full_batch.request.json > probes/full_batch.results.json && npm test && npm run typecheck'\n<output>\n\n> test\n> tsx --test src/*.test.ts\n\n✔ ranks independent probabilities, retaining multiple matches and stable ties (14.11753ms)\n✔ empty inputs skip the model; invalid candidate sets fail locally (0.466286ms)\n✔ missing, mistyped, invalid probabilities and HTTP failures never become no-match results (1.171036ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 740.982953\n\n> typecheck\n> tsc --noEmit\n\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The live probes favored Jev: it scored the two paraphrased duplicates at 0.97 and 0.96, while unrelated or conflicting reports scored much lower. I’ve pinned that model build. The final check covers a full 20-candidate batch; thresholds for automatic merging would still need validation on your historical tickets."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat probes/full_batch.results.json && git status --short && git diff --check'\n<output>\n{\n  \"model\": \"typesafe/jev-1.13-20260917\",\n  \"transport\": \"http\",\n  \"latency_ms\": 252,\n  \"usage\": {\n    \"input_tokens\": 5166,\n    \"output_tokens\": 374,\n    \"cost\": 0.000216972\n  },\n  \"answers\": {\n    \"candidate_0\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_1\": {\n      \"type\": \"noul\",\n      \"noul\": 0.02\n    },\n    \"candidate_2\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_3\": {\n      \"type\": \"noul\",\n      \"noul\": 0.01\n    },\n    \"candidate_4\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_5\": {\n      \"type\": \"noul\",\n      \"noul\": 0.01\n    },\n    \"candidate_6\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_7\": {\n      \"type\": \"noul\",\n      \"noul\": 0.01\n    },\n    \"candidate_8\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_9\": {\n      \"type\": \"noul\",\n      \"noul\": 0.02\n    },\n    \"candidate_10\": {\n      \"type\": \"noul\",\n      \"noul\": 0.03\n    },\n    \"candidate_11\": {\n      \"type\": \"noul\",\n      \"noul\": 0.01\n    },\n    \"candidate_12\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_13\": {\n      \"type\": \"noul\",\n      \"noul\": 0.02\n    },\n    \"candidate_14\": {\n      \"type\": \"noul\",\n      \"noul\": 0.04\n    },\n    \"candidate_15\": {\n      \"type\": \"noul\",\n      \"noul\": 0.02\n    },\n    \"candidate_16\": {\n      \"type\": \"noul\",\n      \"noul\": 0.05\n    },\n    \"candidate_17\": {\n      \"type\": \"noul\",\n      \"noul\": 0.02\n    },\n    \"candidate_18\": {\n      \"type\": \"noul\",\n      \"noul\": 0.11\n    },\n    \"candidate_19\": {\n      \"type\": \"noul\",\n      \"noul\": 0.96\n    }\n  }\n}\n?? .gitignore\n?? README.md\n?? example.ts\n?? package-lock.json\n?? package.json\n?? probes/\n?? scripts/\n?? src/\n?? tsconfig.json\n"
+    },
+    {
+      "type": "file_change",
+      "text": "update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/10/openai_gpt-6-astra/skill/r3/workspace/README.md"
+    },
+    {
+      "type": "agent_message",
+      "text": "Created a standalone TypeScript ranker:\n\n```ts\nconst result = await rankTickets(newTicket, openCandidates);\n// [{ ticketId, probabilitySameIssue }, ...] in result.ranked\n```\n\nIt evaluates up to 20 candidates in one OpenRouter Decisions request and sorts independent same-issue probabilities. Multiple tickets can match; all can score low.\n\nThe live 20-candidate probe ranked the paraphrase first at **0.96**, versus **0.01–0.11** for others. Tests and type checking passed.\n\nSet `OPENROUTER_API_KEY`, then run `npm run example`. Remove the old overlap cutoff before ranking so paraphrases reach the model. Validate probabilities on historical tickets before choosing an automatic-merge threshold."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Created a standalone TypeScript ranker:\n\n```ts\nconst result = await rankTickets(newTicket, openCandidates);\n// [{ ticketId, probabilitySameIssue }, ...] in result.ranked\n```\n\nIt evaluates up to 20 candidates in one OpenRouter Decisions request and sorts independent same-issue probabilities. Multiple tickets can match; all can score low.\n\nThe live 20-candidate probe ranked the paraphrase first at **0.96**, versus **0.01–0.11** for others. Tests and type checking passed.\n\nSet `OPENROUTER_API_KEY`, then run `npm run example`. Remove the old overlap cutoff before ranking so paraphrases reach the model. Validate probabilities on historical tickets before choosing an automatic-merge threshold.",
+  "produced_files": [
+    ".gitignore",
+    "README.md",
+    "example.ts",
+    "package-lock.json",
+    "package.json",
+    "probes/catalog.json",
+    "probes/full_batch.request.json",
+    "probes/full_batch.results.json",
+    "probes/mixed.request.json",
+    "probes/mixed.results.json",
+    "probes/negated_new.request.json",
+    "probes/negated_new.results.json",
+    "probes/no_match.request.json",
+    "probes/no_match.results.json",
+    "probes/prepare.ts",
+    "scripts/decide.ts",
+    "scripts/lib.ts",
+    "scripts/models.ts",
+    "src/config.ts",
+    "src/rank-tickets.test.ts",
+    "src/rank-tickets.ts",
+    "tsconfig.json"
+  ]
+}

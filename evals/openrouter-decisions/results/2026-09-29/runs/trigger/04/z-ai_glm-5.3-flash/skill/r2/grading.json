@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0197375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The code uses numeric outputs (e.g., const spamProbability = body.answers.spam.noul) and compares to thresholds, with no .includes or other string parsing.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The request defines two separate noul questions: questions: { spam: { type: \"noul\", ... }, abusive: { type: \"noul\", ... } }.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Threshold constants are defined in code (const SPAM_THRESHOLD = 0.7; const ABUSIVE_THRESHOLD = 0.7) and used right next to where probabilities are read and returned.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0217025,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "The prompt asks, 'Does this pull request description say that the change is breaking?', which targets what the description says rather than whether the change itself is breaking.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The workflow gates solely on a boolean ('if: steps.decision.outputs.is_breaking == 'false''), with no numeric or probability threshold in code.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "Neither the prompt nor code defines or uses a probability; the model is asked for a boolean and its confidence is ignored, so 'no breaking changes' is not tied to a low probability expectation.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 3
+}

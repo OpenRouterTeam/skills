@@ -1,0 +1,17 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "rankings": [
+    {
+      "ticketId": "same-topic-different-failure",
+      "probabilitySameIssue": 0.06
+    },
+    {
+      "ticketId": "negated",
+      "probabilitySameIssue": 0.03
+    },
+    {
+      "ticketId": "unrelated",
+      "probabilitySameIssue": 0.02
+    }
+  ]
+}

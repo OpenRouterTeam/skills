@@ -1,0 +1,62 @@
+[
+  {
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 518,
+    "usage": {
+      "input_tokens": 704,
+      "output_tokens": 1,
+      "cost": 0.0000352
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.517219
+      }
+    }
+  },
+  {
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}"
+  },
+  {
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 1017,
+    "usage": {
+      "input_tokens": 367,
+      "output_tokens": 23,
+      "cost": 0.000015414
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.7657
+      }
+    }
+  },
+  {
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 162,
+    "usage": {
+      "input_tokens": 685,
+      "output_tokens": 22,
+      "cost": 0.00002877
+    },
+    "answers": {
+      "requires_human": {
+        "type": "noul",
+        "noul": 0.83
+      }
+    }
+  }
+]

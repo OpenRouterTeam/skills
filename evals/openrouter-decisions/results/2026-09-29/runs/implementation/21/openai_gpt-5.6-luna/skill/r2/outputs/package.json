@@ -1,0 +1,9 @@
+{
+  "name": "incident-urgency-decider",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/urgency.test.mjs"
+  }
+}

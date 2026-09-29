@@ -1,0 +1,394 @@
+[
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650079-UPMq1HS3Di5UXB809xbj",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.656316,
+        "probabilities": {
+          "0": 0.371826,
+          "1": 0.613038,
+          "2": 0.00681,
+          "3": 0.003645,
+          "4": 0.004681
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.535622
+      }
+    },
+    "usage": {
+      "input_tokens": 613,
+      "output_tokens": 1,
+      "cost": 0.00003065
+    },
+    "latency_ms": 356,
+    "urgency": 2,
+    "passed": false
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650080-dbbVjOnt7tdubtYuwd1d",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.008511,
+        "probabilities": {
+          "0": 0.036243,
+          "1": 0.934729,
+          "2": 0.01712,
+          "3": 0.008087,
+          "4": 0.00382
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.805402
+      }
+    },
+    "usage": {
+      "input_tokens": 621,
+      "output_tokens": 1,
+      "cost": 0.00003105
+    },
+    "latency_ms": 576,
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650080-1jR4gf1bu4JxbPdy254u",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.659397,
+        "probabilities": {
+          "0": 0.002472,
+          "1": 0.366819,
+          "2": 0.604782,
+          "3": 0.020695,
+          "4": 0.005232
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.506295
+      }
+    },
+    "usage": {
+      "input_tokens": 628,
+      "output_tokens": 1,
+      "cost": 0.0000314
+    },
+    "latency_ms": 499,
+    "urgency": 3,
+    "passed": true
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650081-caKqTCsrFsMhffHAVun0",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.070707,
+        "probabilities": {
+          "0": 0.000655,
+          "1": 0.000952,
+          "2": 0.001079,
+          "3": 0.92166,
+          "4": 0.075654
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.820252
+      }
+    },
+    "usage": {
+      "input_tokens": 629,
+      "output_tokens": 1,
+      "cost": 0.00003145
+    },
+    "latency_ms": 739,
+    "urgency": 4,
+    "passed": true
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650081-LlKmeLMBPNtfHRgZndWU",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.620656,
+        "probabilities": {
+          "0": 0.000344,
+          "1": 0.000143,
+          "2": 0.000112,
+          "3": 0.377314,
+          "4": 0.622086
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.584899
+      }
+    },
+    "usage": {
+      "input_tokens": 622,
+      "output_tokens": 1,
+      "cost": 0.0000311
+    },
+    "latency_ms": 497,
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650082-xwjgcxs4fi10ndwdi17I",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.572991,
+        "probabilities": {
+          "0": 0.485402,
+          "1": 0.485402,
+          "2": 0.00889,
+          "3": 0.011416,
+          "4": 0.00889
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.480123
+      }
+    },
+    "usage": {
+      "input_tokens": 616,
+      "output_tokens": 1,
+      "cost": 0.0000308
+    },
+    "latency_ms": 469,
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650082-sVGRPseXzOgfmjRwnt8Y",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.259772,
+        "probabilities": {
+          "0": 0.851061,
+          "1": 0.101645,
+          "2": 0.009454,
+          "3": 0.01214,
+          "4": 0.0257
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.651211
+      }
+    },
+    "usage": {
+      "input_tokens": 612,
+      "output_tokens": 1,
+      "cost": 0.0000306
+    },
+    "latency_ms": 560,
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650083-bFePwi9y78nA5qcOKdO3",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.066969,
+        "probabilities": {
+          "0": 0.972564,
+          "1": 0.012243,
+          "2": 0.001657,
+          "3": 0.002732,
+          "4": 0.010804
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.902692
+      }
+    },
+    "usage": {
+      "input_tokens": 623,
+      "output_tokens": 1,
+      "cost": 0.00003115
+    },
+    "latency_ms": 489,
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650083-AJrCaQG1L346BCSb9OuY",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.120254,
+        "probabilities": {
+          "0": 0.94271,
+          "1": 0.032258,
+          "2": 0.004366,
+          "3": 0.0034,
+          "4": 0.017266
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.826324
+      }
+    },
+    "usage": {
+      "input_tokens": 634,
+      "output_tokens": 1,
+      "cost": 0.0000317
+    },
+    "latency_ms": 488,
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "upstage/solar-decide-20260928",
+    "id": "gen-dec-1790650084-32eSgIlBsfOXucTkkKXg",
+    "model": "upstage/solar-decide-20260928",
+    "provider": "Upstage",
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.855155,
+        "probabilities": {
+          "0": 0.004047,
+          "1": 0.002781,
+          "2": 0.001023,
+          "3": 0.118267,
+          "4": 0.873882
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.741527
+      }
+    },
+    "usage": {
+      "input_tokens": 627,
+      "output_tokens": 1,
+      "cost": 0.00003135
+    },
+    "latency_ms": 856,
+    "urgency": 5,
+    "passed": true
+  }
+]

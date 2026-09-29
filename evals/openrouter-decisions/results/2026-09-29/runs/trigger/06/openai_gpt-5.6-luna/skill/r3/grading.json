@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.00806875,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "\"Compute hard rules in application code: within_90_days = ..., amount_valid = ..., annual_limit_ok = ... These facts should never be delegated to the model.\"",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "\"ask a decision model only about judgment-based ambiguity... Is this a routine, legitimate refund request?... Use independent `noul` questions rather than asking the model to calculate amounts, dates, or counts.\"",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "\"Gate the result in code: ... else if legitimate_probability >= APPROVE_THRESHOLD ... auto_approve else: human_review\"",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

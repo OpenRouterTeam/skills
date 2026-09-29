@@ -1,0 +1,9 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "mode": "shadow",
+  "fallback": "review",
+  "thresholds": {
+    "min_selected_probability": null
+  },
+  "rubric_version": "support-team-v1"
+}

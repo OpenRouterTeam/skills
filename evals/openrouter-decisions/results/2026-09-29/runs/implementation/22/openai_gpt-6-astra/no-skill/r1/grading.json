@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.02807,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "The model question is 'Does this pull request description say that the change is breaking?', which asks about what the description says rather than whether the change itself is breaking.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "In scripts/breaking_gate.py, the line allowed = decision['verdict'] == 'not_declared' hard-codes the auto-merge pass criterion.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "The prompt states 'Return \"not_declared\" if it... explicitly says the change is not breaking' and the system uses categorical verdicts (no probability), so 'no breaking changes' is not mapped to a low probability.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 3
+}

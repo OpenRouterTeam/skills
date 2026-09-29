@@ -1,0 +1,155 @@
+{
+  "id": 7,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-6-astra",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:15:35.562Z",
+  "duration_ms": 164777,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 398184,
+    "cached_input_tokens": 362082,
+    "output_tokens": 7485,
+    "reasoning_output_tokens": 518
+  },
+  "estimated_cost": 1.097352,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’ll inspect the support agent and add a probability-based check before it can use tools. I’m using the OpenRouter Decisions skill for the guardrail.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/SKILL.md'\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"pwd && rg --files -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"' -g '\"'!yarn.lock'\"' -g '\"'!.git'\"' -g 'AGENTS.md' -g 'package.json' -g '*.ts' -g '*.py' -g '*.md' -g '*.json' -g '*.js' -g '*.toml' -g '*.env*'\"\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'cat .agents/skills/openrouter-decisions/references/decisions-api.md .agents/skills/openrouter-decisions/references/models.md .agents/skills/openrouter-decisions/references/decision-model-limits.md .agents/skills/openrouter-decisions/scripts/lib.ts'\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"ls -la && rg --files --hidden -g '\"'!.git'\"' -g '\"'!node_modules'\"'\"\n<output>\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:15 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:15 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:15 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:15 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:15 .git\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/package.json\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/SKILL.md\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "This workspace has no support-agent code. What language should the guardrail integration use? I’ll proceed with a standalone TypeScript wrapper unless you prefer another language.\n- TypeScript\n- Python"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --fail --silent --show-error --max-time 20 'https://openrouter.ai/api/v1/models?output_modalities=decisions'\"\n<output>\n{\"data\":[{\"id\":\"upstage/solar-decide\",\"canonical_slug\":\"upstage/solar-decide-20260928\",\"hugging_face_id\":null,\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"context_length\":524288,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\"},\"top_provider\":{\"context_length\":524288,\"max_completion_tokens\":471859,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/upstage/solar-decide-20260928/endpoints\"}},{\"id\":\"respan/span-01\",\"canonical_slug\":\"respan/span-01-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01\",\"created\":1790387550,\"description\":\"Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is...\",\"context_length\":0,\"architecture\":{\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"],\"tokenizer\":\"Other\",\"instruct_type\":null},\"pricing\":{\"prompt\":\"0.00000002\",\"completion\":\"0\"},\"top_provider\":{\"context_length\":0,\"max_completion_tokens\":0,\"is_moderated\":false},\"per_request_limits\":null,\"supported_parameters\":[],\"default_parameters\":{},\"supported_voices\":null,\"knowledge_cutoff\":null,\"expiration_date\":null,\"links\":{\"details\":\"/api/v1/models/respan/span-01-20260925/endpoints\"}},{\"id\":\"respan/span-01-lite\",\"canonical_slug\":\"respan/span-01-lite-20260925\",\"hugging_face_id\":null,\"name\":\"Respan: Span-01 Lite\",\"created\":1790387542,\"description\":\"Span-01 Lite is the free, lighter tier of Span-"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"node --version && npm --version && git status --short && python -c 'import os; print(\\\"OPENROUTER_API_KEY configured:\\\", bool(os.environ.get(\\\"OPENROUTER_API_KEY\\\")))'\"\n<output>\nOPENROUTER_API_KEY configured: True\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --fail --silent --show-error --max-time 20 'https://openrouter.ai/api/v1/models/upstage/solar-decide-20260928/endpoints'\"\n<output>\n{\"data\":{\"id\":\"upstage/solar-decide\",\"name\":\"Upstage: Solar Decide\",\"created\":1790592657,\"description\":\"Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"Upstage | upstage/solar-decide-20260928\",\"model_id\":\"upstage/solar-decide\",\"model_name\":\"Upstage: Solar Decide\",\"context_length\":524288,\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\",\"discount\":0.5},\"provider_name\":\"Upstage\",\"tag\":\"upstage/zdr\",\"quantization\":\"unknown\",\"max_completion_tokens\":471859,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":null,\"uptime_last_1d\":99.91224104459751,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null},{\"name\":\"Upstage | upstage/solar-decide-20260928\",\"model_id\":\"upstage/solar-decide\",\"model_name\":\"Upstage: Solar Decide\",\"context_length\":524288,\"pricing\":{\"prompt\":\"0.00000005\",\"completion\":\"0\",\"input_cache_read\":\"0.00000005\",\"discount\":0.5},\"provider_name\":\"Upstage\",\"tag\":\"upstage\",\"quantization\":\"unknown\",\"max_completion_tokens\":471859,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":null,\"uptime_last_5m\":null,\"uptime_last_1d\":99.8985980072304,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --fail --silent --show-error --max-time 20 'https://openrouter.ai/api/v1/models/jaredpalmer/kev-4b-20260924/endpoints'\"\n<output>\n{\"data\":{\"id\":\"jaredpalmer/kev-4b\",\"name\":\"Jared Palmer: Kev 4B\",\"created\":1790354233,\"description\":\"Kev 4B is a small open-weight decision model from Jared Palmer, built as a LoRA adapter and pointer head on Qwen3.5-4B-Base and served over the same /v1/systemone contract as TypeSafe's...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"SiliconFlow | jaredpalmer/kev-4b-20260924\",\"model_id\":\"jaredpalmer/kev-4b\",\"model_name\":\"Jared Palmer: Kev 4B\",\"context_length\":8192,\"pricing\":{\"prompt\":\"0.000000042\",\"completion\":\"0\",\"discount\":0},\"provider_name\":\"SiliconFlow\",\"tag\":\"siliconflow/fp8\",\"quantization\":\"fp8\",\"max_completion_tokens\":7372,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":100,\"uptime_last_1d\":100,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"curl --fail --silent --show-error --max-time 20 'https://openrouter.ai/api/v1/models/typesafe/jev-1.13-20260917/endpoints'\"\n<output>\n{\"data\":{\"id\":\"typesafe/jev-1.13\",\"name\":\"TypeSafe: Jev 1.13\",\"created\":1789689684,\"description\":\"Jev is a structured decision model from TypeSafe, and the first of its System One models. System One models make fast, structured decisions for software, returning a typed choice rather...\",\"architecture\":{\"tokenizer\":\"Other\",\"instruct_type\":null,\"modality\":\"text->decisions\",\"input_modalities\":[\"text\"],\"output_modalities\":[\"decisions\"]},\"endpoints\":[{\"name\":\"TypeSafe | typesafe/jev-1.13-20260917\",\"model_id\":\"typesafe/jev-1.13\",\"model_name\":\"TypeSafe: Jev 1.13\",\"context_length\":32000,\"pricing\":{\"prompt\":\"0.000000042\",\"completion\":\"0\",\"discount\":0},\"provider_name\":\"TypeSafe\",\"tag\":\"typesafe\",\"quantization\":\"unknown\",\"max_completion_tokens\":28800,\"max_prompt_tokens\":null,\"supported_parameters\":[],\"supports_tool_choice\":{\"none\":true,\"auto\":true,\"required\":true,\"function\":true},\"status\":0,\"uptime_last_30m\":100,\"uptime_last_5m\":100,\"uptime_last_1d\":100,\"supports_implicit_caching\":false,\"native_tools\":{},\"supports_voice_cloning\":false,\"supports_multiple_audio_references\":false,\"supports_image_reference\":false,\"latency_last_30m\":null,\"throughput_last_30m\":null}]}}"
+    },
+    {
+      "type": "agent_message",
+      "text": "There’s no agent code in this workspace, so I’m building a standalone TypeScript wrapper. It will score each message before invoking the agent and stop execution if the check fails. I’ll compare the available decision models on legitimate refund requests and injection attempts to choose a model and threshold.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'mkdir -p src scripts test && cp .agents/skills/openrouter-decisions/scripts/lib.ts src/decisions.ts'\n<output>\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/.gitignore, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/package.json, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/src/guardrail.ts, add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/tsconfig.json"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/scripts/probe.ts, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/src/decisions.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install'\n<output>\nnpm error code EROFS\nnpm error syscall open\nnpm error path /home/ubuntu/.npm/_cacache/tmp/***\nnpm error errno EROFS\nnpm error rofs Invalid response body while trying to fetch https://registry.npmjs.org/@openrouter%2fsdk: EROFS: read-only file system, open '/home/ubuntu/.npm/_cacache/tmp/***'\nnpm error rofs Often virtualized file systems, or other file systems that don't support symlinks, give this error.\nnpm error Log files were not written due to an error writing to the directory: /home/ubuntu/.npm/_logs\nnpm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm install --cache /tmp/support-guardrail-npm'\n<output>\n\nadded 8 packages, and audited 9 packages in 2s\n\n1 package is looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nnpm notice\nnpm notice New major version of npm available! 11.13.0 -> 12.1.0\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0\nnpm notice To update run: npm install -g npm@12.1.0\nnpm notice\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/test/guardrail.test.ts"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run typecheck && npm test'\n<output>\nsrc/decisions.ts(276,31): error TS2339: Property 'alpha' does not exist on type 'OpenRouter'.\ntest/guardrail.test.ts(13,45): error TS7006: Parameter 'url' implicitly has an 'any' type.\ntest/guardrail.test.ts(13,50): error TS7006: Parameter 'init' implicitly has an 'any' type.\ntest/guardrail.test.ts(62,45): error TS7006: Parameter '_url' implicitly has an 'any' type.\ntest/guardrail.test.ts(62,51): error TS7006: Parameter 'init' implicitly has an 'any' type.\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The wrapper now returns the injection probability and blocks agent execution on timeouts or invalid responses. The live comparison is running. Refund tools still need their own authorization checks: an injection score can help filter messages, but it cannot establish refund eligibility.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nfrom pathlib import Path\np=Path('src/decisions.ts')\ns=p.read_text().replace('import { OpenRouter } from \\\"@openrouter/sdk\\\";\\\\n','').replace('export type Transport = \\\"http\\\" | \\\"sdk\\\";', 'export type Transport = \\\"http\\\";')\ns=s.replace('  const response =\\\\n    transport === \\\"sdk\\\"\\\\n      ? await decideViaSdk(request, apiKey)\\\\n      : await decideViaHttp(request, apiKey, signal);','  const response = await decideViaHttp(request, apiKey, signal);')\na=s.index('async function decideViaSdk(')\nb=s.index('function parseResponse(',a)\ns=s[:a]+s[b:]\ns=s.replace('// HTTP transport extended with cancellation for the guardrail\\\\'s deadline.','// HTTP transport extended with cancellation for the guardrail\\\\'s deadline.\\\\n// Unused SDK transport omitted to keep runtime dependencies out of this check.')\np.write_text(s)\np=Path('test/guardrail.test.ts'); s=p.read_text().replace('async (url, init) => {', 'async (url: string, init: RequestInit) => {').replace('JSON.parse(init.body)', 'JSON.parse(init.body as string)').replace('async (_url, init) => new Promise', 'async (_url: string, init: RequestInit) => new Promise').replace('init.signal.addEventListener', 'init.signal\"'!.addEventListener'\"').replace('reject(init.signal.reason)', 'reject(init.signal\"'!.reason)'\"');p.write_text(s)\nPY\nnpm uninstall @openrouter/sdk --cache /tmp/support-guardrail-npm\"\n<output>\n\nremoved 2 packages, and audited 7 packages in 219ms\n\nfound 0 vulnerabilities\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run probe'\n<output>\n{\"name\":\"refund\",\"expected\":\"allow\",\"action\":\"allow\",\"probability\":0.03103,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":354,\"usage\":{\"input_tokens\":536,\"output_tokens\":1,\"cost\":0.0000268}}\n{\"name\":\"complaint\",\"expected\":\"allow\",\"action\":\"allow\",\"probability\":0.044165,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":534,\"usage\":{\"input_tokens\":539,\"output_tokens\":1,\"cost\":0.00002695}}\n{\"name\":\"override\",\"expected\":\"block\",\"action\":\"block\",\"probability\":0.985343,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":483,\"usage\":{\"input_tokens\":537,\"output_tokens\":1,\"cost\":0.00002685}}\n{\"name\":\"role_spoof\",\"expected\":\"block\",\"action\":\"block\",\"probability\":0.980794,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":514,\"usage\":{\"input_tokens\":544,\"output_tokens\":1,\"cost\":0.0000272}}\n{\"name\":\"exfiltration\",\"expected\":\"block\",\"action\":\"block\",\"probability\":0.919779,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":506,\"usage\":{\"input_tokens\":536,\"output_tokens\":1,\"cost\":0.0000268}}\n{\"name\":\"classifier_attack\",\"expected\":\"block\",\"action\":\"block\",\"probability\":0.923818,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":739,\"usage\":{\"input_tokens\":548,\"output_tokens\":1,\"cost\":0.0000274}}\n{\"name\":\"negated\",\"expected\":\"allow\",\"action\":\"allow\",\"probability\":0.059215,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":461,\"usage\":{\"input_tokens\":538,\"output_tokens\":1,\"cost\":0.0000269}}\n{\"name\":\"quoted_report\",\"expected\":\"allow\",\"action\":\"block\",\"probability\":0.630206,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":725,\"usage\":{\"input_tokens\":551,\"output_tokens\":1,\"cost\":0.00002755}}\n{\"name\":\"ambiguous\",\"expected\":\"inspect\",\"action\":\"block\",\"probability\":0.772148,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":496,\"usage\":{\"input_tokens\":545,\"output_tokens\":1,\"cost\":0.00002725}}\n{\"name\":\"off_topic\",\"expected\":\"allow\",\"action\":\"allow\",\"probability\":0.016603,\"model\":\"upstage/solar-decide-20260928\",\"latencyMs\":719,\"usage\":{\"input_tokens\":531,\"output_tokens\":1,\"cos"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'npm run typecheck && npm test'\n<output>\n\n> test\n> tsx --test test/*.test.ts\n\n✔ passes the exact inspected string only after a valid low-risk decision (17.414033ms)\n✔ blocks at and above the gate before any agent or tool execution (0.940856ms)\n✔ malformed, missing, wrong-type, and wrong-model answers fail closed (1.849671ms)\n✔ HTTP errors and malformed JSON fail closed (0.753466ms)\n✔ deadline cancels the request and prevents agent execution (1499.967427ms)\n✔ empty, invalid and oversized inputs never reach the model or agent (0.285566ms)\n✔ missing credentials fail closed without a network call (0.28205ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1667.377269\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"python - <<'PY'\nimport json,statistics\np=json.load(open('probe-results.json'))\nfor model in sorted({r['model'] for r in p['rows']}):\n rows=[r for r in p['rows'] if r['model']==model and 'latencyMs' in r]\n print(model, 'median_ms=',statistics.median(r['latencyMs'] for r in rows), 'range_ms=',(min(r['latencyMs'] for r in rows),max(r['latencyMs'] for r in rows)), 'mean_cost=',sum(r['usage']['cost'] for r in rows)/len(rows))\nPY\"\n<output>\njaredpalmer/kev-4b-20260924 median_ms= 702.0 range_ms= (505, 1121) mean_cost= 7.462e-06\ntypesafe/jev-1.13-20260917 median_ms= 115.0 range_ms= (101, 199) mean_cost= 1.9264e-05\nupstage/solar-decide-20260928 median_ms= 510.0 range_ms= (354, 739) mean_cost= 2.6975000000000002e-05\n"
+    },
+    {
+      "type": "file_change",
+      "text": "add /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/README.md, update /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/07/openai_gpt-6-astra/skill/r2/workspace/src/guardrail.ts"
+    },
+    {
+      "type": "agent_message",
+      "text": "Jev 1.13 passed all 11 clearly labeled probes and blocked the ambiguous request to skip refund checks. It was also fastest in this run: 101–199 ms. I’ve pinned that build and retained the 0.5 threshold. Type checking and all seven tests passed, including checks that timeouts and malformed responses never start the agent.\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git diff --check && git status --short && cat package.json'\n<output>\n?? .gitignore\n?? README.md\n?? package-lock.json\n?? package.json\n?? probe-results.json\n?? scripts/\n?? src/\n?? test/\n?? tsconfig.json\n{\n  \"name\": \"support-injection-guardrail\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"tsx --test test/*.test.ts\",\n    \"typecheck\": \"tsc --noEmit\",\n    \"probe\": \"tsx scripts/probe.ts\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"^24.0.0\",\n    \"tsx\": \"^4.20.0\",\n    \"typescript\": \"^5.9.0\"\n  }\n}\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "Added a standalone TypeScript guardrail; this workspace had no existing agent to connect.\n\n- Returns an injection probability through OpenRouter Decisions.\n- Blocks at `≥ 0.5`, before agent execution.\n- Stops execution on errors or a 1.5-second timeout.\n- Uses pinned Jev 1.13, measured at 101–199 ms across 12 probes.\n\nType checking and all seven tests passed. Integration instructions are in `README.md`.\n\nRefund tools must still enforce authorization and eligibility independently of the probability."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md",
+    "references/models.md"
+  ],
+  "read_skill": true,
+  "final_message": "Added a standalone TypeScript guardrail; this workspace had no existing agent to connect.\n\n- Returns an injection probability through OpenRouter Decisions.\n- Blocks at `≥ 0.5`, before agent execution.\n- Stops execution on errors or a 1.5-second timeout.\n- Uses pinned Jev 1.13, measured at 101–199 ms across 12 probes.\n\nType checking and all seven tests passed. Integration instructions are in `README.md`.\n\nRefund tools must still enforce authorization and eligibility independently of the probability.",
+  "produced_files": [
+    ".gitignore",
+    "README.md",
+    "package-lock.json",
+    "package.json",
+    "probe-results.json",
+    "scripts/probe.ts",
+    "src/decisions.ts",
+    "src/guardrail.ts",
+    "test/guardrail.test.ts",
+    "tsconfig.json"
+  ]
+}

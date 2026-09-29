@@ -1,0 +1,34 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.0219975,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "Transcript shows live catalog fetch: python opened 'https://openrouter.ai/api/v1/models' and printed entries (see command output listing ids and canonical_slug).",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No same-request comparison was run; the transcript only lists the catalog and pins Claude Haiku 4.5, with no decide.ts --compare or equivalent execution.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "classification.config.json uses \"model\": \"anthropic/claude-haiku-4.5\" and a separate \"expected_canonical_slug\": \"anthropic/claude-4.5-haiku-20251001\"; the versioned ID is not pinned in a single config value.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No code logs the response model with stored answers; verify_model_pin.py only prints a PASS line and the docs merely recommend recording it.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "No probe or decide.ts run on real inputs; the agent states 'classification performance remains untested' and the pin script prints 'Classification thresholds are NOT validated.'",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 1,
+  "total": 5
+}

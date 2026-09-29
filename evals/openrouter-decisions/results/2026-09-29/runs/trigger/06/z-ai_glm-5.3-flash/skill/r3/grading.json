@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01140375,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: 'Keep the hard rules in code — never in the model.' and lists 'days_since_purchase <= 90', 'refund_amount <= order_total', and 'refunds_in_last_365_days < 2'.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: 'Use a decision model only for the judgment code can't make' and 'Don't send computed booleans or counts — code already owns those.'",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message: 'Gate in code with three bands, not two' and routes 'ambiguous or low confidence' to the 'Human queue'.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

@@ -1,0 +1,1394 @@
+[
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 583,
+    "usage": {
+      "input_tokens": 613,
+      "output_tokens": 1,
+      "cost": 0.00003065
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.401231,
+        "probabilities": {
+          "0": 0.616528,
+          "1": 0.373943,
+          "2": 0.004154,
+          "3": 0.00252,
+          "4": 0.002855
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.552267
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 1006,
+    "usage": {
+      "input_tokens": 287,
+      "output_tokens": 272,
+      "cost": 0.000012054
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.1501,
+        "probabilities": {
+          "0": 0.8591,
+          "1": 0.1348,
+          "2": 0.004,
+          "3": 0.0013,
+          "4": 0.0009
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9625
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "routine",
+    "expected": [
+      1
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 167,
+    "usage": {
+      "input_tokens": 582,
+      "output_tokens": 18,
+      "cost": 0.000024444
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0,
+        "probabilities": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 1
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 616,
+    "usage": {
+      "input_tokens": 621,
+      "output_tokens": 1,
+      "cost": 0.00003105
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.026393,
+        "probabilities": {
+          "0": 0.02501,
+          "1": 0.938477,
+          "2": 0.02501,
+          "3": 0.008119,
+          "4": 0.003385
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.812094
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 675,
+    "usage": {
+      "input_tokens": 294,
+      "output_tokens": 273,
+      "cost": 0.000012348
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.9202,
+        "probabilities": {
+          "0": 0.1742,
+          "1": 0.7434,
+          "2": 0.0728,
+          "3": 0.0072,
+          "4": 0.0024
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9329
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "low",
+    "expected": [
+      2
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 180,
+    "usage": {
+      "input_tokens": 588,
+      "output_tokens": 18,
+      "cost": 0.000024696
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1,
+        "probabilities": {
+          "0": 0.01,
+          "1": 0.99,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.99
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 480,
+    "usage": {
+      "input_tokens": 628,
+      "output_tokens": 1,
+      "cost": 0.0000314
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.589491,
+        "probabilities": {
+          "0": 0.002883,
+          "1": 0.427867,
+          "2": 0.549393,
+          "3": 0.01659,
+          "4": 0.003267
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.505509
+      }
+    },
+    "urgency": 3,
+    "passed": true
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 943,
+    "usage": {
+      "input_tokens": 301,
+      "output_tokens": 273,
+      "cost": 0.000012642
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.6914,
+        "probabilities": {
+          "0": 0.0549,
+          "1": 0.2422,
+          "2": 0.6639,
+          "3": 0.0348,
+          "4": 0.0043
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9012
+      }
+    },
+    "urgency": 3,
+    "passed": true
+  },
+  {
+    "case": "moderate",
+    "expected": [
+      3
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 119,
+    "usage": {
+      "input_tokens": 595,
+      "output_tokens": 18,
+      "cost": 0.00002499
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.99,
+        "probabilities": {
+          "0": 0,
+          "1": 0.01,
+          "2": 0.99,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.99
+      }
+    },
+    "urgency": 3,
+    "passed": true
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 586,
+    "usage": {
+      "input_tokens": 629,
+      "output_tokens": 1,
+      "cost": 0.00003145
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.053387,
+        "probabilities": {
+          "0": 0.000754,
+          "1": 0.001408,
+          "2": 0.001408,
+          "3": 0.936558,
+          "4": 0.059872
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.842264
+      }
+    },
+    "urgency": 4,
+    "passed": true
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 556,
+    "usage": {
+      "input_tokens": 300,
+      "output_tokens": 272,
+      "cost": 0.0000126
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.0588,
+        "probabilities": {
+          "0": 0.0091,
+          "1": 0.0059,
+          "2": 0.0195,
+          "3": 0.848,
+          "4": 0.1175
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9559
+      }
+    },
+    "urgency": 4,
+    "passed": true
+  },
+  {
+    "case": "high",
+    "expected": [
+      4
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 200,
+    "usage": {
+      "input_tokens": 594,
+      "output_tokens": 18,
+      "cost": 0.000024948
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3,
+        "probabilities": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.99
+      }
+    },
+    "urgency": 4,
+    "passed": true
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 1125,
+    "usage": {
+      "input_tokens": 622,
+      "output_tokens": 1,
+      "cost": 0.0000311
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.729301,
+        "probabilities": {
+          "0": 0.000315,
+          "1": 0.000149,
+          "2": 0.000102,
+          "3": 0.268789,
+          "4": 0.730645
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.635136
+      }
+    },
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 958,
+    "usage": {
+      "input_tokens": 296,
+      "output_tokens": 273,
+      "cost": 0.000012432
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.7169,
+        "probabilities": {
+          "0": 0.0023,
+          "1": 0.0013,
+          "2": 0.0027,
+          "3": 0.2645,
+          "4": 0.7292
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9292
+      }
+    },
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "critical",
+    "expected": [
+      5
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 187,
+    "usage": {
+      "input_tokens": 590,
+      "output_tokens": 18,
+      "cost": 0.00002478
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.86,
+        "probabilities": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0.13,
+          "4": 0.87
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.88
+      }
+    },
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 561,
+    "usage": {
+      "input_tokens": 616,
+      "output_tokens": 1,
+      "cost": 0.0000308
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.658833,
+        "probabilities": {
+          "0": 0.421037,
+          "1": 0.540622,
+          "2": 0.01122,
+          "3": 0.012714,
+          "4": 0.014407
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.463367
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 1016,
+    "usage": {
+      "input_tokens": 289,
+      "output_tokens": 271,
+      "cost": 0.000012138
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.992,
+        "probabilities": {
+          "0": 0.4402,
+          "1": 0.2444,
+          "2": 0.2223,
+          "3": 0.0696,
+          "4": 0.0236
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.752
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "ambiguous",
+    "expected": [
+      1,
+      2,
+      3
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 251,
+    "usage": {
+      "input_tokens": 583,
+      "output_tokens": 18,
+      "cost": 0.000024486
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 1.31,
+        "probabilities": {
+          "0": 0.27,
+          "1": 0.17,
+          "2": 0.54,
+          "3": 0.02,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.4
+      }
+    },
+    "urgency": 2,
+    "passed": true
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 307,
+    "usage": {
+      "input_tokens": 612,
+      "output_tokens": 1,
+      "cost": 0.0000306
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.192172,
+        "probabilities": {
+          "0": 0.890789,
+          "1": 0.07312,
+          "2": 0.007707,
+          "3": 0.009896,
+          "4": 0.018488
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.719637
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 704,
+    "usage": {
+      "input_tokens": 284,
+      "output_tokens": 273,
+      "cost": 0.000011928
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.3812,
+        "probabilities": {
+          "0": 0.7415,
+          "1": 0.1812,
+          "2": 0.0426,
+          "3": 0.0237,
+          "4": 0.0109
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9047
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "off-topic",
+    "expected": [
+      1
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 298,
+    "usage": {
+      "input_tokens": 578,
+      "output_tokens": 18,
+      "cost": 0.000024276
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0,
+        "probabilities": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 1
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 494,
+    "usage": {
+      "input_tokens": 623,
+      "output_tokens": 1,
+      "cost": 0.00003115
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.092014,
+        "probabilities": {
+          "0": 0.963517,
+          "1": 0.015574,
+          "2": 0.00186,
+          "3": 0.003475,
+          "4": 0.015574
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.877708
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 556,
+    "usage": {
+      "input_tokens": 296,
+      "output_tokens": 272,
+      "cost": 0.000012432
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.075,
+        "probabilities": {
+          "0": 0.9553,
+          "1": 0.0291,
+          "2": 0.0057,
+          "3": 0.0054,
+          "4": 0.0046
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.9813
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "negated",
+    "expected": [
+      1
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 155,
+    "usage": {
+      "input_tokens": 590,
+      "output_tokens": 18,
+      "cost": 0.00002478
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0,
+        "probabilities": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 1
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 497,
+    "usage": {
+      "input_tokens": 634,
+      "output_tokens": 1,
+      "cost": 0.0000317
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.147747,
+        "probabilities": {
+          "0": 0.919444,
+          "1": 0.051871,
+          "2": 0.00702,
+          "3": 0.004825,
+          "4": 0.01684
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.7763
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 562,
+    "usage": {
+      "input_tokens": 308,
+      "output_tokens": 271,
+      "cost": 0.000012936
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0.5823,
+        "probabilities": {
+          "0": 0.564,
+          "1": 0.3565,
+          "2": 0.0376,
+          "3": 0.0168,
+          "4": 0.025
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.8544
+      }
+    },
+    "urgency": 2,
+    "passed": false
+  },
+  {
+    "case": "adversarial-inflate",
+    "expected": [
+      1
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 154,
+    "usage": {
+      "input_tokens": 602,
+      "output_tokens": 18,
+      "cost": 0.000025284
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 0,
+        "probabilities": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 1
+      }
+    },
+    "urgency": 1,
+    "passed": true
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "upstage/solar-decide",
+    "model": "upstage/solar-decide-20260928",
+    "latency_ms": 533,
+    "usage": {
+      "input_tokens": 627,
+      "output_tokens": 1,
+      "cost": 0.00003135
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.786421,
+        "probabilities": {
+          "0": 0.004814,
+          "1": 0.003749,
+          "2": 0.001217,
+          "3": 0.180641,
+          "4": 0.809578
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.667624
+      }
+    },
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01-lite",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "respan/span-01-lite:free",
+    "error": "Decisions API 400: {\"error\":{\"message\":\"Respan state must be a string or an object with only input (a message array) and output (a message), where each message has a string content and a role of system, user, assistant or tool, and the output role is assistant\",\"code\":400}}",
+    "passed": false
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "jaredpalmer/kev-4b",
+    "model": "jaredpalmer/kev-4b-20260924",
+    "latency_ms": 547,
+    "usage": {
+      "input_tokens": 300,
+      "output_tokens": 273,
+      "cost": 0.0000126
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.5395,
+        "probabilities": {
+          "0": 0.0142,
+          "1": 0.0113,
+          "2": 0.0327,
+          "3": 0.3045,
+          "4": 0.6374
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.8849
+      }
+    },
+    "urgency": 5,
+    "passed": true
+  },
+  {
+    "case": "adversarial-deflate",
+    "expected": [
+      5
+    ],
+    "model_id": "typesafe/jev-1.13",
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 196,
+    "usage": {
+      "input_tokens": 594,
+      "output_tokens": 18,
+      "cost": 0.000024948
+    },
+    "answers": {
+      "urgency": {
+        "type": "score",
+        "score": 3.19,
+        "probabilities": {
+          "0": 0.19,
+          "1": 0,
+          "2": 0,
+          "3": 0.02,
+          "4": 0.79
+        },
+        "legend": {
+          "0": "1 — Routine: no active service impact; informational, resolved, hypothetical, off-topic, or cosmetic issue. Can wait for normal backlog work.",
+          "1": "2 — Low: minor active inconvenience with an easy workaround; core service functions remain available. Handle during normal working hours.",
+          "2": "3 — Moderate: active service degradation or a limited group blocked, with a viable workaround or partial availability. Investigate promptly.",
+          "3": "4 — High: a core production function is unavailable or severely degraded for many users, with no practical workaround. On-call intervention is needed now.",
+          "4": "5 — Critical: widespread production outage, ongoing data loss, or active security compromise causing severe harm. Immediate emergency response is needed."
+        },
+        "confidence": 0.33
+      }
+    },
+    "urgency": 4,
+    "passed": false
+  }
+]

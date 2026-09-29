@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01053,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "no transcript item read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "Final message provides a retry loop and exponential backoff with jitter: 'for (let attempt = 0; attempt <= maxRetries; attempt++) { ... const backoffMs = Math.min(1000 * 2 ** attempt, 30_000); const jitterMs = Math.random() * backoffMs * 0.5; await new Promise(resolve => setTimeout(resolve, backoffMs + jitterMs)); }'.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 2
+}

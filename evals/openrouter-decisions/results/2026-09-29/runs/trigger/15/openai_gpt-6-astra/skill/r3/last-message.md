@@ -1,0 +1,1 @@
+The workspace has no application code or support tickets. Where are the tickets stored, and which repository or integration should I use to generate and save their summaries?

@@ -1,0 +1,119 @@
+[
+  {
+    "id": "respan/span-01-lite",
+    "name": "Respan: Span-01 Lite",
+    "build_slug": "respan/span-01-lite-20260925",
+    "released": "2026-09-26",
+    "context_length": 0,
+    "usd_per_million_input_tokens": 0,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "Respan"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 0,
+    "estimated_input_tokens": 169,
+    "fit": "no",
+    "description": "Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present..."
+  },
+  {
+    "id": "respan/span-01-lite:free",
+    "name": "Respan: Span-01 Lite (free)",
+    "build_slug": "respan/span-01-lite-20260925",
+    "released": "2026-09-26",
+    "context_length": 0,
+    "usd_per_million_input_tokens": 0,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "Respan"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 0,
+    "estimated_input_tokens": 169,
+    "fit": "no",
+    "description": "Span-01 Lite is the free, lighter tier of Span-01, a behavior scoring model from Respan. It returns, for each plain-language behavior you define, the probability that the behavior is present..."
+  },
+  {
+    "id": "respan/span-01",
+    "name": "Respan: Span-01",
+    "build_slug": "respan/span-01-20260925",
+    "released": "2026-09-26",
+    "context_length": 0,
+    "usd_per_million_input_tokens": 0.02,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "Respan"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 0,
+    "estimated_input_tokens": 169,
+    "fit": "no",
+    "description": "Span-01 is a behavior scoring model from Respan. It reads a conversation span and returns, for each plain-language behavior you define, the probability that the behavior is present. It is..."
+  },
+  {
+    "id": "jaredpalmer/kev-4b",
+    "name": "Jared Palmer: Kev 4B",
+    "build_slug": "jaredpalmer/kev-4b-20260924",
+    "released": "2026-09-25",
+    "context_length": 8192,
+    "usd_per_million_input_tokens": 0.042,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "SiliconFlow (fp8)"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 8192,
+    "estimated_input_tokens": 169,
+    "fit": "ok",
+    "description": "Kev 4B is a small open-weight decision model from Jared Palmer, built as a LoRA adapter and pointer head on Qwen3.5-4B-Base and served over the same /v1/systemone contract as TypeSafe's..."
+  },
+  {
+    "id": "typesafe/jev-1.13",
+    "name": "TypeSafe: Jev 1.13",
+    "build_slug": "typesafe/jev-1.13-20260917",
+    "released": "2026-09-18",
+    "context_length": 32000,
+    "usd_per_million_input_tokens": 0.042,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "TypeSafe"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 32000,
+    "estimated_input_tokens": 169,
+    "fit": "ok",
+    "description": "Jev is a structured decision model from TypeSafe, and the first of its System One models. System One models make fast, structured decisions for software, returning a typed choice rather..."
+  },
+  {
+    "id": "upstage/solar-decide",
+    "name": "Upstage: Solar Decide",
+    "build_slug": "upstage/solar-decide-20260928",
+    "released": "2026-09-28",
+    "context_length": 524288,
+    "usd_per_million_input_tokens": 0.05,
+    "usd_per_million_output_tokens": 0,
+    "providers": [
+      "Upstage"
+    ],
+    "min_uptime_last_30m": 100,
+    "max_input_tokens": 524288,
+    "estimated_input_tokens": 169,
+    "fit": "ok",
+    "description": "Solar Decide is Upstage's structured decision model, served as a System One endpoint on Solar Mini 4. Send a state along with typed questions, and it returns a choice, a..."
+  },
+  {
+    "id": "~typesafe/jev-latest",
+    "name": "TypeSafe: Jev Latest",
+    "build_slug": "~typesafe/jev-latest",
+    "alias_target": "typesafe/jev-1.13",
+    "released": "2026-09-18",
+    "context_length": 32000,
+    "usd_per_million_input_tokens": 0.042,
+    "usd_per_million_output_tokens": 0,
+    "providers": [],
+    "max_input_tokens": 32000,
+    "estimated_input_tokens": 169,
+    "fit": "ok",
+    "description": "This model always redirects to the latest model in the Jev family."
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "id": 2,
+  "kind": "trigger",
+  "category": "trigger-explicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:10:26.283Z",
+  "duration_ms": 13463,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 29352,
+    "cached_input_tokens": 17094,
+    "output_tokens": 1146,
+    "reasoning_output_tokens": 403
+  },
+  "estimated_cost": 0.00416868,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the openrouter-decisions skill because this is a moderation/classification decision that should return probabilities rather than generated text. I’ll map your boolean filter to a bounded toxicity decision and show the request payload."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/02/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,260p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/02/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/references/decisions-api.md && sed -n '1,220p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/02/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/references/decision-model-limits.md\"\n<output>\n# Decisions API reference\n\n`POST https://openrouter.ai/api/alpha/decisions` with `Authorization: Bearer $OPENROUTER_API_KEY`. The source of truth is the [OpenAPI page](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request), which also lists error responses. This page condenses it to the shapes and rules an integration needs. Any decision model ID from the live catalog goes in `model` (the examples use `typesafe/jev-1.13`); how to list and choose between them is in [models.md](models.md).\n\n## Request\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"customer_tier\": \"enterprise\",\n    \"ticket\": \"My checkout page shows a blank screen after I click Pay. I have tried two browsers.\"\n  },\n  \"questions\": {\n    \"is_bug\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is the customer reporting a software defect?\",\n      \"criteria\": {\n        \"true\": \"The customer describes broken or unexpected product behavior.\",\n        \"false\": \"The customer is asking a question or requesting a feature.\"\n      }\n    },\n    \"team\": {\n      \"type\": \"choice\",\n      \"instructions\": \"Which team should own this ticket?\",\n      \"criteria\": {\n        \"payments\": \"Checkout, billing, or payment processing issues.\",\n        \"frontend\": \"Rendering, layout, or browser compatibility issues.\",\n        \"account\": \"Login, permissions, or profile issues.\",\n        \"none\": \"None of the teams above.\"\n      }\n    },\n    \"urgency\": {\n      \"type\": \"score\",\n      \"instructions\": \"How urgent is this ticket?\",\n      \"criteria\": [\n        \"Can wait for the next release\",\n        \"Should be fixed this week\",\n        \"Blocking revenue right now\"\n      ]\n    }\n  }\n}\n```\n\n- `state` is a string, object, or array. Objects with named fields are preferred.\n- `questions` is an object keyed by your own IDs.\n- `choice.criteria` maps option name to description. `noul.criteria` is optional and has exactly `true` and `false`. `score.criteria` is an ordered array, lowest level first, and "
+    },
+    {
+      "type": "agent_message",
+      "text": "Your banned-word check is deterministic, so keep it as a code-side hard block. Use Decisions for semantic toxicity that the keyword list misses.\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"review\": \"The seller threatened me and tried to deceive me.\"\n  },\n  \"questions\": {\n    \"is_toxic\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is this review toxic under the moderation policy?\",\n      \"criteria\": {\n        \"true\": \"The review contains harassment, threats, abusive attacks, or deceptive/scam-like content.\",\n        \"false\": \"The review is ordinary criticism, dissatisfaction, or neutral feedback without those behaviors.\"\n      }\n    }\n  }\n}\n```\n\nI would send it as:\n\n```bash\ncurl https://openrouter.ai/api/alpha/decisions \\\n  -H \"Authorization: Bearer $OPENROUTER_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d @request.json\n```\n\nThen gate in code:\n\n```py\ndef is_toxic(review: str) -> bool:\n    if any(w in review.lower() for w in BANNED):\n        return True\n\n    answer = call_decisions_api(review)\n    return answer[\"answers\"][\"is_toxic\"][\"noul\"] >= TOXIC_THRESHOLD\n```\n\nUse a pinned model version selected from the live catalog, and calibrate `TOXIC_THRESHOLD` with representative probes before relying on it."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md",
+    "references/decision-model-limits.md",
+    "references/decisions-api.md"
+  ],
+  "read_skill": true,
+  "final_message": "Your banned-word check is deterministic, so keep it as a code-side hard block. Use Decisions for semantic toxicity that the keyword list misses.\n\n```json\n{\n  \"model\": \"typesafe/jev-1.13\",\n  \"state\": {\n    \"review\": \"The seller threatened me and tried to deceive me.\"\n  },\n  \"questions\": {\n    \"is_toxic\": {\n      \"type\": \"noul\",\n      \"instructions\": \"Is this review toxic under the moderation policy?\",\n      \"criteria\": {\n        \"true\": \"The review contains harassment, threats, abusive attacks, or deceptive/scam-like content.\",\n        \"false\": \"The review is ordinary criticism, dissatisfaction, or neutral feedback without those behaviors.\"\n      }\n    }\n  }\n}\n```\n\nI would send it as:\n\n```bash\ncurl https://openrouter.ai/api/alpha/decisions \\\n  -H \"Authorization: Bearer $OPENROUTER_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d @request.json\n```\n\nThen gate in code:\n\n```py\ndef is_toxic(review: str) -> bool:\n    if any(w in review.lower() for w in BANNED):\n        return True\n\n    answer = call_decisions_api(review)\n    return answer[\"answers\"][\"is_toxic\"][\"noul\"] >= TOXIC_THRESHOLD\n```\n\nUse a pinned model version selected from the live catalog, and calibrate `TOXIC_THRESHOLD` with representative probes before relying on it.",
+  "produced_files": []
+}

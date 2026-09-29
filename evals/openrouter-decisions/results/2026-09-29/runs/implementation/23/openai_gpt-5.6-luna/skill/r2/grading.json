@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01610625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "subscription.py checks age in code: if not _is_more_than_one_year_old(started, as_of_date): return False, with _is_more_than_one_year_old computing the anniversary.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The Decisions request sends only the reason: request_body['state'] = {'cancellation_reason': reason}, with no dates included.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The question is a noul ('type': 'noul' for 'may_return') and the code gates on RETURN_PROBABILITY_THRESHOLD = 0.5 via return probability >= RETURN_PROBABILITY_THRESHOLD.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

@@ -1,0 +1,53 @@
+{
+  "id": 5,
+  "kind": "trigger",
+  "category": "trigger-implicit",
+  "should_trigger": true,
+  "model": "openai/gpt-5.6-luna",
+  "arm": "skill",
+  "round": 2,
+  "reasoning_effort": "medium",
+  "started_at": "2026-09-29T02:13:09.181Z",
+  "duration_ms": 21342,
+  "exit_code": 0,
+  "error": null,
+  "usage": {
+    "input_tokens": 50161,
+    "cached_input_tokens": 38464,
+    "output_tokens": 1284,
+    "reasoning_output_tokens": 404
+  },
+  "estimated_cost": 0.004649479999999999,
+  "items": [
+    {
+      "type": "agent_message",
+      "text": "I’m using the OpenRouter Decisions skill because you’re asking to identify judgment points—routing, classification, deduplication, approval escalation, and policy mapping—that may be better served by probability-based decision models. I’ll inspect the specified files and return candidates only, with rationale and no code changes."
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"sed -n '1,240p' /home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/05/openai_gpt-5.6-luna/skill/r2/workspace/.agents/skills/openrouter-decisions/SKILL.md && printf '\\\\n---FILES---\\\\n' && rg --files -g 'triage.ts' -g 'tax.ts' -g 'dedupe.ts' -g 'approvals.ts' -g 'permissions.ts' .\"\n<output>\n---\nname: openrouter-decisions\ndescription: Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue, a misfiring router, filter, or classifier) and implement it through OpenRouter's Decisions API, which returns probabilities instead of generated text. Covers routing, classification, moderation, guardrails, grounding checks, scoring, ranking, dedupe, escalation and approval gates, bounded extraction, and thresholds. Use when decision models, Jev, TypeSafe, or System One come up. Not for chat completions, text generation, or general OpenRouter setup.\n---\n\n# OpenRouter Decisions\n\nA decision model reads application state and answers typed questions with probabilities, never text. The model judges, code computes. Code owns the workflow and every deterministic step, and the model fills in the judgments code cannot make. It is not a chat model, a coding agent, or a replacement for the LLM that drives one.\n\nEvery decision model on OpenRouter speaks the same Decisions API and the same three primitives, evaluated independently and in parallel within one request.\n\n| Need | Primitive | Returns |\n| --- | --- | --- |\n| One option from a defined set | `choice` | `choice`, `probabilities` per option, `confidence` |\n| Whether a condition holds | `noul` | `noul`, the probability of yes |\n| Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |\n\nRead [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.\n\n## Steps\n\n1. **Find the decision points.** "
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc \"rg --files . | sort | sed -n '1,200p'; printf '\\\\n---MATCHES---\\\\n'; rg -n \\\"keyword|VAT|duplicate|refund|scope|role|overlap|human|review|ticket\\\" . --glob '*.ts' --glob '*.js' --glob '*.md'\"\n<output>\n\n---MATCHES---\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'pwd; ls -la; find . -maxdepth 4 -type f -print'\n<output>\n/home/ubuntu/repos/skills/evals/openrouter-decisions/results/2026-09-29/runs/trigger/05/openai_gpt-5.6-luna/skill/r2/workspace\ntotal 16\ndrwxr-xr-x 5 ubuntu ubuntu 4096 Sep 29 02:13 .\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:13 ..\ndrwxr-xr-x 3 ubuntu ubuntu 4096 Sep 29 02:13 .agents\ndr-xr-xr-x 2 ubuntu ubuntu   40 Sep 29 02:13 .codex\ndrwxr-xr-x 8 ubuntu ubuntu 4096 Sep 29 02:13 .git\n./.git/objects/de/ea7413eeb1a276665fb2deff32375f6a070fab\n./.git/objects/ab/6a60541b0b60e112e96b9fb9ba0458fed8a417\n./.git/objects/d2/9746111653596cc44b6833c901eaa178781caf\n./.git/objects/76/aa2e5eb099422fa35e19e93f5f8bd66efbd283\n./.git/objects/0a/5bddf55f2090507ccc7ca2196acc24adc0e5b1\n./.git/objects/15/9ffb1d41797ba89cbb362d74016f32bf1826f0\n./.git/objects/cd/513c9804899c7f7d2bbe2a0e4cf8ba2421a86a\n./.git/objects/a4/946b5cabeb9bcad30bcb3a5872ed66f79a8dab\n./.git/objects/b3/87f0dd1063cf6369c8590aa7c7bb7dd51b3906\n./.git/objects/29/f67ca14cba4a9dae564e587a4c223cb4c294ea\n./.git/objects/59/58d611367222b38b400aabcb7c0764ae404bce\n./.git/objects/ff/ad2c78af6a322d15dd6d0afb921dc2802a6928\n./.git/objects/b8/10cf570347719cd5c3d6bb28bffb3690c6ef5a\n./.git/objects/18/686c6dbdb116a8f36a50a4cb66ca11edada64a\n./.git/objects/74/ddeeee8274756a0875205772345e128a9ea1f2\n./.git/objects/d5/8107b10c7ca5103fb539c3b748f428c465561e\n./.git/objects/57/dee2321b408b7fa9790f007b87dd774ff5ed15\n./.git/objects/88/231fe0cf75b1df9fbb9a5f32889d699afdce62\n./.git/objects/62/e2d5dc6aa4227266e7e87a07cd89b76b68765c\n./.git/hooks/pre-rebase.sample\n./.git/hooks/commit-msg.sample\n./.git/hooks/post-update.sample\n./.git/hooks/pre-commit.sample\n./.git/hooks/pre-merge-commit.sample\n./.git/hooks/push-to-checkout.sample\n./.git/hooks/update.sample\n./.git/hooks/pre-receive.sample\n./.git/hooks/pre-applypatch.sample\n./.git/hooks/applypatch-msg.sample\n./.git/hooks/pre-push.sample\n./.git/hooks/fsmonitor-watchman.sample\n./.git/hooks/prepare-commit-msg.sample\n./.git/COMMIT_EDITMSG\n./.git/info/exclude\n./.git/refs/heads/master\n./.git/HEAD\n./.git/logs/HEAD\n"
+    },
+    {
+      "type": "command_execution",
+      "text": "/bin/bash -lc 'git status --short; git log --oneline --all --decorate -5; git ls-tree -r --name-only HEAD; git show --stat --oneline HEAD'\n<output>\n57dee23 (HEAD -> master) baseline\n.agents/skills/openrouter-decisions/README.md\n.agents/skills/openrouter-decisions/SKILL.md\n.agents/skills/openrouter-decisions/agents/openai.yaml\n.agents/skills/openrouter-decisions/references/decision-model-limits.md\n.agents/skills/openrouter-decisions/references/decisions-api.md\n.agents/skills/openrouter-decisions/references/models.md\n.agents/skills/openrouter-decisions/scripts/decide.ts\n.agents/skills/openrouter-decisions/scripts/lib.ts\n.agents/skills/openrouter-decisions/scripts/models.ts\n.agents/skills/openrouter-decisions/scripts/package-lock.json\n.agents/skills/openrouter-decisions/scripts/package.json\n57dee23 baseline\n .agents/skills/openrouter-decisions/README.md      |  39 ++\n .agents/skills/openrouter-decisions/SKILL.md       |  46 ++\n .../skills/openrouter-decisions/agents/openai.yaml |   4 +\n .../references/decision-model-limits.md            |  18 +\n .../references/decisions-api.md                    | 114 +++++\n .../openrouter-decisions/references/models.md      |  41 ++\n .../skills/openrouter-decisions/scripts/decide.ts  |  97 ++++\n .agents/skills/openrouter-decisions/scripts/lib.ts | 479 ++++++++++++++++++\n .../skills/openrouter-decisions/scripts/models.ts  | 161 ++++++\n .../openrouter-decisions/scripts/package-lock.json | 553 +++++++++++++++++++++\n .../openrouter-decisions/scripts/package.json      |  11 +\n 11 files changed, 1563 insertions(+)\n"
+    },
+    {
+      "type": "agent_message",
+      "text": "The specified service files aren’t present in the workspace, so this is based on the descriptions provided.\n\nCandidates:\n\n- `triage.ts` — Keyword-based ticket routing. A `choice` decision model could classify intent from the full ticket context, handling synonyms, ambiguity, and multi-word meaning better than keyword matches.\n\n- `dedupe.ts` — Fixed token-overlap threshold. A decision model could judge whether two tickets describe the same underlying issue, while code retains candidate retrieval and the final threshold/escalation logic.\n\n- `approvals.ts` — Human review for every refund over $50. A model could assess refund legitimacy or risk and automatically approve clearly safe cases, reserving human review for ambiguous or high-risk cases. The $50 policy threshold itself should remain deterministic.\n\nNot strong candidates:\n\n- `tax.ts` — A country-to-VAT table is a deterministic policy lookup; replacing it with a probabilistic judgment could reduce correctness and auditability.\n\n- `auth/permissions.ts` — Role-to-scope mapping is an explicit authorization policy and should remain deterministic. A model should not decide access rights."
+    }
+  ],
+  "skill_files_read": [
+    "SKILL.md"
+  ],
+  "read_skill": true,
+  "final_message": "The specified service files aren’t present in the workspace, so this is based on the descriptions provided.\n\nCandidates:\n\n- `triage.ts` — Keyword-based ticket routing. A `choice` decision model could classify intent from the full ticket context, handling synonyms, ambiguity, and multi-word meaning better than keyword matches.\n\n- `dedupe.ts` — Fixed token-overlap threshold. A decision model could judge whether two tickets describe the same underlying issue, while code retains candidate retrieval and the final threshold/escalation logic.\n\n- `approvals.ts` — Human review for every refund over $50. A model could assess refund legitimacy or risk and automatically approve clearly safe cases, reserving human review for ambiguous or high-risk cases. The $50 policy threshold itself should remain deterministic.\n\nNot strong candidates:\n\n- `tax.ts` — A country-to-VAT table is a deterministic policy lookup; replacing it with a probabilistic judgment could reduce correctness and auditability.\n\n- `auth/permissions.ts` — Role-to-scope mapping is an explicit authorization policy and should remain deterministic. A model should not decide access rights.",
+  "produced_files": []
+}

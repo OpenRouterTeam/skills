@@ -1,0 +1,29 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01270625,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md, references/decisions-api.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": true,
+      "evidence": "The code uses numeric outputs: `const probability = answer.probabilities?.[answer.choice] ?? answer.confidence;` with no `includes(...)` string matching.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": false,
+      "evidence": "It uses a single `choice` question (“mutually exclusive options”) with `type: \"choice\"`, not separate `noul` questions for spam and abusive.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "Thresholds are defined and applied in code: `const THRESHOLD = 0.5;` and `if (probability < THRESHOLD) { ... }` next to the returned probabilities.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 4
+}

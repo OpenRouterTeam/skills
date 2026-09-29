@@ -1,0 +1,19 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0,
+  "judge_error": "Generator HTTP 400: {\"message\":\"This endpoint's maximum context length is 400000 tokens. However, you requested about 411008 tokens (411008 of text input). Please reduce the length of either one, or use the context-compression plugin to compress your prompt automatically.\",\"code\":400,\"metadata\":{\"provider_name\":null}}",
+  "assertions": [
+    {
+      "pass": false,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "judge error: Generator HTTP 400: {\"message\":\"This endpoint's maximum context length is 400000 tokens. However, you requested about 411008 tokens (411008 of text input). Please reduce the length of either one, or use the context-compression plugin to compress your prompt automatically.\",\"code\":400,\"metadata\":{\"provider_name\":null}}",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 0,
+  "total": 2
+}

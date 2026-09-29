@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01099125,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "transcript read SKILL.md",
+      "graded_by": "transcript"
+    },
+    {
+      "pass": false,
+      "evidence": "The plan’s Primitive lists only 'one choice with options billing, engineering, support' and does not include a no-match/none_of_these option.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The Gate says 'route returns the top choice when confidence clears a threshold… below it, return support… Threshold as a named constant next to the call,' which puts the threshold and fallback in code rather than in the question.",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 2,
+  "total": 3
+}

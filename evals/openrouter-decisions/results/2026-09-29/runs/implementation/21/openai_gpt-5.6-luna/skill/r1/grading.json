@@ -1,0 +1,24 @@
+{
+  "judge": "openai/gpt-5",
+  "judge_cost": 0.01628,
+  "judge_error": null,
+  "assertions": [
+    {
+      "pass": true,
+      "evidence": "In src/incident-urgency.js the request defines questions.urgency = { type: \"score\", ... criteria: URGENCY_CRITERIA } where URGENCY_CRITERIA is an ordered array of five levels; the test also asserts request.questions.urgency.type === \"score\".",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "parseDecisionResponse sets urgency from code via urgency: integerUrgency(answer.score) and integerUrgency rounds the model’s score (+1) to 1–5; no second call or model-generated integer is used.",
+      "graded_by": "judge"
+    },
+    {
+      "pass": true,
+      "evidence": "The POST body sets state: { incident_report: text, affected_service: service }, sending report text and service as separate named fields; the test checks request.state.affected_service === \"checkout\".",
+      "graded_by": "judge"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

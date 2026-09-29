@@ -1,0 +1,48 @@
+{
+  "model": "typesafe/jev-1.13-20260917",
+  "transport": "http",
+  "latency_ms": 245,
+  "usage": {
+    "input_tokens": 2171,
+    "output_tokens": 166,
+    "cost": 0.000091182
+  },
+  "answers": {
+    "candidate_0": {
+      "type": "noul",
+      "noul": 0.95
+    },
+    "candidate_1": {
+      "type": "noul",
+      "noul": 0.99
+    },
+    "candidate_2": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_3": {
+      "type": "noul",
+      "noul": 0.12
+    },
+    "candidate_4": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_5": {
+      "type": "noul",
+      "noul": 0.02
+    },
+    "candidate_6": {
+      "type": "noul",
+      "noul": 0.01
+    },
+    "candidate_7": {
+      "type": "noul",
+      "noul": 0.03
+    },
+    "candidate_8": {
+      "type": "noul",
+      "noul": 0.02
+    }
+  }
+}

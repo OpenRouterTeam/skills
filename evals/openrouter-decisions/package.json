@@ -1,0 +1,10 @@
+{
+  "name": "openrouter-decisions-evals",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.0.0",
+    "typescript": "^7.0.2"
+  }
+}
