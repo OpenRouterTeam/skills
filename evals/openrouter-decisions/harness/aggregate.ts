@@ -56,7 +56,7 @@ if (codex) {
   for (const model of models) {
     const mine = triggers.filter((r) => r.model === model);
     if (mine.length === 0) continue;
-    const correct = (r: Run): boolean => r.read_skill === r.should_trigger;
+    const correct = (r: Run): boolean => r.error === null && r.read_skill === r.should_trigger;
     const byCat = (cat: string): string => {
       const c = mine.filter((r) => r.category === cat);
       return c.length === 0 ? "-" : `${c.filter(correct).length}/${c.length}`;
@@ -65,7 +65,7 @@ if (codex) {
       const c = mine.filter((r) => r.round === round);
       return c.length === 0 ? NaN : c.filter(correct).length / c.length;
     }).filter((v) => !Number.isNaN(v)));
-    const misses = mine.filter((r) => !correct(r)).map((r) => `#${r.id} r${r.round}`);
+    const misses = mine.filter((r) => !correct(r)).map((r) => `#${r.id} r${r.round}${r.error !== null ? " (run failed)" : ""}`);
     const t = {
       runs: mine.length,
       correct: mine.filter(correct).length,
@@ -201,8 +201,16 @@ for (const file of discoveryFiles) {
   const fixture = typeof report.fixture === "string" ? report.fixture : file;
   const d = report.discovery.filter(isRecord);
   const impl = report.implementations.filter(isRecord);
-  const rounds = [...new Set(d.map((r) => Number(r.round)))].sort((a, b) => a - b);
-  const generators = [...new Set(d.map((r) => String(r.generator)))];
+  const rounds = [...new Set([...d, ...impl].map((r) => Number(r.round)))].sort((a, b) => a - b);
+  const generators = [...new Set([...d, ...impl].map((r) => String(r.generator)))];
+  // Rubric ids per site, so a design that failed to generate still counts as failing every item of its site.
+  const siteItems = new Map<string, Set<string>>();
+  for (const r of impl) {
+    if (!isRecord(r.grades)) continue;
+    const set = siteItems.get(String(r.site)) ?? new Set<string>();
+    for (const id of Object.keys(r.grades)) set.add(id);
+    siteItems.set(String(r.site), set);
+  }
   const perArm: Record<string, unknown> = {};
   lines.push(`## Discovery: ${fixture} (${d.length} discovery runs, ${impl.length} designs, decision model ${String(report.decision_model)}, judge ${String(report.judge)})`, "");
   lines.push("| Arm | Recall mean ± sd | Precision mean ± sd | Primitive match | Rubric pass mean ± sd (per round) | Design errors | Runtime errors | Sample accuracy | Gen $ | Judge $ |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
@@ -228,10 +236,12 @@ for (const file of discoveryFiles) {
     const expectedHits = countExpected(ii);
     const perItem: Record<string, { passed: number; total: number }> = {};
     for (const r of ii) {
-      if (!isRecord(r.grades)) continue;
-      for (const [id, g] of Object.entries(r.grades)) {
+      const grades = isRecord(r.grades) ? r.grades : {};
+      const ids = Object.keys(grades).length > 0 ? Object.keys(grades) : [...(siteItems.get(String(r.site)) ?? [])];
+      for (const id of ids) {
         perItem[id] ??= { passed: 0, total: 0 };
         perItem[id].total += 1;
+        const g = grades[id];
         if (isRecord(g) && g.pass === true) perItem[id].passed += 1;
       }
     }
@@ -301,8 +311,9 @@ if (existsSync(codexPairwisePath)) {
 }
 
 writeFileSync(join(iteration, "benchmark.json"), JSON.stringify(out, null, 2));
+writeFileSync(join(iteration, "benchmark.md"), `${lines.join("\n").trimEnd()}\n`);
 console.log(lines.join("\n"));
-console.log(`benchmark.json written to ${join(iteration, "benchmark.json")}`);
+console.log(`benchmark.json and benchmark.md written under ${iteration}`);
 
 function countExpected(impl: Record<string, unknown>[]): { correct: number; graded: number } | null {
   const graded = sum(impl.map((r) => Number(r.graded_samples ?? 0)));

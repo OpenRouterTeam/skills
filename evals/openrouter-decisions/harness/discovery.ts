@@ -212,6 +212,7 @@ const discoveryDir = join(fixturesDir, fixtureName);
 if (!existsSync(join(discoveryDir, "sites.json"))) throw new Error(`No fixture named ${fixtureName} under ${fixturesDir}`);
 const fixtureDir = join(discoveryDir, "fixture");
 const sites = loadSites(join(discoveryDir, "sites.json"));
+const fixtureDescription = loadDescription(join(discoveryDir, "sites.json"));
 const fixtureFiles = listFixtureFiles(fixtureDir);
 const opportunities = sites.filter((s): s is Extract<Site, { opportunity: true }> => s.opportunity);
 const implementSites = opportunities.filter((s) => !filter || s.file.includes(filter));
@@ -335,6 +336,12 @@ function listFixtureFiles(dir: string): string[] {
   return out.sort();
 }
 
+function loadDescription(path: string): string {
+  const raw = readJsonFile(path);
+  if (!isRecord(raw) || typeof raw.description !== "string") throw new Error("sites.json must have a description string naming the kind of codebase");
+  return raw.description;
+}
+
 function loadSites(path: string): Site[] {
   const raw = readJsonFile(path);
   if (!isRecord(raw) || !Array.isArray(raw.sites)) throw new Error("sites.json must have a sites array");
@@ -390,7 +397,7 @@ function parseImplementation(raw: unknown, source: string): Implementation {
 
 function discoveryPrompt(): string {
   return [
-    "Below is the source of a small support-operations backend. Review every file and list the places where a decision model called through OpenRouter's Decisions API should replace the existing logic.",
+    `Below is the source of a small ${fixtureDescription}. Review every file and list the places where a decision model called through OpenRouter's Decisions API should replace the existing logic.`,
     "",
     "Be selective. Flag a file only when replacing part of it with a decision model would be a real improvement, and leave out files that should stay as they are. For each flagged file give one line on what the model would judge and what the code does with the answer, and the primitive (choice, noul, or score) for the main judgment.",
     "",
@@ -696,7 +703,7 @@ async function judge(
   ].join("\n");
   let reply;
   try {
-    reply = await chatJson(judgeModel, system, user, apiKey, {});
+    reply = await chatJson(judgeModel, system, user, apiKey, { temperature: 0 });
   } catch (error) {
     return { grades: failAll(rubric, errorMessage(error)), cost: 0, error: errorMessage(error) };
   }

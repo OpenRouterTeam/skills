@@ -1,638 +1,797 @@
 {
   "codex-21-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "4dd583daf2cb6d8a40cd7cf9a47d0a33621ce42b9ae70f2b2fb85db8b1000802"
   },
   "codex-21-openai_gpt-5.6-luna-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "0856e280edc842310e4fd595128b8b51366832972d780c9b9a86c8d02d9077e8"
   },
   "codex-21-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "e341864ea1df55b423a91cfa45839509f5ae99aa737e90b6c8aed02f4b38a3c2"
   },
   "codex-21-openai_gpt-6-astra-r1": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "714b61b2edb198f3cf9e68e6f0bbbb4080a7bf3bc62c3031a10e7833565f2f9d"
   },
   "codex-21-openai_gpt-6-astra-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "ed09c6c1b088aac18c2cf2ac2539e610d81864fa2ad95eabbb04cd001719ba36"
   },
   "codex-21-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "5ff1d00139b9763eb107521629fc7a79fe94839cc1fd77158eb9e1e01e9e98df"
   },
   "codex-21-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "06112d06d196cd9d4d74d09254887301095198ca06b6692db64eee0198ad646e"
   },
   "codex-21-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "fc6904e54ed8ef06706ecfc4818b3052dac8afd84b02d3e56d86d9d1bde1b7d8"
   },
   "codex-21-z-ai_glm-5.3-flash-r3": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "87375c477952815272fb58a0f1db1de0f03a2401c4426e672bc3895c4732b509"
   },
   "codex-22-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "1d3a703a1ac1fcd8918a9bad852c2e37af7d9e57ce603b00414da38037d50731"
   },
   "codex-22-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "d5544e810c89168093d73dbd94821364acc149d715299dc3028b83eac8244cee"
   },
   "codex-22-openai_gpt-5.6-luna-r3": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "80eab62a73241eddfbc94ec9c7177c3dc7256031891fcd5a0528c480804455f1"
   },
   "codex-22-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "1a6a9c208461606a0094fe2aa5b026a438ffa6845aa60171e5e0ef4f21ef39fe"
   },
   "codex-22-openai_gpt-6-astra-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "625346713c6e53ed1be615ab2068f96fc7dbf9949c9731116df49f0ca6834bf6"
   },
   "codex-22-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "7f5c7c577a113308013497ffeb6603e37c2a5b9d54cc5460e78e7eb3e1dd5106"
   },
   "codex-22-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "44ef01988fd961c902775197b4890495a7c0f6334ff3297b7791d06ae966148a"
   },
   "codex-22-z-ai_glm-5.3-flash-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "e9dccb184ce9a7658ec56b8914708a588d1121f9cf3ad1560be0a40ffdec37ab"
   },
   "codex-22-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "5cc6ab61e90112dc9d4cce4114afc497b098ef5c015e0cb81b9f196511b00f0e"
   },
   "codex-23-openai_gpt-5.6-luna-r1": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "d795bf7d51e6031056ba824723bb7684ea30bc024bcaf106c89507ca007d6c97"
   },
   "codex-23-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "df9fa107cd6b8650157b1deb63a0a30a41848b34f5041bdcc6610450ab486a09"
   },
   "codex-23-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "8f2e0bc36e6229b614a5806cdec53e0a57b65c435712014338a9ebad75c285a9"
   },
   "codex-23-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "b0226f201c6a2f0cfe972a244b8faaa93f0af1da0f5178f99f17ced99553e834"
   },
   "codex-23-openai_gpt-6-astra-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "e27b0eedc2016ec8a503c793e3484579710fb54ead8e61481bbe5b6df7f965ea"
   },
   "codex-23-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "ec38e5f03b9293c2fef5832fe11d7daaaf5d24960721b0f405889eb48d6a276e"
   },
   "codex-23-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "c3414d2629958773c63d0b8bf79ad75322f93ec1d8d5d5dbd45acfa941a0db3e"
   },
   "codex-23-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "d425ed70a11cfbb00a5e87ea9ef0b7c77704e4138789952c048ff7b28689ea44"
   },
   "codex-23-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "e9cc3cfca6bf521e8a53c4e032f71b2c365a7fd0bcc53f7852eacac75e426249"
   },
   "codex-24-openai_gpt-5.6-luna-r1": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "9e5d44eee05656ecc70fed2a84157bd20e7653315fb8a1351a50843f71eae539"
   },
   "codex-24-openai_gpt-5.6-luna-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "ce9f64507fc4a65c9441791b10e9ff12ca7e8797711d327901bac6547e17c2f4"
   },
   "codex-24-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "92fbc46767b00ead86d35dc09267c3ef2cbfd32e575c83399ab5364990d3ec4d"
   },
   "codex-24-openai_gpt-6-astra-r1": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "d596da36f081099fadbfaaccfc21da484691dcb45f6bfef1f67d896e6ea863ca"
   },
   "codex-24-openai_gpt-6-astra-r2": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "a76a47e11989f921d0a0ed5c53e29285eefc42ce1c7825acd92ec0acf191d3fb"
   },
   "codex-24-openai_gpt-6-astra-r3": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "845513e5bfb103cee68bfec17ba91409831a558bb9d3c9ec8602d451c618907f"
   },
   "codex-24-z-ai_glm-5.3-flash-r1": {
     "A": "no-skill",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "fd6905f248c9a90fec38ea1c9f144dcb2dfff9cfaa99b2ea8bf989b78302e2b4"
   },
   "codex-24-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "22ec42423a726ce4b9441a1c55f9325fa50e0ffd04c5c2b8c959e04ca08bd378"
   },
   "codex-24-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "no-skill"
+    "B": "no-skill",
+    "sha256": "1a9d352aa0ac472764436cd7a198b1fc62e32aa72ffe29c4fe2ef7e03574a5af"
   },
   "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "7c13595577eff3da54c25a99e8ffcfe87d597ed6c88bd6c13b5a62cece4c105a"
   },
   "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "1d7fba9b7d021eb553ef0a18821df16e2cbc89510af29e20bd13cedda383d3e2"
   },
   "marketplace-ops-catalog_condition-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "39848296d691173af6175997a988e8f536c165b2334f80b911fe5032aa70ea5e"
   },
   "marketplace-ops-catalog_condition-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "cf73feda1cb5ceb33493babcf1badcf0ddaa92ffafdb0d479af67c012756fdb4"
   },
   "marketplace-ops-catalog_condition-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "8d72ea919498aa276b5af21cb31d66c073e9c6608925a0cdb1038320a8b9d44b"
   },
   "marketplace-ops-catalog_condition-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "5b0fc7fca7c77c27ac5af1bfa723bb63604d591db6b694762a40334fdd1473c0"
   },
   "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "bbfd043f947ea0718179f183bd61f1b16d9a1ff6cf58114e363a838202453035"
   },
   "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "4c95f057099772b96abde97763ba14945dd95e7d29ab2499c21c717719929a51"
   },
   "marketplace-ops-catalog_condition-z-ai_glm-5.3-flash-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "a75eac8b9ead3c7cb33b0327f9c9dd93d5e0f43368502f0c797d4ec68ab780bb"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "c24e7ada045a789231736755b50493cd1d42c713f0db3f5db6ec78f17157d5e4"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "38cb5954f39926ed9f197ff76385256c5b196daf0ac416900148189053e2988c"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "56b2db3ee8ebf2a48ea616af8047f287e418af2fc7c5dca6dbdf243c9dce1675"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "a5b10112e8efd2857f722062afb08b065c8eb56bfee63e4a36ba3331d27d7b87"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "16343077de5a81612fab9df893f79c44cc3104b261952da366374b5d5739c0e8"
   },
   "marketplace-ops-disputes_resolve-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "a900e40543518808cd8325fec18001df9b59b6e85b443f3274dd622b81e8f679"
   },
   "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "5e6be25ea572493f633f999ef0e27ca76c8573b875b48a349f70214af2d1e1dd"
   },
   "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "5a5be22b75cd735d62b8e687f83b2e518602b81634a236adfdb7bbe42da9ece9"
   },
   "marketplace-ops-disputes_resolve-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "0138ed70b3bdb7ac207a4dedc668536ba48b959dfabfaf2955b6b9c0506891d0"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "a7623e2b50d9997cded8ead48cf19e89ce37d5dd41082cf5fbfb0406b2a52bc3"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "af4fc7aaf818c3efd291bcbca8608a461616648be98bbe5a737aff2d1ccf142f"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "a260073c512ecf9247fb7a64fa42dcb4c8dd919a7aea53c09ddb35a7b1e6ff35"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "29b5e15f78177da3a889eda7198c1b5f85f5f1853df7b85b6461493795d19b62"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "9866eafa179f9626c03fb2a85cf47c0776a04f1e9e7e6a1f2db6e78821e99245"
   },
   "marketplace-ops-listings_prohibited-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "c497370bd104d3a5a57c65dbcd5d7e35900b96593391fc2c7b564042deef1bab"
   },
   "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "88876679502c9ff83e424c902e0ec45afbe82ce73569901ed49b4e46a587f269"
   },
   "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "fb5ac6f536720b764b4e3ee1edeff62d94a8b235cfe737ad89e1987f21bda674"
   },
   "marketplace-ops-listings_prohibited-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "d1c42de67d2f71f129736ca08aa72de0038dcc84655e626eae5ec658f52902d0"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "108ee42efcaf6228805389aefcc40fc44ea625bcd74af14b02b2c6211f32fdbf"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "64dcb73d99afb52a2e569e8ff9a13b94c9311b31a63fbae9f783dffcd49a9154"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "dfdee7c82cb8b649954e35f60caee26b7c2ccb75bfad9c52bb726d5648f0f60a"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "150a913d95aa2ecbd5995c26923330142c5b006af9465769657444c1ea0b452e"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "575da06c4cb8c3fe4a66a5203fc18187e1c8e5909a4f4a706e58234602cccf63"
   },
   "marketplace-ops-messages_offplatform-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "98c53214159e4bf4fe75c0ba280ddd736c495a16884b93a2e398750c96319558"
   },
   "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "f6cdcc17cfb42dcaab9047c82918718af02aa989415a4a81b48879967f284327"
   },
   "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "5fd0fc2519ee7807566905e99517c8f7a5b3c6dc80f65700b9e1502f61009360"
   },
   "marketplace-ops-messages_offplatform-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "e806af91734f3b8884e479e587f20511b5666c1c02de15b1604939dfbb4b3d73"
   },
   "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "5ba5f6b6c2a77215f429ed3b9324fe57102de34f4d024bad15fe7b815a86e7b3"
   },
   "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "be92b3f0fc193feda540a3689372834a46885401173294dbf5e5c88014c65798"
   },
   "marketplace-ops-returns_reason-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "f9b82c4a803aa022e8874c86ef0e73ac1741cde9ef938bcf961c91ff90496b22"
   },
   "marketplace-ops-returns_reason-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "240ccecb6dd1f82d5af3b22a0971e70351a4783efe2ffcfc851ebf91b7137682"
   },
   "marketplace-ops-returns_reason-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "c833219ba001740105fba91c095bd7412761f1d80d950803fe69611ce8af51ba"
   },
   "marketplace-ops-returns_reason-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "c7c5c9616f9f1640f8072a0cb411618aae7d865f42fa46460d5abbf0f10474f5"
   },
   "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "d991b5e61d5cf3c621bba3c1f69c3ce8b90b8ad2d7e03b4655a137cfa58822ce"
   },
   "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "aa80bc494ee04d416fffd3934f8ec0e9243704f449cb33817d990fb25f5a016d"
   },
   "marketplace-ops-returns_reason-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "e902f37bdcc9ea9bdf2099ff01f182eb6c504490f1da20987b3202beb1dfda46"
   },
   "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "071673152518ef0aba3b278352d49f21884f8ebbf2ef7687c19890fa5a8ed36f"
   },
   "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "80f37c253b2cd3be47d0b402637a2edd18f0d83a77bc83d8e131339c636bde33"
   },
   "marketplace-ops-reviews_quality-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "f695e267d8366af9fe2d54cb2996bf3d90be35bb2ed91ea0d373ffc32faf8d82"
   },
   "marketplace-ops-reviews_quality-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "f78acbe66d31405d38530cd84751ed218b73a62161df4ffc962745b4240eeeff"
   },
   "marketplace-ops-reviews_quality-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "034aa07f1c29d339bbb504dfedf58e29753f1e5c04ea34363a72cbd81959d387"
   },
   "marketplace-ops-reviews_quality-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ba8776228d4f19626142aebb99b75593d6fa0d7d3e1ce638df62b49fae333d85"
   },
   "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "a6329e5910bf62d4d2649710ffe41ece2112a20a0c66ff5c025d05d4c4562eb9"
   },
   "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "f979bc3b993282fa46612fbd66741cc94d13910042800d6d4b5a81d5226158e9"
   },
   "marketplace-ops-reviews_quality-z-ai_glm-5.3-flash-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "46f8a8425dc6db782cadf5ee523ded89df311afc0210598115b28a1968b74879"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "9b96ef1f18a45d990d8acc61992ac97d69428ea65b779a875e53c7d8b852c7e5"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "9f275897fe132b261364a7da64bbb3018a6ba028022c7e9fd22ca8db3007866f"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "4cb19537b01c1abf8ed0a56e5fa0ac3efcb9f71e38ecd2b476fbb3b4350757c2"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "cb2639a73a13748fb0af97d66c47bf11283d9ab4c18271acf839d75605a23c91"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ac8331152ac2d7180c6ffd4777de1a8ed8cf89e31d4b6ca35829333ccd30859f"
   },
   "marketplace-ops-sellers_onboarding-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "c706c6269ba47329f28cac83afcfd97dcfa2465ef30b9c50853b1f5516a76a8a"
   },
   "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "305aefa2695a36af02b00dd1c03171ea58e564af83a0c5199287d14dfec71791"
   },
   "marketplace-ops-sellers_onboarding-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "5d5b88b540ab8533604d112298f58582d7f1c1dc6b37693c30e517e1ee72a558"
   },
   "support-ops-kb_suggest-openai_gpt-5.6-luna-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "4c18beba5fd6bc950a16a7cb02cf2c1c4cf1ab025956a7b00106154d723b0e6b"
   },
   "support-ops-kb_suggest-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "71f7cf96b2485cc45f0f17587d50e67d4ba3b090769efd7cfa0811eb5722bbe1"
   },
   "support-ops-kb_suggest-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "c2cef69de42f247dc92c16e47943114fa88ebc3dfbad7450cc489677fda78150"
   },
   "support-ops-kb_suggest-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "96557664d2d1ef273df81dafbc530e7757b5adfe42f255f6754b7a6d4e7c0183"
   },
   "support-ops-kb_suggest-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "e38c1fa5f5b11fe432f5d5c8f30eeae0577afe54055ed2b6ffad9e70ef19f465"
   },
   "support-ops-kb_suggest-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "edc3e5c43d5f22bbe5392c80027b7941a9f31a9422e9f2c9617eec3dfdcbf6ca"
   },
   "support-ops-kb_suggest-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "c6689d87bd343c38ad44211e172eae8d1ff8f1dc7c5254c97cdd809eac130335"
   },
   "support-ops-kb_suggest-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "789b1db1b550360c3580cb6bc577d7f9287093101768051de531ab8095ba26a2"
   },
   "support-ops-kb_suggest-z-ai_glm-5.3-flash-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "43978980e44a3f3720ab7448aa46a69b7632f6f91232d67481ae4433e4663c2b"
   },
   "support-ops-leads_route-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "08d6e7b1e12ef8ee0b7a9987851b829ab510bd4000fed9ab79d590dc9dadad65"
   },
   "support-ops-leads_route-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ca8ac7ba90b9058b3b597ca30cf4e4b6f26c6ca3d3a0259b5a5caa71f1133b38"
   },
   "support-ops-leads_route-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ca3b09af43466fb436831b0046b709ce7a75ccadb028114ffa364f32817d93c7"
   },
   "support-ops-leads_route-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "0f6f020d6405db16b587deeb6669f16e678481fe1de4f7527b49531597e39327"
   },
   "support-ops-leads_route-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "c3ee59ce65f14200faf6dd96bc8b353b9928d4510b281a6ea0e49a986e201deb"
   },
   "support-ops-leads_route-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "627ab8dcd48a719a31a54a901395dae6a1e6e3046af45da364738583303958b1"
   },
   "support-ops-leads_route-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "e568a82005f73a8fd0955eb61a96cc768e07636e28a4d6933979ca27970c098f"
   },
   "support-ops-leads_route-z-ai_glm-5.3-flash-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "fb822af0f532ca989e27e94a222c80e5d1559f44f4121eb716ace7fd1d40d027"
   },
   "support-ops-leads_route-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "0b45bdb220dccb4dc11a2c1b1ca1c0c30996c64d2aca4f0d6779bb5a60ec1055"
   },
   "support-ops-moderation_reviews-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "08ae981b0b396dec71a980fd0dd4ef975bee1ad68dd6c2e352e2cfbe6ee3c706"
   },
   "support-ops-moderation_reviews-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "6f87dacc96a6ecffad7278f4002b8c675fba3d2c236b3d5d132d21e4ed32e5eb"
   },
   "support-ops-moderation_reviews-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "aa22ce4f994ec053efa8a8c28576db6741af430110c828258edfd8592c64d5f2"
   },
   "support-ops-moderation_reviews-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "9d6a533673d54ce98ad22f19f76646e1875a086fcaf0ac39416b0501b327dc3a"
   },
   "support-ops-moderation_reviews-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "38859da1daf49c2e9ed4f6cf245d706357c5a35220501a58af6c8205348236f7"
   },
   "support-ops-moderation_reviews-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "cec2c4b615b684d3408d0b88aa5e7ae5195b038b4318ac2046a74aa95b904183"
   },
   "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "518e38ca98a2715c9afebedfc8e6aa1d4319324add6690369e1ca2f5de592310"
   },
   "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "2589651f7cc5b6ffc3b624326b2b8bac689a749c8de009467d7a5a000faaf964"
   },
   "support-ops-moderation_reviews-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "33eb7c607a93ef6eab6adb7a80a9ac83aecd9799dc5d58c5967c4b76faaa8496"
   },
   "support-ops-refunds_approve-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "6928605308195434f85597fb330faaabc7b305c1cff600714d7fff7b4d227eb1"
   },
   "support-ops-refunds_approve-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "7888c82f3c14b65f83b22efd14a46ee659f632c7370fad68e5c12c8ffcc7186f"
   },
   "support-ops-refunds_approve-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "824978de93c076f6049999ca998124f1bba67b3a7bee57b48b0d764984970a15"
   },
   "support-ops-refunds_approve-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "514589f7216b30358862cfda2d63079ebcd724664f8e2cfdbe6a843d2b78dfda"
   },
   "support-ops-refunds_approve-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "11bea3289518d591d08a6bb670dfcdf92d4296363eaa15a3a7857e4bb4efc3f0"
   },
   "support-ops-refunds_approve-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "16495138bbb24e8f3e5b9ecd5ae15604b78e8cb5c6ff9d09e2976bbb9312a981"
   },
   "support-ops-refunds_approve-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "b7e48b08735af3c30d8ffb505ba45a56e1a9de617319f0e300eac23be140c830"
   },
   "support-ops-refunds_approve-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "7b815c7e5c4f658206f854ae759c5f3346199c6d426c3bb942be94f853e3ceae"
   },
   "support-ops-tickets_categorize-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "f9754d7ec15f54f3ce03a1f9ab4bea2ef64eab4b1bbaa96ebf3941e81fb58e15"
   },
   "support-ops-tickets_categorize-openai_gpt-5.6-luna-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "09111101229a795551081d50a53fcd2f407b01a6cbde2823e693a793e56ad25a"
   },
   "support-ops-tickets_categorize-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ee83db4250bb5f4623b03838221911d1b1dff4711d08dbfe23f05f347155f419"
   },
   "support-ops-tickets_categorize-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "f94d86c9784973416d3ff99e0d7c981e703609d0ba9ac5b0d5503f4a3e5407b1"
   },
   "support-ops-tickets_categorize-openai_gpt-6-astra-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "5beb0c32c67e71830682bc3cd48955171a827bb076b7f97dc1bad4de301172fa"
   },
   "support-ops-tickets_categorize-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "be2fd922be6eff1f0b0268ec4d7533f65354b5bea475c537b7773e6aad276ea6"
   },
   "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "026456a2ac447ce086dfff891431d0b25876d2fdee45e41c2e2426070206e53c"
   },
   "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "dab76e5cbc2fb21cbf2bf39b979917cb92b560b6a85aae5e3b65b2a41d0fe35c"
   },
   "support-ops-tickets_categorize-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "10e1275a4544c5edce386e19b5f35e8890c6d762a0df7897b9c1fdcd5d17a777"
   },
   "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "7a65f961b2bd8f6b457a3ac4ae88b31e311115977f1973845c6b1e954451e052"
   },
   "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "0f5a83e3c391322dea07b974049a40ddae406f24dac7901379b2654b5b34ee7c"
   },
   "support-ops-tickets_duplicates-openai_gpt-5.6-luna-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "ac752d3a31015acd767d3b03f89df27952fa833d70ac6f654404fb04753fba33"
   },
   "support-ops-tickets_duplicates-openai_gpt-6-astra-r1": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "fdb764c06a77a8e453287e6356a265f8d5647bebdb15330d5ad2c5494468a51a"
   },
   "support-ops-tickets_duplicates-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "a83f5a2f99c5d2830f05b398717fc899a02b5ed5a44b4ee7a5ea5f3175fff5ca"
   },
   "support-ops-tickets_duplicates-openai_gpt-6-astra-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "46c4002d5de69455e33b83de43711cca3f4060da99e117886eabe65ab977ad02"
   },
   "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "4cfc0a9c16f24514fc49a5d02016390589feaf66d59101f87255785ae37a9af1"
   },
   "support-ops-tickets_duplicates-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "62b7f174c8a69eb7e85d29c0e6831fb9cc2a8d931aac8131ed44bb6448bbb4ef"
   },
   "support-ops-tickets_urgency-openai_gpt-5.6-luna-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "4c001f8e9d957e5321770d7f2c05d35b54854da300b4c95c5f33064e6e6f5866"
   },
   "support-ops-tickets_urgency-openai_gpt-5.6-luna-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "b7968aa4c20b3210cede60f8885c9fe399f92e9b23dc455a580b5c82700d8680"
   },
   "support-ops-tickets_urgency-openai_gpt-5.6-luna-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "ae236a2ccc35907495f3a82c7901d0c6ba4b15e23b0cf7f764e776852cd99e6d"
   },
   "support-ops-tickets_urgency-openai_gpt-6-astra-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "47e781dffb580577469f58755e8ff2d6b7bfa2ba7d82bec40dd65e7fae2fdeb6"
   },
   "support-ops-tickets_urgency-openai_gpt-6-astra-r2": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "61b1ef800ab9e1f62d158219aaa6436820ef40b31602bb9777fb2acb1ecb1f45"
   },
   "support-ops-tickets_urgency-openai_gpt-6-astra-r3": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "8b7c38c9398d9e6d5f3b55fbc3a4f3f5ac6ebb8b5c21e27965d1a5a56c8c01d5"
   },
   "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r1": {
     "A": "api-only",
-    "B": "skill"
+    "B": "skill",
+    "sha256": "012362dba90330131828bcf2bf4c3e17969a29bc34877dee7b639d42cf3d3797"
   },
   "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r2": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "32bb6409100fd294670bd6203925e4195c04439bd32536ada5186455fd30862d"
   },
   "support-ops-tickets_urgency-z-ai_glm-5.3-flash-r3": {
     "A": "skill",
-    "B": "api-only"
+    "B": "api-only",
+    "sha256": "7c6d6a164c2393b5e906a7d71966ae374faedc9aa57841deb0ded6ab88d7a372"
   }
 }

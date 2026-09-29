@@ -11,6 +11,7 @@
  * preference ("A", "B", or "tie"), notes, reviewer id, and timestamp for that pair. Only after
  * that should key.json be consulted. `arm_labels_visible` records whether the reviewer looked.
  */
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { isRecord, seededRandom, skillDir } from "./harness.ts";
@@ -28,11 +29,19 @@ type Feedback = {
 const args = process.argv.slice(2);
 const iteration = argValue("--iteration") ?? fail("--iteration <dir> is required");
 const reviewDir = join(iteration, "review");
+const GENERATED_FILE = /(^|\/)(__pycache__|node_modules|\.git|\.npm-cache|dist|build)\/|\.(pyc|pyo|class|o|so|wasm|png|jpg|jpeg|gif|pdf|zip|gz)$/;
 const random = seededRandom(Number(argValue("--seed") ?? "11"));
 mkdirSync(reviewDir, { recursive: true });
 
 const feedback: Feedback[] = [];
-const key: Record<string, { A: string; B: string }> = {};
+type KeyEntry = { A: string; B: string; sha256: string };
+const key: Record<string, KeyEntry> = {};
+const keyPath = join(reviewDir, "key.json");
+const previousKey: Record<string, KeyEntry> = {};
+if (existsSync(keyPath)) {
+  const raw: unknown = JSON.parse(readFileSync(keyPath, "utf8"));
+  if (isRecord(raw)) for (const [pair, v] of Object.entries(raw)) if (isRecord(v) && typeof v.A === "string" && typeof v.B === "string" && typeof v.sha256 === "string") previousKey[pair] = { A: v.A, B: v.B, sha256: v.sha256 };
+}
 
 // Codex implementation runs
 const codexPath = join(iteration, "codex-runs.json");
@@ -83,13 +92,24 @@ for (const file of readdirSync(iteration).filter((f) => /^discovery-.*\.json$/.t
   }
 }
 
-writeFileSync(join(reviewDir, "key.json"), JSON.stringify(key, null, 2));
+writeFileSync(keyPath, JSON.stringify(key, null, 2));
 const feedbackPath = join(reviewDir, "feedback.json");
 if (existsSync(feedbackPath)) {
   const existing: unknown = JSON.parse(readFileSync(feedbackPath, "utf8"));
   const done = new Map<string, Feedback>();
   if (Array.isArray(existing)) for (const f of existing) if (isRecord(f) && typeof f.pair === "string") done.set(f.pair, f as Feedback);
-  writeFileSync(feedbackPath, JSON.stringify(feedback.map((f) => done.get(f.pair) ?? f), null, 2));
+  let dropped = 0;
+  const merged = feedback.map((f) => {
+    const prior = done.get(f.pair);
+    if (!prior) return f;
+    const before = previousKey[f.pair];
+    const now = key[f.pair];
+    if (before && now && before.A === now.A && before.B === now.B && before.sha256 === now.sha256) return prior;
+    if (prior.preference !== null) dropped += 1;
+    return f;
+  });
+  if (dropped > 0) console.log(`${dropped} recorded preference(s) dropped because the A/B assignment or the candidate text changed`);
+  writeFileSync(feedbackPath, JSON.stringify(merged, null, 2));
 } else {
   writeFileSync(feedbackPath, JSON.stringify(feedback, null, 2));
 }
@@ -100,9 +120,11 @@ function writePair(pair: string, source: Feedback["source"], header: string, arm
   const [a, b] = random() < 0.5 ? names : [names[1], names[0]];
   const dir = join(reviewDir, pair);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "A.md"), `${header}## Candidate A\n\n${arms[a]}\n`);
-  writeFileSync(join(dir, "B.md"), `${header}## Candidate B\n\n${arms[b]}\n`);
-  key[pair] = { A: a, B: b };
+  const textA = `${header}## Candidate A\n\n${arms[a]}\n`;
+  const textB = `${header}## Candidate B\n\n${arms[b]}\n`;
+  writeFileSync(join(dir, "A.md"), textA);
+  writeFileSync(join(dir, "B.md"), textB);
+  key[pair] = { A: a, B: b, sha256: createHash("sha256").update(textA).update(textB).digest("hex") };
   feedback.push({ pair, source, reviewer: null, preference: null, notes: "", reviewed_at: null, arm_labels_visible: false });
 }
 
@@ -111,8 +133,17 @@ function describeCodex(r: Record<string, unknown>): string {
   const parts: string[] = [];
   if (existsSync(dir)) {
     for (const file of walk(dir)) {
+      if (GENERATED_FILE.test(file)) {
+        parts.push(`### ${file}\n\n(generated file omitted)`);
+        continue;
+      }
+      const bytes = readFileSync(join(dir, file));
+      if (bytes.subarray(0, 8192).includes(0)) {
+        parts.push(`### ${file}\n\n(binary file omitted)`);
+        continue;
+      }
       const ext = file.split(".").pop() ?? "";
-      parts.push(`### ${file}\n\n\`\`\`${ext}\n${readFileSync(join(dir, file), "utf8")}\n\`\`\``);
+      parts.push(`### ${file}\n\n\`\`\`${ext}\n${bytes.toString("utf8")}\n\`\`\``);
     }
   }
   if (parts.length === 0) parts.push("(no files were written)");

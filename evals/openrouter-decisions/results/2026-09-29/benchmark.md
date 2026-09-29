@@ -55,11 +55,11 @@
 
 | Item | api-only | skill | Discriminates |
 |---|---:|---:|---|
-| deterministic_in_code | 63/63 | 60/62 | yes |
-| primitive_fit | 63/63 | 62/62 | no (passes in both arms) |
-| fact_not_text | 63/63 | 60/62 | yes |
-| thresholds_in_code | 63/63 | 57/62 | yes |
-| state_minimal | 43/63 | 57/62 | yes |
+| deterministic_in_code | 63/63 | 60/63 | yes |
+| primitive_fit | 63/63 | 62/63 | yes |
+| fact_not_text | 63/63 | 60/63 | yes |
+| thresholds_in_code | 63/63 | 57/63 | yes |
+| state_minimal | 43/63 | 57/63 | yes |
 | strikes_rule_in_code | 6/9 | 8/9 | yes |
 | violation_per_noul | 5/9 | 6/9 | yes |
 | hold_on_uncertain | 9/9 | 6/9 | yes |
@@ -71,9 +71,9 @@
 | late_from_dates | 9/9 | 8/9 | yes |
 | closed_set_choice | 9/9 | 9/9 | no (passes in both arms) |
 | no_dates_in_state | 8/9 | 9/9 | yes |
-| verification_in_code | 9/9 | 8/8 | no (passes in both arms) |
-| restricted_business_judged | 9/9 | 8/8 | no (passes in both arms) |
-| review_on_uncertain | 2/9 | 2/8 | yes |
+| verification_in_code | 9/9 | 8/9 | yes |
+| restricted_business_judged | 9/9 | 8/9 | yes |
+| review_on_uncertain | 2/9 | 2/9 | yes |
 | score_for_degree | 9/9 | 9/9 | no (passes in both arms) |
 | verified_rule_in_code | 7/9 | 9/9 | yes |
 | placement_in_code | 9/9 | 9/9 | no (passes in both arms) |
@@ -100,28 +100,28 @@ skill 29 · api-only 23 · tie 0 · inconsistent 10 · errors 0 → skill wins 5
 
 | Item | api-only | skill | Discriminates |
 |---|---:|---:|---|
-| deterministic_in_code | 57/63 | 59/61 | yes |
-| primitive_fit | 63/63 | 61/61 | no (passes in both arms) |
-| fact_not_text | 51/63 | 59/61 | yes |
-| thresholds_in_code | 62/63 | 60/61 | yes |
-| state_minimal | 25/63 | 57/61 | yes |
+| deterministic_in_code | 57/63 | 59/63 | yes |
+| primitive_fit | 63/63 | 61/63 | yes |
+| fact_not_text | 51/63 | 59/63 | yes |
+| thresholds_in_code | 62/63 | 60/63 | yes |
+| state_minimal | 25/63 | 57/63 | yes |
 | single_choice | 9/9 | 9/9 | no (passes in both arms) |
 | general_is_option | 9/9 | 9/9 | no (passes in both arms) |
 | plan_not_in_state | 2/9 | 9/9 | yes |
 | score_with_levels | 9/9 | 9/9 | no (passes in both arms) |
 | plan_cap_in_code | 2/9 | 9/9 | yes |
 | no_regex_parse | 9/9 | 9/9 | no (passes in both arms) |
-| candidates_in_state | 6/9 | 8/8 | yes |
-| none_option | 18/18 | 17/17 | no (passes in both arms) |
-| status_filter_in_code | 9/9 | 8/8 | no (passes in both arms) |
-| empty_candidates_skip | 8/9 | 8/8 | yes |
+| candidates_in_state | 6/9 | 8/9 | yes |
+| none_option | 18/18 | 17/18 | yes |
+| status_filter_in_code | 9/9 | 8/9 | yes |
+| empty_candidates_skip | 8/9 | 8/9 | yes |
 | one_noul_per_label | 9/9 | 9/9 | no (passes in both arms) |
 | too_short_in_code | 9/9 | 9/9 | no (passes in both arms) |
 | fact_not_words | 6/9 | 8/9 | yes |
-| hard_rules_stay_in_code | 8/9 | 8/8 | yes |
-| skip_model_when_settled | 7/9 | 8/8 | yes |
-| reason_only_state | 6/9 | 8/8 | yes |
-| unclear_to_review | 9/9 | 8/8 | no (passes in both arms) |
+| hard_rules_stay_in_code | 8/9 | 8/9 | yes |
+| skip_model_when_settled | 7/9 | 8/9 | yes |
+| reason_only_state | 6/9 | 8/9 | yes |
+| unclear_to_review | 9/9 | 8/9 | yes |
 | deterministic_rules_first | 9/9 | 8/9 | yes |
 | choice_with_general | 8/9 | 9/9 | yes |
 | employees_not_reasked | 9/9 | 9/9 | no (passes in both arms) |
@@ -139,4 +139,3 @@ skill 31 · no-skill 0 · tie 0 · inconsistent 5 · errors 0 → skill wins 100
 - openai/gpt-5.6-luna: skill 11 · no-skill 0 · tie 0 · inconsistent 1 · errors 0 → skill wins 100.0% of decided pairs
 - openai/gpt-6-astra: skill 10 · no-skill 0 · tie 0 · inconsistent 2 · errors 0 → skill wins 100.0% of decided pairs
 - z-ai/glm-5.3-flash: skill 10 · no-skill 0 · tie 0 · inconsistent 2 · errors 0 → skill wins 100.0% of decided pairs
-

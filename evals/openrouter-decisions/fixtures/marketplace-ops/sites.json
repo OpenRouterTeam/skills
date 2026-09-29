@@ -1,480 +1,481 @@
 {
- "sites": [
-  {
-   "file": "src/listings/prohibited.ts",
-   "opportunity": true,
-   "why": "Term lists standing in for the judgment of whether a listing offers a weapon, a counterfeit, or a recalled product; the strike rule is already code.",
-   "primitives": [
-    "noul",
-    "choice"
-   ],
-   "implement": {
-    "brief": "Replace the term lists in screenListing() so a listing is published, blocked when it offers a weapon or a counterfeit, or held when it appears to be a recalled product or the screen is unsure. Keep the strike rule.",
-    "input_shape": "the DraftListing object passed to screenListing()",
-    "actions": [
-     "publish",
-     "block",
-     "hold"
-    ],
-    "samples": [
-     {
-      "id": "L-1",
-      "title": "Kitchen knife set, 5 pieces",
-      "description": "Stainless steel chef knives with a wooden block. Sharp and well balanced, dishwasher safe.",
-      "category": "home",
-      "sellerStrikes": 0
-     },
-     {
-      "id": "L-2",
-      "title": "Nike Air Max 90 - mirror quality, no box",
-      "description": "Look exactly like the originals, nobody will notice the difference. Very cheap, all sizes available.",
-      "category": "shoes",
-      "sellerStrikes": 1
-     },
-     {
-      "id": "L-3",
-      "title": "Baby sleeper rocker, gently used",
-      "description": "Inclined sleeper, the kind that was in the news last year. Works fine, we just don't need it anymore.",
-      "category": "baby",
-      "sellerStrikes": 0
-     }
-    ],
-    "expected": [
-     "publish",
-     "block",
-     "hold"
-    ],
-    "rubric": [
-     {
-      "id": "strikes_rule_in_code",
-      "text": "The sellerStrikes >= 3 hold stays a code check that runs before any model call, and the strike count is not sent to the model."
-     },
-     {
-      "id": "violation_per_noul",
-      "text": "Weapon, counterfeit, and recalled product are judged as separate nouls (or one choice with a none option), not inferred from a single free-form question."
-     },
-     {
-      "id": "hold_on_uncertain",
-      "text": "Uncertain cases reach hold through a probability or confidence gate in code rather than being forced to publish or block."
-     },
-     {
-      "id": "category_as_context",
-      "text": "The listing category is passed as context for the judgment rather than used as a keyword filter."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/disputes/resolve.ts",
-   "opportunity": true,
-   "why": "A chat completion parsed into a label; the tracking rules are already code and the amount rule is being asked of the model.",
-   "primitives": [
-    "choice"
-   ],
-   "implement": {
-    "brief": "Replace the chat-completion call in resolveDispute() with a decision model that picks the resolution from the two statements and the shipping status. Keep the tracking rules in code and make disputes over $500 always escalate.",
-    "input_shape": "the Dispute object passed to resolveDispute()",
-    "actions": [
-     "refund_buyer",
-     "side_with_seller",
-     "split",
-     "escalate"
-    ],
-    "samples": [
-     {
-      "id": "D-1",
-      "amountCents": 4200,
-      "buyerStatement": "The jacket arrived with a torn lining and smells of smoke. Photos attached.",
-      "sellerStatement": "It was in perfect condition when I posted it. Buyer probably wore it out.",
-      "trackingStatus": "delivered",
-      "sellerProvidedPhotos": false
-     },
-     {
-      "id": "D-2",
-      "amountCents": 89000,
-      "buyerStatement": "Camera body has a scratched sensor that was not in the listing.",
-      "sellerStatement": "Listing said used with minor marks. Sensor was clean, I have photos from before shipping.",
-      "trackingStatus": "delivered",
-      "sellerProvidedPhotos": true
-     },
-     {
-      "id": "D-3",
-      "amountCents": 1500,
-      "buyerStatement": "Never received it.",
-      "sellerStatement": "Tracking shows delivered to the front porch on Tuesday.",
-      "trackingStatus": "delivered",
-      "sellerProvidedPhotos": false
-     }
-    ],
-    "expected": [
-     null,
-     "escalate",
-     null
-    ],
-    "rubric": [
-     {
-      "id": "tracking_rules_in_code",
-      "text": "The lost and no-tracking rules remain code checks before the model is called."
-     },
-     {
-      "id": "amount_rule_in_code",
-      "text": "Disputes over $500 escalate through a code comparison on amountCents, not by asking the model to apply the threshold."
-     },
-     {
-      "id": "single_choice",
-      "text": "The resolution is one choice question over the possible outcomes (with escalate or an unclear option available), not a free-text answer parsed afterwards or several booleans recombined."
-     },
-     {
-      "id": "escalate_on_low_confidence",
-      "text": "Low-probability or low-confidence outcomes route to escalate in code."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/returns/reason.ts",
-   "opportunity": true,
-   "why": "Keyword map standing in for a semantic classification of the return reason; lateness is derivable from dates code already holds.",
-   "primitives": [
-    "choice"
-   ],
-   "implement": {
-    "brief": "Replace the keyword map in classifyReturn() so the reason comes from a decision model, with arrived_late decided from the dates in code.",
-    "input_shape": "the ReturnRequest object passed to classifyReturn()",
-    "actions": [
-     "defective",
-     "not_as_described",
-     "wrong_item",
-     "changed_mind",
-     "arrived_late",
-     "other"
-    ],
-    "samples": [
-     {
-      "orderId": "R-1",
-      "reasonText": "The wrong colour arrived, I ordered navy and got black.",
-      "promisedBy": "2026-09-10T00:00:00Z",
-      "deliveredAt": "2026-09-09T14:00:00Z"
-     },
-     {
-      "orderId": "R-2",
-      "reasonText": "Took almost three weeks to get here, I had already bought another one.",
-      "promisedBy": "2026-09-05T00:00:00Z",
-      "deliveredAt": "2026-09-19T14:00:00Z"
-     },
-     {
-      "orderId": "R-3",
-      "reasonText": "The lamp flickers and then shuts off after a minute.",
-      "promisedBy": "2026-09-10T00:00:00Z",
-      "deliveredAt": "2026-09-08T14:00:00Z"
-     }
-    ],
-    "expected": [
-     null,
-     "arrived_late",
-     "defective"
-    ],
-    "rubric": [
-     {
-      "id": "late_from_dates",
-      "text": "Whether the delivery was late is computed in code from promisedBy and deliveredAt and is not asked of the model."
-     },
-     {
-      "id": "closed_set_choice",
-      "text": "The reason is a single choice over the closed set, with other as an option."
-     },
-     {
-      "id": "no_dates_in_state",
-      "text": "The dates are not sent to the model as state to weigh."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/sellers/onboarding.ts",
-   "opportunity": true,
-   "why": "Human queue that mostly confirms the obvious; the verification and restricted-category checks are already code and the remaining work is a semantic read of the description.",
-   "primitives": [
-    "noul",
-    "choice",
-    "score"
-   ],
-   "implement": {
-    "brief": "Change screenApplication() so verified applications outside restricted categories are approved or rejected from the description (a real business selling permitted goods is approved; a restricted or misrepresented business is rejected), with review only for unclear cases.",
-    "input_shape": "the SellerApplication object passed to screenApplication()",
-    "actions": [
-     "approve",
-     "reject",
-     "review"
-    ],
-    "samples": [
-     {
-      "id": "S-1",
-      "businessName": "Marta's Ceramics",
-      "description": "I make hand-thrown stoneware mugs and bowls in my studio in Leeds and sell them at markets. Looking to reach more customers online.",
-      "categories": [
-       "home"
+  "description": "marketplace-operations backend",
+  "sites": [
+    {
+      "file": "src/listings/prohibited.ts",
+      "opportunity": true,
+      "why": "Term lists standing in for the judgment of whether a listing offers a weapon, a counterfeit, or a recalled product; the strike rule is already code.",
+      "primitives": [
+        "noul",
+        "choice"
       ],
-      "identityVerified": true,
-      "bankVerified": true,
-      "country": "GB"
-     },
-     {
-      "id": "S-2",
-      "businessName": "BestDeals Ltd",
-      "description": "We offer premium quality products at competitive prices with excellent customer service and fast delivery to satisfy all customer needs.",
-      "categories": [
-       "electronics",
-       "home"
+      "implement": {
+        "brief": "Replace the term lists in screenListing() so a listing is published, blocked when it offers a weapon or a counterfeit, or held when it appears to be a recalled product or the screen is unsure. Keep the strike rule.",
+        "input_shape": "the DraftListing object passed to screenListing()",
+        "actions": [
+          "publish",
+          "block",
+          "hold"
+        ],
+        "samples": [
+          {
+            "id": "L-1",
+            "title": "Kitchen knife set, 5 pieces",
+            "description": "Stainless steel chef knives with a wooden block. Sharp and well balanced, dishwasher safe.",
+            "category": "home",
+            "sellerStrikes": 0
+          },
+          {
+            "id": "L-2",
+            "title": "Nike Air Max 90 - mirror quality, no box",
+            "description": "Look exactly like the originals, nobody will notice the difference. Very cheap, all sizes available.",
+            "category": "shoes",
+            "sellerStrikes": 1
+          },
+          {
+            "id": "L-3",
+            "title": "Baby sleeper rocker, gently used",
+            "description": "Inclined sleeper, the kind that was in the news last year. Works fine, we just don't need it anymore.",
+            "category": "baby",
+            "sellerStrikes": 0
+          }
+        ],
+        "expected": [
+          "publish",
+          "block",
+          "hold"
+        ],
+        "rubric": [
+          {
+            "id": "strikes_rule_in_code",
+            "text": "The sellerStrikes >= 3 hold stays a code check that runs before any model call, and the strike count is not sent to the model."
+          },
+          {
+            "id": "violation_per_noul",
+            "text": "Weapon, counterfeit, and recalled product are judged as separate nouls (or one choice with a none option), not inferred from a single free-form question."
+          },
+          {
+            "id": "hold_on_uncertain",
+            "text": "Uncertain cases reach hold through a probability or confidence gate in code rather than being forced to publish or block."
+          },
+          {
+            "id": "category_as_context",
+            "text": "The listing category is passed as context for the judgment rather than used as a keyword filter."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/disputes/resolve.ts",
+      "opportunity": true,
+      "why": "A chat completion parsed into a label; the tracking rules are already code and the amount rule is being asked of the model.",
+      "primitives": [
+        "choice"
       ],
-      "identityVerified": true,
-      "bankVerified": true,
-      "country": "GB"
-     },
-     {
-      "id": "S-3",
-      "businessName": "Vape Corner",
-      "description": "Disposable vapes and e-liquids, all the popular flavours, listed under accessories so they show up in search.",
-      "categories": [
-       "accessories"
+      "implement": {
+        "brief": "Replace the chat-completion call in resolveDispute() with a decision model that picks the resolution from the two statements and the shipping status. Keep the tracking rules in code and make disputes over $500 always escalate.",
+        "input_shape": "the Dispute object passed to resolveDispute()",
+        "actions": [
+          "refund_buyer",
+          "side_with_seller",
+          "split",
+          "escalate"
+        ],
+        "samples": [
+          {
+            "id": "D-1",
+            "amountCents": 4200,
+            "buyerStatement": "The jacket arrived with a torn lining and smells of smoke. Photos attached.",
+            "sellerStatement": "It was in perfect condition when I posted it. Buyer probably wore it out.",
+            "trackingStatus": "delivered",
+            "sellerProvidedPhotos": false
+          },
+          {
+            "id": "D-2",
+            "amountCents": 89000,
+            "buyerStatement": "Camera body has a scratched sensor that was not in the listing.",
+            "sellerStatement": "Listing said used with minor marks. Sensor was clean, I have photos from before shipping.",
+            "trackingStatus": "delivered",
+            "sellerProvidedPhotos": true
+          },
+          {
+            "id": "D-3",
+            "amountCents": 1500,
+            "buyerStatement": "Never received it.",
+            "sellerStatement": "Tracking shows delivered to the front porch on Tuesday.",
+            "trackingStatus": "delivered",
+            "sellerProvidedPhotos": false
+          }
+        ],
+        "expected": [
+          null,
+          "escalate",
+          null
+        ],
+        "rubric": [
+          {
+            "id": "tracking_rules_in_code",
+            "text": "The lost and no-tracking rules remain code checks before the model is called."
+          },
+          {
+            "id": "amount_rule_in_code",
+            "text": "Disputes over $500 escalate through a code comparison on amountCents, not by asking the model to apply the threshold."
+          },
+          {
+            "id": "single_choice",
+            "text": "The resolution is one choice question over the possible outcomes (with escalate or an unclear option available), not a free-text answer parsed afterwards or several booleans recombined."
+          },
+          {
+            "id": "escalate_on_low_confidence",
+            "text": "Low-probability or low-confidence outcomes route to escalate in code."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/returns/reason.ts",
+      "opportunity": true,
+      "why": "Keyword map standing in for a semantic classification of the return reason; lateness is derivable from dates code already holds.",
+      "primitives": [
+        "choice"
       ],
-      "identityVerified": true,
-      "bankVerified": true,
-      "country": "GB"
-     }
-    ],
-    "expected": [
-     "approve",
-     null,
-     "reject"
-    ],
-    "rubric": [
-     {
-      "id": "verification_in_code",
-      "text": "The identity, bank, and restricted-category checks remain code checks that run before the model, and the model is not asked about them."
-     },
-     {
-      "id": "restricted_business_judged",
-      "text": "Whether the described business sells restricted goods (regardless of the declared categories) is a question to the model."
-     },
-     {
-      "id": "review_on_uncertain",
-      "text": "Applications the model is unsure about reach review through a probability or confidence gate in code, not through a model-chosen review option alone."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/reviews/quality.ts",
-   "opportunity": true,
-   "why": "Length and vote heuristics standing in for a graded judgment of how informative the review is; the verified-purchase rule is already code.",
-   "primitives": [
-    "score"
-   ],
-   "implement": {
-    "brief": "Replace the points heuristic in placeReview() with a decision model that rates how informative the review text is about the product, and derive feature, show, or bury from that in code. Unverified reviews still never get featured.",
-    "input_shape": "the ProductReview object passed to placeReview()",
-    "actions": [
-     "feature",
-     "show",
-     "bury"
-    ],
-    "samples": [
-     {
-      "id": "V-1",
-      "text": "Runs a half size small, otherwise perfect. Sole is stiff for the first week.",
-      "rating": 4,
-      "hasPhoto": false,
-      "helpfulVotes": 0,
-      "verifiedPurchase": true
-     },
-     {
-      "id": "V-2",
-      "text": "Absolutely furious. The courier left the parcel in the rain and nobody answers the phone. Never again, worst delivery experience I have ever had in my life, avoid.",
-      "rating": 1,
-      "hasPhoto": true,
-      "helpfulVotes": 6,
-      "verifiedPurchase": true
-     },
-     {
-      "id": "V-3",
-      "text": "Great!",
-      "rating": 5,
-      "hasPhoto": false,
-      "helpfulVotes": 0,
-      "verifiedPurchase": false
-     }
-    ],
-    "expected": [
-     "feature",
-     null,
-     "bury"
-    ],
-    "rubric": [
-     {
-      "id": "score_for_degree",
-      "text": "Informativeness is a score question whose levels describe concrete situations (nothing about the product, a general opinion, specific product details), not a choice over placement labels."
-     },
-     {
-      "id": "verified_rule_in_code",
-      "text": "The verified-purchase rule that prevents featuring stays in code and is not sent to the model."
-     },
-     {
-      "id": "placement_in_code",
-      "text": "feature, show, and bury are derived in code from the returned score or level probabilities, not asked of the model."
-     },
-     {
-      "id": "votes_not_judged",
-      "text": "helpfulVotes and hasPhoto are not sent to the model as state to weigh."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/messages/offplatform.ts",
-   "opportunity": true,
-   "why": "Regex and term lists standing in for the judgment of whether a message asks to pay or continue off the platform; the new-account rule and pattern extraction stay code.",
-   "primitives": [
-    "noul"
-   ],
-   "implement": {
-    "brief": "Replace the term list in screenMessage() with a decision model that judges whether the message asks to pay or continue the conversation outside the platform, keeping the new-account rule and the URL and phone extraction in code.",
-    "input_shape": "the BuyerSellerMessage object passed to screenMessage()",
-    "actions": [
-     "deliver",
-     "warn",
-     "block"
-    ],
-    "samples": [
-     {
-      "id": "M-1",
-      "fromAccountAgeDays": 120,
-      "body": "I paid through the app, not PayPal, so the receipt should be in your orders tab."
-     },
-     {
-      "id": "M-2",
-      "fromAccountAgeDays": 30,
-      "body": "Let's take this to my email, I will send you the address and we can sort the payment there and skip the fees."
-     },
-     {
-      "id": "M-3",
-      "fromAccountAgeDays": 0,
-      "body": "Call me on 415 555 0100 to arrange pickup."
-     }
-    ],
-    "expected": [
-     "deliver",
-     "warn",
-     "block"
-    ],
-    "rubric": [
-     {
-      "id": "new_account_rule_in_code",
-      "text": "The new-account block (fromAccountAgeDays < 1 with a URL or phone number) remains a code check before the model is called."
-     },
-     {
-      "id": "intent_as_noul",
-      "text": "Solicitation to pay or continue off platform is asked as a noul about the fact (does this message ask to move payment or contact off platform), not whether the text mentions a payment service."
-     },
-     {
-      "id": "warn_block_gate_in_code",
-      "text": "The split between warn and block is made in code from the returned probability or the account rules, not asked of the model."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/catalog/condition.ts",
-   "opportunity": true,
-   "why": "Hint lists standing in for the judgment of what condition the description actually describes; the comparison with the declared condition is code.",
-   "primitives": [
-    "score",
-    "choice"
-   ],
-   "implement": {
-    "brief": "Replace describedCondition() in checkCondition() with a decision model that reads the condition the description implies, and keep the comparison with the declared condition in code.",
-    "input_shape": "the ConditionCheck object passed to checkCondition()",
-    "actions": [
-     "accept",
-     "flag"
-    ],
-    "samples": [
-     {
-      "listingId": "C-1",
-      "declared": "like_new",
-      "description": "The box has a small dent from shipping but the item itself is sealed and unopened."
-     },
-     {
-      "listingId": "C-2",
-      "declared": "good",
-      "description": "Screen cracked in one corner but everything else works and looks pristine."
-     },
-     {
-      "listingId": "C-3",
-      "declared": "like_new",
-      "description": "A few scratches on the back, works fine, comes with the charger."
-     }
-    ],
-    "expected": [
-     "accept",
-     "flag",
-     "flag"
-    ],
-    "rubric": [
-     {
-      "id": "ordered_levels",
-      "text": "The implied condition is a score over the five ordered levels (or a choice with each level described concretely), with each level describing a concrete state of the item."
-     },
-     {
-      "id": "comparison_in_code",
-      "text": "Comparing the implied condition with the declared one and deciding accept or flag happens in code, not in a question that names the declared condition."
-     },
-     {
-      "id": "declared_not_in_state",
-      "text": "The declared condition is not sent to the model."
-     }
-    ]
-   }
-  },
-  {
-   "file": "src/llm/client.ts",
-   "opportunity": false,
-   "why": "Transport helper for chat completions; nothing to judge."
-  },
-  {
-   "file": "src/orders/eta.ts",
-   "opportunity": false,
-   "why": "Business-day date arithmetic."
-  },
-  {
-   "file": "src/pricing/fees.ts",
-   "opportunity": false,
-   "why": "Commission and payment-fee arithmetic over a rate table."
-  },
-  {
-   "file": "src/promos/validate.ts",
-   "opportunity": false,
-   "why": "Date, count, and category-membership checks with all inputs already structured."
-  },
-  {
-   "file": "src/inventory/reorder.ts",
-   "opportunity": false,
-   "why": "Moving-average arithmetic and threshold comparison."
-  },
-  {
-   "file": "src/payouts/schedule.ts",
-   "opportunity": false,
-   "why": "Date arithmetic and grouping."
-  },
-  {
-   "file": "src/geo/zones.ts",
-   "opportunity": false,
-   "why": "Longest-prefix table lookup."
-  },
-  {
-   "file": "src/auth/ratelimit.ts",
-   "opportunity": false,
-   "why": "Token bucket arithmetic."
-  }
- ]
+      "implement": {
+        "brief": "Replace the keyword map in classifyReturn() so the reason comes from a decision model, with arrived_late decided from the dates in code.",
+        "input_shape": "the ReturnRequest object passed to classifyReturn()",
+        "actions": [
+          "defective",
+          "not_as_described",
+          "wrong_item",
+          "changed_mind",
+          "arrived_late",
+          "other"
+        ],
+        "samples": [
+          {
+            "orderId": "R-1",
+            "reasonText": "The wrong colour arrived, I ordered navy and got black.",
+            "promisedBy": "2026-09-10T00:00:00Z",
+            "deliveredAt": "2026-09-09T14:00:00Z"
+          },
+          {
+            "orderId": "R-2",
+            "reasonText": "Took almost three weeks to get here, I had already bought another one.",
+            "promisedBy": "2026-09-05T00:00:00Z",
+            "deliveredAt": "2026-09-19T14:00:00Z"
+          },
+          {
+            "orderId": "R-3",
+            "reasonText": "The lamp flickers and then shuts off after a minute.",
+            "promisedBy": "2026-09-10T00:00:00Z",
+            "deliveredAt": "2026-09-08T14:00:00Z"
+          }
+        ],
+        "expected": [
+          null,
+          "arrived_late",
+          "defective"
+        ],
+        "rubric": [
+          {
+            "id": "late_from_dates",
+            "text": "Whether the delivery was late is computed in code from promisedBy and deliveredAt and is not asked of the model."
+          },
+          {
+            "id": "closed_set_choice",
+            "text": "The reason is a single choice over the closed set, with other as an option."
+          },
+          {
+            "id": "no_dates_in_state",
+            "text": "The dates are not sent to the model as state to weigh."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/sellers/onboarding.ts",
+      "opportunity": true,
+      "why": "Human queue that mostly confirms the obvious; the verification and restricted-category checks are already code and the remaining work is a semantic read of the description.",
+      "primitives": [
+        "noul",
+        "choice",
+        "score"
+      ],
+      "implement": {
+        "brief": "Change screenApplication() so verified applications outside restricted categories are approved or rejected from the description (a real business selling permitted goods is approved; a restricted or misrepresented business is rejected), with review only for unclear cases.",
+        "input_shape": "the SellerApplication object passed to screenApplication()",
+        "actions": [
+          "approve",
+          "reject",
+          "review"
+        ],
+        "samples": [
+          {
+            "id": "S-1",
+            "businessName": "Marta's Ceramics",
+            "description": "I make hand-thrown stoneware mugs and bowls in my studio in Leeds and sell them at markets. Looking to reach more customers online.",
+            "categories": [
+              "home"
+            ],
+            "identityVerified": true,
+            "bankVerified": true,
+            "country": "GB"
+          },
+          {
+            "id": "S-2",
+            "businessName": "BestDeals Ltd",
+            "description": "We offer premium quality products at competitive prices with excellent customer service and fast delivery to satisfy all customer needs.",
+            "categories": [
+              "electronics",
+              "home"
+            ],
+            "identityVerified": true,
+            "bankVerified": true,
+            "country": "GB"
+          },
+          {
+            "id": "S-3",
+            "businessName": "Vape Corner",
+            "description": "Disposable vapes and e-liquids, all the popular flavours, listed under accessories so they show up in search.",
+            "categories": [
+              "accessories"
+            ],
+            "identityVerified": true,
+            "bankVerified": true,
+            "country": "GB"
+          }
+        ],
+        "expected": [
+          "approve",
+          null,
+          "reject"
+        ],
+        "rubric": [
+          {
+            "id": "verification_in_code",
+            "text": "The identity, bank, and restricted-category checks remain code checks that run before the model, and the model is not asked about them."
+          },
+          {
+            "id": "restricted_business_judged",
+            "text": "Whether the described business sells restricted goods (regardless of the declared categories) is a question to the model."
+          },
+          {
+            "id": "review_on_uncertain",
+            "text": "Applications the model is unsure about reach review through a probability or confidence gate in code, not through a model-chosen review option alone."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/reviews/quality.ts",
+      "opportunity": true,
+      "why": "Length and vote heuristics standing in for a graded judgment of how informative the review is; the verified-purchase rule is already code.",
+      "primitives": [
+        "score"
+      ],
+      "implement": {
+        "brief": "Replace the points heuristic in placeReview() with a decision model that rates how informative the review text is about the product, and derive feature, show, or bury from that in code. Unverified reviews still never get featured.",
+        "input_shape": "the ProductReview object passed to placeReview()",
+        "actions": [
+          "feature",
+          "show",
+          "bury"
+        ],
+        "samples": [
+          {
+            "id": "V-1",
+            "text": "Runs a half size small, otherwise perfect. Sole is stiff for the first week.",
+            "rating": 4,
+            "hasPhoto": false,
+            "helpfulVotes": 0,
+            "verifiedPurchase": true
+          },
+          {
+            "id": "V-2",
+            "text": "Absolutely furious. The courier left the parcel in the rain and nobody answers the phone. Never again, worst delivery experience I have ever had in my life, avoid.",
+            "rating": 1,
+            "hasPhoto": true,
+            "helpfulVotes": 6,
+            "verifiedPurchase": true
+          },
+          {
+            "id": "V-3",
+            "text": "Great!",
+            "rating": 5,
+            "hasPhoto": false,
+            "helpfulVotes": 0,
+            "verifiedPurchase": false
+          }
+        ],
+        "expected": [
+          "feature",
+          null,
+          "bury"
+        ],
+        "rubric": [
+          {
+            "id": "score_for_degree",
+            "text": "Informativeness is a score question whose levels describe concrete situations (nothing about the product, a general opinion, specific product details), not a choice over placement labels."
+          },
+          {
+            "id": "verified_rule_in_code",
+            "text": "The verified-purchase rule that prevents featuring stays in code and is not sent to the model."
+          },
+          {
+            "id": "placement_in_code",
+            "text": "feature, show, and bury are derived in code from the returned score or level probabilities, not asked of the model."
+          },
+          {
+            "id": "votes_not_judged",
+            "text": "helpfulVotes and hasPhoto are not sent to the model as state to weigh."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/messages/offplatform.ts",
+      "opportunity": true,
+      "why": "Regex and term lists standing in for the judgment of whether a message asks to pay or continue off the platform; the new-account rule and pattern extraction stay code.",
+      "primitives": [
+        "noul"
+      ],
+      "implement": {
+        "brief": "Replace the term list in screenMessage() with a decision model that judges whether the message asks to pay or continue the conversation outside the platform, keeping the new-account rule and the URL and phone extraction in code.",
+        "input_shape": "the BuyerSellerMessage object passed to screenMessage()",
+        "actions": [
+          "deliver",
+          "warn",
+          "block"
+        ],
+        "samples": [
+          {
+            "id": "M-1",
+            "fromAccountAgeDays": 120,
+            "body": "I paid through the app, not PayPal, so the receipt should be in your orders tab."
+          },
+          {
+            "id": "M-2",
+            "fromAccountAgeDays": 30,
+            "body": "Let's take this to my email, I will send you the address and we can sort the payment there and skip the fees."
+          },
+          {
+            "id": "M-3",
+            "fromAccountAgeDays": 0,
+            "body": "Call me on 415 555 0100 to arrange pickup."
+          }
+        ],
+        "expected": [
+          "deliver",
+          "warn",
+          "block"
+        ],
+        "rubric": [
+          {
+            "id": "new_account_rule_in_code",
+            "text": "The new-account block (fromAccountAgeDays < 1 with a URL or phone number) remains a code check before the model is called."
+          },
+          {
+            "id": "intent_as_noul",
+            "text": "Solicitation to pay or continue off platform is asked as a noul about the fact (does this message ask to move payment or contact off platform), not whether the text mentions a payment service."
+          },
+          {
+            "id": "warn_block_gate_in_code",
+            "text": "The split between warn and block is made in code from the returned probability or the account rules, not asked of the model."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/catalog/condition.ts",
+      "opportunity": true,
+      "why": "Hint lists standing in for the judgment of what condition the description actually describes; the comparison with the declared condition is code.",
+      "primitives": [
+        "score",
+        "choice"
+      ],
+      "implement": {
+        "brief": "Replace describedCondition() in checkCondition() with a decision model that reads the condition the description implies, and keep the comparison with the declared condition in code.",
+        "input_shape": "the ConditionCheck object passed to checkCondition()",
+        "actions": [
+          "accept",
+          "flag"
+        ],
+        "samples": [
+          {
+            "listingId": "C-1",
+            "declared": "like_new",
+            "description": "The box has a small dent from shipping but the item itself is sealed and unopened."
+          },
+          {
+            "listingId": "C-2",
+            "declared": "good",
+            "description": "Screen cracked in one corner but everything else works and looks pristine."
+          },
+          {
+            "listingId": "C-3",
+            "declared": "like_new",
+            "description": "A few scratches on the back, works fine, comes with the charger."
+          }
+        ],
+        "expected": [
+          "accept",
+          "flag",
+          "flag"
+        ],
+        "rubric": [
+          {
+            "id": "ordered_levels",
+            "text": "The implied condition is a score over the five ordered levels (or a choice with each level described concretely), with each level describing a concrete state of the item."
+          },
+          {
+            "id": "comparison_in_code",
+            "text": "Comparing the implied condition with the declared one and deciding accept or flag happens in code, not in a question that names the declared condition."
+          },
+          {
+            "id": "declared_not_in_state",
+            "text": "The declared condition is not sent to the model."
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/llm/client.ts",
+      "opportunity": false,
+      "why": "Transport helper for chat completions; nothing to judge."
+    },
+    {
+      "file": "src/orders/eta.ts",
+      "opportunity": false,
+      "why": "Business-day date arithmetic."
+    },
+    {
+      "file": "src/pricing/fees.ts",
+      "opportunity": false,
+      "why": "Commission and payment-fee arithmetic over a rate table."
+    },
+    {
+      "file": "src/promos/validate.ts",
+      "opportunity": false,
+      "why": "Date, count, and category-membership checks with all inputs already structured."
+    },
+    {
+      "file": "src/inventory/reorder.ts",
+      "opportunity": false,
+      "why": "Moving-average arithmetic and threshold comparison."
+    },
+    {
+      "file": "src/payouts/schedule.ts",
+      "opportunity": false,
+      "why": "Date arithmetic and grouping."
+    },
+    {
+      "file": "src/geo/zones.ts",
+      "opportunity": false,
+      "why": "Longest-prefix table lookup."
+    },
+    {
+      "file": "src/auth/ratelimit.ts",
+      "opportunity": false,
+      "why": "Token bucket arithmetic."
+    }
+  ]
 }

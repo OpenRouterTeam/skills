@@ -15,12 +15,16 @@
  *   npx tsx codex-evals.ts --out ../iteration-2 --kind trigger --rounds 3
  *   npx tsx codex-evals.ts --out ../iteration-2 --kind implementation --rounds 5 --models openai/gpt-5.6-luna
  *   npx tsx codex-evals.ts --out ../iteration-2 --filter 3,21 --rounds 1 --arms skill
- *   npx tsx codex-evals.ts --out ../iteration-2 --grade-only        # re-grade existing runs
+ *   npx tsx codex-evals.ts --out ../iteration-2 --grade-only        # re-grade existing runs (all rounds found on disk)
+ *
+ * Cached runs are reused only while the skill files, prompt, and reasoning effort they were produced
+ * with are unchanged (run_fingerprint in run.json); cached gradings are reused only for the same judge.
  *
  * Requires: codex on PATH, OPENROUTER_API_KEY, and a CODEX_HOME whose config.toml points
  * model_provider at OpenRouter (see ../README.md).
  */
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { chatJson, errorMessage, isRecord, runPool, skillDir } from "./harness.ts";
@@ -61,6 +65,7 @@ type RunRecord = {
   read_skill: boolean;
   final_message: string;
   produced_files: string[];
+  run_fingerprint?: string;
 };
 
 type Grade = { pass: boolean; evidence: string; graded_by: "transcript" | "judge" };
@@ -119,15 +124,17 @@ const evalsPath = argValue("--evals") ?? join(skillDir, "evals", "evals.json");
 const kinds = parseKinds(argValue("--kind") ?? "both");
 const models = (argValue("--models") ?? DEFAULT_MODELS.join(",")).split(",").map((m) => m.trim()).filter(Boolean);
 const armsArg = argValue("--arms");
-const rounds = Number(argValue("--rounds") ?? "1");
+const gradeOnly = args.includes("--grade-only");
+const roundsArg = argValue("--rounds");
+const rounds = roundsArg !== undefined ? Number(roundsArg) : gradeOnly ? existingRounds(outDir) : 1;
 const concurrency = Number(argValue("--concurrency") ?? "3");
 const filter = argValue("--filter")?.split(",").map((s) => Number(s.trim()));
 const judgeModel = argValue("--judge") ?? DEFAULT_JUDGE;
 const effort = argValue("--effort") ?? DEFAULT_EFFORT;
-const gradeOnly = args.includes("--grade-only");
 const codexHome = process.env.CODEX_HOME ?? fail("CODEX_HOME must point at a Codex home configured for OpenRouter");
 const apiKey = process.env.OPENROUTER_API_KEY ?? fail("OPENROUTER_API_KEY is not set");
 if (!Number.isInteger(rounds) || rounds < 1) fail("--rounds must be a positive integer");
+if (!Number.isInteger(concurrency) || concurrency < 1) fail("--concurrency must be a positive integer");
 
 const cases = loadCases(evalsPath).filter((c) => !filter || filter.includes(c.id));
 const skillSource = skillDir;
@@ -147,24 +154,29 @@ console.log(`${jobs.length} run(s): ${cases.length} case(s) x ${models.length} m
 const results = await runPool(jobs, concurrency, async (job) => {
   const dir = runDir(job.c, job.model, job.arm, job.round);
   const recordPath = join(dir, "run.json");
-  let record: RunRecord;
-  if (existsSync(recordPath) && (gradeOnly || existsSync(join(dir, "grading.json")))) {
-    record = refreshSkillReads(JSON.parse(readFileSync(recordPath, "utf8")) as RunRecord, recordPath);
-    if (!gradeOnly) {
-      const cached = JSON.parse(readFileSync(join(dir, "grading.json"), "utf8")) as Grading;
-      const grading = refreshTranscriptGrades(job.c, record, cached);
-      writeFileSync(join(dir, "grading.json"), JSON.stringify(grading, null, 2));
-      return { record, grading };
-    }
-  } else if (gradeOnly) {
-    if (!existsSync(recordPath)) return null;
-    record = JSON.parse(readFileSync(recordPath, "utf8")) as RunRecord;
-  } else {
+  const gradingPath = join(dir, "grading.json");
+  let record: RunRecord | null = null;
+  if (existsSync(recordPath)) {
+    const cached = refreshCached(JSON.parse(readFileSync(recordPath, "utf8")) as RunRecord, recordPath, dir);
+    if (cached.run_fingerprint !== undefined && cached.run_fingerprint !== fingerprintOf(job.c)) {
+      console.log(`stale run (skill, prompt, or effort changed since it was recorded)${gradeOnly ? ", skipped" : ", rerunning"}: ${dir}`);
+    } else record = cached;
+  }
+  if (record === null) {
+    if (gradeOnly) return null;
     record = await runCodex(job.c, job.model, job.arm, job.round, dir);
     writeFileSync(recordPath, JSON.stringify(record, null, 2));
+  } else if (!gradeOnly && existsSync(gradingPath)) {
+    const cached = JSON.parse(readFileSync(gradingPath, "utf8")) as Grading;
+    if (cached.judge === null || cached.judge === judgeModel) {
+      const grading = refreshTranscriptGrades(job.c, record, cached);
+      writeFileSync(gradingPath, JSON.stringify(grading, null, 2));
+      return { record, grading };
+    }
+    console.log(`cached grading came from judge ${cached.judge}, regrading with ${judgeModel}: ${dir}`);
   }
   const grading = await grade(job.c, record, dir);
-  writeFileSync(join(dir, "grading.json"), JSON.stringify(grading, null, 2));
+  writeFileSync(gradingPath, JSON.stringify(grading, null, 2));
   const tag = `[${job.arm.padEnd(8)} r${job.round}] ${job.model.padEnd(22)} #${String(job.c.id).padStart(2)} ${job.c.category.padEnd(20)}`;
   console.log(`${tag} ${grading.passed}/${grading.total} read_skill=${record.read_skill} ${(record.duration_ms / 1000).toFixed(0)}s${record.error ? ` ERROR ${record.error}` : ""}`);
   return { record, grading };
@@ -237,7 +249,7 @@ async function runCodex(c: EvalCase, model: string, arm: CodexArm, round: number
   ];
   const started = Date.now();
   const proc = spawn("codex", codexArgs, {
-    env: { ...process.env, CODEX_HOME: codexHome, OPENROUTER_API_KEY: apiKey },
+    env: codexEnv(),
     stdio: ["ignore", "pipe", "pipe"],
   });
   let stdout = "";
@@ -264,50 +276,20 @@ async function runCodex(c: EvalCase, model: string, arm: CodexArm, round: number
   writeFileSync(join(dir, "transcript.jsonl"), stdout);
   writeFileSync(join(dir, "stderr.log"), stderr);
 
-  const items: TranscriptItem[] = [];
-  let usage: Usage | null = null;
-  let turnError: string | null = null;
-  for (const line of stdout.split("\n")) {
-    if (!line.trim()) continue;
-    let event: unknown;
-    try {
-      event = JSON.parse(line);
-    } catch {
-      continue;
-    }
-    if (!isRecord(event)) continue;
-    if (event.type === "item.completed" && isRecord(event.item)) {
-      const item = event.item;
-      const type = typeof item.type === "string" ? item.type : "unknown";
-      const text =
-        typeof item.command === "string"
-          ? item.command + (typeof item.aggregated_output === "string" ? `\n<output>\n${item.aggregated_output.slice(0, 2_000)}` : "")
-          : typeof item.text === "string"
-            ? item.text
-            : Array.isArray(item.changes)
-              ? item.changes.map((ch) => (isRecord(ch) ? `${String(ch.kind)} ${String(ch.path)}` : "")).join(", ")
-              : JSON.stringify(item).slice(0, 2_000);
-      items.push({ type, text });
-    } else if (event.type === "turn.completed" && isRecord(event.usage)) {
-      usage = {
-        input_tokens: num(event.usage.input_tokens),
-        cached_input_tokens: num(event.usage.cached_input_tokens),
-        output_tokens: num(event.usage.output_tokens),
-        reasoning_output_tokens: num(event.usage.reasoning_output_tokens),
-      };
-    } else if (event.type === "turn.failed" || event.type === "error") {
-      turnError = JSON.stringify(event).slice(0, 500);
-    }
-  }
+  const { items, usage, turnError } = parseTranscript(stdout);
   const skillRefs = detectSkillReads(items);
   const produced = listProduced(workspace);
   const outputs = join(dir, "outputs");
   for (const file of produced) {
     mkdirSync(join(outputs, file, ".."), { recursive: true });
-    cpSync(join(workspace, file), join(outputs, file));
+    const bytes = readFileSync(join(workspace, file));
+    if (bytes.subarray(0, 8192).includes(0)) cpSync(join(workspace, file), join(outputs, file));
+    else writeFileSync(join(outputs, file), redactSecrets(bytes.toString("utf8")));
   }
   rmSync(workspace, { recursive: true, force: true });
-  const finalMessage = existsSync(join(dir, "last-message.md")) ? readFileSync(join(dir, "last-message.md"), "utf8") : "";
+  const lastMessagePath = join(dir, "last-message.md");
+  const finalMessage = existsSync(lastMessagePath) ? redactSecrets(readFileSync(lastMessagePath, "utf8")) : "";
+  if (existsSync(lastMessagePath)) writeFileSync(lastMessagePath, finalMessage);
   const price = pricing.get(model);
   const cost =
     usage && price
@@ -333,6 +315,7 @@ async function runCodex(c: EvalCase, model: string, arm: CodexArm, round: number
     read_skill: skillRefs.includes("SKILL.md"),
     final_message: finalMessage,
     produced_files: produced,
+    run_fingerprint: fingerprintOf(c),
   };
 }
 
@@ -351,9 +334,88 @@ function listProduced(workspace: string): string[] {
 }
 
 
+/**
+ * Splits the JSONL event stream into transcript items, usage, and a terminal error. `error` events
+ * are Codex's recoverable reconnects; one only counts when no `turn.completed` follows it.
+ */
+function parseTranscript(stdout: string): { items: TranscriptItem[]; usage: Usage | null; turnError: string | null } {
+  const items: TranscriptItem[] = [];
+  let usage: Usage | null = null;
+  let turnError: string | null = null;
+  let failed = false;
+  for (const line of stdout.split("\n")) {
+    if (!line.trim()) continue;
+    let event: unknown;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (!isRecord(event)) continue;
+    if (event.type === "item.completed" && isRecord(event.item)) {
+      const item = event.item;
+      const type = typeof item.type === "string" ? item.type : "unknown";
+      const text =
+        typeof item.command === "string"
+          ? item.command + (typeof item.aggregated_output === "string" ? `\n<output>\n${item.aggregated_output.slice(0, 2_000)}` : "")
+          : typeof item.text === "string"
+            ? item.text
+            : Array.isArray(item.changes)
+              ? item.changes.map((ch) => (isRecord(ch) ? `${String(ch.kind)} ${String(ch.path)}` : "")).join(", ")
+              : JSON.stringify(item).slice(0, 2_000);
+      items.push({ type, text });
+    } else if (event.type === "turn.completed") {
+      if (isRecord(event.usage)) {
+        usage = {
+          input_tokens: num(event.usage.input_tokens),
+          cached_input_tokens: num(event.usage.cached_input_tokens),
+          output_tokens: num(event.usage.output_tokens),
+          reasoning_output_tokens: num(event.usage.reasoning_output_tokens),
+        };
+      }
+      if (!failed) turnError = null;
+    } else if (event.type === "turn.failed") {
+      turnError = JSON.stringify(event).slice(0, 500);
+      failed = true;
+    } else if (event.type === "error" && !failed) {
+      turnError = JSON.stringify(event).slice(0, 500);
+    }
+  }
+  return { items, usage, turnError };
+}
+
+/** The evaluated agent sees only what it needs; the harness's own environment stays out of the transcript. */
+function codexEnv(): Record<string, string> {
+  const env: Record<string, string> = { CODEX_HOME: codexHome, OPENROUTER_API_KEY: apiKey };
+  for (const name of ["PATH", "HOME", "LANG", "LC_ALL", "TERM", "TMPDIR", "SHELL"]) {
+    const value = process.env[name];
+    if (value !== undefined) env[name] = value;
+  }
+  return env;
+}
+
+/** Everything that changes what a run measures; a cached run whose fingerprint differs is rerun. */
+function fingerprintOf(c: EvalCase): string {
+  const hash = createHash("sha256");
+  hash.update(JSON.stringify({ prompt: c.prompt, effort, skill: SKILL_FILES.map((f) => readFileSync(join(skillDir, f), "utf8")) }));
+  return hash.digest("hex").slice(0, 16);
+}
+
+/** Highest round number present under <out>/runs, so --grade-only covers every recorded cell. */
+function existingRounds(out: string): number {
+  let max = 1;
+  const root = join(out, "runs");
+  if (!existsSync(root)) return max;
+  for (const kind of readdirSync(root)) for (const id of readdirSync(join(root, kind))) for (const model of readdirSync(join(root, kind, id))) for (const arm of readdirSync(join(root, kind, id, model))) for (const r of readdirSync(join(root, kind, id, model, arm))) {
+    const n = Number(/^r(\d+)$/.exec(r)?.[1]);
+    if (Number.isInteger(n) && n > max) max = n;
+  }
+  return max;
+}
+
 /** Agents sometimes print their environment; the API key must not reach the stored artifacts. */
 function redactSecrets(text: string): string {
-  return text.replace(/sk-or-v1-[a-f0-9]{64}/g, "sk-or-v1-<redacted>");
+  return text.split(apiKey).join("sk-or-v1-<redacted>").replace(/sk-or-v1-[a-f0-9]{64}/g, "sk-or-v1-<redacted>");
 }
 
 /** Grades an assertion about whether SKILL.md was read from the transcript, honouring negation. */
@@ -366,13 +428,13 @@ function transcriptGrade(text: string, record: RunRecord): Grade {
   };
 }
 
-/** Recomputes skill reads from the stored transcript items with the current detector. */
-function refreshSkillReads(record: RunRecord, recordPath: string): RunRecord {
+/** Recomputes skill reads and the transient-error classification of a cached run with the current code. */
+function refreshCached(record: RunRecord, recordPath: string, dir: string): RunRecord {
   const skillRefs = detectSkillReads(record.items);
-  const refreshed = { ...record, skill_files_read: skillRefs, read_skill: skillRefs.includes("SKILL.md") };
-  if (refreshed.read_skill !== record.read_skill || refreshed.skill_files_read.join() !== record.skill_files_read.join()) {
-    writeFileSync(recordPath, JSON.stringify(refreshed, null, 2));
-  }
+  const transcriptPath = join(dir, "transcript.jsonl");
+  const error = record.exit_code === 0 && existsSync(transcriptPath) ? parseTranscript(readFileSync(transcriptPath, "utf8")).turnError : record.error;
+  const refreshed = { ...record, skill_files_read: skillRefs, read_skill: skillRefs.includes("SKILL.md"), error };
+  if (JSON.stringify(refreshed) !== JSON.stringify(record)) writeFileSync(recordPath, JSON.stringify(refreshed, null, 2));
   return refreshed;
 }
 

@@ -1,5 +1,5 @@
 {
-  "ran_at": "2026-09-29T03:35:15.174Z",
+  "ran_at": "2026-09-29T04:58:10.071Z",
   "evals": "../../../../skills/openrouter-decisions/evals/evals.json",
   "models": [
     "openai/gpt-5.6-luna",
@@ -5446,7 +5446,7 @@
       "started_at": "2026-09-29T02:14:30.328Z",
       "duration_ms": 24299,
       "exit_code": 0,
-      "error": "{\"type\":\"error\",\"message\":\"Reconnecting... 1/5 (stream disconnected before completion: upstream connect error or disconnect/reset before headers. reset reason: connection timeout)\"}",
+      "error": null,
       "usage": {
         "input_tokens": 17111,
         "cached_input_tokens": 7336,

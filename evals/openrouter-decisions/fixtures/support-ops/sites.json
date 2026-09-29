@@ -1,14 +1,23 @@
 {
+  "description": "support-operations backend",
   "sites": [
     {
       "file": "src/tickets/categorize.ts",
       "opportunity": true,
       "why": "Keyword-count heuristic standing in for a semantic classification into a closed set with a fallback label.",
-      "primitives": ["choice"],
+      "primitives": [
+        "choice"
+      ],
       "implement": {
         "brief": "Replace the keyword heuristic in categorize() so the ticket is assigned one of billing, account_access, bug, feature_request, or general.",
         "input_shape": "the InboundTicket object passed to categorize()",
-        "actions": ["billing", "account_access", "bug", "feature_request", "general"],
+        "actions": [
+          "billing",
+          "account_access",
+          "bug",
+          "feature_request",
+          "general"
+        ],
         "samples": [
           {
             "id": "T-1041",
@@ -43,11 +52,19 @@
       "file": "src/tickets/urgency.ts",
       "opportunity": true,
       "why": "Prompt-and-parse chat completion whose free-text reply is regex-parsed into a 1 to 5 level, with a silent default on parse failure.",
-      "primitives": ["score"],
+      "primitives": [
+        "score"
+      ],
       "implement": {
         "brief": "Replace the chat-completion call and regex parsing in rateUrgency() with a decision model, keeping the same 1 to 5 urgency output and the existing rule that free-plan tickets never rate 5.",
         "input_shape": "the InboundTicket object passed to rateUrgency()",
-        "actions": ["1", "2", "3", "4", "5"],
+        "actions": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
         "samples": [
           {
             "id": "T-2210",
@@ -82,11 +99,17 @@
       "file": "src/tickets/duplicates.ts",
       "opportunity": true,
       "why": "Token-overlap similarity with a tuned threshold standing in for the judgment of whether a new ticket reports the same issue as an open one.",
-      "primitives": ["choice", "noul"],
+      "primitives": [
+        "choice",
+        "noul"
+      ],
       "implement": {
         "brief": "Replace the Jaccard similarity in findDuplicate() with a decision model that picks which open ticket, if any, the new ticket duplicates.",
         "input_shape": "an object { ticket: InboundTicket, open: OpenTicket[] } with the same fields as the function parameters",
-        "actions": ["duplicate", "none"],
+        "actions": [
+          "duplicate",
+          "none"
+        ],
         "samples": [
           {
             "ticket": {
@@ -96,9 +119,24 @@
               "customerPlan": "pro"
             },
             "open": [
-              { "id": "T-2990", "subject": "Reports page: no export option", "body": "Can't find CSV export anymore on reports.", "status": "open" },
-              { "id": "T-2985", "subject": "CSV export has wrong dates", "body": "Exported dates are off by one day.", "status": "open" },
-              { "id": "T-2970", "subject": "Login loop", "body": "Keeps sending me back to login.", "status": "pending" }
+              {
+                "id": "T-2990",
+                "subject": "Reports page: no export option",
+                "body": "Can't find CSV export anymore on reports.",
+                "status": "open"
+              },
+              {
+                "id": "T-2985",
+                "subject": "CSV export has wrong dates",
+                "body": "Exported dates are off by one day.",
+                "status": "open"
+              },
+              {
+                "id": "T-2970",
+                "subject": "Login loop",
+                "body": "Keeps sending me back to login.",
+                "status": "pending"
+              }
             ]
           },
           {
@@ -109,7 +147,12 @@
               "customerPlan": "enterprise"
             },
             "open": [
-              { "id": "T-2990", "subject": "Reports page: no export option", "body": "Can't find CSV export anymore on reports.", "status": "open" }
+              {
+                "id": "T-2990",
+                "subject": "Reports page: no export option",
+                "body": "Can't find CSV export anymore on reports.",
+                "status": "open"
+              }
             ]
           },
           {
@@ -120,7 +163,12 @@
               "customerPlan": "free"
             },
             "open": [
-              { "id": "T-2970", "subject": "Login loop", "body": "Keeps sending me back to login.", "status": "pending" }
+              {
+                "id": "T-2970",
+                "subject": "Login loop",
+                "body": "Keeps sending me back to login.",
+                "status": "pending"
+              }
             ]
           }
         ],
@@ -148,11 +196,16 @@
       "file": "src/moderation/reviews.ts",
       "opportunity": true,
       "why": "Word lists and regexes standing in for independent semantic labels (profanity, promotional, harassment) that can co-occur.",
-      "primitives": ["noul"],
+      "primitives": [
+        "noul"
+      ],
       "implement": {
         "brief": "Replace the word lists and promo regexes in moderate() with a decision model, keeping the same flags and publish decision.",
         "input_shape": "the ProductReview object passed to moderate()",
-        "actions": ["publish", "hold"],
+        "actions": [
+          "publish",
+          "hold"
+        ],
         "samples": [
           {
             "id": "R-1",
@@ -191,11 +244,18 @@
       "file": "src/refunds/approve.ts",
       "opportunity": true,
       "why": "Manual review queue where the hard policy rules are already in code and the only remaining work is a semantic read of the reason text against covered reasons.",
-      "primitives": ["choice", "noul"],
+      "primitives": [
+        "choice",
+        "noul"
+      ],
       "implement": {
         "brief": "Change decideRefund() so requests under the auto-approve cap are approved or denied from the reason text against the policy (damaged, defective, wrong item, or undelivered qualify, change of mind does not), and only unclear cases go to manual_review.",
         "input_shape": "the RefundRequest object passed to decideRefund()",
-        "actions": ["approve", "deny", "manual_review"],
+        "actions": [
+          "approve",
+          "deny",
+          "manual_review"
+        ],
         "samples": [
           {
             "orderId": "O-5001",
@@ -249,11 +309,19 @@
       "file": "src/leads/route.ts",
       "opportunity": true,
       "why": "Keyword if-chain over free text standing in for a routing judgment, with deterministic rules (source, employee count) mixed in.",
-      "primitives": ["choice"],
+      "primitives": [
+        "choice"
+      ],
       "implement": {
         "brief": "Replace the keyword if-chain in routeLead() with a decision model, keeping the same team outputs and the existing source and employee-count rules.",
         "input_shape": "the Lead object passed to routeLead()",
-        "actions": ["enterprise", "smb", "partnerships", "developer_relations", "general_inbox"],
+        "actions": [
+          "enterprise",
+          "smb",
+          "partnerships",
+          "developer_relations",
+          "general_inbox"
+        ],
         "samples": [
           {
             "email": "cto@northwind.example",
@@ -297,11 +365,18 @@
       "file": "src/kb/suggest.ts",
       "opportunity": true,
       "why": "Embedding similarity threshold standing in for the judgment of whether the top retrieved article actually answers the ticket.",
-      "primitives": ["choice", "noul", "score"],
+      "primitives": [
+        "choice",
+        "noul",
+        "score"
+      ],
       "implement": {
         "brief": "Keep the embedding retrieval in suggestArticle() but replace the similarity threshold with a decision model that picks which of the retrieved articles, if any, answers the ticket.",
         "input_shape": "an object { ticket: InboundTicket, candidates: Array<{ slug, title, summary }> } holding the top retrieved articles",
-        "actions": ["suggest", "none"],
+        "actions": [
+          "suggest",
+          "none"
+        ],
         "samples": [
           {
             "ticket": {
@@ -311,9 +386,21 @@
               "customerPlan": "pro"
             },
             "candidates": [
-              { "slug": "invite-users", "title": "Inviting users to your workspace", "summary": "Add teammates from Settings, assign roles, and resend invitations." },
-              { "slug": "share-dashboard-link", "title": "Sharing a dashboard by link", "summary": "Create a read-only public link to a single dashboard." },
-              { "slug": "sso-setup", "title": "Setting up SSO", "summary": "Configure SAML with Okta or Azure AD on enterprise plans." }
+              {
+                "slug": "invite-users",
+                "title": "Inviting users to your workspace",
+                "summary": "Add teammates from Settings, assign roles, and resend invitations."
+              },
+              {
+                "slug": "share-dashboard-link",
+                "title": "Sharing a dashboard by link",
+                "summary": "Create a read-only public link to a single dashboard."
+              },
+              {
+                "slug": "sso-setup",
+                "title": "Setting up SSO",
+                "summary": "Configure SAML with Okta or Azure AD on enterprise plans."
+              }
             ]
           },
           {
@@ -324,8 +411,16 @@
               "customerPlan": "enterprise"
             },
             "candidates": [
-              { "slug": "invite-users", "title": "Inviting users to your workspace", "summary": "Add teammates from Settings, assign roles, and resend invitations." },
-              { "slug": "sso-setup", "title": "Setting up SSO", "summary": "Configure SAML with Okta or Azure AD on enterprise plans." }
+              {
+                "slug": "invite-users",
+                "title": "Inviting users to your workspace",
+                "summary": "Add teammates from Settings, assign roles, and resend invitations."
+              },
+              {
+                "slug": "sso-setup",
+                "title": "Setting up SSO",
+                "summary": "Configure SAML with Okta or Azure AD on enterprise plans."
+              }
             ]
           }
         ],
