@@ -1,6 +1,6 @@
 # openrouter-decisions
 
-Find where an app or agent should use a decision model (a prompt-and-parse LLM call, a keyword or similarity heuristic, a human review queue) and implement it through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.
+Implement decision models through OpenRouter's Decisions API (`POST /api/alpha/decisions`), which returns probabilities instead of generated text so code can gate on them directly, in place of a prompt-and-parse LLM call, a keyword or similarity heuristic, or a human review queue. The workflow and scripts work with every decision model in OpenRouter's live catalog, and the skill picks between them by criteria rather than by name, so a new model needs no change here.
 
 ## Install
 
@@ -20,7 +20,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## What it covers
 
-[SKILL.md](SKILL.md) walks through eight steps: find the decision points in existing code, split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.
+[SKILL.md](SKILL.md) walks through seven steps: split judgment from computation, pick a primitive, build minimal state, write the questions, pick and pin a model, gate in code, and probe thresholds on real inputs. The references hold the API shapes, the limits shared by decision models with the code-side pattern for each, and the criteria for choosing between the models the catalog returns (fit, price, providers, pinned build, and measured behavior on your own questions). `scripts/lib.ts` holds the request validation, the catalog reader, and the HTTP and SDK calls for an integration to import or copy.
 
 ## Scripts
 
