@@ -33,7 +33,3 @@ npx tsx decide.ts request.json --compare           # same request to every pinne
 ```
 
 `models.ts` reads `GET /api/v1/models?output_modalities=decisions` and each model's endpoints, and needs no key. `decide.ts` takes the model from `--model`, then the request, then the `DECISION_MODEL` environment variable, and prints the answers, the resolved model version, latency, and cost, so thresholds can be probed on real inputs before they go into code. `--compare` runs the request against every non-alias model the catalog returns and reports each model's answers or its error, so the choice between models rests on observed numbers.
-
-## Evals
-
-[evals/evals.json](evals/evals.json) holds the test prompts for the skill in the [agentskills.io format](https://agentskills.io/skill-creation/evaluating-skills): trigger prompts (explicit, implicit, contextual, and negative controls, each with `should_trigger`) and implementation prompts with expected outputs and assertions. Run each prompt in a clean agent session with the skill installed, check the transcript for whether `SKILL.md` was read, and grade the assertions against the output. Rerun the set after changing the description or the workflow.
