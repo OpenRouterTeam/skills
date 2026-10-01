@@ -119,7 +119,7 @@ curl -sS -X POST https://openrouter.ai/api/v1/audio/speech \
 
 Each `input_audio` needs exactly one of `data` (raw base64 or a data URI, max 20 MiB of base64 / 15 MiB decoded) or `url` (public http(s) URL; OpenRouter downloads it, 15 MiB max, and forwards the bytes, never the URL). `format` is optional; most providers detect it from the audio bytes. With a single clip the transcript may come before or after it.
 
-**Multiple clips.** Send up to three `input_audio` parts; with more than one clip, each transcript `text` part must immediately follow the clip it transcribes. On providers that support multiple references, the Nth clip is addressable from `input` as `@AudioN` (e.g. `"input": "Read this in the voice of @Audio1, then @Audio2."`). Only routed to endpoints with `supports_multiple_audio_references: true`.
+**Multiple clips.** Send up to three `input_audio` parts; with more than one clip, each transcript `text` part must immediately follow the clip it transcribes. On providers that support multiple references, the Nth clip is addressable from `input` as `@AudioN` (e.g. `"input": "@Audio1 Welcome back to the show. @Audio2 Thanks for having me."`). Only routed to endpoints with `supports_multiple_audio_references: true`. Seed Audio 1.0 (`bytedance-seed/seed-audio-1-0`, currently the only multi-clip model) validates placeholders with a 400: with more than one clip every clip must be referenced at least once, a placeholder for a clip you did not send (or with no audio references) is rejected, and with a single clip the placeholder is optional but must be `@Audio1`. Seed Audio ignores transcripts and rejects requests that send both `voice` and `input_references`.
 
 **Image reference (voice design).** Instead of audio, send exactly one image describing the desired voice; it cannot be combined with `input_audio` parts and is only routed to endpoints with `supports_image_reference: true`. The `url` is a JPEG, PNG, or WebP as a base64 data URI or a public http(s) URL (downloaded, 15 MiB max):
 
@@ -127,6 +127,18 @@ Each `input_audio` needs exactly one of `data` (raw base64 or a data URI, max 20
 "input_references": [
   { "type": "image_url", "image_url": { "url": "https://example.com/speaker.png" } }
 ]
+```
+
+### Non-speech prompts
+
+Most models read `input` aloud verbatim. Seed Audio 1.0 instead treats `input` as a prompt, so it can describe delivery or non-speech audio (sound effects, ambience, a scene). Omit `voice` and `input_references` to let the model infer everything from the prompt. Limits (400 otherwise): `input` up to 3000 characters, `speed` 0.5–2.0, at most 120 seconds of generated audio.
+
+```json
+{
+  "model": "bytedance-seed/seed-audio-1-0",
+  "input": "Heavy rain falling on a tin roof with distant rolling thunder, no voices.",
+  "response_format": "mp3"
+}
 ```
 
 ### Picking a format
@@ -204,7 +216,7 @@ await fs.promises.writeFile(
 
 ## Long inputs
 
-TTS models have per-request character limits (usually a few thousand characters) and are priced **per character of input**, so there's no penalty to splitting. For anything long (chapters, articles, scripts):
+TTS models have per-request character limits (usually a few thousand characters) and most are priced **per character of input**, so there's no penalty to splitting. (Some audio generation models, such as Seed Audio 1.0, are priced per second of generated audio instead, reported under `pricing.completion`.) For anything long (chapters, articles, scripts):
 
 1. Split the text at sentence or paragraph boundaries — never mid-word.
 2. Synthesize each chunk with the same `model` + `voice` so prosody stays consistent.
