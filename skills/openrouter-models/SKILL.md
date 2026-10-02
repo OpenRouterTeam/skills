@@ -141,7 +141,8 @@ Returns for each provider:
 
 - To check if a model supports a feature, use `model.supported_parameters` (e.g. `.includes("tools")`), or filter server-side with `?supported_parameters=tools`.
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
-- Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
+- Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing. Beyond `prompt`/`completion`, pricing can include per-unit keys like `image`, `image_token`, `image_output`, `audio`, `audio_output`, `input_audio_cache`, `input_cache_read`, and `input_cache_write` when the model bills those units.
+- `pricing.overrides` (when present) is an array of conditional price overrides. An entry applies when all its condition fields match the request — `min_prompt_tokens` (prompt tokens strictly greater than the threshold, e.g. long-context pricing) or a daily UTC time window `utc_start`/`utc_end` (HHMM clock numbers, e.g. off-peak pricing). Among applicable entries, later entries win per price key; keys absent from an entry inherit the base price. Top-level pricing always reflects default-condition prices.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
@@ -205,6 +206,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | Field | Meaning |
 |---|---|
 | `pricing.prompt` / `pricing.completion` | Cost per token in USD. Multiply by 1,000,000 for per-million-token pricing |
+| `pricing.overrides` | Conditional pricing (long-context via `min_prompt_tokens`, time-based via `utc_start`/`utc_end`) that replaces base prices when the condition matches |
 | `context_length` | Max total tokens (input + output) |
 | `top_provider.max_completion_tokens` | Max output tokens from the best provider |
 | `top_provider.is_moderated` | Whether content moderation is applied |
@@ -224,5 +226,6 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
 - Note cache pricing when available — it can cut input costs 90%+
+- Check `pricing.overrides` before quoting costs — long-context or peak/off-peak conditions can change the effective price
 - Flag models with `expiration_date` as deprecated
 - When a model has multiple providers at different prices, mention the cheapest option
