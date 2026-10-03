@@ -103,7 +103,7 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | `timestamp_granularities` | no  | Array of `"segment"` and/or `"word"`. Only used with `response_format: "verbose_json"`.                 |
 | `diarize`            | no       | `true` to label each word with its speaker. Requires `verbose_json`. Only some providers; 400 otherwise.    |
 | `keyterms`           | no       | Array of terms/names to bias recognition toward (max 1000, 1–100 chars each). Only some providers; 400 otherwise. |
-| `provider`           | no       | Provider passthrough under `provider.options` — see below. Routing preferences (`order`, `only`, `ignore`) are not applied to transcription requests. |
+| `provider`           | no       | Data policy routing (`zdr`, `data_collection`) and provider passthrough under `provider.options` — see below. With `zdr: true` the request routes only to Zero Data Retention endpoints; `data_collection: "deny"` excludes providers that store or train on data. Other routing preferences (`order`, `only`, `ignore`) are not applied to transcription requests. |
 
 ### Picking an audio format
 
