@@ -69,6 +69,10 @@ Content-Type: application/json
 → { "key": "sk-or-..." }
 ```
 
+Authorization codes expire 10 minutes after issuance. If the exchange returns
+`403 Authorization code expired`, restart the OAuth flow and exchange the new
+code promptly.
+
 Remove the verifier from `sessionStorage` before or after the exchange.
 
 ### Step 5: Store the key and clean up
