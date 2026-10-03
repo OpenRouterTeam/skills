@@ -86,7 +86,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
 | `input_references` | no       | Stateless voice cloning or voice design. Audio mode: one to three `input_audio` parts (each with base64/data-URI `data` **or** a public `url`, plus optional `format`), each optionally paired with a transcript `text` part. Image mode: exactly one `image_url` part. The two modes cannot be mixed; an empty array means no reference. See [Voice cloning](#voice-cloning) for routing requirements. |
-| `provider`        | no       | Provider passthrough — see below.                                                                                 |
+| `provider`        | no       | Data policy routing (`zdr`, `data_collection`) and provider passthrough under `provider.options` — see below. With `zdr: true` the request routes only to Zero Data Retention endpoints; `data_collection: "deny"` excludes providers that store or train on data. Other routing preferences (`order`, `only`, `ignore`) are not applied to speech requests. |
 
 ### Voice cloning
 
