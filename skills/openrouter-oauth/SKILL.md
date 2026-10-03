@@ -47,6 +47,7 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 | `callback_url` | Your app's URL (where the user returns after auth) |
 | `code_challenge` | The S256 challenge from Step 1 |
 | `code_challenge_method` | Always `S256` |
+| `state` | Optional. Returned unchanged as a `state` query parameter on the callback URL after the user authorizes, so you can match the response to the request and protect against CSRF. Not returned when the user denies access or in headless mode. |
 
 ### Headless / no-callback flow
 
@@ -100,7 +101,7 @@ if (!response.ok) {
 
 ### Step 3: Handle the redirect back
 
-User returns to your `callback_url` with `?code=` appended. Extract the `code` query parameter.
+User returns to your `callback_url` with `?code=` appended. Extract the `code` query parameter. If you sent `state` in Step 2, `?state=` comes back unchanged — reject the callback when it doesn't match the value you stored.
 
 **Important:** Before processing `?code=`, check that a `code_verifier` exists in `sessionStorage`. Other routes or third-party code might use `?code=` query params for unrelated purposes — a `hasOAuthCallbackPending()` guard ensures you only consume codes that belong to your OAuth flow.
 
