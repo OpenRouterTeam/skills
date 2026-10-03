@@ -16,7 +16,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## Compatibility
 
-Browser environment — requires Web Crypto API, `localStorage`, and `sessionStorage`.
+Browser, CLI, and Node.js environments. Browser flows require Web Crypto API, `localStorage`, and `sessionStorage`. Headless flows require Web Crypto API and can keep the verifier in process memory.
 
 ## What it covers
 
@@ -27,3 +27,4 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Copy-pasteable auth module with no dependencies
 - A ready-to-use "Sign In with OpenRouter" button component
 - Programmatic API-key acquisition flows (no UI required)
+- Headless authorization for SSH sessions, remote development boxes, and containers without a reachable callback
