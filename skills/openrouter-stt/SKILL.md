@@ -7,7 +7,7 @@ description: Transcribe speech to text using OpenRouter's speech-to-text API. Us
 
 Transcribe audio via `POST /api/v1/audio/transcriptions` using `curl`. Requires `OPENROUTER_API_KEY` (get one at https://openrouter.ai/keys). If unset, stop and ask.
 
-**This endpoint is not OpenAI-compatible.** The body is JSON with base64 audio under `input_audio: { data, format }` — not `multipart/form-data` with a `file` field the way OpenAI's `/v1/audio/transcriptions` works. Do not point the OpenAI SDK at this endpoint; it will send the wrong shape. Use `curl`, `fetch`, or `requests` directly.
+The native body is JSON: either base64 audio under `input_audio: { data, format }`, or a URL under `input_audio: { url }` that the provider downloads itself. The endpoint also accepts OpenAI-style `multipart/form-data` (`file` or `source_url`, plus `model`), but multipart uploads are capped at 25 MB — prefer the JSON body shown below.
 
 ## One call, JSON back
 
@@ -94,11 +94,16 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | Field                | Required | Notes                                                                                                     |
 | -------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
 | `model`              | yes      | Full model slug from `/api/v1/models?output_modalities=transcription`.                                    |
-| `input_audio.data`   | yes      | Base64-encoded raw audio bytes. **Not** a data URI — just the base64 payload, no `data:audio/...;base64,` prefix. |
-| `input_audio.format` | yes      | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Support varies by provider. |
+| `input_audio.data`   | yes*     | Base64-encoded raw audio bytes. **Not** a data URI — just the base64 payload, no `data:audio/...;base64,` prefix. |
+| `input_audio.url`    | yes*     | Instead of `data`: a publicly reachable http(s) URL the provider downloads directly. Only some providers — see below. |
+| `input_audio.format` | yes / no | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Required with `data`; with `url` it defaults to the URL path extension. Support varies by provider. |
 | `language`           | no       | ISO-639-1 code (`en`, `ja`, `fr`). Auto-detected if omitted.                                              |
 | `temperature`        | no       | 0–1. Lower is more deterministic.                                                                         |
-| `provider`           | no       | Provider passthrough — see below.                                                                         |
+| `response_format`    | no       | `json` (default) or `verbose_json` — see below.                                                           |
+| `timestamp_granularities` | no  | Array of `"segment"` and/or `"word"`. Only used with `response_format: "verbose_json"`.                 |
+| `diarize`            | no       | `true` to label each word with its speaker. Requires `verbose_json`. Only some providers; 400 otherwise.    |
+| `keyterms`           | no       | Array of terms/names to bias recognition toward (max 1000, 1–100 chars each). Only some providers; 400 otherwise. |
+| `provider`           | no       | Data policy routing (`zdr`, `data_collection`) and provider passthrough under `provider.options` — see below. With `zdr: true` the request routes only to Zero Data Retention endpoints; `data_collection: "deny"` excludes providers that store or train on data. Other routing preferences (`order`, `only`, `ignore`) are not applied to transcription requests. |
 
 ### Picking an audio format
 
@@ -108,9 +113,65 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 
 The `format` field must match the actual container/codec of the bytes. A file saved as `.wav` that is actually mp3 will be rejected or mis-decoded. When in doubt, confirm with `ffprobe <file>`.
 
+### Audio by URL
+
+For large or already-hosted files, pass a URL instead of base64. The provider downloads it directly, so the inline upload size limit does not apply:
+
+```json
+{
+  "model": "<url-capable model slug>",
+  "input_audio": { "url": "https://example.com/meeting.mp3" }
+}
+```
+
+- Send exactly one of `data` or `url`. `format` is optional with `url` and defaults to the path extension; set it when the URL has no extension.
+- Only some providers accept URL input (ElevenLabs does); models whose providers don't are rejected with a 400. The multipart equivalent is a `source_url` form field in place of `file`.
+- The URL must be publicly reachable; if the provider can't download it, the request fails with a 400.
+
+## Verbose transcripts (timestamps and speakers)
+
+Set `response_format: "verbose_json"` to get structured fields alongside `text`: `language`, `duration` (seconds), and a `segments` array with `id`, `start`, `end`, `text` (OpenAI-compatible providers also return `task`). Add `"word"` to `timestamp_granularities` to also get a `words` array with `word`, `start`, `end`. Providers that score their output also return an optional `confidence` (0 to 1) on each word and, for the whole transcript, at the top level (AssemblyAI does; most others omit it). Which fields are present varies by provider.
+
+Depending on the provider, verbose output may also carry `language_confidence` (0 to 1), `entities` (`text`, `type`, `start_char`, `end_char` offsets into `text`), and on segments/words a string `speaker_label` and a `channel` index. Words with `type: "audio_event"` are tagged non-speech sounds (e.g. `"(laughter)"`), not spoken words.
+
+For speaker diarization, set the top-level `diarize: true` on models whose provider supports it (ElevenLabs does). It requires `response_format: "verbose_json"` (a `json` request is rejected with a 400), always includes word timestamps, and labels words with `speaker` / `speaker_label`; unsupported models return a 400. Other providers expose diarization through their own option instead. Example — Azure diarization for `microsoft/mai-transcribe-2`, which adds a `speaker` index to each segment and word:
+
+```json
+{
+  "model": "microsoft/mai-transcribe-2",
+  "input_audio": { "data": "SUQzBAAA...", "format": "mp3" },
+  "response_format": "verbose_json",
+  "timestamp_granularities": ["segment", "word"],
+  "provider": {
+    "options": {
+      "azure": { "diarization": { "enabled": true } }
+    }
+  }
+}
+```
+
+```json
+{
+  "language": "en",
+  "duration": 6.4,
+  "text": "Hello there. Hi, how are you?",
+  "segments": [
+    { "id": 0, "start": 0.0, "end": 1.2, "text": "Hello there.", "speaker": 0 },
+    { "id": 1, "start": 1.5, "end": 3.1, "text": "Hi, how are you?", "speaker": 1 }
+  ],
+  "words": [
+    { "word": "Hello", "start": 0.0, "end": 0.4, "speaker": 0 },
+    { "word": "there.", "start": 0.4, "end": 1.2, "speaker": 0 }
+  ],
+  "usage": { "seconds": 6.4, "cost": 0.000178 }
+}
+```
+
+Providers that do not return structured output reject `verbose_json` with a 400, as do some individual models (for example `openai/gpt-4o-transcribe` and `microsoft/mai-transcribe-1.5`). The default `json` works everywhere.
+
 ## Provider-specific options
 
-Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Example — Groq's `prompt` for vocabulary hinting:
+Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Find the slug for a model's providers with `GET /api/v1/models/<author>/<slug>/endpoints` — the `tag` field of each endpoint record is the key to use. Normalized parameters (`language`, `temperature`, `response_format`, `timestamp_granularities`) stay at the top level, not under `provider.options`. Example — Groq's `prompt` for vocabulary hinting:
 
 ```json
 {
@@ -126,7 +187,7 @@ Provider passthrough goes under `provider.options.<slug>` and is only forwarded 
 }
 ```
 
-Options keyed by provider slug are forwarded only when that provider matches; other keys are ignored. Check each provider's upstream docs for available passthrough keys.
+Options keyed by provider slug are forwarded only when that provider matches; other keys are ignored. Providers differ in how they treat unsupported options — some forward only an allowlist and silently drop the rest (Deepgram), others forward most fields as-is so an invalid option surfaces as a provider error (Azure). Check each provider's upstream docs for available passthrough keys.
 
 ## TypeScript (fetch)
 
@@ -192,7 +253,7 @@ print(res.json()["text"])
 
 **400 with a `ZodError`** — a required field is missing or the wrong type. The body looks like `{"success":false,"error":{"name":"ZodError","message":"[...]"}}` — the nested `message` JSON string names the bad path (commonly `input_audio.data` or `input_audio.format`).
 
-**413 / request too large** — base64 inflates bytes by ~33%, so a large raw file becomes an even larger JSON payload. Use a smaller source file (compressed format, lower sample rate, or trimmed clip).
+**413 / request too large** — base64 inflates bytes by ~33%, so a large raw file becomes an even larger JSON payload. Use a smaller source file (compressed format, lower sample rate, or trimmed clip), or host the file and send `input_audio.url` on a model that accepts URL input.
 
 **Model not found** — use the full slug from `/api/v1/models?output_modalities=transcription` (`google/chirp-3`, not `chirp-3`).
 
