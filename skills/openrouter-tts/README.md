@@ -1,6 +1,6 @@
 # openrouter-tts
 
-Synthesize speech from text via OpenRouter's synchronous `POST /api/v1/audio/speech`. Covers basic usage with `curl`, model/voice discovery, format selection (mp3 vs pcm), provider-specific options (e.g. OpenAI `instructions`), and OpenAI-SDK compatibility.
+Synthesize speech from text via OpenRouter's synchronous `POST /api/v1/audio/speech`. Covers basic usage with `curl`, model/voice discovery, format selection (mp3 vs pcm), delivery `instructions`, multi-speaker input, provider-specific options, and OpenAI-SDK compatibility.
 
 ## Install
 
@@ -26,6 +26,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - A drop-in bash script that handles headers, error bodies, and generation ID capture
 - Discovering TTS models via `/api/v1/models?output_modalities=speech`
 - Picking between `mp3` and `pcm`, and avoiding the format/extension mismatch that accounts for most "empty audio" reports
-- Provider passthrough (`provider.options.<slug>`) including OpenAI's `instructions` for tone/pacing
+- Top-level `instructions` for tone/pacing (OpenAI and Gemini) and multi-speaker turn arrays (Gemini)
+- Provider passthrough (`provider.options.<slug>`)
 - OpenAI SDK compatibility — swap the base URL and the existing client code works
 - Splitting and concatenating long inputs

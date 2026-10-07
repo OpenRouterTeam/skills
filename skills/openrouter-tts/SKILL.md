@@ -81,9 +81,10 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | Field             | Required | Notes                                                                                                             |
 | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `model`           | yes      | TTS model slug (e.g. `openai/gpt-4o-mini-tts-2025-12-15`, `mistralai/voxtral-mini-tts-2603`).                     |
-| `input`           | yes      | The text to synthesize.                                                                                           |
+| `input`           | yes      | The text to synthesize, or an array of turns for multi-speaker input — see [Multi-speaker input](#multi-speaker-input). |
 | `voice`           | no       | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. Some models/providers require a voice; follow the endpoint's declared requirements. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
+| `instructions`    | no       | Delivery instructions for the whole request (tone, pacing, emotion, e.g. `"Speak in a warm and friendly tone."`). Supported by OpenAI `gpt-4o-mini-tts` and Gemini TTS models; ignored by other providers. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
 | `input_references` | no       | Stateless voice cloning or voice design. Audio mode: one to three `input_audio` parts (each with base64/data-URI `data` **or** a public `url`, plus optional `format`), each optionally paired with a transcript `text` part. Image mode: exactly one `image_url` part. The two modes cannot be mixed; an empty array means no reference. See [Voice cloning](#voice-cloning) for routing requirements. |
 | `provider`        | no       | Data policy routing (`zdr`, `data_collection`) and provider passthrough under `provider.options` — see below. With `zdr: true` the request routes only to Zero Data Retention endpoints; `data_collection: "deny"` excludes providers that store or train on data. Other routing preferences (`order`, `only`, `ignore`) are not applied to speech requests. |
@@ -141,6 +142,22 @@ Most models read `input` aloud verbatim. Seed Audio 1.0 instead treats `input` a
 }
 ```
 
+### Multi-speaker input
+
+Gemini TTS models can voice a conversation in one request. Pass `input` as an array of turns instead of a string. Each turn has `text` and may set its own `voice` and `instructions`; a turn without them falls back to the top-level `voice` / `instructions`. Turns are synthesized in order into one audio stream. Other providers return a 400 for array input.
+
+```json
+{
+  "model": "google/gemini-3.8-flash-lite-tts",
+  "input": [
+    { "text": "How's it going today, Jane?", "voice": "Kore" },
+    { "text": "Not too bad, how about you?", "voice": "Puck", "instructions": "tired, yawning" }
+  ],
+  "instructions": "cheerful",
+  "response_format": "pcm"
+}
+```
+
 ### Picking a format
 
 - **`mp3`** (`audio/mpeg`) — compressed, ready to play in any audio app. Default choice for files the user will listen to or share.
@@ -150,19 +167,20 @@ Match the file extension to the format — saving pcm bytes as `.mp3` produces a
 
 ## Provider-specific options
 
-Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. The most useful one is OpenAI's `instructions`, which steers tone, accent, pacing, or emotion without retraining:
+Use the top-level `instructions` parameter to steer tone, accent, pacing, or emotion — OpenRouter forwards it natively to OpenAI and sends it as `speech_metadata.style` to Gemini (Gemini reads `input` verbatim, so directions written into the text get spoken aloud). `provider.options.openai.instructions` is still accepted as a fallback, but the top-level field wins when both are set.
+
+Other provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request:
 
 ```json
 {
-  "model": "openai/gpt-4o-mini-tts-2025-12-15",
-  "input": "Welcome to the show.",
-  "voice": "alloy",
-  "response_format": "mp3",
+  "model": "google/gemini-3.8-flash-lite-tts",
+  "input": "Have a wonderful day!",
+  "voice": "Kore",
+  "instructions": "warm and friendly",
+  "response_format": "pcm",
   "provider": {
     "options": {
-      "openai": {
-        "instructions": "Speak in a warm, friendly tone with a slow pace."
-      }
+      "google-ai-studio": { "temperature": 0.7 }
     }
   }
 }
