@@ -20,7 +20,16 @@ export async function fetchApi(path: string, apiKey?: string): Promise<any> {
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`;
   }
-  const res = await fetch(url, { headers });
+
+  let res: Response;
+  try {
+    res = await fetch(url, { headers });
+  } catch (err) {
+    console.error(
+      `Network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -41,7 +50,14 @@ export async function fetchApi(path: string, apiKey?: string): Promise<any> {
     process.exit(1);
   }
 
-  return res.json();
+  try {
+    return await res.json();
+  } catch (err) {
+    console.error(
+      `Invalid JSON in response (status ${res.status}): ${err instanceof Error ? err.message : String(err)}`
+    );
+    process.exit(1);
+  }
 }
 
 export function formatModel(m: any) {
