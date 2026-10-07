@@ -19,6 +19,7 @@ export type DecisionModel = {
   aliasTarget?: string;
   createdAt: Date;
   contextLength: number;
+  inputModalities: string[];
   promptPricePerToken: number;
   completionPricePerToken: number;
   description: string;
@@ -75,11 +76,17 @@ function parseModel(entry: Record<string, unknown>): DecisionModel {
     aliasTarget: isRecord(entry.alias_target) ? stringField(id, entry.alias_target, "slug") : undefined,
     createdAt: new Date(finiteField(id, "created", entry.created) * 1000),
     contextLength: finiteField(id, "context_length", entry.context_length),
+    inputModalities: inputModalities(entry),
     promptPricePerToken: priceField(id, pricing, "prompt"),
     completionPricePerToken: priceField(id, pricing, "completion"),
     description: typeof entry.description === "string" ? entry.description : "",
     endpointsUrl: `${SDK_SERVER_URL}${detailsPath ?? `/api/v1/models/${id}/endpoints`}`,
   };
+}
+
+function inputModalities(entry: Record<string, unknown>): string[] {
+  const modalities = isRecord(entry.architecture) ? entry.architecture.input_modalities : undefined;
+  return Array.isArray(modalities) ? modalities.filter((m): m is string => typeof m === "string") : [];
 }
 
 function parseEndpoint(modelId: string, entry: unknown): ModelEndpoint {
