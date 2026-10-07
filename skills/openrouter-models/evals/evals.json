@@ -1,0 +1,16 @@
+{
+  "skill_name": "openrouter-models",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use the OpenRouter models skill at ./SKILL.md to resolve 'claude sonnet' to current model IDs and report the confidence of the matches. This is a managed skill directory; keep its files unchanged and do not install dependencies inside it.",
+      "expected_output": "The bundled resolve-model.ts runs with the cache-based runner and returns model IDs and confidence without modifying the skill directory.",
+      "files": [],
+      "expectations": [
+        "The agent executes the bundled resolve-model.ts using npx --yes tsx@4.21.0.",
+        "The result reports model IDs and confidence from the script output.",
+        "The skill directory is unchanged and contains no node_modules."
+      ]
+    }
+  ]
+}

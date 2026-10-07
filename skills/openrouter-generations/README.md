@@ -49,8 +49,10 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 
 ## Quick start
 
+Choose an execution method in [Running Scripts](SKILL.md#running-scripts). For a managed or read-only skill directory, skip local setup and replace `npx tsx` below with `npx --yes tsx@4.22.3`. Run the commands from `<skill-path>/scripts`.
+
 ```bash
-# First-time setup (once per installation):
+# Optional local setup for a writable skill directory:
 # cd <skill-path>/scripts && npm install
 
 # Get metadata for a generation

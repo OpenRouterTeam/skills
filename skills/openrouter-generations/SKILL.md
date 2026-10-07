@@ -14,7 +14,23 @@ Retrieve detailed metadata and stored content for individual OpenRouter generati
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 - Generation IDs look like `gen-1234567890` or `gen-aBcDeFgHiJkLmNoPqRsT`.
 
-## First-Time Setup
+## Running Scripts
+
+Choose one execution method:
+
+### Without a local install
+
+For managed or read-only skill directories, skip `npm install` and replace `npx tsx` in the examples below with `npx --yes tsx@4.22.3`:
+
+```bash
+cd <skill-path>/scripts && npx --yes tsx@4.22.3 get-generation.ts gen-1234567890
+```
+
+These scripts use only Node.js built-ins and sibling files. npm installs the runner into its external cache when needed; `--yes` suppresses the installation prompt. The runner version matches this skill's lockfile, but this method does not reproduce the lockfile's full dependency tree. It requires a writable npm cache and registry access on the first run.
+
+### With a local install
+
+For a writable skill directory, install locally and use the `npx tsx` examples below. Use `npm ci` instead of `npm install` to reproduce the full lockfile.
 
 ```bash
 cd <skill-path>/scripts && npm install

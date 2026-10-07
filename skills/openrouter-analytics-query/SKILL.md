@@ -22,6 +22,8 @@ Content-Type: application/json
 
 Or via the `openrouter-analytics` skill scripts:
 
+Choose the execution method in that skill's **Running Scripts** section. For managed or read-only skill directories, skip its local install and replace `npx tsx` in the examples below with `npx --yes tsx@4.22.3`.
+
 ```bash
 cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --metrics request_count
 ```
