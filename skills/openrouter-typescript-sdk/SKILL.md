@@ -26,7 +26,7 @@ npm install @openrouter/sdk
 
 ## Setup
 
-Get your API key from [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys), then initialize:
+Get your API key from the [dashboard](https://openrouter.ai/settings/keys), or provision one with the [Stripe Projects](https://openrouter.ai/announcements/openrouter-on-stripe-projects) CLI (`stripe projects add openrouter/api`). Then initialize:
 
 ```typescript
 import { OpenRouter } from '@openrouter/agent';
@@ -48,9 +48,19 @@ The primary authentication method uses API keys from your OpenRouter account.
 
 #### Obtaining an API Key
 
+**Option A — Dashboard:**
+
 1. Visit [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
 2. Create a new API key
 3. Store securely in an environment variable
+
+**Option B — Stripe Projects CLI** (creates account + key + billing in one command):
+
+```bash
+stripe projects add openrouter/api
+```
+
+This provisions an OpenRouter account linked to your Stripe identity, generates an API key, and writes it to your project's `.env` as `OPENROUTER_API_KEY`. See the [announcement](https://openrouter.ai/announcements/openrouter-on-stripe-projects) for details. Requires the [Stripe CLI](https://docs.stripe.com/stripe-cli) with the Projects plugin (`stripe plugin install projects`).
 
 #### Environment Setup
 
