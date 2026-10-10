@@ -15,6 +15,8 @@ Video generation is async: submit → poll → download. A single request can't 
 2. `GET <polling_url>` every ~30s until `status` is `completed` (terminal failures: `failed`, `cancelled`, `expired` — surface the `error` field verbatim)
 3. `GET /api/v1/videos/{id}/content?index=0` **with the auth header** → MP4 bytes
 
+Once `completed`, the polling response may include `expires_at` (Unix seconds): when OpenRouter's stored copy of the outputs stops being available. It is present only when that copy exists — download before then, and tell the user the deadline if they plan to fetch the video later.
+
 ## Pick parameters from the models endpoint, don't guess
 
 `resolution`, `aspect_ratio`, `duration`, and `frame_images[].frame_type` are per-model. Before the first submit for a new model (or whenever the user asks for something specific), fetch the model's capabilities and only send values from the returned sets:
@@ -67,7 +69,7 @@ curl -sS -L "$(echo "$resp" | jq -r '.unsigned_urls[0]')" \
   --output "$OUTPUT"
 
 echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
-  '{job_id: .id, generation_id, video_saved: $out, usage}'
+  '{job_id: .id, generation_id, video_saved: $out, usage, expires_at}'
 ```
 
 ## Parameters
