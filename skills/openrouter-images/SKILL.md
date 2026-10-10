@@ -105,6 +105,17 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
 
+### Provider-specific dimensions
+
+`aspect_ratio` and `resolution` resolve to concrete pixel dimensions per provider where supported;
+use `discover.ts <model>` as the authoritative source for each model's accepted values.
+
+| Provider/model | Dimension behavior |
+|---|---|
+| BFL FLUX.2 | Bare ratios use a 1K default, with 16px granularity, a 4MP cap, and a 64px minimum edge; `16:9` → `1824x1024`. |
+| OpenAI GPT Image 2 | Generation ratios use a 1536px long edge, 16px granularity, and a 3:1 cap; `16:9` → `1536x864`. |
+| Seedream 4.5 | A resolved output below `3,686,400` pixels returns HTTP 400 before the upstream request. |
+
 `--provider-options` takes a JSON object keyed by provider slug, using keys from that endpoint's `allowed_passthrough_parameters`:
 
 ```bash
