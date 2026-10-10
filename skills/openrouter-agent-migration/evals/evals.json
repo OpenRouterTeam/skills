@@ -1,0 +1,63 @@
+{
+  "skill_name": "openrouter-agent-migration",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Migrate the TypeScript project at evals/fixtures/agent-only from @openrouter/sdk to @openrouter/agent. The project imports OpenRouter from '@openrouter/sdk', tool from '@openrouter/sdk/lib/tool', stop conditions (stepCountIs, hasToolCall, maxCost) from '@openrouter/sdk/lib/stop-conditions', and types (CallModelInput, ModelResult, ToolWithGenerator, Tool, ToolWithExecute, ManualTool) from '@openrouter/sdk/lib/*' subpaths. No platform API features are used. Remove @openrouter/sdk entirely and update all imports to use @openrouter/agent and its subpaths.",
+      "expected_output": "The project's package.json replaces @openrouter/sdk with @openrouter/agent. All imports in src/ are updated: OpenRouter from '@openrouter/agent', tool from '@openrouter/agent/tool', stop conditions from '@openrouter/agent/stop-conditions', type imports (Tool, ToolWithExecute, ManualTool, ToolWithGenerator) from '@openrouter/agent/tool-types', CallModelInput from '@openrouter/agent/async-params', ModelResult from '@openrouter/agent/model-result'. No @openrouter/sdk imports remain anywhere in src/. The bun test and tsc --noEmit commands pass.",
+      "expectations": [
+        "@openrouter/sdk is removed from package.json dependencies",
+        "@openrouter/agent is added to package.json dependencies",
+        "src/agent.ts imports OpenRouter from '@openrouter/agent' as a named import",
+        "src/agent.ts imports stepCountIs, hasToolCall, and maxCost from '@openrouter/agent/stop-conditions'",
+        "src/tools.ts imports tool from '@openrouter/agent/tool'",
+        "src/tools.ts imports Tool, ToolWithExecute, and ManualTool from '@openrouter/agent/tool-types'",
+        "src/types.ts imports CallModelInput from '@openrouter/agent/async-params'",
+        "src/types.ts imports ModelResult from '@openrouter/agent/model-result'",
+        "src/types.ts imports ToolWithGenerator from '@openrouter/agent/tool-types'",
+        "No file in src/ contains any import from '@openrouter/sdk'",
+        "The project's test suite passes (bun test exits 0)",
+        "TypeScript type check passes (tsc --noEmit exits 0)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Migrate the TypeScript project at evals/fixtures/mixed-platform-agent. The project uses @openrouter/sdk for platform features in src/platform.ts (OpenRouter client for models.list, credits.getCredits, chat.send). The src/agent.ts file uses @openrouter/sdk for agent features (OpenRouter client, tool from '@openrouter/sdk/lib/tool', stop conditions from '@openrouter/sdk/lib/stop-conditions'). Keep @openrouter/sdk for platform.ts but migrate agent.ts to use @openrouter/agent and its subpaths for all agent functionality.",
+      "expected_output": "package.json retains @openrouter/sdk (for platform features) and adds @openrouter/agent (for agent features). src/platform.ts is unchanged and still imports from '@openrouter/sdk'. src/agent.ts is updated: OpenRouter (or aliased as Agent) from '@openrouter/agent', tool from '@openrouter/agent/tool', stepCountIs/maxTokensUsed/finishReasonIs from '@openrouter/agent/stop-conditions'. src/agent.ts no longer imports from '@openrouter/sdk'. The bun test and tsc --noEmit commands pass.",
+      "expectations": [
+        "@openrouter/sdk is retained in package.json dependencies",
+        "@openrouter/agent is added to package.json dependencies",
+        "src/platform.ts still imports from '@openrouter/sdk' (file unchanged)",
+        "src/agent.ts no longer imports from '@openrouter/sdk'",
+        "src/agent.ts imports OpenRouter (or an alias like Agent) from '@openrouter/agent'",
+        "src/agent.ts imports tool from '@openrouter/agent/tool'",
+        "src/agent.ts imports stepCountIs from '@openrouter/agent/stop-conditions'",
+        "src/agent.ts imports maxTokensUsed from '@openrouter/agent/stop-conditions'",
+        "src/agent.ts imports finishReasonIs from '@openrouter/agent/stop-conditions'",
+        "The project's test suite passes (bun test exits 0)",
+        "TypeScript type check passes (tsc --noEmit exits 0)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Migrate the TypeScript project at evals/fixtures/streaming-converters from @openrouter/sdk to @openrouter/agent. The project uses format converters in src/converters.ts (fromClaudeMessages, toClaudeMessage from '@openrouter/sdk/lib/anthropic-compat'; fromChatMessages, toChatMessage from '@openrouter/sdk/lib/chat-compat'), type guards and type imports in src/type-guards.ts (hasExecuteFunction, isGeneratorTool, isRegularExecuteTool, Tool, ToolWithExecute, ToolWithGenerator from '@openrouter/sdk/lib/tool-types'; tool from '@openrouter/sdk/lib/tool'), and streaming in src/stream.ts (OpenRouter from '@openrouter/sdk'; CallModelInput from '@openrouter/sdk/lib/async-params'). Update all imports and remove @openrouter/sdk entirely.",
+      "expected_output": "package.json replaces @openrouter/sdk with @openrouter/agent. src/converters.ts imports fromClaudeMessages and toClaudeMessage from '@openrouter/agent' (barrel) and fromChatMessages and toChatMessage from '@openrouter/agent' (barrel). src/type-guards.ts imports hasExecuteFunction, isGeneratorTool, isRegularExecuteTool, Tool, ToolWithExecute, ToolWithGenerator from '@openrouter/agent/tool-types' and tool from '@openrouter/agent/tool'. src/stream.ts imports OpenRouter from '@openrouter/agent' and CallModelInput from '@openrouter/agent/async-params'. No @openrouter/sdk imports remain. The bun test and tsc --noEmit commands pass.",
+      "expectations": [
+        "@openrouter/sdk is removed from package.json dependencies",
+        "@openrouter/agent is added to package.json dependencies",
+        "src/converters.ts imports fromClaudeMessages from '@openrouter/agent'",
+        "src/converters.ts imports toClaudeMessage from '@openrouter/agent'",
+        "src/converters.ts imports fromChatMessages from '@openrouter/agent'",
+        "src/converters.ts imports toChatMessage from '@openrouter/agent'",
+        "src/type-guards.ts imports hasExecuteFunction from '@openrouter/agent/tool-types'",
+        "src/type-guards.ts imports isGeneratorTool from '@openrouter/agent/tool-types'",
+        "src/type-guards.ts imports isRegularExecuteTool from '@openrouter/agent/tool-types'",
+        "src/type-guards.ts imports tool from '@openrouter/agent/tool'",
+        "src/stream.ts imports CallModelInput from '@openrouter/agent/async-params'",
+        "No file in src/ contains any import from '@openrouter/sdk'",
+        "The project's test suite passes (bun test exits 0)",
+        "TypeScript type check passes (tsc --noEmit exits 0)"
+      ]
+    }
+  ]
+}
