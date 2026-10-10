@@ -1,0 +1,30 @@
+id: generate-basic-001
+name: Generate Basic Image
+description: |
+  A new-image request should route to generate.ts on the dedicated Images API,
+  not edit.ts or a raw legacy endpoint.
+tags:
+  - happy-path
+  - generate
+
+inputs:
+  prompt: |
+    Generate an image of a red panda wearing sunglasses. Do not execute the
+    request because my API key is unavailable; show the exact bundled-script
+    command you would run.
+
+graders:
+  - type: code
+    name: uses_generate_script
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in output'
+        - '"edit.ts" not in output'
+        - '"red panda" in output.lower() and "sunglasses" in output.lower()'
+        - '"/api/v1/chat/completions" not in output and "/api/v1/responses" not in output'
+
+
+expected:
+  outcomes:
+    - type: task_completed

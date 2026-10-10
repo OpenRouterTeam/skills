@@ -59,11 +59,7 @@ function reportHttpError(status: number, statusText: string, body: string): neve
   process.exit(1);
 }
 
-/**
- * Generate images via the dedicated Image API (`POST /api/v1/images`). This is
- * the canonical image path — image generation is no longer routed through chat
- * completions.
- */
+// NOTE: Image generation uses the dedicated Images API, not Chat Completions.
 export async function postImageGeneration(apiKey: string, body: unknown): Promise<ImageGenerationResponse> {
   const res = await fetch(IMAGES_ENDPOINT, {
     method: "POST",
@@ -82,10 +78,6 @@ export async function postImageGeneration(apiKey: string, body: unknown): Promis
   return res.json() as Promise<ImageGenerationResponse>;
 }
 
-/**
- * List every image model and its capabilities (`GET /api/v1/images/models`).
- * Discovery is public and needs no API key.
- */
 export async function getImageModels(): Promise<ImageModelsListResponse> {
   const res = await fetch(IMAGE_MODELS_ENDPOINT);
   if (!res.ok) {
@@ -95,10 +87,6 @@ export async function getImageModels(): Promise<ImageModelsListResponse> {
   return res.json() as Promise<ImageModelsListResponse>;
 }
 
-/**
- * Fetch the definitive per-endpoint capabilities for one model
- * (`GET /api/v1/images/models/{author}/{slug}/endpoints`).
- */
 export async function getImageModelEndpoints(model: string): Promise<ImageModelEndpointsResponse> {
   const [author, slug] = model.split("/");
   if (!author || !slug) {
@@ -142,10 +130,6 @@ const MEDIA_TYPE_EXTENSIONS: Record<string, string> = {
   "image/svg+xml": ".svg",
 };
 
-/**
- * Save one base64 image. The extension follows the response `media_type` when
- * present (e.g. SVG from vector models), otherwise the requested output path.
- */
 export function saveImage(b64: string, outputBase: string, mediaType: string | undefined, index: number, total: number): string {
   const dotIdx = outputBase.lastIndexOf(".");
   const stem = dotIdx > 0 ? outputBase.slice(0, dotIdx) : outputBase;
@@ -157,11 +141,6 @@ export function saveImage(b64: string, outputBase: string, mediaType: string | u
   return abs;
 }
 
-/**
- * Build the shared image-config fields from parsed CLI args. Only fields the
- * caller passed are included, so the model applies its own defaults for the
- * rest. Discover a model's accepted values with `discover.ts` first.
- */
 export function buildImageParams(args: Map<string, string | true>): Record<string, unknown> {
   const params: Record<string, unknown> = {};
   const setString = (flag: string, key: string) => {

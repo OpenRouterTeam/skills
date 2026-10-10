@@ -12,7 +12,7 @@ gh skill install OpenRouterTeam/skills openrouter-images
 
 Works with Claude Code, Cursor, Codex, OpenCode, Gemini CLI, Windsurf, and [many more agents](https://cli.github.com/manual/gh_skill_install). Add `--scope user` to install across every project for your current agent, or `--agent claude-code` to target a specific agent.
 
-For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) see the [root README](../../README.md#installing).
+The repository root README documents additional install methods for Claude Code, Cursor, and other agents.
 
 ## Prerequisites
 
