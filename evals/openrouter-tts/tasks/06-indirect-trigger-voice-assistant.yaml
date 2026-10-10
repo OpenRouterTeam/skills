@@ -1,0 +1,62 @@
+id: indirect-trigger-voice-assistant-001
+name: Indirect Trigger - TTS As Component
+description: |
+  Tests the indirect-mention pattern documented in the repo's memory:
+  the user is building something that needs TTS as a component (a voice
+  assistant) but hasn't asked for TTS directly. The skill should activate
+  and the agent should wire in /api/v1/audio/speech for the spoken output.
+tags:
+  - happy-path
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    Write a Node.js script for a simple voice greeting system: it takes
+    a user's name as input and produces an audio file that says
+    "Hello, <name>, welcome!" in a friendly voice. Save the audio as
+    greeting-<name>.mp3. Show me the complete script in your response.
+
+graders:
+  - type: code
+    name: uses_openrouter_tts
+    config:
+      language: python
+      assertions:
+        - '"/api/v1/audio/speech" in output.lower() or "audio.speech" in output.lower()'
+        - '"openrouter_api_key" in output.lower() or "$OPENROUTER_API_KEY" in output'
+
+  - type: code
+    name: dynamic_filename_and_content
+    config:
+      language: python
+      assertions:
+        # Script must use the name variable in both the spoken text AND the filename.
+        - '"greeting-" in output.lower() or "greeting_" in output.lower()'
+        - '"welcome" in output.lower() or "hello" in output.lower()'
+
+  - type: prompt
+    name: component_assembly
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants a voice greeting system. Call set_waza_grade_pass
+        or set_waza_grade_fail once per criterion (3 calls total).
+
+        1) Correctly uses TTS: calls OpenRouter's TTS endpoint
+           (/api/v1/audio/speech) with the greeting text and a real voice,
+           writes the response bytes to the .mp3 file. Does NOT try to
+           generate a placeholder or skip the audio step.
+
+        2) Dynamic personalization: the name is injected into BOTH the
+           spoken input ("Hello, Alice, welcome!") AND the output
+           filename (greeting-alice.mp3). A single hardcoded value for
+           both does NOT pass this criterion.
+
+        3) Complete script: the code is runnable as a Node.js script
+           (has imports, an entry point, reads name from argv or function
+           arg, handles the TTS response as raw bytes, writes the file).
+
+expected:
+  outcomes:
+    - type: task_completed

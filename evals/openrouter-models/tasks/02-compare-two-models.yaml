@@ -1,0 +1,55 @@
+id: compare-models-001
+name: Compare Two Models
+description: |
+  Tests the decision-tree mapping "compare X vs Y" → compare-models.ts.
+  Skill guidance requires markdown table for comparisons.
+tags:
+  - happy-path
+  - compare-models
+
+inputs:
+  prompt: |
+    How do Claude Sonnet 4 and GPT-4o compare on pricing and context length?
+
+graders:
+  - type: code
+    name: invoked_compare_models
+    config:
+      language: python
+      assertions:
+        - '"compare-models.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"claude" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower() and ("sonnet" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower())'
+        - '"gpt-4o" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]).lower()'
+
+  - type: code
+    name: markdown_table_output
+    config:
+      language: python
+      assertions:
+        - '"|" in output and "---" in output'
+
+  - type: prompt
+    name: comparison_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked to compare Claude Sonnet 4 and GPT-4o on pricing and
+        context length. Call set_waza_grade_pass or set_waza_grade_fail once
+        per criterion (3 calls total).
+
+        1) Correct tool: the agent ran compare-models.ts with both models
+           as arguments (not list-models + manual diff, not a single-model
+           lookup).
+
+        2) Both dimensions addressed: the response covers pricing AND
+           context length for both models.
+
+        3) Tabular presentation: results shown in a markdown table with
+           models as columns (or a clearly aligned comparison format),
+           per the skill's Presenting Results guidance. Pricing in
+           per-million-tokens format.
+
+expected:
+  outcomes:
+    - type: task_completed

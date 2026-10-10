@@ -1,0 +1,54 @@
+id: sign-in-button-001
+name: Sign-In Button Component
+description: |
+  Narrow request focused on the button section of the skill — logo SVG,
+  variants, sizes, dark mode, loading state, click handler wiring.
+  User has said the OAuth flow is already working, so PKCE protocol details
+  are NOT required (and would be scope bloat).
+tags:
+  - happy-path
+  - ui
+  - button
+
+inputs:
+  prompt: |
+    I already have the OAuth flow working — I can get an API key from
+    OpenRouter. Now I just want a polished "Sign in with OpenRouter" button
+    component I can drop into my app. Multiple visual variants, proper
+    sizing, dark mode support, and a loading state while the exchange is
+    happening.
+
+graders:
+  # Rely on the LLM-judge rubric below rather than a `code` grader that
+  # greps the chat-text output for "<svg". The skill produces the component
+  # by writing a .tsx file to the workspace; the response text summarizes
+  # the work. Grepping the response misses the actual artifact. If we want
+  # structural assertions on the component file we should add a `file`
+  # grader pointed at the generated .tsx path — deferred until we know the
+  # deterministic filename the agents pick.
+  - type: prompt
+    name: button_quality_rubric
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants ONLY a button component — the OAuth flow is done.
+        Evaluate these criteria. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (3 total calls).
+
+        1) Renders the OpenRouter logo: includes an SVG logo (inline <svg> or
+           a clearly-identified logo asset) so the button is branded as
+           "Sign in with OpenRouter", not a generic button.
+
+        2) Multiple variants + sizes: offers at least 3 visual variants (e.g.,
+           default/minimal/branded/icon/cta) AND multiple size options
+           (e.g., sm/default/lg/xl). Hardcoding a single style is not enough.
+
+        3) Interaction state handled: accessible button (not a div), has a
+           loading/disabled state while the auth flow runs, and a clear
+           onClick that triggers the sign-in flow (calling initiateOAuth or
+           equivalent). Dark mode classes or theming are addressed.
+
+expected:
+  outcomes:
+    - type: task_completed

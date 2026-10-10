@@ -1,0 +1,67 @@
+id: python-requests-001
+name: Python Transcription via requests
+description: |
+  Python flow using the requests library (or equivalent). Critical
+  negative test: the agent should NOT use the OpenAI SDK, because the
+  endpoint is not OpenAI-compatible (documented in the skill).
+tags:
+  - happy-path
+  - python
+  - not-openai-sdk
+
+inputs:
+  prompt: |
+    Write a Python script that transcribes a local audio.wav file using
+    OpenRouter and prints the transcript. Show me the complete code in
+    your response.
+
+graders:
+  - type: code
+    name: uses_direct_http
+    config:
+      language: python
+      assertions:
+        - '"requests" in output.lower() or "httpx" in output.lower() or "urllib" in output.lower() or "aiohttp" in output.lower()'
+        - '"/api/v1/audio/transcriptions" in output.lower()'
+
+  - type: code
+    name: avoids_openai_sdk
+    config:
+      language: python
+      assertions:
+        # Agent must not use the OpenAI Python SDK for this endpoint.
+        - '"from openai" not in output.lower() and "import openai" not in output.lower()'
+        - '"client.audio.transcriptions.create" not in output.lower()'
+
+  - type: code
+    name: base64_encoding
+    config:
+      language: python
+      assertions:
+        - '"base64" in output.lower()'
+        - '"input_audio" in output.lower()'
+
+  - type: prompt
+    name: python_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a Python STT script. Call set_waza_grade_pass
+        or set_waza_grade_fail once per criterion (3 calls total).
+
+        1) Correct HTTP approach: uses requests / httpx / urllib / aiohttp
+           (NOT the OpenAI SDK) to POST JSON to
+           https://openrouter.ai/api/v1/audio/transcriptions.
+
+        2) Correct body: JSON body with model (real transcription slug),
+           input_audio.data set to base64-encoded file bytes (no data:
+           URI prefix), input_audio.format matching the audio container
+           ("wav").
+
+        3) Prints transcript: on success reads response.json()["text"]
+           and prints it. Handles non-200 with a clear error.
+
+expected:
+  outcomes:
+    - type: task_completed

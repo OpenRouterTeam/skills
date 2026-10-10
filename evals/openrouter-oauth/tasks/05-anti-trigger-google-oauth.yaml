@@ -1,0 +1,67 @@
+id: anti-trigger-google-001
+name: Anti-Trigger - Unrelated OAuth Request
+description: |
+  Negative test: a generic "Google OAuth in Django" request shares the word
+  "OAuth" with this skill but is otherwise unrelated. The openrouter-oauth
+  skill should NOT activate, and the response must not leak OpenRouter-specific
+  details (openrouter.ai/auth, sk-or-, the PKCE code-verifier storage model
+  from this skill) into what should be a Google/Django answer.
+tags:
+  - anti-trigger
+  - negative-test
+  - trigger-specificity
+
+inputs:
+  prompt: |
+    How do I implement Google OAuth sign-in in my Django web app?
+    I need users to log in with their Google accounts.
+
+graders:
+  # Direct leak check: must not contain OpenRouter endpoints or api-key prefix.
+  # We intentionally omit a `trigger` grader here — it measures keyword overlap
+  # between the prompt and the skill's description, which is inherently high
+  # for any OAuth-adjacent prompt and doesn't reflect whether the skill
+  # actually contaminated the answer. The real signal is the content checks
+  # below.
+  - type: code
+    name: no_openrouter_leakage
+    config:
+      language: python
+      assertions:
+        - "'openrouter.ai' not in output.lower()"
+        - "'sk-or-' not in output.lower()"
+        # Allow the word "openrouter" once (as in "this is not about OpenRouter")
+        # but flag repeated mentions that suggest the skill activated.
+        - "output.lower().count('openrouter') <= 1"
+
+  # LLM-judge: evaluate that the response actually answers the Google/Django
+  # question well, rather than being contaminated by OpenRouter content.
+  - type: prompt
+    name: stays_on_topic
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked about Google OAuth in Django. Call set_waza_grade_pass
+        or set_waza_grade_fail once per criterion (3 total calls).
+
+        1) Answers the actual question: the response addresses Google OAuth
+           in a Django context (covers OAuth consent screen, client_id/secret
+           from Google Cloud Console, callback URL, session/user creation).
+           A library like django-allauth or authlib is fine; a raw OAuth
+           implementation is also fine.
+
+        2) No OpenRouter contamination: the response does NOT describe the
+           OpenRouter PKCE flow, does NOT tell the user to go to
+           openrouter.ai/auth, does NOT mention an openrouter API key
+           (sk-or-...), and does NOT apply the skill's sessionStorage
+           verifier model to Google OAuth. A brief disclaimer like "this is
+           different from OpenRouter OAuth" does not count as contamination.
+
+        3) Django-appropriate advice: recommends Django-idiomatic patterns
+           (e.g., a callback view, settings.py config, session-based user
+           auth) rather than a frontend-only PKCE flow.
+
+expected:
+  outcomes:
+    - type: task_completed
