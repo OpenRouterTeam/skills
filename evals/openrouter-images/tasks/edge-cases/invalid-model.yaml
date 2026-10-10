@@ -1,0 +1,23 @@
+id: edge-004
+name: Nonexistent model requested
+description: >
+  User names a model that does not exist. The agent should check available
+  image models with discover.ts and suggest a close valid alternative instead
+  of passing the bogus ID through and failing.
+
+tags:
+  - edge-case
+  - negative
+  - model-selection
+
+inputs:
+  prompt: "Generate a photo of a beach at sunset using the dall-e-9-ultra model."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_not_contains:
+    - "dall-e-9-ultra generated"
