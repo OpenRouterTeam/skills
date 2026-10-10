@@ -125,6 +125,7 @@ Returns for each provider:
 - **Status** — `operational` or `degraded`
 - **Provider-specific pricing** — some providers offer discounts
 - **Supported parameters** — varies by provider (some don't support all features)
+- **Tool choice support** (`supports_tool_choice`) — per-variant flags for `none`, `auto`, `required`, and `function`
 
 ## API Response Shapes
 
@@ -140,6 +141,7 @@ Returns for each provider:
 **Tips for working with the response:**
 
 - To check if a model supports a feature, use `model.supported_parameters` (e.g. `.includes("tools")`), or filter server-side with `?supported_parameters=tools`.
+- `tool_choice` in `supported_parameters` only means the endpoint accepts the parameter. Which *values* it accepts comes from the endpoint's `supports_tool_choice` object (`{ none, auto, required, function }`), where each flag reflects a capability test. A request using an unsupported value is routed away from that endpoint, and fails with a `404` when `provider.require_parameters` pins routing to it.
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
@@ -194,7 +196,8 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
       "max_completion_tokens": 64000,
       "pricing_per_million_tokens": { "prompt": "$3.00", "completion": "$15.00", "cached_input": "$0.30" },
       "supports_implicit_caching": true,
-      "supported_parameters": ["max_tokens", "temperature", "tools", "..."]
+      "supported_parameters": ["max_tokens", "temperature", "tools", "..."],
+      "supports_tool_choice": { "none": true, "auto": true, "required": true, "function": true }
     }
   ]
 }
@@ -210,6 +213,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | `top_provider.is_moderated` | Whether content moderation is applied |
 | `per_request_limits` | Per-request token limits (when non-null) |
 | `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `web_search_options`) |
+| `supports_tool_choice` | Endpoint field: which `tool_choice` values (`none`, `auto`, `required`, `function`) the endpoint is verified to support |
 | `created` | Unix timestamp — use for sorting by recency |
 | `expiration_date` | Non-null means the model is being deprecated |
 | `latency_30m_ms.p50` | Median response latency over last 30 min |
@@ -223,6 +227,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - When comparing, use a markdown table with models as columns
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
+- When the user needs a specific `tool_choice` value, check the endpoint's `supports_tool_choice` flags rather than the presence of `tool_choice` in `supported_parameters`
 - Note cache pricing when available — it can cut input costs 90%+
 - Flag models with `expiration_date` as deprecated
 - When a model has multiple providers at different prices, mention the cheapest option
