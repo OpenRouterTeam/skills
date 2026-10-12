@@ -323,7 +323,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
+| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400, as do request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`) mixed with any other metric, or with a dimension or filter other than `model`, `provider`, `api_key_id`, `user`, or `workspace`, or with classifier fields. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
@@ -332,13 +332,15 @@ Combine up to 2 dimensions for cross-tabulation:
 
 ## Time Range Behavior
 
-`start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs.
+`start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs. `end` is exclusive at whole-second precision: other fractional ends are truncated to the second, but an end at `.999` (e.g. `2026-05-20T23:59:59.999Z`) is treated as inclusive and moves to the next second, so that last second is kept.
 
 Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
 Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup. They are limited to 31 days regardless of granularity, support only `model` and `provider` dimensions and filters, and are rejected with 400 when combined with `minute` granularity, classifier dimensions, or classifier filters.
+
+Request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`) are limited to 31 days. They combine only with each other and the `model`, `provider`, `api_key_id`, `user`, and `workspace` dimensions and filters; any other metric, dimension, filter, or classifier field returns 400 listing the incompatible fields.
 
 `hour` granularity reads the minute materialized view, so it caps the range at 31 days even for metrics that otherwise allow 367.
 
