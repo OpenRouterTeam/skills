@@ -62,7 +62,7 @@ Each metric has:
 
 Most volume and cost metrics support time ranges up to **367 days** with day or coarser granularity. Latency/throughput metrics, `blended_cost_per_million_tokens`, and generations-only dimensions (`provider`, `origin`, `country`, `data_region`, `skin`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `session_id`, `streamed`) are limited to **31-day** time ranges, as is `hour` granularity. Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup, so they are capped at **31 days** too and coarser granularity does not lift that cap.
 
-Exceeding a cap returns 400 with the applicable maximum in the message, not a truncated result. If a query times out instead, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Exceeding a cap returns 400 with the applicable maximum in the message, not a truncated result. If a query times out instead (408), try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -109,6 +109,13 @@ All performance metrics exclude server-tool rows (web search / file-parsing char
 - `cache_capture_rate` — ratio of cache-eligible prompt tokens that were actually served from cache (0–1 by construction; 31-day limit, hourly rollup only)
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
+
+**Request-outcome metrics** (did requests succeed; 31-day limit). Counted once per request from its terminal outcome, failed requests included (`request_count` counts generation rows instead):
+- `total_request_count` — all requests, including failed ones
+- `gateway_5xx_count` — requests that ended in a 5xx without reaching a provider (an OpenRouter-side error)
+- `provider_5xx_count` — requests that ended in a 5xx after a provider call
+
+These three can only be combined with each other and with the `model`, `provider`, `api_key_id`, `user`, and `workspace` dimensions and filters. Mixing them with any other metric, dimension, filter, or classifier field returns 400 listing the incompatible fields.
 
 ## Understanding Dimensions
 
@@ -247,6 +254,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 367 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
+| "How many requests failed with 5xx, and whose fault?" | `total_request_count`, `gateway_5xx_count`, `provider_5xx_count` | `provider` or `model` | 31-day limit. Cannot be mixed with other metrics |
 
 ## Filter Value Reference
 
@@ -276,4 +284,5 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Minute granularity: only available when the time window is ≤ 3 hours
 - `hour` granularity reads the minute materialized view: 31-day maximum
 - Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`): 31-day maximum, `hour` or coarser granularity, and only `model`/`provider` dimensions and filters — any other dimension, filter, classifier, or `minute` granularity returns 400
+- Request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`): 31-day maximum, only combinable with each other and the `model`/`provider`/`api_key_id`/`user`/`workspace` dimensions and filters — anything else returns 400
 - Rate-limited to 64 requests per minute
