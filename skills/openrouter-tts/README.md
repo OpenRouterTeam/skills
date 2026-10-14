@@ -26,7 +26,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - A drop-in bash script that handles headers, error bodies, and generation ID capture
 - Discovering TTS models via `/api/v1/models?output_modalities=speech`
 - Picking between `mp3` and `pcm`, and avoiding the format/extension mismatch that accounts for most "empty audio" reports
-- Top-level `instructions` for tone/pacing (OpenAI and Gemini) and multi-speaker turn arrays (Gemini)
+- Top-level `instructions` for tone/pacing (OpenAI, Gemini, Fish Audio) and multi-speaker turn arrays (Gemini, Fish Audio except S1)
 - Provider passthrough (`provider.options.<slug>`)
 - OpenAI SDK compatibility — swap the base URL and the existing client code works
 - Splitting and concatenating long inputs
