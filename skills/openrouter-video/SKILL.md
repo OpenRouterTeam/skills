@@ -17,6 +17,8 @@ Video generation is async: submit → poll → download. A single request can't 
 
 Once `completed`, the polling response may include `expires_at` (Unix seconds): when OpenRouter's stored copy of the outputs stops being available. It is present only when that copy exists — download before then, and tell the user the deadline if they plan to fetch the video later.
 
+When that stored copy exists, the response may also include `urls`: one signed download URL per output that works **without** an API key until `expires_at`. Use it only where you cannot set headers (a `<video>` tag, `ffmpeg`, a tool that only accepts a URL). Anyone holding one of these URLs can download the output until it expires, so never log, print, or share them. `unsigned_urls` keeps working with the auth header for as long as the output is available, including when `urls` is absent, so the drop-in script below uses it.
+
 ## Pick parameters from the models endpoint, don't guess
 
 `resolution`, `aspect_ratio`, `duration`, and `frame_images[].frame_type` are per-model. Before the first submit for a new model (or whenever the user asks for something specific), fetch the model's capabilities and only send values from the returned sets:
