@@ -142,7 +142,12 @@ export type ScoreQuestion = {
   criteria: Criterion[];
 };
 
-export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
+export type BoxQuestion = {
+  type: "box";
+  instructions: Criterion;
+};
+
+export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion | BoxQuestion;
 
 export type DecisionsState = string | Record<string, unknown> | unknown[];
 
@@ -178,7 +183,13 @@ export type ScoreAnswer = {
   confidence?: number;
 };
 
-export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer;
+export type BoxAnswer = {
+  type: "box";
+  box: { top: number; bottom: number; left: number; right: number };
+  confidence?: number;
+};
+
+export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer | BoxAnswer;
 
 export type DecisionsResponse = {
   id?: string;
@@ -348,6 +359,20 @@ function parseAnswer(key: string, value: unknown): Answer {
         legend: optional(value.legend, (v) => criterionMap(key, "legend", v)),
         confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
       };
+    case "box": {
+      const box = value.box;
+      if (!isRecord(box)) throw new Error(`Answer ${key} has no box`);
+      return {
+        type: "box",
+        box: {
+          top: finiteField(`Answer ${key}`, "box.top", box.top),
+          bottom: finiteField(`Answer ${key}`, "box.bottom", box.bottom),
+          left: finiteField(`Answer ${key}`, "box.left", box.left),
+          right: finiteField(`Answer ${key}`, "box.right", box.right),
+        },
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
+      };
+    }
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
   }
@@ -476,8 +501,11 @@ function parseQuestion(source: string, value: unknown): Question {
       }
       return { type: "score", instructions, criteria };
     }
+    case "box":
+      if (value.criteria !== undefined) throw new Error(`${source}: box questions take no criteria`);
+      return { type: "box", instructions };
     default:
-      throw new Error(`${source}.type must be choice, noul, or score`);
+      throw new Error(`${source}.type must be choice, noul, score, or box`);
   }
 }
 
