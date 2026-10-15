@@ -134,7 +134,7 @@ Set `response_format: "verbose_json"` to get structured fields alongside `text`:
 
 Depending on the provider, verbose output may also carry `language_confidence` (0 to 1), `entities` (`text`, `type`, `start_char`, `end_char` offsets into `text`), and on segments/words a string `speaker_label` and a `channel` index. Words with `type: "audio_event"` are tagged non-speech sounds (e.g. `"(laughter)"`), not spoken words.
 
-For speaker diarization, set the top-level `diarize: true` on models whose provider supports it (ElevenLabs does). It requires `response_format: "verbose_json"` (a `json` request is rejected with a 400), always includes word timestamps, and labels words with `speaker` / `speaker_label`; unsupported models return a 400. Other providers expose diarization through their own option instead. Example — Azure diarization for `microsoft/mai-transcribe-2`, which adds a `speaker` index to each segment and word:
+For speaker diarization, set the top-level `diarize: true` on models whose provider supports it (ElevenLabs does). It requires `response_format: "verbose_json"` (a `json` request is rejected with a 400), always includes word timestamps, and labels words with `speaker` / `speaker_label`; unsupported models return a 400. To find endpoints that can label speakers, check `supports_diarization` on each record from `GET /api/v1/models/<author>/<slug>/endpoints` (`false` when the endpoint has not declared support). Other providers expose diarization through their own option instead. Example — Azure diarization for `microsoft/mai-transcribe-2`, which adds a `speaker` index to each segment and word:
 
 ```json
 {
