@@ -19,6 +19,7 @@ export type DecisionModel = {
   aliasTarget?: string;
   createdAt: Date;
   contextLength: number;
+  inputModalities: string[];
   promptPricePerToken: number;
   completionPricePerToken: number;
   description: string;
@@ -75,11 +76,17 @@ function parseModel(entry: Record<string, unknown>): DecisionModel {
     aliasTarget: isRecord(entry.alias_target) ? stringField(id, entry.alias_target, "slug") : undefined,
     createdAt: new Date(finiteField(id, "created", entry.created) * 1000),
     contextLength: finiteField(id, "context_length", entry.context_length),
+    inputModalities: inputModalities(entry),
     promptPricePerToken: priceField(id, pricing, "prompt"),
     completionPricePerToken: priceField(id, pricing, "completion"),
     description: typeof entry.description === "string" ? entry.description : "",
     endpointsUrl: `${SDK_SERVER_URL}${detailsPath ?? `/api/v1/models/${id}/endpoints`}`,
   };
+}
+
+function inputModalities(entry: Record<string, unknown>): string[] {
+  const modalities = isRecord(entry.architecture) ? entry.architecture.input_modalities : undefined;
+  return Array.isArray(modalities) ? modalities.filter((m): m is string => typeof m === "string") : [];
 }
 
 function parseEndpoint(modelId: string, entry: unknown): ModelEndpoint {
@@ -135,7 +142,12 @@ export type ScoreQuestion = {
   criteria: Criterion[];
 };
 
-export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
+export type BoxQuestion = {
+  type: "box";
+  instructions: Criterion;
+};
+
+export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion | BoxQuestion;
 
 export type DecisionsState = string | Record<string, unknown> | unknown[];
 
@@ -171,7 +183,13 @@ export type ScoreAnswer = {
   confidence?: number;
 };
 
-export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer;
+export type BoxAnswer = {
+  type: "box";
+  box: { top: number; bottom: number; left: number; right: number };
+  confidence?: number;
+};
+
+export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer | BoxAnswer;
 
 export type DecisionsResponse = {
   id?: string;
@@ -341,6 +359,20 @@ function parseAnswer(key: string, value: unknown): Answer {
         legend: optional(value.legend, (v) => criterionMap(key, "legend", v)),
         confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
       };
+    case "box": {
+      const box = value.box;
+      if (!isRecord(box)) throw new Error(`Answer ${key} has no box`);
+      return {
+        type: "box",
+        box: {
+          top: finiteField(`Answer ${key}`, "box.top", box.top),
+          bottom: finiteField(`Answer ${key}`, "box.bottom", box.bottom),
+          left: finiteField(`Answer ${key}`, "box.left", box.left),
+          right: finiteField(`Answer ${key}`, "box.right", box.right),
+        },
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
+      };
+    }
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
   }
@@ -469,8 +501,11 @@ function parseQuestion(source: string, value: unknown): Question {
       }
       return { type: "score", instructions, criteria };
     }
+    case "box":
+      if (value.criteria !== undefined) throw new Error(`${source}: box questions take no criteria`);
+      return { type: "box", instructions };
     default:
-      throw new Error(`${source}.type must be choice, noul, or score`);
+      throw new Error(`${source}.type must be choice, noul, score, or box`);
   }
 }
 
