@@ -67,7 +67,7 @@ curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
   | jq -r '.data[] | select(.id=="openai/gpt-4o-mini-tts-2025-12-15") | .supported_voices[]'
 ```
 
-Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`. Two more flags gate the richer reference modes: `supports_multiple_audio_references` (more than one clip) and `supports_image_reference` (an `image_url` reference describing the voice). Requests are only routed to endpoints whose flags allow the references sent:
+Voice cloning support is an endpoint capability, not a models-list field. After choosing a model, inspect its provider endpoints via `GET /api/v1/models/{author}/{slug}/endpoints` and use reference audio only where `supports_voice_cloning` is `true`. Two more flags gate the richer reference modes: `supports_multiple_audio_references` (more than one clip) and `supports_image_reference` (an `image_url` reference, either on its own for voice design or alongside a clip as a scene image; which shape applies is per model). Requests are only routed to endpoints whose flags allow the references sent:
 
 ```bash
 curl -sS "https://openrouter.ai/api/v1/models/fish-audio/s1/endpoints" \
@@ -86,7 +86,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `instructions`    | no       | Delivery instructions for the whole request (tone, pacing, emotion, e.g. `"Speak in a warm and friendly tone."`). Supported by OpenAI `gpt-4o-mini-tts`, Gemini TTS, and Fish Audio models; ignored by other providers. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `input_references` | no       | Stateless voice cloning or voice design. Audio mode: one to three `input_audio` parts (each with base64/data-URI `data` **or** a public `url`, plus optional `format`), each optionally paired with a transcript `text` part. Image mode: exactly one `image_url` part. The two modes cannot be mixed; an empty array means no reference. See [Voice cloning](#voice-cloning) for routing requirements. |
+| `input_references` | no       | Stateless voice cloning or voice design. Audio mode: one to three `input_audio` parts (each with base64/data-URI `data` **or** a public `url`, plus optional `format`), each optionally paired with a transcript `text` part. Audio mode may add at most one `image_url` scene image on providers that support it (HeyGen Voice). Image mode: exactly one `image_url` part on its own. Two images are rejected; an empty array means no reference. See [Voice cloning](#voice-cloning) for routing requirements. |
 | `provider`        | no       | Data policy routing (`zdr`, `data_collection`) and provider passthrough under `provider.options` — see below. With `zdr: true` the request routes only to Zero Data Retention endpoints; `data_collection: "deny"` excludes providers that store or train on data. Other routing preferences (`order`, `only`, `ignore`) are not applied to speech requests. |
 
 ### Voice cloning
@@ -122,12 +122,27 @@ Each `input_audio` needs exactly one of `data` (raw base64 or a data URI, max 20
 
 **Multiple clips.** Send up to three `input_audio` parts; with more than one clip, each transcript `text` part must immediately follow the clip it transcribes. On providers that support multiple references, the Nth clip is addressable from `input` as `@AudioN` (e.g. `"input": "@Audio1 Welcome back to the show. @Audio2 Thanks for having me."`). Only routed to endpoints with `supports_multiple_audio_references: true`. Seed Audio 1.0 (`bytedance-seed/seed-audio-1-0`, currently the only multi-clip model) validates placeholders with a 400: with more than one clip every clip must be referenced at least once, a placeholder for a clip you did not send (or with no audio references) is rejected, and with a single clip the placeholder is optional but must be `@Audio1`. Seed Audio ignores transcripts and rejects requests that send both `voice` and `input_references`.
 
-**Image reference (voice design).** Instead of audio, send exactly one image describing the desired voice; it cannot be combined with `input_audio` parts and is only routed to endpoints with `supports_image_reference: true`. The `url` is a JPEG, PNG, or WebP as a base64 data URI or a public http(s) URL (downloaded, 15 MiB max):
+**Image reference (voice design).** Instead of audio, send exactly one image describing the desired voice; Seed Audio's voice-design mode accepts no `input_audio` clips alongside it. Only routed to endpoints with `supports_image_reference: true`. The `url` is a JPEG, PNG, or WebP as a base64 data URI or a public http(s) URL (downloaded, 15 MiB max):
 
 ```json
 "input_references": [
   { "type": "image_url", "image_url": { "url": "https://example.com/speaker.png" } }
 ]
+```
+
+**Scene image.** HeyGen Voice (`heygen/heygen-voice-1`) clones the reference recording on each request and can condition the voice on one optional `image_url` picture of the speaker in their setting (a quiet room stays clean, a car or stage adds matching acoustics). Send it next to the `input_audio` part, omit `voice` (the recording is the voice), and name the recording's language with `provider.options.heygen.language`. The recording must be WAV or MP3 of clear speech (only the first 3 minutes are used); the image is JPEG, PNG, or WebP. HeyGen Voice rejects an image without a recording, and Seed Audio rejects a recording together with an image, each with a 400:
+
+```json
+{
+  "model": "heygen/heygen-voice-1",
+  "input": "Welcome aboard, please fasten your seat belts.",
+  "response_format": "pcm",
+  "input_references": [
+    { "type": "input_audio", "input_audio": { "data": "data:audio/mpeg;base64,SUQzBAAAAAAA..." } },
+    { "type": "image_url", "image_url": { "url": "https://example.com/pilot-in-cockpit.jpg" } }
+  ],
+  "provider": { "options": { "heygen": { "language": "en" } } }
+}
 ```
 
 ### Non-speech prompts
