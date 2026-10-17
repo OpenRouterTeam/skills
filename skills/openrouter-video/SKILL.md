@@ -15,6 +15,10 @@ Video generation is async: submit → poll → download. A single request can't 
 2. `GET <polling_url>` every ~30s until `status` is `completed` (terminal failures: `failed`, `cancelled`, `expired` — surface the `error` field verbatim)
 3. `GET /api/v1/videos/{id}/content?index=0` **with the auth header** → MP4 bytes
 
+Once `completed`, the polling response may include `expires_at` (Unix seconds): when OpenRouter's stored copy of the outputs stops being available. It is present only when that copy exists — download before then, and tell the user the deadline if they plan to fetch the video later.
+
+When that stored copy exists, the response may also include `urls`: one signed download URL per output that works **without** an API key until `expires_at`. Use it only where you cannot set headers (a `<video>` tag, `ffmpeg`, a tool that only accepts a URL). Anyone holding one of these URLs can download the output until it expires, so never log, print, or share them. `unsigned_urls` keeps working with the auth header for as long as the output is available, including when `urls` is absent, so the drop-in script below uses it.
+
 ## Pick parameters from the models endpoint, don't guess
 
 `resolution`, `aspect_ratio`, `duration`, and `frame_images[].frame_type` are per-model. Before the first submit for a new model (or whenever the user asks for something specific), fetch the model's capabilities and only send values from the returned sets:
@@ -67,7 +71,7 @@ curl -sS -L "$(echo "$resp" | jq -r '.unsigned_urls[0]')" \
   --output "$OUTPUT"
 
 echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
-  '{job_id: .id, generation_id, video_saved: $out, usage}'
+  '{job_id: .id, generation_id, video_saved: $out, usage, expires_at}'
 ```
 
 ## Parameters
@@ -80,10 +84,13 @@ Required: `model`, `prompt`. Common optional fields:
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `input_references[]` — reference-to-video (style guidance); entries are `{ type: "image_url", image_url: { url } }` (no `frame_type`), or `{ type: "video_url", video_url: { url } }` / `{ type: "audio_url", audio_url: { url } }` for models that honor video or audio references (e.g. Seedance 2+, Wan 3.0). Image references work everywhere; models that only take image references reject the others with a 400. If both arrays are present, `frame_images` wins.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+- `previous_job_id` (string) — edit or extend a completed job by passing its `id` from the submit response. The new job runs on the same `model` and endpoint as the original (a different `model` returns 400, a job that is not `completed` returns 409). Only models that support continuation accept it.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
+
+The request body is capped at 50 MiB, checked against `Content-Length` before the body is read, so an oversized submission returns `413` rather than a job. Base64 inflates bytes by ~33% — for larger reference images, pass an `https://` URL instead of a data URL.
 
 ## Provider passthrough
 
