@@ -84,7 +84,7 @@ Required: `model`, `prompt`. Common optional fields:
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `input_references[]` — reference-to-video (style guidance); entries are `{ type: "image_url", image_url: { url } }` (no `frame_type`), or `{ type: "video_url", video_url: { url } }` / `{ type: "audio_url", audio_url: { url } }` for models that honor video or audio references (e.g. Seedance 2+, Wan 3.0). Image references work everywhere; models that only take image references reject the others with a 400. If both arrays are present, `frame_images` wins.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
 - `previous_job_id` (string) — edit or extend a completed job by passing its `id` from the submit response. The new job runs on the same `model` and endpoint as the original (a different `model` returns 400, a job that is not `completed` returns 409). Only models that support continuation accept it.
 
