@@ -344,6 +344,8 @@ Request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5
 
 `hour` granularity reads the minute materialized view, so it caps the range at 31 days even for metrics that otherwise allow 367.
 
+The daily materialized view stores whole UTC days. When a query would otherwise read it, a range of up to 2 days that starts or ends off UTC midnight (an end at `23:59:59.999` counts as midnight) and starts within the last 30 days reads the minute materialized view instead, so totals count only the requested window rather than the whole days it touches.
+
 Classifier dimensions and classifier filters always force the 31-day time range limit.
 
 If a query times out, try:

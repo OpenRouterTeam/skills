@@ -99,7 +99,7 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `*_total_time_to_first_token` — `latency + router_latency`, computed over streamed requests only
 - `*_generation_time` — provider-side generation time
 - `*_inter_token_latency` — average time between consecutive completion tokens, `(generation_time - latency) / (native_tokens_completion - 1)`, computed over streamed requests with more than one completion token only
-- `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens
+- `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens. Percentiles read the slow tail because higher is better: `pN_throughput` is the speed that N% of requests reached or exceeded (the (100 − N)th percentile of raw values), so `p90_throughput` ≤ `p50_throughput`
 
 All performance metrics exclude server-tool rows (web search / file-parsing charges recorded alongside a request).
 
