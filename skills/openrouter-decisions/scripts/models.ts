@@ -30,6 +30,7 @@ type ModelReport = {
   alias_target?: string;
   released: string;
   context_length: number;
+  input_modalities: string[];
   usd_per_million_input_tokens: number;
   usd_per_million_output_tokens: number;
   providers: string[];
@@ -84,6 +85,7 @@ async function report(model: DecisionModel, tokens: number | undefined): Promise
     alias_target: model.aliasTarget,
     released: model.createdAt.toISOString().slice(0, 10),
     context_length: model.contextLength,
+    input_modalities: model.inputModalities,
     usd_per_million_input_tokens: perMillion(model.promptPricePerToken),
     usd_per_million_output_tokens: perMillion(model.completionPricePerToken),
     providers: unique(endpoints.map(providerLabel)),
@@ -134,11 +136,12 @@ function byPinnedThenPrice(a: ModelReport, b: ModelReport): number {
 }
 
 function printTable(rows: ModelReport[]): void {
-  const header = ["id", "pin", "ctx", "max in", "$/M in", "providers", "uptime30m", "released", "fit"];
+  const header = ["id", "pin", "ctx", "input", "max in", "$/M in", "providers", "uptime30m", "released", "fit"];
   const cells = rows.map((r) => [
     r.id,
     r.alias_target === undefined ? r.build_slug : `alias -> ${r.alias_target}`,
     String(r.context_length),
+    r.input_modalities.join("+") || "-",
     r.max_input_tokens === undefined ? "-" : String(r.max_input_tokens),
     r.usd_per_million_input_tokens.toFixed(3),
     r.endpoints_error === undefined ? r.providers.join(", ") || "none" : "unavailable",
