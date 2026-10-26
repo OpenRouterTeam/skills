@@ -10,7 +10,7 @@ Query your OpenRouter usage data programmatically. Answer questions like "What w
 
 ## Prerequisites
 
-- An OpenRouter **management key** (provisioning key). Regular API keys will get a 403.
+- An OpenRouter **management key** (provisioning key). Regular API keys will get a 403. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
 - Get a management key at https://openrouter.ai/settings/management-keys (separate from the regular API keys page)
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 
@@ -166,7 +166,7 @@ This workflow is useful for identifying your most expensive or slowest requests 
 
 ## API Reference
 
-Both endpoints require a management key via `Authorization: Bearer sk-or-v1-...`.
+Both endpoints require a management key (read-write, or read-only on an organization) via `Authorization: Bearer sk-or-v1-...`.
 
 | Endpoint | Method | Description |
 |---|---|---|

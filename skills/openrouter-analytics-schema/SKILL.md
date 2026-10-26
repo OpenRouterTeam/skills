@@ -10,7 +10,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 
 ## Prerequisites
 
-- An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
+- An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 
 ## Discovery Endpoint
@@ -114,6 +114,8 @@ All performance metrics exclude server-tool rows (web search / file-parsing char
 - `total_request_count` — all requests, including failed ones
 - `gateway_5xx_count` — requests that ended in a 5xx without reaching a provider (an OpenRouter-side error)
 - `provider_5xx_count` — requests that ended in a 5xx after a provider call
+
+Requests rejected before routing (auth, credits, validation), requests that failed before any provider call (rate limits, spend-limit denials, budget or request-building 400s, adapter rejections, aborted requests), and response-cache hits are not counted.
 
 These three can only be combined with each other and with the `model`, `provider`, `api_key_id`, `user`, and `workspace` dimensions and filters. Mixing them with any other metric, dimension, filter, or classifier field returns 400 listing the incompatible fields.
 
@@ -264,7 +266,7 @@ Several dimensions are **label-resolved** in query results — the response show
 |---|---|---|
 | `api_key_id` | Numeric ID **or** 64-char SHA-256 hash | Numeric ID: generation metadata (`api_key_id` field). Hash: `GET /api/v1/keys` (`key_hash` field). Hashes are auto-resolved server-side. If a hash can't be resolved, a sentinel value returns zero rows (no error). |
 | `user` | Clerk user ID (e.g. `user_abc123`) | User settings or org member list — not the display name/email shown in results. |
-| `workspace` | Workspace UUID. Filtering on the default workspace UUID also matches legacy rows written before workspace resolution existed. | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
+| `workspace` | Workspace UUID; any non-UUID value returns 400. Filtering on the default workspace UUID also matches legacy rows written before workspace resolution existed. | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
 | `app` | Numeric app ID | Generation metadata (`app_id` field) or app settings — not the app title shown in results. |
 | `model` | Permaslug (e.g. `openai/gpt-4o`) | Model page URL or `GET /api/v1/models` — not the display name. |
 
