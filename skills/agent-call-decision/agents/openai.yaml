@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Call Decision"
+  short_description: "Build with System One decision models via OpenRouter"
+  default_prompt: "Use $agent-call-decision to replace this prompt-and-parse step with typed questions sent to a System One model through OpenRouter's System One API."
