@@ -1,6 +1,6 @@
 # Choosing a decision model on OpenRouter
 
-Every decision model on OpenRouter speaks the same Decisions API and the same three primitives, so an integration written against one runs against any other with a config change. What differs is in the catalog (context length, price, providers, release date) or only shows up when you probe (how a model answers your questions, its latency, how spread its probabilities are). This page is the criteria. The catalog is the inventory, and it changes without this page changing.
+Every decision model on OpenRouter speaks the same Decisions API and the same `choice`, `noul`, and `score` primitives (`box` is Jev 1.14 only), so an integration written against one runs against any other with a config change. What differs is in the catalog (context length, price, providers, release date) or only shows up when you probe (how a model answers your questions, its latency, how spread its probabilities are). This page is the criteria. The catalog is the inventory, and it changes without this page changing.
 
 ## Read the live catalog
 
@@ -38,4 +38,4 @@ A threshold does not carry between models, so a switch is the config change plus
 
 ## Vendor material
 
-A model's `description` names its vendor and lineage. When the vendor publishes a limits or weaknesses page, read it against [decision-model-limits.md](decision-model-limits.md) and probe any difference. Models on TypeSafe's System One contract (the `description` says so) also answer `POST https://openrouter.ai/api/v1/systemone` with the bare model ID after the vendor prefix, which is the path for teams already on the TypeSafe SDK with `baseURL: 'https://openrouter.ai/api'` ([OpenRouter guide](https://openrouter.ai/docs/guides/community/typesafe-sdk)). The Decisions API, `POST /api/alpha/decisions`, takes the full `id` and is the contract every entry the catalog returns for `output_modalities=decisions` declares.
+A model's `description` names its vendor and lineage. When the vendor publishes a limits or weaknesses page, read it against [decision-model-limits.md](decision-model-limits.md) and probe any difference. Every entry also answers `POST https://openrouter.ai/api/v1/systemone`, the TypeSafe-SDK-compatible path described in [decisions-api.md](decisions-api.md#system-one-api-and-the-typesafe-sdk), where a bare TypeSafe ID such as `jev-1.14` resolves to `typesafe/jev-1.14`. For TypeSafe models, the vendor's [jaggedness page](https://docs.typesafe.ai/go/jaggedness.md) is the limits page.
