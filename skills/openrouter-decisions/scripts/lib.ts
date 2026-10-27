@@ -111,8 +111,12 @@ function priceField(modelId: string, pricing: Record<string, unknown>, field: st
   return parsed;
 }
 
+/** Text-only estimate: inline image data URLs are excluded because providers bill images separately from their encoded length. */
 export function estimateInputTokens(request: Pick<DecisionsRequest, "state" | "questions">): number {
-  return Math.ceil(JSON.stringify({ state: request.state, questions: request.questions }).length / 4);
+  const text = JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) =>
+    typeof value === "string" && value.startsWith("data:") ? "" : value,
+  );
+  return Math.ceil(text.length / 4);
 }
 
 export type Criterion = string | Record<string, unknown> | unknown[];
