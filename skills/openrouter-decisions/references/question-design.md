@@ -45,7 +45,7 @@ Questions sharing state go in one request: they run in parallel and the state is
 
 ## Probing
 
-Ask the user before sending live requests: get a budget (decision models are cheap and `usage.cost` reports each call), disclose what data will be sent and point out personal or private data, and say their `OPENROUTER_API_KEY` will be used. Compare wordings by sending each variant as a separate question in one request over the same state. Read individual answers, not only aggregates, keep each exact payload so it can be rerun, and check every change against cases you did not tune on.
+Compare wordings by sending each variant as a separate question in one request over the same state. Read individual answers, not only aggregates, keep each exact payload so it can be rerun, and check every change against cases you did not tune on.
 
 When an answer looks wrong, check in this order:
 
