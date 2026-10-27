@@ -114,9 +114,15 @@ function priceField(modelId: string, pricing: Record<string, unknown>, field: st
 /** Text-only estimate: inline image data URLs are excluded because providers bill images separately from their encoded length. */
 export function estimateInputTokens(request: Pick<DecisionsRequest, "state" | "questions">): number {
   const text = JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) =>
-    typeof value === "string" && value.startsWith("data:") ? "" : value,
+    isInlineImagePart(value) ? { type: "image_url" } : value,
   );
   return Math.ceil(text.length / 4);
+}
+
+function isInlineImagePart(value: unknown): boolean {
+  if (!isRecord(value) || value.type !== "image_url" || !isRecord(value.image_url)) return false;
+  const url = value.image_url.url;
+  return typeof url === "string" && url.startsWith("data:image/");
 }
 
 export type Criterion = string | Record<string, unknown> | unknown[];
