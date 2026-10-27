@@ -1,0 +1,28 @@
+name: Validate skills
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GH_VERSION: 2.103.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned GitHub CLI
+        run: |
+          curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gh_${GH_VERSION}_linux_amd64/bin" >> "$GITHUB_PATH"
+
+      # Same parser and checks `gh skill install` uses, so invalid frontmatter YAML fails here instead of at install time.
+      - name: gh skill publish --dry-run
+        run: |
+          gh --version
+          gh skill publish --dry-run .
