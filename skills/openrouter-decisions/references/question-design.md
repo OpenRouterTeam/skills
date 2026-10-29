@@ -69,7 +69,7 @@ Wording written to produce a particular value is prompt gymnastics and breaks on
 
 ## Cookbooks
 
-TypeSafe's cookbooks call TypeSafe's own API. Translate them to OpenRouter's base URL and key, a `model` on every request, and inline image parts in place of `assets` references.
+TypeSafe's cookbooks call TypeSafe's own API. Translate them to OpenRouter's base URL and key, and a `model` on every request. Their `assets` image references work on OpenRouter unchanged.
 
 - **Route and fill arguments.** One request identifies the intent and the value for each argument, and code calls the handler: [function calling](https://docs.typesafe.ai/cookbooks/function_calling.md), [intent routing](https://docs.typesafe.ai/patterns/intent-routing.md).
 - **Gate agent actions.** Check each risky tool call or permission prompt against what the user asked for and pause only on the ambiguous ones: [gate agent tool calls](https://openrouter.ai/docs/cookbook/building-agents/gate-tool-calls-with-jev.md), [auto-approve permission prompts](https://openrouter.ai/docs/cookbook/coding-agents/auto-approve-permission-prompts-with-jev.md).

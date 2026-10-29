@@ -111,12 +111,32 @@ function priceField(modelId: string, pricing: Record<string, unknown>, field: st
   return parsed;
 }
 
-/** Text-only estimate: inline image data URLs are excluded because providers bill images separately from their encoded length. */
+export type Fit = "ok" | "tight" | "no" | "unknown";
+
+const CONTEXT_HEADROOM = 2;
+
+/** Text-only lower bound: inline image parts are excluded because each provider counts images its own way. */
 export function estimateInputTokens(request: Pick<DecisionsRequest, "state" | "questions">): number {
   const text = JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) =>
     isInlineImagePart(value) ? { type: "image_url" } : value,
   );
   return Math.ceil(text.length / 4);
+}
+
+/** With images, only "no" (text alone exceeds the cap) is certain; providers count image tokens differently. */
+export function fitVerdict(textTokens: number, maxInput: number, hasImages: boolean): Fit {
+  if (textTokens > maxInput) return "no";
+  if (hasImages) return "unknown";
+  return textTokens * CONTEXT_HEADROOM > maxInput ? "tight" : "ok";
+}
+
+export function requestHasImages(request: Pick<DecisionsRequest, "state" | "questions">): boolean {
+  let found = false;
+  JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) => {
+    if (isInlineImagePart(value)) found = true;
+    return value;
+  });
+  return found;
 }
 
 function isInlineImagePart(value: unknown): boolean {
