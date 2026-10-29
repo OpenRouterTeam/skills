@@ -12,16 +12,15 @@
 import { readFileSync } from "node:fs";
 import {
   estimateInputTokens,
+  fitVerdict,
   listDecisionModels,
   listEndpoints,
   parseRequestBody,
+  requestHasImages,
   type DecisionModel,
+  type Fit,
   type ModelEndpoint,
 } from "./lib.ts";
-
-const CONTEXT_HEADROOM = 2;
-
-type Fit = "ok" | "tight" | "no";
 
 type ModelReport = {
   id: string;
@@ -50,7 +49,9 @@ if (args.some((a) => a.startsWith("--") && a !== "--json")) {
   process.exit(1);
 }
 
-const estimatedTokens = source === undefined ? undefined : estimateInputTokens(readRequest(source));
+const request = source === undefined ? undefined : readRequest(source);
+const estimatedTokens = request === undefined ? undefined : estimateInputTokens(request);
+const hasImages = request !== undefined && requestHasImages(request);
 const models = await listDecisionModels();
 if (models.length === 0) {
   console.error("The catalog returned no decision models.");
@@ -91,7 +92,7 @@ async function report(model: DecisionModel, tokens: number | undefined): Promise
     min_uptime_last_30m: uptimes.length === 0 ? undefined : Math.min(...uptimes),
     max_input_tokens: maxInput,
     estimated_input_tokens: tokens,
-    fit: tokens === undefined || maxInput === undefined ? undefined : fit(tokens, maxInput),
+    fit: tokens === undefined || maxInput === undefined ? undefined : fitVerdict(tokens, maxInput, hasImages),
     description: model.description,
   };
 }
@@ -116,11 +117,6 @@ function providerLabel(endpoint: ModelEndpoint): string {
 
 function maxInputTokens(model: DecisionModel, endpoints: ModelEndpoint[]): number {
   return Math.min(model.contextLength, ...endpoints.map((e) => Math.min(e.contextLength, e.maxPromptTokens ?? e.contextLength)));
-}
-
-function fit(tokens: number, maxInput: number): Fit {
-  if (tokens > maxInput) return "no";
-  return tokens * CONTEXT_HEADROOM > maxInput ? "tight" : "ok";
 }
 
 function unique(values: string[]): string[] {

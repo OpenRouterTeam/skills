@@ -2,8 +2,11 @@
   "name": "openrouter-decisions-scripts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test": "tsx --test lib.test.ts"
+  },
   "dependencies": {
-    "@openrouter/sdk": "^1.3.23"
+    "@openrouter/sdk": "^1.5.13"
   },
   "devDependencies": {
     "tsx": "^4.0.0"

@@ -111,8 +111,38 @@ function priceField(modelId: string, pricing: Record<string, unknown>, field: st
   return parsed;
 }
 
+export type Fit = "ok" | "tight" | "no" | "unknown";
+
+const CONTEXT_HEADROOM = 2;
+
+/** Text-only lower bound: inline image parts are excluded because each provider counts images its own way. */
 export function estimateInputTokens(request: Pick<DecisionsRequest, "state" | "questions">): number {
-  return Math.ceil(JSON.stringify({ state: request.state, questions: request.questions }).length / 4);
+  const text = JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) =>
+    isInlineImagePart(value) ? { type: "image_url" } : value,
+  );
+  return Math.ceil(text.length / 4);
+}
+
+/** With images, only "no" (text alone exceeds the cap) is certain; providers count image tokens differently. */
+export function fitVerdict(textTokens: number, maxInput: number, hasImages: boolean): Fit {
+  if (textTokens > maxInput) return "no";
+  if (hasImages) return "unknown";
+  return textTokens * CONTEXT_HEADROOM > maxInput ? "tight" : "ok";
+}
+
+export function requestHasImages(request: Pick<DecisionsRequest, "state" | "questions">): boolean {
+  let found = false;
+  JSON.stringify({ state: request.state, questions: request.questions }, (_key, value: unknown) => {
+    if (isInlineImagePart(value)) found = true;
+    return value;
+  });
+  return found;
+}
+
+function isInlineImagePart(value: unknown): boolean {
+  if (!isRecord(value) || value.type !== "image_url" || !isRecord(value.image_url)) return false;
+  const url = value.image_url.url;
+  return typeof url === "string" && url.startsWith("data:image/");
 }
 
 export type Criterion = string | Record<string, unknown> | unknown[];
@@ -135,7 +165,12 @@ export type ScoreQuestion = {
   criteria: Criterion[];
 };
 
-export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion;
+export type BoxQuestion = {
+  type: "box";
+  instructions: Criterion;
+};
+
+export type Question = ChoiceQuestion | NoulQuestion | ScoreQuestion | BoxQuestion;
 
 export type DecisionsState = string | Record<string, unknown> | unknown[];
 
@@ -171,7 +206,13 @@ export type ScoreAnswer = {
   confidence?: number;
 };
 
-export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer;
+export type BoxAnswer = {
+  type: "box";
+  box: { top: number; bottom: number; left: number; right: number };
+  confidence?: number;
+};
+
+export type Answer = ChoiceAnswer | NoulAnswer | ScoreAnswer | BoxAnswer;
 
 export type DecisionsResponse = {
   id?: string;
@@ -341,6 +382,20 @@ function parseAnswer(key: string, value: unknown): Answer {
         legend: optional(value.legend, (v) => criterionMap(key, "legend", v)),
         confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
       };
+    case "box": {
+      const box = value.box;
+      if (!isRecord(box)) throw new Error(`Answer ${key} has no box`);
+      return {
+        type: "box",
+        box: {
+          top: finiteField(`Answer ${key}`, "box.top", box.top),
+          bottom: finiteField(`Answer ${key}`, "box.bottom", box.bottom),
+          left: finiteField(`Answer ${key}`, "box.left", box.left),
+          right: finiteField(`Answer ${key}`, "box.right", box.right),
+        },
+        confidence: optional(value.confidence, (v) => finiteField(`Answer ${key}`, "confidence", v)),
+      };
+    }
     default:
       throw new Error(`Answer ${key} has unknown type ${String(value.type)}`);
   }
@@ -469,8 +524,11 @@ function parseQuestion(source: string, value: unknown): Question {
       }
       return { type: "score", instructions, criteria };
     }
+    case "box":
+      if (value.criteria !== undefined) throw new Error(`${source}: box takes no criteria`);
+      return { type: "box", instructions };
     default:
-      throw new Error(`${source}.type must be choice, noul, or score`);
+      throw new Error(`${source}.type must be choice, noul, score, or box`);
   }
 }
 
