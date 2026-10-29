@@ -11,6 +11,8 @@ Discover, search, and compare the 300+ AI models available on OpenRouter. Query 
 
 The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
 
+> **Key-scoped catalog:** When `OPENROUTER_API_KEY` is set, `list-models.ts`, `search-models.ts`, `compare-models.ts`, and `resolve-model.ts` send it, and `GET /api/v1/models` called with an API key returns only the models that key can route to (after its guardrails, data-region, and BYOK-only rules). Without a key, they get the full public catalog. If a model the user expects is missing, rerun with `OPENROUTER_API_KEY` unset to tell "not on OpenRouter" apart from "not routable for this key".
+
 ## First-Time Setup
 
 ```bash
