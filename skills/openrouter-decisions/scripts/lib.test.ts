@@ -28,3 +28,9 @@ test("text that starts with data: still counts", () => {
   assert.equal(requestHasImages(request), false);
   assert.ok(estimateInputTokens(request) > 1_000);
 });
+
+test("images nested in state objects, instructions, or criteria are detected", () => {
+  assert.equal(requestHasImages({ state: { door: { frames: [image] } }, questions: {} }), true);
+  assert.equal(requestHasImages({ state: "a door", questions: { q: { type: "noul", instructions: ["Is this the door?", image] } } } as never), true);
+  assert.equal(requestHasImages({ state: "a door", questions: { q: { type: "noul", instructions: "Same door?", criteria: { true: [image], false: "a different door" } } } } as never), true);
+});
