@@ -143,6 +143,7 @@ Returns for each provider:
 
 - To check if a model supports a feature, use `model.supported_parameters` (e.g. `.includes("tools")`), or filter server-side with `?supported_parameters=tools`.
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
+- To find which API to call for a model, read `model.endpoints`: the request paths that serve it, e.g. `["/api/v1/chat/completions", "/api/v1/completions", "/api/v1/messages", "/api/v1/responses"]` for a text model, `["/api/v1/images"]` for an image model, or `["/api/v1/audio/speech"]` for TTS. Other paths: `/api/v1/embeddings`, `/api/v1/rerank`, `/api/v1/videos`, `/api/v1/audio/transcriptions`, and alpha surfaces such as `/api/alpha/decisions`. A model can list more than one surface (e.g. text + `/api/v1/images`), and the list can be empty when no surface currently serves it. This is a list of path strings, not the per-provider `endpoints` array from `get-endpoints.ts`.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
@@ -155,7 +156,7 @@ The scripts below reformat the raw API data. When calling the API directly (e.g.
 
 ### list-models.ts / search-models.ts
 
-A subset of the raw API fields — the scripts run `formatModel()` which drops `canonical_slug`, `hugging_face_id`, `default_parameters`, `knowledge_cutoff`, and `links`. If you need those fields, call the API directly.
+A subset of the raw API fields — the scripts run `formatModel()` which drops `canonical_slug`, `hugging_face_id`, `default_parameters`, `knowledge_cutoff`, `links`, and `endpoints`. If you need those fields, call the API directly.
 
 ### compare-models.ts
 
@@ -212,6 +213,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | `top_provider.is_moderated` | Whether content moderation is applied |
 | `per_request_limits` | Per-request token limits (when non-null) |
 | `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `web_search_options`) |
+| `endpoints` (model list) | Request API paths that serve the model (e.g. `/api/v1/chat/completions`, `/api/v1/images`) |
 | `created` | Unix timestamp — use for sorting by recency |
 | `expiration_date` | Non-null means the model is being deprecated |
 | `latency_30m_ms.p50` | Median response latency over last 30 min |
