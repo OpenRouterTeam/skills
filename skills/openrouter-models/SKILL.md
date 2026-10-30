@@ -11,7 +11,23 @@ Discover, search, and compare the 300+ AI models available on OpenRouter. Query 
 
 The `OPENROUTER_API_KEY` environment variable is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at https://openrouter.ai/keys
 
-## First-Time Setup
+## Running Scripts
+
+Choose one execution method:
+
+### Without a local install
+
+For managed or read-only skill directories, skip `npm install` and replace `npx tsx` in the examples below with `npx --yes tsx@4.21.0`:
+
+```bash
+cd <skill-path>/scripts && npx --yes tsx@4.21.0 list-models.ts
+```
+
+These scripts use only Node.js built-ins and sibling files. npm installs the runner into its external cache when needed; `--yes` suppresses the installation prompt. The runner version matches this skill's lockfile, but this method does not reproduce the lockfile's full dependency tree. It requires a writable npm cache and registry access on the first run.
+
+### With a local install
+
+For a writable skill directory, install locally and use the `npx tsx` examples below. Use `npm ci` instead of `npm install` to reproduce the full lockfile.
 
 ```bash
 cd <skill-path>/scripts && npm install

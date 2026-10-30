@@ -1,0 +1,17 @@
+{
+  "skill_name": "openrouter-analytics",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use the OpenRouter analytics skill at ./SKILL.md to run its bundled query-template helper and show the query for finding which models drive most of my spend. I don't have a management key yet, so don't execute an authenticated query. This is a managed skill directory; keep its files unchanged and do not install dependencies inside it.",
+      "expected_output": "The bundled suggest-queries.ts runs with the cache-based runner. The agent shows the spend-by-model template without requesting credentials or contacting authenticated endpoints.",
+      "files": [],
+      "expectations": [
+        "The agent executes the bundled suggest-queries.ts using npx --yes tsx@4.22.3.",
+        "The result includes total_usage and request_count, dimensions model, and descending total_usage ordering from the helper output.",
+        "The skill directory is unchanged and contains no node_modules.",
+        "The agent does not execute an authenticated analytics query or request a management key."
+      ]
+    }
+  ]
+}
