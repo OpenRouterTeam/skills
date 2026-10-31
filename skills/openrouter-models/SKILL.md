@@ -27,6 +27,8 @@ Pick the right script based on what the user is asking:
 | Find recently added models | `list-models.ts --sort newest` | "What are the newest models?" |
 | Find cheapest models | `list-models.ts --sort price` | "What's the cheapest model?" |
 | Find highest throughput models | `list-models.ts --sort throughput` | "Which models have the most output capacity?" |
+| Find most intelligent models | `list-models.ts --sort intelligence` | "What are the smartest models?" |
+| Find best design models | `list-models.ts --sort design-arena-elo` | "Best models for design/UI tasks?" |
 | Find models in a category | `list-models.ts --category X` | "Best programming models?" |
 | Search by name | `search-models.ts "query"` | "Do they have Claude?" |
 | Resolve an informal model name | `resolve-model.ts "query"` | "Use the nano banana 2.0 model" |
@@ -77,11 +79,17 @@ Categories: `programming`, `roleplay`, `marketing`, `marketing/seo`, `technology
 ### Sort Results
 
 ```bash
-cd <skill-path>/scripts && npx tsx list-models.ts --sort newest      # Recently added first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort price       # Cheapest first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort context     # Largest context first
-cd <skill-path>/scripts && npx tsx list-models.ts --sort throughput  # Most output tokens first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort newest           # Recently added first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort price            # Cheapest first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort context          # Largest context first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort throughput       # Most output tokens first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort latency          # Lowest latency first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort popular          # Most popular first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort intelligence     # Highest Artificial Analysis intelligence index first
+cd <skill-path>/scripts && npx tsx list-models.ts --sort design-arena-elo # Highest Design Arena ELO first
 ```
+
+Sorting is performed server-side. Models without a score for benchmark-based sorts (intelligence, design-arena-elo) are placed last.
 
 Models with upcoming `expiration_date` values trigger a stderr warning.
 
@@ -136,6 +144,9 @@ Returns for each provider:
 |---|---|---|
 | `category` | `?category=programming` | Server-side category filter |
 | `supported_parameters` | `?supported_parameters=tools` | Only models supporting this parameter |
+| `sort` | `?sort=intelligence-high-to-low` | Server-side sort order |
+
+Available `sort` values: `most-popular`, `newest`, `top-weekly`, `pricing-low-to-high`, `pricing-high-to-low`, `context-high-to-low`, `throughput-high-to-low`, `latency-low-to-high`, `intelligence-high-to-low`, `design-arena-elo-high-to-low`. Models without a score for the chosen benchmark are placed last.
 
 **Tips for working with the response:**
 
