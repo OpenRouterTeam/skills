@@ -1,0 +1,55 @@
+id: anti-trigger-tts-theory-001
+name: Anti-Trigger - TTS Theory Question
+description: |
+  Negative test: a theoretical question about TTS that shares keywords
+  ("TTS", "text-to-speech") but is NOT asking to generate audio. The skill
+  should not activate into code generation, and should not produce
+  OpenRouter-specific TTS API calls in the response.
+tags:
+  - anti-trigger
+  - negative-test
+  - trigger-specificity
+
+inputs:
+  prompt: |
+    What are the main differences between neural TTS models and the older
+    concatenative synthesis approach? I'm writing a blog post and want to
+    explain it clearly.
+
+graders:
+  - type: code
+    name: no_openrouter_api_call
+    config:
+      language: python
+      assertions:
+        # Response should not contain OpenRouter endpoints or API-key references,
+        # since this is an educational question, not a generation task.
+        - "'openrouter.ai/api/v1/audio/speech' not in output.lower()"
+        - "'$openrouter_api_key' not in output.lower() and 'os.environ[\"openrouter_api_key\"]' not in output.lower()"
+        # Mentioning OpenRouter by name once in context ("OpenRouter supports various models") is fine; full code is not.
+        - "output.lower().count('response_format') <= 1"
+
+  - type: prompt
+    name: stays_educational
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked a conceptual/educational question about TTS
+        approaches. Call set_waza_grade_pass or set_waza_grade_fail once
+        per criterion (2 calls total).
+
+        1) Answers the actual question: explains differences between
+           neural TTS (e.g., Tacotron, WaveNet, modern diffusion-based
+           models) and concatenative synthesis (unit selection from
+           recorded speech databases). Covers quality, flexibility,
+           compute requirements, or similar dimensions.
+
+        2) No OpenRouter contamination: does NOT produce a curl command,
+           does NOT write a script that calls /api/v1/audio/speech, does
+           NOT suggest "here's how to do it with OpenRouter" — this is a
+           conceptual question, not a generation request.
+
+expected:
+  outcomes:
+    - type: task_completed

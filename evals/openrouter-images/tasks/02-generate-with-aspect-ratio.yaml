@@ -1,0 +1,45 @@
+id: generate-aspect-ratio-001
+name: Generate With Aspect Ratio
+description: |
+  User specifies a wide / landscape image. Agent should pass
+  --aspect-ratio 16:9 (or similar) to generate.ts.
+tags:
+  - happy-path
+  - generate
+  - aspect-ratio
+
+inputs:
+  prompt: |
+    Make a wide landscape image of a futuristic city at night, 16:9.
+
+graders:
+  - type: code
+    name: aspect_ratio_flag
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"--aspect-ratio" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"]) or "--aspect_ratio" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"16:9" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: prompt
+    name: aspect_ratio_usage
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wanted a 16:9 landscape cityscape. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (2 calls total).
+
+        1) Used flag correctly: passed --aspect-ratio 16:9 to generate.ts.
+           Does NOT hardcode the ratio into the prompt text or resort to
+           a different approach.
+
+        2) Prompt preserved: the prompt positional argument contains
+           "city" / "futuristic" / "night" (user's actual request), not
+           a rewritten description.
+
+expected:
+  outcomes:
+    - type: task_completed

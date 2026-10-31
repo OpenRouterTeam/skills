@@ -1,0 +1,56 @@
+id: indirect-trigger-explainer-001
+name: Indirect Trigger - Product Explainer Pipeline
+description: |
+  Indirect mention: user builds a pipeline that needs video as a
+  component. The skill should activate without being asked directly for
+  "video generation".
+tags:
+  - happy-path
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    Write a Node.js script that takes a product description as input and
+    produces a 4-second explainer clip in clip.mp4. Use OpenRouter.
+    Include the full code.
+
+graders:
+  - type: code
+    name: uses_video_endpoint
+    config:
+      language: python
+      assertions:
+        - '"/videos" in output.lower()'
+        - '"clip.mp4" in output.lower()'
+
+  - type: code
+    name: handles_async
+    config:
+      language: python
+      assertions:
+        - '"polling_url" in output.lower() or ("poll" in output.lower() and "status" in output.lower())'
+        - '"completed" in output.lower()'
+
+  - type: prompt
+    name: pipeline_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants a Node.js explainer-video pipeline. Call
+        set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Takes description as input: reads the product description
+           from argv, stdin, or function arg — not hardcoded.
+
+        2) Uses video API correctly: submits to /api/v1/videos with the
+           description as the prompt, picks a real video-gen model slug,
+           passes duration: 4. Polls for completion, downloads the MP4.
+
+        3) Writes clip.mp4: saves the resulting video bytes to clip.mp4
+           with the auth header on the download call.
+
+expected:
+  outcomes:
+    - type: task_completed

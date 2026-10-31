@@ -1,0 +1,33 @@
+name: openrouter-stt-eval
+description: |
+  Evaluation suite for the openrouter-stt skill. Validates the agent calls
+  OpenRouter's NOT-OpenAI-compatible /api/v1/audio/transcriptions endpoint
+  correctly: JSON body, base64 audio under input_audio.data, format field,
+  direct fetch/requests (NOT the OpenAI SDK).
+skill: openrouter-stt
+version: "1.0"
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-opus-4.7
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.8
+    description: Did the agent write correct STT code?
+
+hooks:
+  before_run:
+    - command: "mkdir -p ~/.agents/skills && rsync -a --delete /Users/matt.apperson/Development/skills/.worktrees/setup-waza/skills/openrouter-stt/ /Users/matt.apperson/.agents/skills/openrouter-stt/"
+
+graders:
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 100"
+
+tasks:
+  - "tasks/*.yaml"
