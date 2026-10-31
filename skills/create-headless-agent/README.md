@@ -58,6 +58,7 @@ The skill presents an interactive checklist when invoked:
 | Web Fetch | on | Fetch text content from a URL via `openrouter:web_fetch` |
 | Datetime | on | Current date/time via `openrouter:datetime` |
 | Image Generation | off | Generate images via `openrouter:image_generation` |
+| Advisor | off | Consult a stronger model mid-generation via `openrouter:advisor` |
 
 ### User-defined tools (your code, executed locally)
 
@@ -127,7 +128,7 @@ my-agent/
     agent.test.ts           Example test (bun:test)
 ```
 
-Server tools (`openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`) are wired in `tools/index.ts` and execute on OpenRouter's side — no client code.
+Server tools (`openrouter:web_search`, `openrouter:web_fetch`, `openrouter:datetime`, `openrouter:advisor`) are wired in `tools/index.ts` and execute on OpenRouter's side — no client code.
 
 ## Sample
 
