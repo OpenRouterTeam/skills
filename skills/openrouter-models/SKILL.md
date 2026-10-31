@@ -205,6 +205,9 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | Field | Meaning |
 |---|---|
 | `pricing.prompt` / `pricing.completion` | Cost per token in USD. Multiply by 1,000,000 for per-million-token pricing |
+| `pricing.input_cache_read` | Cost per cached input token (read). Often 90%+ cheaper than `prompt` |
+| `pricing.input_cache_write` | Cost per cache-write token. For providers with multiple cache TTLs (e.g. Anthropic), this is the default (5-minute) rate |
+| `pricing.input_cache_write_1h` | Cost per 1-hour cache-write token. Only present for providers that price an extended (1-hour) cache TTL separately, such as Anthropic |
 | `context_length` | Max total tokens (input + output) |
 | `top_provider.max_completion_tokens` | Max output tokens from the best provider |
 | `top_provider.is_moderated` | Whether content moderation is applied |
@@ -223,6 +226,6 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - When comparing, use a markdown table with models as columns
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
-- Note cache pricing when available — it can cut input costs 90%+
+- Note cache pricing when available — `input_cache_read` can cut input costs 90%+. For Anthropic, `input_cache_write` is the 5-minute rate and `input_cache_write_1h` (when present) is the extended 1-hour cache-write rate
 - Flag models with `expiration_date` as deprecated
 - When a model has multiple providers at different prices, mention the cheapest option
