@@ -10,7 +10,7 @@ Query your OpenRouter usage data programmatically. Answer questions like "What w
 
 ## Prerequisites
 
-- An OpenRouter **management key** (provisioning key). Regular API keys will get a 403.
+- An OpenRouter **management key** (provisioning key). Regular API keys will get a 403. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
 - Get a management key at https://openrouter.ai/settings/management-keys (separate from the regular API keys page)
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 
@@ -125,7 +125,7 @@ When interpreting results for the user:
 - **Token counts** (`tokens_total`, `tokens_prompt`, `tokens_completion`) are in native model tokens
 - **Latency** (`avg_latency`, `p50_latency`, etc.) is in milliseconds. `*_latency` is provider-side time to first token; `*_router_latency` is OpenRouter routing time; `*_total_time_to_first_token` is their sum over streamed requests only; `*_generation_time` is provider-side generation time; `*_inter_token_latency` is the average gap between completion tokens over streamed requests with more than one completion token. Each family has `avg_`, `p50_`, `p90_`, `p95_`, `p99_` variants and excludes server-tool rows
 - **Rates** (`cache_hit_rate`, `possible_cache_hit_rate`, `cache_capture_rate`) are 0–1 ratios
-- **Throughput** (`avg_throughput`, `p50_`/`p90_`/`p95_`/`p99_throughput`) is completion tokens per second
+- **Throughput** (`avg_throughput`, `p50_`/`p90_`/`p95_`/`p99_throughput`) is completion tokens per second. Its percentiles mirror latency's slow tail: `pN_throughput` is the speed N% of requests reached or exceeded, so `p90_throughput` is lower than `p50_throughput`
 - When `granularity` is set, rows include a `date__<granularity>` field for the time bucket (e.g., `date__day`, `date__hour`, `date__month`)
 - **Label resolution**: dimensions `api_key_id`, `app`, `user`, and `workspace` have their raw IDs replaced with human-readable names (key name, app title, user name, workspace name) directly in the data rows; `generation_id` and `session_id` return raw values; sentinel buckets are labelled (`api_key_id` `-1` → `Chatroom`, `app` `-1` → `Unknown`, the max-UUID workspace → `Unattributed`)
 - **Truncation**: when consuming output programmatically, check `metadata.truncated`. If `true`, the result was capped at `--limit` and is a *partial* dataset — raise `--limit` or paginate before reporting totals or rankings
@@ -166,7 +166,7 @@ This workflow is useful for identifying your most expensive or slowest requests 
 
 ## API Reference
 
-Both endpoints require a management key via `Authorization: Bearer sk-or-v1-...`.
+Both endpoints require a management key (read-write, or read-only on an organization) via `Authorization: Bearer sk-or-v1-...`.
 
 | Endpoint | Method | Description |
 |---|---|---|

@@ -10,7 +10,7 @@ Full reference for constructing and executing analytics queries against the Open
 
 ## Prerequisites
 
-- `OPENROUTER_API_KEY` must be set to a **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
+- `OPENROUTER_API_KEY` must be set to a **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
 
 ## Query Endpoint
 
@@ -91,7 +91,7 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 - Several dimensions are **label-resolved** in query results (returned as human-readable names), but filters must use the underlying ID:
   - `api_key_id` — numeric ID (from generation metadata) or 64-char SHA-256 hash (from `GET /api/v1/keys`). Hashes are auto-resolved to numeric IDs before querying.
   - `user` — Clerk user ID (e.g. `user_abc123`), not the display name/email shown in results.
-  - `workspace` — workspace UUID, not the workspace name shown in results.
+  - `workspace` — workspace UUID, not the workspace name shown in results. Any non-UUID value returns 400.
   - `app` — numeric app ID, not the app title shown in results.
   - `model` — permaslug (e.g. `openai/gpt-4o`), not the display name.
 - Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_user`, etc.) are not enriched — filter values match what's returned in results.
@@ -323,16 +323,16 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
+| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400, as do request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`) mixed with any other metric, or with a dimension or filter other than `model`, `provider`, `api_key_id`, `user`, or `workspace`, or with classifier fields. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
-| 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
+| 403 | Not a management key, or a read-only management key outside an organization | The key must be a provisioning/management key. Read-only management keys are accepted only on organization accounts. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
 | 429 | Rate limited (64 RPM) | Wait and retry |
 | 500 | Server error | Retry after a moment |
 
 ## Time Range Behavior
 
-`start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs.
+`start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs. `end` is exclusive at whole-second precision: other fractional ends are truncated to the second, but an end at `.999` (e.g. `2026-05-20T23:59:59.999Z`) is treated as inclusive and moves to the next second, so that last second is kept.
 
 Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
 
@@ -340,7 +340,11 @@ Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstrea
 
 Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup. They are limited to 31 days regardless of granularity, support only `model` and `provider` dimensions and filters, and are rejected with 400 when combined with `minute` granularity, classifier dimensions, or classifier filters.
 
+Request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`) are limited to 31 days. They combine only with each other and the `model`, `provider`, `api_key_id`, `user`, and `workspace` dimensions and filters; any other metric, dimension, filter, or classifier field returns 400 listing the incompatible fields.
+
 `hour` granularity reads the minute materialized view, so it caps the range at 31 days even for metrics that otherwise allow 367.
+
+The daily materialized view stores whole UTC days. When a query would otherwise read it, a range of up to 2 days that starts or ends off UTC midnight (an end at `23:59:59.999` counts as midnight) and starts within the last 30 days reads the minute materialized view instead, so totals count only the requested window rather than the whole days it touches.
 
 Classifier dimensions and classifier filters always force the 31-day time range limit.
 
