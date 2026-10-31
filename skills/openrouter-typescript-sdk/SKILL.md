@@ -735,7 +735,7 @@ interface MultimodalMessage {
   role: 'user';
   content: Array<
     | { type: 'input_text'; text: string }
-    | { type: 'input_image'; imageUrl: string; detail?: 'auto' | 'low' | 'high' }
+    | { type: 'input_image'; imageUrl: string; detail?: 'auto' | 'low' | 'high' | 'original' }
     | {
         type: 'image';
         source: {
@@ -748,6 +748,8 @@ interface MultimodalMessage {
   >;
 }
 ```
+
+`detail` controls image resolution for vision models. `'original'` is an OpenRouter extension (not in the OpenAI spec) that requests true original-resolution media; it falls back to `'high'` for providers without an original-resolution tier.
 
 ### Tool Function Call Message
 
