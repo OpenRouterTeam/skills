@@ -9,28 +9,32 @@ GET https://openrouter.ai/api/v1/benchmarks
 Authorization: Bearer <OPENROUTER_API_KEY>
 ```
 
-The endpoint aggregates Artificial Analysis and Design Arena benchmark scores. It is authenticated with any valid OpenRouter API key and rate-limited to 30 requests/minute per key and 500 requests/day per account.
+The endpoint aggregates Artificial Analysis, Design Arena, and OpenRouter search benchmark scores. It is authenticated with any valid OpenRouter API key and rate-limited to 30 requests/minute per key and 500 requests/day per account.
 
 ## Query Parameters
 
 | Parameter | Values | Description |
 |---|---|---|
-| `source` | `artificial-analysis`, `design-arena` | Benchmark source. Omitting it returns all sources. The source determines row shape. |
-| `task_type` | `coding`, `intelligence`, `agentic` | Workload filter. For Artificial Analysis, maps to the corresponding index. For Design Arena, maps to the matching category. |
+| `source` | `artificial-analysis`, `design-arena`, `openrouter` | Benchmark source. Omitting it returns all sources. The source determines row shape. |
+| `task_type` | `coding`, `intelligence`, `agentic`, `search` | Workload filter. For Artificial Analysis, maps to the corresponding index. For Design Arena, maps to the matching category. `search` scopes to OpenRouter search benchmarks. |
+| `benchmark_type` | `gpqa_diamond`, `tau_bench_verified_airline`, `search_browsecomp`, `search_hle`, `search_dsqa`, `search_widesearch` | OpenRouter benchmark filter. `search_*` values scope to search results. |
+| `include_run_config` | `true`, `false` | Search benchmarks only. Defaults to `false`; when true, includes the published lane configuration. |
+| `search_engine` | string | Search benchmarks only. Filters by the search engine used. |
+| `search_surface` | `server-tool`, `plugin` | Search benchmarks only. Filters by the request surface used. |
 | `arena` | `models`, `builders`, `agents` | Design Arena only. Defaults to `models` when `source=design-arena`. |
 | `category` | string | Design Arena category such as `codecategories`, `uicomponent`, `gamedev`, `3d`, `dataviz`, `image`, `video`, or `svg`. Omitting it returns all categories. |
-| `max_results` | integer >= 1 | Maximum number of items to return. Omitting it returns all matching results. |
+| `max_results` | integer >= 1 | Maximum number of items to return after selected source items are combined. Omitting it returns all matching results. |
 
 ## Response Shape
 
 ```ts
 type UnifiedBenchmarksResponse = {
-  data: Array<ArtificialAnalysisItem | DesignArenaItem>;
+  data: Array<ArtificialAnalysisItem | DesignArenaItem | SearchBenchmarkItem>;
   meta: {
     as_of: string;
     citation: string | null;
     model_count: number;
-    source: "artificial-analysis" | "design-arena" | null;
+    source: "artificial-analysis" | "design-arena" | "openrouter" | null;
     source_url: string | null;
     task_type: string | null;
     version: "v1";
@@ -79,6 +83,40 @@ type DesignArenaItem = {
 
 Higher `elo` and `win_rate` are better. `avg_generation_time_ms` is performance context, not the ranking score.
 
+### OpenRouter Search Benchmark Item
+
+```ts
+type SearchBenchmarkItem = {
+  source: "openrouter";
+  model_permaslug: string;
+  display_name: string;
+  benchmark_type:
+    | "search_browsecomp"
+    | "search_hle"
+    | "search_dsqa"
+    | "search_widesearch";
+  primary_metric: "accuracy" | "f1_by_item";
+  primary_score: number; // 0..1, higher is better
+  total_tasks: number;
+  avg_cost_per_task: number | null;
+  avg_latency_per_task_ms: number | null;
+  search_engine: string;
+  search_surface: "server-tool" | "plugin";
+  last_run_timestamp: string;
+  run_config?: {
+    max_agent_turns: number | null;
+    reasoning_effort: string | null;
+    temperature: number | null;
+  };
+};
+```
+
+`run_config` is present only when `include_run_config=true`. `primary_metric` is `f1_by_item` only for WideSearch and `accuracy` otherwise. Each model's published row is its highest-scoring eligible configuration, with same-configuration runs combined by task-weighted mean.
+
+For `source=openrouter`, `meta.source` is `"openrouter"`, `meta.source_url` is `"https://openrouter.ai/rankings"`, and `meta.citation` is `"Source: OpenRouter evals (openrouter.ai) via OpenRouter (openrouter.ai/rankings)."`. `meta.as_of` is the newest selected item timestamp, and `meta.model_count` is computed after `max_results` limiting.
+
+`task_type=search`, a `search_*` `benchmark_type`, `search_engine`, or `search_surface` scopes the response to search results and suppresses other sources. Contradictory filters, such as a search-only filter with `source=design-arena`, return an empty `200` response rather than a `400`.
+
 ## Errors
 
 | Status | Meaning | Recovery |
@@ -91,6 +129,8 @@ Higher `elo` and `win_rate` are better. `avg_generation_time_ms` is performance 
 ## Reporting Guidance
 
 When answering users, include the benchmark source, `meta.as_of`, and the citation/source URL if present. If results mix sources and `meta.citation` is null, attribute each row by its `source` discriminator.
+
+Search `primary_score` values are not comparable to Artificial Analysis indices or Design Arena ELO. Search rows do not include a `pricing` field; the pricing guidance above applies only to Artificial Analysis and Design Arena rows.
 
 ## Availability Caveat
 
