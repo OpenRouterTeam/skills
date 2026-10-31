@@ -144,7 +144,8 @@ const MEDIA_TYPE_EXTENSIONS: Record<string, string> = {
 
 /**
  * Save one base64 image. The extension follows the response `media_type` when
- * present (e.g. SVG from vector models), otherwise the requested output path.
+ * present (set whenever the format is identifiable), otherwise the requested
+ * output path.
  */
 export function saveImage(b64: string, outputBase: string, mediaType: string | undefined, index: number, total: number): string {
   const dotIdx = outputBase.lastIndexOf(".");
