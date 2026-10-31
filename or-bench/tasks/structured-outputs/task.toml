@@ -1,0 +1,35 @@
+schema_version = "1.4"
+
+[task]
+name = "or-bench/structured-outputs"
+version = "1.0.0"
+authors = []
+keywords = ["openrouter", "structured-outputs", "json-schema"]
+
+[metadata]
+difficulty = "easy"
+category = "api-integration"
+tags = ["openrouter", "structured-outputs"]
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[verifier.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[solution.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
