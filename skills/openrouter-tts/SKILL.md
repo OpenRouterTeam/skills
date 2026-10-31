@@ -75,7 +75,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `model`           | yes      | TTS model slug (e.g. `openai/gpt-4o-mini-tts-2025-12-15`, `mistralai/voxtral-mini-tts-2603`).                     |
 | `input`           | yes      | The text to synthesize.                                                                                           |
-| `voice`           | yes      | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
+| `voice`           | provider-dependent | Optional at the API level. Some providers require a voice and fail the request without one. Providers whose metadata declares no voice requirement, such as Fish Audio, accept omission and use a provider default. Discover supported voices from model or endpoint metadata and provide one explicitly when available. Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
 | `provider`        | no       | Provider passthrough — see below.                                                                                 |
