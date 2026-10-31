@@ -190,25 +190,39 @@ export function buildImageParams(args: Map<string, string | true>): Record<strin
   setInt("seed", "seed");
   setInt("output-compression", "output_compression");
 
+  const provider: Record<string, unknown> = {};
+
+  const providerRouting = args.get("provider");
+  if (typeof providerRouting === "string") {
+    Object.assign(
+      provider,
+      parseJsonObject(providerRouting, "--provider must be a JSON object of routing preferences.")
+    );
+  }
+
   const providerOptions = args.get("provider-options");
   if (typeof providerOptions === "string") {
-    const parsed = parseProviderOptions(providerOptions);
-    params.provider = { options: parsed };
+    provider.options = parseJsonObject(
+      providerOptions,
+      "--provider-options must be a JSON object keyed by provider slug."
+    );
   }
+
+  if (Object.keys(provider).length > 0) params.provider = provider;
 
   return params;
 }
 
-function parseProviderOptions(raw: string): Record<string, unknown> {
+function parseJsonObject(raw: string, errorMessage: string): Record<string, unknown> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    console.error("Error: --provider-options must be a JSON object keyed by provider slug.");
+    console.error(`Error: ${errorMessage}`);
     process.exit(1);
   }
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    console.error("Error: --provider-options must be a JSON object keyed by provider slug.");
+    console.error(`Error: ${errorMessage}`);
     process.exit(1);
   }
   return parsed as Record<string, unknown>;
