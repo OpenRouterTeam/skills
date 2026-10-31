@@ -30,6 +30,12 @@ Migrate if your code imports any of these from `@openrouter/sdk`:
 npm install @openrouter/agent
 ```
 
+The `tool()` examples below define schemas with [zod](https://zod.dev). If your project doesn't already depend on it, install it too:
+
+```bash
+npm install zod
+```
+
 If you only use agent features, you can remove `@openrouter/sdk`:
 
 ```bash
