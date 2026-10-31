@@ -19,7 +19,12 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - When to migrate (which imports trigger it)
-- Package install changes (`@openrouter/sdk` → `@openrouter/agent`)
+- Pre-edit inventory: inspect package versions, identify agent vs platform uses, locate converter call sites, and find test mocks before touching any file
+- Evidence-driven Zod compatibility: preserve the current setup first, typecheck the minimal migration, and upgrade only when the documented nominal mismatch occurs and project-wide compatibility permits
+- Package install changes (`@openrouter/sdk` → `@openrouter/agent`), including lockfile update
 - Import rewrites for `callModel`, `tool()`, `stepCountIs`, `hasToolCall`, `maxCost`, `maxTokensUsed`, `finishReasonIs`
 - Format converter renames (`fromClaudeMessages`, `toClaudeMessage`, `fromChatMessages`, `toChatMessage`)
 - Type renames (`Tool`, `ToolWithExecute`, `ManualTool`, `CallModelInput`, `ModelResult`)
+- Converter type mismatch: `fromClaudeMessages`/`fromChatMessages` return `InputsUnion`, not `Item[]` — prohibited workarounds (`as any`, etc.) and safe fallback paths
+- Test mock path updates and how to handle mixed-project mocks
+- Stale-import search, type-suppression check, typecheck, and diff review before finishing
