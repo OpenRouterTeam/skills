@@ -98,6 +98,8 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | `input_audio.format` | yes      | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Support varies by provider. |
 | `language`           | no       | ISO-639-1 code (`en`, `ja`, `fr`). Auto-detected if omitted.                                              |
 | `temperature`        | no       | 0–1. Lower is more deterministic.                                                                         |
+| `response_format`    | no       | `json` (default) or `verbose_json` — see below. `text`, `srt`, and `vtt` are rejected with a 400.         |
+| `timestamp_granularities` | no  | Array of `"segment"` and/or `"word"`. Only meaningful with `response_format: "verbose_json"`.            |
 | `provider`           | no       | Provider passthrough — see below.                                                                         |
 
 ### Picking an audio format
@@ -107,6 +109,23 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 - **`webm`** / **`ogg`** — typical for browser recordings (`MediaRecorder`).
 
 The `format` field must match the actual container/codec of the bytes. A file saved as `.wav` that is actually mp3 will be rejected or mis-decoded. When in doubt, confirm with `ffprobe <file>`.
+
+## Timestamps with `verbose_json`
+
+Set `response_format: "verbose_json"` to additionally get `task`, `language`, `duration` (seconds), and timestamped `segments` in the response. Pass `timestamp_granularities: ["word"]` to also receive word-level timestamps in a `words` array (`segment` is the provider default).
+
+```json
+{
+  "model": "openai/whisper-large-v3",
+  "input_audio": { "data": "UklGRiQA...", "format": "wav" },
+  "response_format": "verbose_json",
+  "timestamp_granularities": ["word"]
+}
+```
+
+Each segment carries `id`, `start`, `end` (seconds), `text`, and may include Whisper-style extras (`tokens`, `avg_logprob`, `compression_ratio`, `no_speech_prob`). Each word carries `word`, `start`, `end`.
+
+`verbose_json` is only available on OpenAI-compatible providers (OpenAI, Groq, Together) — other providers, and a few specific models (e.g. OpenAI's gpt-4o transcribe models), reject it with a 400. Default `json` keeps working everywhere.
 
 ## Provider-specific options
 
