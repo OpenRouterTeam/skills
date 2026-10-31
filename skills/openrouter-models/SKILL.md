@@ -145,6 +145,7 @@ Returns for each provider:
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
+- Service tier endpoints (`flex`, `priority`) appear as separate entries in the endpoints list with a tier-suffixed `tag` (e.g. `openai/priority`) and pricing with the tier multiplier already applied. They're opt-in for routing — requests only use them via the `service_tier` parameter or a tier slug in `provider.order`/`provider.only`. See the [Service Tiers guide](https://openrouter.ai/docs/features/service-tiers).
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
 
 ## Script Output Formats
@@ -209,7 +210,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | `top_provider.max_completion_tokens` | Max output tokens from the best provider |
 | `top_provider.is_moderated` | Whether content moderation is applied |
 | `per_request_limits` | Per-request token limits (when non-null) |
-| `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `web_search_options`) |
+| `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `reasoning_effort`, `web_search_options`) |
 | `created` | Unix timestamp — use for sorting by recency |
 | `expiration_date` | Non-null means the model is being deprecated |
 | `latency_30m_ms.p50` | Median response latency over last 30 min |
@@ -222,6 +223,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - Convert pricing to per-million-tokens format for readability
 - When comparing, use a markdown table with models as columns
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
+- Treat tier-suffixed entries (tag like `openai/priority`) as service tier variants of the base endpoint, not additional providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
 - Note cache pricing when available — it can cut input costs 90%+
 - Flag models with `expiration_date` as deprecated
