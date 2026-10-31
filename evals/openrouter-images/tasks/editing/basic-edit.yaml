@@ -1,0 +1,29 @@
+id: editing-001
+name: Basic image edit
+description: >
+  User asks to modify an existing image. The agent should call edit.ts with
+  the source path and prompt, and must NOT use generate.ts (which would
+  discard the source image).
+
+tags:
+  - editing
+  - basic
+  - happy-path
+  - golden
+
+golden: true
+
+inputs:
+  prompt: "Make the sky purple in photo.png."
+  files:
+    - path: photo.png
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "edit"
+    - "photo.png"

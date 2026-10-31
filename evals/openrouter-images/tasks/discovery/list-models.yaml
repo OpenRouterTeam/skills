@@ -1,0 +1,24 @@
+id: discovery-001
+name: List available image models
+description: >
+  User asks which image models are available. The agent should run discover.ts
+  (no arguments) and summarize model IDs and capabilities rather than guessing.
+
+tags:
+  - discovery
+  - basic
+  - happy-path
+
+inputs:
+  prompt: "What image generation models can I use through OpenRouter, and which of them support image editing?"
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "discover"
+    - "input_modalities"
+    - "image models"

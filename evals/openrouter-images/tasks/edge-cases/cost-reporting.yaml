@@ -1,0 +1,25 @@
+id: edge-005
+name: Cost awareness and reporting
+description: >
+  User asks about cost before generating. The agent should look up per-image
+  pricing via discover.ts endpoint data and report the cost printed to stderr
+  after generation, per the skill's presentation guidance.
+
+tags:
+  - edge-case
+  - presentation
+  - pricing
+
+inputs:
+  prompt: "How much will it cost to generate one image with the default model? Check the pricing, then generate a picture of a hot air balloon and tell me what it actually cost."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "$"
+    - "cost"
+    - "pricing"

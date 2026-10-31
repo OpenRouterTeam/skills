@@ -1,0 +1,21 @@
+id: trigger-004
+name: Should NOT trigger on image analysis
+description: >
+  Describing/analyzing an existing image (vision) is not generation or
+  editing; the openrouter-images skill should not be invoked.
+
+tags:
+  - trigger
+  - negative
+
+inputs:
+  prompt: "Look at photo.png and tell me what's in it."
+  files:
+    - path: photo.png
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    forbidden_tools:
+      - skill
