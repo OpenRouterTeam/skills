@@ -81,15 +81,15 @@ Required: `model`, `prompt`. Common optional fields:
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
-- `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+- `provider.options.<slug>.<key>` — provider passthrough (Google Veo nests keys in `parameters`), see below.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
 ## Provider passthrough
 
-Provider-specific params go under `provider.options.<slug>.parameters`. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
+Provider-specific params are keyed by the slug of the provider the request is routed to; only the matched provider's options are forwarded. Google Veo models are the only video models that nest them in a `parameters` object (`provider.options.<slug>.parameters.<key>`). Every other video model, including other Google video models, takes its keys directly under the slug (`provider.options.<slug>.<key>`); a `parameters` object sent to them is not forwarded, and Runway video upscale rejects any provider options. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
 
-Example:
+Google Veo example:
 
 ```json
 {
@@ -102,6 +102,22 @@ Example:
           "personGeneration": "allow",
           "negativePrompt": "blurry, low quality"
         }
+      }
+    }
+  }
+}
+```
+
+Any other video model, e.g. Seedance 2.0 served by the Seed provider (use the `byteplus` slug when it is routed to BytePlus):
+
+```json
+{
+  "model": "bytedance/seedance-2.0",
+  "prompt": "a time-lapse of a flower blooming",
+  "provider": {
+    "options": {
+      "seed": {
+        "watermark": false
       }
     }
   }
