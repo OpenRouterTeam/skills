@@ -138,12 +138,13 @@ Returns for each provider:
 |---|---|---|
 | `category` | `?category=programming` | Server-side category filter |
 | `supported_parameters` | `?supported_parameters=tools` | Only models supporting this parameter |
+| `endpoints` | `?endpoints=/api/alpha/extractions` | Only models whose `endpoints` list includes every listed request path (comma-separated). An unknown path returns `400` |
 
 **Tips for working with the response:**
 
 - To check if a model supports a feature, use `model.supported_parameters` (e.g. `.includes("tools")`), or filter server-side with `?supported_parameters=tools`.
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
-- To find which API to call for a model, read `model.endpoints`: the request paths that serve it, e.g. `["/api/v1/chat/completions", "/api/v1/completions", "/api/v1/messages", "/api/v1/responses"]` for a text model, `["/api/v1/images"]` for an image model, or `["/api/v1/audio/speech"]` for TTS. Other paths: `/api/v1/embeddings`, `/api/v1/rerank`, `/api/v1/videos`, `/api/v1/audio/transcriptions`, and alpha surfaces such as `/api/alpha/decisions`. A model can list more than one surface (e.g. text + `/api/v1/images`), and the list can be empty when no surface currently serves it. This is a list of path strings, not the per-provider `endpoints` array from `get-endpoints.ts`.
+- To find which API to call for a model, read `model.endpoints`: the request paths that serve it, e.g. `["/api/v1/chat/completions", "/api/v1/completions", "/api/v1/messages", "/api/v1/responses"]` for a text model, `["/api/v1/images"]` for an image model, or `["/api/v1/audio/speech"]` for TTS. Other paths: `/api/v1/embeddings`, `/api/v1/rerank`, `/api/v1/videos`, `/api/v1/audio/transcriptions`, `/api/v1/batches` (`:batch` variants), and alpha surfaces such as `/api/alpha/decisions` and `/api/alpha/extractions`. A model can list more than one surface (e.g. text + `/api/v1/images`), and the list can be empty when no surface currently serves it. This is a list of path strings, not the per-provider `endpoints` array from `get-endpoints.ts`. To list every model that serves a path, filter server-side with `?endpoints=<path>`; with no `output_modalities` set, models of every output modality are included.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
