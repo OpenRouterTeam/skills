@@ -327,7 +327,7 @@ Combine up to 2 dimensions for cross-tabulation:
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
-| 429 | Rate limited (64 RPM) | Wait and retry |
+| 429 | Rate limited (256 requests per minute per IP) | Wait and retry |
 | 500 | Server error | Retry after a moment |
 
 ## Time Range Behavior
