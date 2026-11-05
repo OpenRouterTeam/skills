@@ -189,6 +189,8 @@ export function buildImageParams(args: Map<string, string | true>): Record<strin
   setInt("n", "n");
   setInt("seed", "seed");
   setInt("output-compression", "output_compression");
+  setInt("frame-count", "frame_count");
+  setInt("frame-duration-ms", "frame_duration_ms");
 
   const providerOptions = args.get("provider-options");
   if (typeof providerOptions === "string") {

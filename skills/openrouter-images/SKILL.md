@@ -98,9 +98,11 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--resolution <t>` | Resolution tier (`512`, `1K`, `2K`, `4K`) | Model default |
 | `--size <s>` | Shorthand: a tier (`2K`) or explicit pixels (`2048x2048`) | Model default |
 | `--quality <q>` | `auto`, `low`, `medium`, or `high` | Model default |
-| `--output-format <f>` | `png`, `jpeg`, `webp`, or `svg` (vector models) | Model default |
+| `--output-format <f>` | `png`, `jpeg`, `webp`, `svg` (vector models), or `gif` (animation models, e.g. `openai/gpt-image-2.6-flare`) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
+| `--frame-count <n>` | Animation frames (2–64) with `--output-format gif`; generations only | Model default |
+| `--frame-duration-ms <n>` | Per-frame display time (20–2000 ms) with `--output-format gif` | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
