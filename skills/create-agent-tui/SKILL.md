@@ -563,6 +563,7 @@ function summarizeArgs(name: string, args: Record<string, unknown>): string {
 async function main() {
   const configFlag = process.argv.indexOf('--config');
   const configPath = configFlag !== -1 ? process.argv[configFlag + 1] : undefined;
+  if (configFlag !== -1 && (!configPath || configPath.startsWith('--'))) throw new Error('--config requires a file path');
   const config = loadConfig({}, { configPath });
   const BG_INPUT = config.display.inputStyle === 'block' ? await detectBg() : '';
 

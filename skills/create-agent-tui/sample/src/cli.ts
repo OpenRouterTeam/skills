@@ -154,6 +154,8 @@ async function main() {
   const argInput = parseArg('--input') as DisplayConfig['inputStyle'] | undefined;
   const argToolDisplay = parseArg('--tool-display') as DisplayConfig['toolDisplay'] | undefined;
   const argLoaderStyle = parseArg('--loader-style') as import('./config.js').LoaderConfig['style'] | undefined;
+  const argConfig = parseArg('--config');
+  if (process.argv.includes('--config') && (!argConfig || argConfig.startsWith('--'))) throw new Error('--config requires a file path');
   const demoMode = process.argv.includes('--demo');
   const demoLoaderMode = process.argv.includes('--demo-loader');
 
@@ -168,7 +170,7 @@ async function main() {
     };
   }
 
-  const config = loadConfig(overrides, { skipApiKey: demoMode || demoLoaderMode, configPath: parseArg('--config') });
+  const config = loadConfig(overrides, { skipApiKey: demoMode || demoLoaderMode, configPath: argConfig });
   const BG_INPUT = config.display.inputStyle === 'block' ? await detectBg() : '';
 
   initSessionDir(config.sessionDir);
