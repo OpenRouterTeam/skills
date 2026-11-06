@@ -252,6 +252,7 @@ import { readFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
 
+// Use the agent's package name, so each agent gets its own ~/.config/<name>/ directory.
 const APP_NAME = 'my-agent';
 
 function positiveNumber(name: string, raw: string | number): number {
@@ -560,7 +561,9 @@ function summarizeArgs(name: string, args: Record<string, unknown>): string {
 }
 
 async function main() {
-  const config = loadConfig();
+  const configFlag = process.argv.indexOf('--config');
+  const configPath = configFlag !== -1 ? process.argv[configFlag + 1] : undefined;
+  const config = loadConfig({}, { configPath });
   const BG_INPUT = config.display.inputStyle === 'block' ? await detectBg() : '';
 
   // Banner
@@ -685,7 +688,7 @@ if (config.showBanner) {
 }
 ```
 
-Add `showBanner: boolean` to `AgentConfig` (default `false`). Enable via `~/.config/my-agent/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`) or `loadConfig({ showBanner: true })`.
+Add `showBanner: boolean` to `AgentConfig` (default `false`). Enable via `~/.config/<agent-name>/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`) or `loadConfig({ showBanner: true })`.
 
 ---
 

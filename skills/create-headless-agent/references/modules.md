@@ -1155,7 +1155,7 @@ try {
 }
 ```
 
-Add `webhookUrl: 'string'` to `FILE_FIELDS` in `config.ts` (and to `AgentConfig`), then set it in `~/.config/my-agent/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
+Add `webhookUrl: 'string'` to `FILE_FIELDS` in `config.ts` (and to `AgentConfig`), then set it in `~/.config/<agent-name>/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
 
 ```json
 {

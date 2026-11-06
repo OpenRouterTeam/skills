@@ -302,7 +302,7 @@ const renderer = new TuiRenderer({
 
 ### Display modes via config
 
-Set in `~/.config/my-agent/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
+Set in `~/.config/<agent-name>/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
 
 ```json
 {

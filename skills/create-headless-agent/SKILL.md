@@ -259,7 +259,8 @@ import { readFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { join, resolve } from 'path';
 
-const APP_NAME = 'my-agent';
+// The <agent-name> chosen above, so each agent gets its own ~/.config/<agent-name>/ directory.
+const APP_NAME = '<agent-name>';
 
 function positiveNumber(name: string, raw: string | number): number {
   const n = Number(raw);
