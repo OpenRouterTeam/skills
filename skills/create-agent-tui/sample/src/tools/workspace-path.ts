@@ -16,7 +16,9 @@ export async function resolveInsideCwd(path: string): Promise<string> {
   if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
     throw new Error(`Refusing to access ${path}: outside the working directory ${root}`);
   }
-  if (rel.split(sep).includes('.git')) {
+  const parts = rel.toLowerCase().split(sep);
+  const name = parts[parts.length - 1];
+  if (parts.includes('.git') || name === '.env' || name.startsWith('.env.')) {
     throw new Error(`Refusing to access ${path}: inside a .git directory`);
   }
   return real;
