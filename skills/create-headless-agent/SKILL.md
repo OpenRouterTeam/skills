@@ -55,12 +55,12 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Tool | Default | Description |
 |------|---------|-------------|
 | File Read | ON | Read files with offset/limit |
-| File Write | ON | Write/create files, auto-create directories |
-| File Edit | ON | Search-and-replace with diff validation |
+| File Write | ON | Write/create files inside the working directory, auto-create directories |
+| File Edit | ON | Search-and-replace with diff validation, inside the working directory |
 | Glob/Find | ON | File discovery by glob pattern |
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
-| Shell/Bash | ON | Execute commands with timeout and output capture |
+| Shell/Bash | ON | Execute commands with timeout and output capture (not confined; pair with Tool Approval when the agent reads untrusted content) |
 | Custom Tool Template | ON | Empty skeleton for domain-specific tools |
 | JS/TS REPL | OFF | Persistent Bun REPL |
 | Sub-agent Spawn | OFF | Delegate tasks to child agents |
