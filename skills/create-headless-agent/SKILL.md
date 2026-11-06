@@ -60,7 +60,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Glob/Find | ON | File discovery by glob pattern |
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
-| Shell/Bash | ON | Execute commands with timeout and output capture |
+| Shell/Bash | ON | Execute commands with timeout and output capture. Denied unless approved (see Tool Approval) |
 | Custom Tool Template | ON | Empty skeleton for domain-specific tools |
 | JS/TS REPL | OFF | Persistent Bun REPL |
 | Sub-agent Spawn | OFF | Delegate tasks to child agents |
@@ -75,10 +75,20 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Context Compaction | OFF | Summarize when context is long |
 | Tool Result Offload | OFF | Persist oversized tool outputs to disk, keep preview in context |
 | System Prompt Composition | OFF | Dynamic instructions from context files |
-| Tool Approval Flow | OFF | Programmatic approve/reject |
+| Tool Approval Flow | ON | `shell`, `file_write`, `file_edit` denied unless `approvalPolicy: 'never'` or listed in `approvedTools` |
 | Structured Event Logging | OFF | JSON events to stderr |
 | Output Schema Validation | OFF | Zod schema constraining response |
 | Webhook Notifications | OFF | POST on completion |
+
+### Prompt injection and tool approval
+
+Any agent that reads untrusted text (`web_search`, `web_fetch`, `file_read` on a cloned repo, piped stdin such as tickets in CI, HTTP or MCP request bodies) can be steered by that text. If the same agent can also run `shell`, `file_write`, or `file_edit` without approval, anyone who can put text in front of it can run commands as the user who started it. Model behavior is not a control.
+
+The generated agent therefore defaults to `approvalPolicy: 'always'` with an empty `approvedTools`: those three tools return a denial to the model instead of running. Approved shell commands run in the project directory with credential-looking env vars (including `OPENROUTER_API_KEY`) removed, and the timeout is capped at 600 seconds. This is not a sandbox: an approved command still has the user's file and network access. Never drop the approval default when generating, and tell the user:
+
+- `AGENT_APPROVED_TOOLS=shell,file_edit` (or `"approvedTools"` in `agent.config.json`) allows only the listed tools.
+- `AGENT_APPROVAL_POLICY=never` (or `"approvalPolicy": "never"`) allows all of them. Only use it when the agent never sees untrusted text, or when it runs inside a disposable sandbox (container or VM with no secrets).
+- For per-call human approval, see [Tool Approval](references/modules.md#tool-approval).
 
 ### CLI Output Mode (single-select, if CLI entry point is ON)
 
@@ -106,6 +116,7 @@ After getting the name and checklist selections, follow this workflow:
 - [ ] Generate tsconfig.json (Bun-native)
 - [ ] Generate src/config.ts
 - [ ] Generate src/tools/index.ts wiring selected tools
+- [ ] Generate src/tools/policy.ts (approval gate and env scrubbing, spec in references/tools.md) and keep the approval default
 - [ ] Generate selected tool files in src/tools/ (specs in references/tools.md)
 - [ ] Generate src/agent.ts (core runner)
 - [ ] If Session Persistence ON: generate src/session.ts (spec in references/modules.md)
@@ -266,6 +277,17 @@ function positiveNumber(name: string, raw: string): number {
   return n;
 }
 
+// 'always': shell, file_write and file_edit are denied unless listed in
+// approvedTools. 'never': run them without approval (trusted input only).
+export type ApprovalPolicy = 'always' | 'never';
+
+const APPROVAL_POLICIES: readonly ApprovalPolicy[] = ['always', 'never'];
+
+function approvalPolicy(name: string, raw: unknown): ApprovalPolicy {
+  if (APPROVAL_POLICIES.includes(raw as ApprovalPolicy)) return raw as ApprovalPolicy;
+  throw new Error(`${name} must be one of ${APPROVAL_POLICIES.join(', ')}, got: ${JSON.stringify(raw)}`);
+}
+
 export interface AgentConfig {
   apiKey: string;
   model: string;
@@ -276,6 +298,8 @@ export interface AgentConfig {
   sessionDir: string;
   sessionEnabled: boolean;
   outputMode: 'text' | 'json' | 'quiet';
+  approvalPolicy: ApprovalPolicy;
+  approvedTools: string[];
 }
 
 const DEFAULTS: AgentConfig = {
@@ -301,6 +325,8 @@ const DEFAULTS: AgentConfig = {
   sessionDir: '.sessions',
   sessionEnabled: true,
   outputMode: 'text',
+  approvalPolicy: 'always',
+  approvedTools: [],
 };
 
 export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipApiKey?: boolean }): AgentConfig {
@@ -317,7 +343,16 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
   if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
   if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
+  if (process.env.AGENT_APPROVAL_POLICY) config.approvalPolicy = approvalPolicy('AGENT_APPROVAL_POLICY', process.env.AGENT_APPROVAL_POLICY);
+  if (process.env.AGENT_APPROVED_TOOLS !== undefined) {
+    config.approvedTools = process.env.AGENT_APPROVED_TOOLS.split(',').map((t) => t.trim()).filter(Boolean);
+  }
+
   config = { ...config, ...overrides };
+  config.approvalPolicy = approvalPolicy('approvalPolicy', config.approvalPolicy);
+  if (!Array.isArray(config.approvedTools) || !config.approvedTools.every((t) => typeof t === 'string')) {
+    throw new Error('approvedTools must be an array of tool names');
+  }
   if (!config.apiKey && !opts?.skipApiKey) throw new Error('OPENROUTER_API_KEY is required.');
   return config;
 }
@@ -330,25 +365,29 @@ Adapt imports based on checklist selections. This example includes all default-O
 ```typescript
 import { serverTool } from '@openrouter/agent';
 import { fileReadTool } from './file-read.js';
-import { fileWriteTool } from './file-write.js';
-import { fileEditTool } from './file-edit.js';
+import { createFileWriteTool } from './file-write.js';
+import { createFileEditTool } from './file-edit.js';
 import { globTool } from './glob.js';
 import { grepTool } from './grep.js';
 import { listDirTool } from './list-dir.js';
-import { shellTool } from './shell.js';
+import { createShellTool } from './shell.js';
 import { myCustomTool } from './custom.js';
+import { isToolApproved, type ToolPolicy } from './policy.js';
 
 // `as const` unlocks full type inference for tool calls downstream.
 // See: https://openrouter.ai/docs/agent-sdk/call-model/tools
-export const tools = [
+//
+// shell, file_write and file_edit return a denial instead of running unless
+// config.approvalPolicy is 'never' or the tool is listed in approvedTools.
+export const buildTools = (policy: ToolPolicy, cwd: string = process.cwd()) => [
   // User-defined tools — executed client-side
   fileReadTool,
-  fileWriteTool,
-  fileEditTool,
+  createFileWriteTool({ approved: isToolApproved(policy, 'file_write') }),
+  createFileEditTool({ approved: isToolApproved(policy, 'file_edit') }),
   globTool,
   grepTool,
   listDirTool,
-  shellTool,
+  createShellTool({ approved: isToolApproved(policy, 'shell'), cwd }),
   myCustomTool,
 
   // Server tools — executed by OpenRouter, no client implementation needed
@@ -365,7 +404,7 @@ import { OpenRouter } from '@openrouter/agent';
 import type { Item } from '@openrouter/agent';
 import { stepCountIs, maxCost } from '@openrouter/agent/stop-conditions';
 import type { AgentConfig } from './config.js';
-import { tools } from './tools/index.js';
+import { buildTools } from './tools/index.js';
 
 export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
@@ -389,7 +428,7 @@ export async function runAgent(
     model: config.model,
     instructions: config.systemPrompt.replace('{cwd}', process.cwd()),
     input: input as string | Item[],
-    tools,
+    tools: buildTools(config),
     stopWhen: [stepCountIs(config.maxSteps), maxCost(config.maxCost)],
   });
 

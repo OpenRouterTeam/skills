@@ -11,6 +11,22 @@ function positiveNumber(name: string, raw: string): number {
 
 export type OutputMode = 'text' | 'json' | 'quiet';
 
+/**
+ * 'always': shell, file_write and file_edit are denied unless listed in
+ * approvedTools. 'never': run them without approval. Only use 'never' when
+ * the agent never sees untrusted text (web results, repo files, stdin from
+ * tickets, HTTP/MCP request bodies), because prompt injection in that text
+ * can otherwise run arbitrary commands.
+ */
+export type ApprovalPolicy = 'always' | 'never';
+
+const APPROVAL_POLICIES: readonly ApprovalPolicy[] = ['always', 'never'];
+
+function approvalPolicy(name: string, raw: unknown): ApprovalPolicy {
+  if (APPROVAL_POLICIES.includes(raw as ApprovalPolicy)) return raw as ApprovalPolicy;
+  throw new Error(`${name} must be one of ${APPROVAL_POLICIES.join(', ')}, got: ${JSON.stringify(raw)}`);
+}
+
 export interface AgentConfig {
   apiKey: string;
   model: string;
@@ -21,6 +37,8 @@ export interface AgentConfig {
   sessionDir: string;
   sessionEnabled: boolean;
   outputMode: OutputMode;
+  approvalPolicy: ApprovalPolicy;
+  approvedTools: string[];
 }
 
 const DEFAULTS: AgentConfig = {
@@ -46,6 +64,8 @@ const DEFAULTS: AgentConfig = {
   sessionDir: '.sessions',
   sessionEnabled: true,
   outputMode: 'text',
+  approvalPolicy: 'always',
+  approvedTools: [],
 };
 
 export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipApiKey?: boolean }): AgentConfig {
@@ -62,7 +82,16 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
   if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
   if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
+  if (process.env.AGENT_APPROVAL_POLICY) config.approvalPolicy = approvalPolicy('AGENT_APPROVAL_POLICY', process.env.AGENT_APPROVAL_POLICY);
+  if (process.env.AGENT_APPROVED_TOOLS !== undefined) {
+    config.approvedTools = process.env.AGENT_APPROVED_TOOLS.split(',').map((t) => t.trim()).filter(Boolean);
+  }
+
   config = { ...config, ...overrides };
+  config.approvalPolicy = approvalPolicy('approvalPolicy', config.approvalPolicy);
+  if (!Array.isArray(config.approvedTools) || !config.approvedTools.every((t) => typeof t === 'string')) {
+    throw new Error('approvedTools must be an array of tool names');
+  }
   if (!config.apiKey && !opts?.skipApiKey) throw new Error('OPENROUTER_API_KEY is required.');
   return config;
 }

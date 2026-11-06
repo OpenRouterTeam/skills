@@ -22,6 +22,13 @@ Options:
                             (exits 2 on schema mismatch, uses Ajv)
   -h, --help                Show this help message
 
+Tool approval:
+  shell, file_write and file_edit are denied by default, because text the
+  agent reads (web pages, files, piped stdin) can carry prompt injection.
+  AGENT_APPROVED_TOOLS=shell,file_edit   allow only the listed tools
+  AGENT_APPROVAL_POLICY=never            allow all of them (trusted input only)
+  (or "approvalPolicy" / "approvedTools" in agent.config.json)
+
 Examples:
   my-agent "What files are in this directory?"
   my-agent -p "Refactor the auth module" --max-steps 30

@@ -30,6 +30,7 @@ Read file contents with optional offset/limit. Full example in SKILL.md.
 Write content to a file, creating it and parent directories if needed.
 
 - **inputSchema**: `path` (string), `content` (string)
+- **Approval**: Export a factory `createFileWriteTool({ approved })`. When `approved` is false, return `deniedResult('file_write')` from `policy.ts` without touching the disk.
 - **Behavior**: Create parent directories with `import { mkdirSync } from 'fs'` and `mkdirSync(dirname(path), { recursive: true })`, then `await Bun.write(path, content)`. Return `{ written: true, path }`
 - **Mutating**
 
@@ -38,6 +39,7 @@ Write content to a file, creating it and parent directories if needed.
 Apply search-and-replace edits to a file with diff output.
 
 - **inputSchema**: `path` (string), `edits` (array of `{ old_text: string, new_text: string }`)
+- **Approval**: Export a factory `createFileEditTool({ approved })`. When `approved` is false, return `deniedResult('file_edit')` without reading or writing.
 - **Behavior**:
   1. Read the file with `await Bun.file(path).text()`
   2. For each edit: verify `old_text` appears exactly once (error if not found or ambiguous)
@@ -96,16 +98,28 @@ inputSchema: z.object({
 })
 ```
 
+- **Approval**: Export a factory `createShellTool({ approved, cwd })`. When `approved` is false, return `{ output: <denial message>, exitCode: 126, denied: true }` and spawn nothing. The model chooses `command`, and text it reads (web pages, files, stdin) can choose it too, so this gate must stay on by default (see the prompt injection section in SKILL.md).
 - **Behavior**:
-  1. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`) and `['-c', command]`
+  1. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`) and `['-c', command]`, passing `cwd` and `env: scrubbedEnv()` so credential-looking variables (`OPENROUTER_API_KEY`, `*_TOKEN`, `*_SECRET*`, ...) are not visible to the command
   2. Read stdout with `await new Response(proc.stdout).text()` and stderr with `await new Response(proc.stderr).text()`
   3. Wait for exit code via `await proc.exited`
   4. Truncate combined output to last 2000 lines or 256KB
   5. Return `{ output, exitCode, truncated? }`
   6. Kill process on timeout
 - **Key implementation detail**: For simpler use cases, `Bun.spawnSync(['sh', '-c', command])` is a cleaner alternative — it blocks and returns `{ stdout, stderr, exitCode }` directly. Use the async `Bun.spawn()` variant when you need streaming or timeout handling.
-- **Timeout handling**: Use `setTimeout` + `proc.kill()` to enforce the deadline, then return partial output with `timedOut: true`.
+- **Timeout handling**: Clamp the model-supplied timeout to 1-600 seconds (default 120). Use `setTimeout` + `proc.kill()` to enforce the deadline, then return partial output with `timedOut: true`.
 - **Mutating**
+
+### policy.ts (approval gate, not a tool)
+
+Shared helpers for the mutating tools. Generate it whenever `shell`, `file_write`, or `file_edit` is selected.
+
+- `GATED_TOOLS = ['shell', 'file_write', 'file_edit']`
+- `isToolApproved(policy, name)`: true when `policy.approvalPolicy === 'never'` or `policy.approvedTools` includes `name`
+- `deniedResult(name)`: `{ error, denied: true }` telling the model the call was denied and not to retry
+- `scrubbedEnv(env = process.env)`: copy of `env` without names matching `/KEY|TOKEN|SECRET|PASSW|CREDENTIAL|AUTH|SESSION|COOKIE|PRIVATE/i`
+
+`src/tools/index.ts` exports `buildTools(policy, cwd = process.cwd())`, and `agent.ts` calls `buildTools(config)`. See `sample/src/tools/policy.ts`.
 
 ### web_fetch
 

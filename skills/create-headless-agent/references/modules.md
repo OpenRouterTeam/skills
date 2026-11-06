@@ -525,6 +525,8 @@ const result = client.callModel({
 
 Gate dangerous tools behind programmatic approval. Unlike the TUI version, headless agents have no stdin -- approval decisions come from a callback function, an allow-list, or an external service.
 
+The default scaffold already ships the allow-list form: `src/tools/policy.ts` plus `approvalPolicy` (default `'always'`) and `approvedTools` (default `[]`) in `config.ts`, so `shell`, `file_write`, and `file_edit` return a denial unless the operator allows them (see `sample/`). The rest of this section is for per-call approval through an external approver. Note that `requireApproval` on a tool makes the SDK pause the run, and without a `state` accessor `callModel` throws `Tool(s) require approval but no state accessor is configured`, so pair it with [Persistent State](#persistent-state-stateaccessor).
+
 > **For approval workflows that need to survive across process restarts** (e.g. an HTTP server that queues tool calls for human review, then resumes the agent when approvals arrive): pair this module with [Persistent State (StateAccessor)](#persistent-state-stateaccessor). Without persistent state, pending tool calls are lost when the process exits.
 
 ### Adding requireApproval to tools

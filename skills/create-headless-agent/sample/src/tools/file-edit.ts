@@ -1,7 +1,8 @@
 import { tool } from '@openrouter/agent/tool';
 import { z } from 'zod';
+import { deniedResult } from './policy.js';
 
-export const fileEditTool = tool({
+export const createFileEditTool = ({ approved }: { approved: boolean }) => tool({
   name: 'file_edit',
   description: 'Apply search-and-replace edits to a file',
   inputSchema: z.object({
@@ -12,6 +13,7 @@ export const fileEditTool = tool({
     })),
   }),
   execute: async ({ path, edits }) => {
+    if (!approved) return deniedResult('file_edit');
     try {
       let content = await Bun.file(path).text();
       // Show each substitution as a self-contained -/+ block. Positional

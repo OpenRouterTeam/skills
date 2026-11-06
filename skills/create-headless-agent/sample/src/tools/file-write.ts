@@ -1,9 +1,10 @@
 import { tool } from '@openrouter/agent/tool';
 import { z } from 'zod';
+import { deniedResult } from './policy.js';
 import { mkdirSync } from 'fs';
 import { dirname } from 'path';
 
-export const fileWriteTool = tool({
+export const createFileWriteTool = ({ approved }: { approved: boolean }) => tool({
   name: 'file_write',
   description: 'Write content to a file, creating it and parent directories if needed',
   inputSchema: z.object({
@@ -11,6 +12,7 @@ export const fileWriteTool = tool({
     content: z.string().describe('Content to write'),
   }),
   execute: async ({ path, content }) => {
+    if (!approved) return deniedResult('file_write');
     try {
       mkdirSync(dirname(path), { recursive: true });
       await Bun.write(path, content);

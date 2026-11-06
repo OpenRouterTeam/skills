@@ -2,7 +2,7 @@ import { OpenRouter } from '@openrouter/agent';
 import type { Item } from '@openrouter/agent';
 import { stepCountIs, maxCost } from '@openrouter/agent/stop-conditions';
 import type { AgentConfig } from './config.js';
-import { tools } from './tools/index.js';
+import { buildTools } from './tools/index.js';
 
 export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
@@ -26,7 +26,7 @@ export async function runAgent(
     model: config.model,
     instructions: config.systemPrompt.replace('{cwd}', process.cwd()),
     input: input as string | Item[],
-    tools,
+    tools: buildTools(config),
     stopWhen: [stepCountIs(config.maxSteps), maxCost(config.maxCost)],
   });
 

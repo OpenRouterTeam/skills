@@ -1,22 +1,40 @@
 import { tool } from '@openrouter/agent/tool';
 import { z } from 'zod';
+import { deniedResult, scrubbedEnv } from './policy.js';
 
 const MAX_LINES = 2000;
 const MAX_BYTES = 256 * 1024;
+const DEFAULT_TIMEOUT_S = 120;
+const MAX_TIMEOUT_S = 600;
 
-export const shellTool = tool({
+export interface ShellToolOptions {
+  /** Run commands at all. Off unless the operator approved the shell tool. */
+  approved: boolean;
+  /** Working directory for every command. */
+  cwd: string;
+}
+
+// Not a sandbox: an approved command runs with the user's privileges and can
+// `cd` anywhere. The scrubbed env only keeps credentials in env vars (such as
+// OPENROUTER_API_KEY) away from commands; it does not protect files on disk.
+export const createShellTool = ({ approved, cwd }: ShellToolOptions) => tool({
   name: 'shell',
   description: 'Execute a shell command and return output',
   inputSchema: z.object({
     command: z.string().describe('Shell command to execute'),
-    timeout: z.number().optional().describe('Timeout in seconds (default: 120)'),
+    timeout: z.number().optional().describe(`Timeout in seconds (default: ${DEFAULT_TIMEOUT_S}, max: ${MAX_TIMEOUT_S})`),
   }),
   execute: async ({ command, timeout }) => {
-    const timeoutMs = (timeout ?? 120) * 1000;
+    if (!approved) return { output: deniedResult('shell').error, exitCode: 126, denied: true };
+
+    const requested = timeout ?? DEFAULT_TIMEOUT_S;
+    const timeoutMs = (requested > 0 ? Math.min(requested, MAX_TIMEOUT_S) : DEFAULT_TIMEOUT_S) * 1000;
     const shell = process.env.SHELL || '/bin/bash';
 
     try {
       const proc = Bun.spawn([shell, '-c', command], {
+        cwd,
+        env: scrubbedEnv(),
         stdout: 'pipe',
         stderr: 'pipe',
       });

@@ -69,7 +69,7 @@ The skill presents an interactive checklist when invoked:
 | Glob/Find | on | Find files by pattern |
 | Grep/Search | on | Search file contents by regex |
 | Directory List | on | List directory entries |
-| Shell/Bash | on | Execute commands with timeout |
+| Shell/Bash | on | Execute commands with timeout (denied unless approved) |
 | Custom Tool Template | on | Empty skeleton for your domain |
 | JS/TS REPL | off | Persistent Bun REPL |
 | Sub-agent Spawn | off | Delegate tasks to child agents |
@@ -83,7 +83,7 @@ The skill presents an interactive checklist when invoked:
 | Retry with Backoff | on | Exponential backoff on 429/5xx errors |
 | Context Compaction | off | Summarize old messages when context gets long |
 | System Prompt Composition | off | Build instructions from static + dynamic context files |
-| Tool Approval Flow | off | Gate dangerous tools behind programmatic approve/reject |
+| Tool Approval Flow | on | `shell`, `file_write`, `file_edit` denied unless allowed via `AGENT_APPROVED_TOOLS` or `AGENT_APPROVAL_POLICY=never` |
 | Structured Event Logging | off | Emit JSON events to stderr or file |
 | Output Schema Validation | off | Constrain final response shape with Zod schema |
 | Webhook Notifications | off | POST to a URL on agent completion |
@@ -122,6 +122,7 @@ my-agent/
       grep.ts               Search content by regex
       list-dir.ts           List directories
       shell.ts              Execute commands (Bun.spawn)
+      policy.ts             Approval gate and env scrubbing for mutating tools
       custom.ts             Empty skeleton for domain-specific tools
   test/
     agent.test.ts           Example test (bun:test)
