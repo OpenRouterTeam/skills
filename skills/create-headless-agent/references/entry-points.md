@@ -56,6 +56,7 @@ try {
       'max-steps':   { type: 'string' },
       'max-cost':    { type: 'string' },
       'output-schema': { type: 'string' },
+      config:        { type: 'string' },
       help:          { type: 'boolean', short: 'h', default: false },
     },
     allowPositionals: true,
@@ -81,6 +82,7 @@ Options:
       --max-steps <n>       Maximum number of agent steps
       --max-cost <n>        Maximum cost in dollars
       --output-schema <f>   Path to a JSON Schema file to validate output
+      --config <file>       Config file (default: ~/.config/<agent-name>/agent.config.json)
   -h, --help                Show this help message
 
 Prompt sources (in priority order):
@@ -114,7 +116,7 @@ if (!prompt) {
 
 // ── Load config and apply overrides ─────────────────────────────────
 
-const config = loadConfig();
+const config = loadConfig({}, { configPath: values.config });
 
 if (values.model) config.model = values.model;
 if (values['max-steps']) {

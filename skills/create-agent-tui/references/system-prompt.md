@@ -79,7 +79,7 @@ This is the same pattern as the System Prompt Composition module in [modules.md]
 
 ### Override the entire prompt
 
-Set `systemPrompt` in `agent.config.json`:
+Set `systemPrompt` in `~/.config/<agent-name>/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`). The agent never reads `agent.config.json` from the working directory, so a cloned repository cannot replace the prompt:
 
 ```json
 {

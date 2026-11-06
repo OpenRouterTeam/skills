@@ -1096,7 +1096,7 @@ export async function notifyWebhook(
 
 /**
  * Read webhook URL from config or environment.
- * Priority: explicit url > env var > agent.config.json
+ * Priority: config.webhookUrl > AGENT_WEBHOOK_URL
  */
 export function resolveWebhookUrl(config?: { webhookUrl?: string }): string | null {
   if (config?.webhookUrl) return config.webhookUrl;
@@ -1155,7 +1155,7 @@ try {
 }
 ```
 
-Add webhook config to `agent.config.json`:
+Add `webhookUrl: 'string'` to `FILE_FIELDS` in `config.ts` (and to `AgentConfig`), then set it in `~/.config/<agent-name>/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
 
 ```json
 {
