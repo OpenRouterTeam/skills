@@ -28,7 +28,7 @@ export const createShellTool = ({ approved, cwd }: ShellToolOptions) => tool({
     if (!approved) return { output: deniedResult('shell').error, exitCode: 126, denied: true };
 
     const requested = timeout ?? DEFAULT_TIMEOUT_S;
-    const timeoutMs = (requested > 0 ? Math.min(requested, MAX_TIMEOUT_S) : DEFAULT_TIMEOUT_S) * 1000;
+    const timeoutMs = (requested > 0 ? Math.max(1, Math.min(requested, MAX_TIMEOUT_S)) : DEFAULT_TIMEOUT_S) * 1000;
     const shell = process.env.SHELL || '/bin/bash';
 
     try {

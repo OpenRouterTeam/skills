@@ -86,8 +86,9 @@ Any agent that reads untrusted text (`web_search`, `web_fetch`, `file_read` on a
 
 The generated agent therefore defaults to `approvalPolicy: 'always'` with an empty `approvedTools`: those three tools return a denial to the model instead of running. Approved shell commands run in the project directory with credential-looking env vars (including `OPENROUTER_API_KEY`) removed, and the timeout is capped at 600 seconds. This is not a sandbox: an approved command still has the user's file and network access. Never drop the approval default when generating, and tell the user:
 
-- `AGENT_APPROVED_TOOLS=shell,file_edit` (or `"approvedTools"` in `agent.config.json`) allows only the listed tools.
-- `AGENT_APPROVAL_POLICY=never` (or `"approvalPolicy": "never"`) allows all of them. Only use it when the agent never sees untrusted text, or when it runs inside a disposable sandbox (container or VM with no secrets).
+- `AGENT_APPROVED_TOOLS=shell,file_edit` allows only the listed tools.
+- `AGENT_APPROVAL_POLICY=never` allows all of them. Only use it when the agent never sees untrusted text, or when it runs inside a disposable sandbox (container or VM with no secrets).
+- `loadConfig` ignores `approvalPolicy` and `approvedTools` in `agent.config.json`, because that file is read from the working directory, which can be a cloned repo the agent is working on. Set them through env vars or `loadConfig` overrides from code.
 - For per-call human approval, see [Tool Approval](references/modules.md#tool-approval).
 
 ### CLI Output Mode (single-select, if CLI entry point is ON)
@@ -334,7 +335,9 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
 
   const configPath = resolve('agent.config.json');
   if (existsSync(configPath)) {
-    const file = JSON.parse(readFileSync(configPath, 'utf-8'));
+    // agent.config.json is read from the cwd, which may be a cloned repo the
+    // agent is working on, so it must not be able to turn off tool approval.
+    const { approvalPolicy: _p, approvedTools: _t, ...file } = JSON.parse(readFileSync(configPath, 'utf-8'));
     config = { ...config, ...file };
   }
 

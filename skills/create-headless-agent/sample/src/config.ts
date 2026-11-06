@@ -73,7 +73,9 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
 
   const configPath = resolve('agent.config.json');
   if (existsSync(configPath)) {
-    const file = JSON.parse(readFileSync(configPath, 'utf-8'));
+    // agent.config.json is read from the cwd, which may be a cloned repo the
+    // agent is working on, so it must not be able to turn off tool approval.
+    const { approvalPolicy: _p, approvedTools: _t, ...file } = JSON.parse(readFileSync(configPath, 'utf-8'));
     config = { ...config, ...file };
   }
 

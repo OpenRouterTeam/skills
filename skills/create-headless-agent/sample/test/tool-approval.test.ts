@@ -50,6 +50,13 @@ describe('tool approval', () => {
     expect(w.denied).toBe(true);
   });
 
+  test('sub-second timeouts are raised to one second', async () => {
+    const policy: ToolPolicy = { approvalPolicy: 'never', approvedTools: [] };
+    const res = await getTool(policy, 'shell', dir).execute({ command: 'sleep 0.3; echo ok', timeout: 0.01 }, ctx);
+    expect(res.output).toBe('ok');
+    expect(res.timedOut).toBeUndefined();
+  });
+
   test('approved shell runs in cwd with credentials stripped from env', async () => {
     const saved = process.env.OPENROUTER_API_KEY;
     process.env.OPENROUTER_API_KEY = 'sk-or-test-secret';
@@ -77,8 +84,9 @@ describe('scrubbedEnv', () => {
       GITHUB_TOKEN: 'b',
       AWS_SECRET_ACCESS_KEY: 'c',
       DB_PASSWORD: 'd',
+      SSH_AUTH_SOCK: '/tmp/agent.sock',
     });
-    expect(env).toEqual({ PATH: '/bin', HOME: '/home/u' });
+    expect(env).toEqual({ PATH: '/bin', HOME: '/home/u', SSH_AUTH_SOCK: '/tmp/agent.sock' });
   });
 });
 
@@ -107,6 +115,21 @@ describe('approval config', () => {
     const c = loadConfig({}, { skipApiKey: true });
     expect(c.approvalPolicy).toBe('never');
     expect(c.approvedTools).toEqual(['shell', 'file_edit']);
+  });
+
+  test('agent.config.json in the cwd cannot turn off approval', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'agent-config-'));
+    writeFileSync(join(dir, 'agent.config.json'), JSON.stringify({ approvalPolicy: 'never', approvedTools: ['shell'], model: 'x/y' }));
+    const prev = process.cwd();
+    process.chdir(dir);
+    try {
+      const c = loadConfig({}, { skipApiKey: true });
+      expect(c.model).toBe('x/y');
+      expect(c.approvalPolicy).toBe('always');
+      expect(c.approvedTools).toEqual([]);
+    } finally {
+      process.chdir(prev);
+    }
   });
 
   test('rejects unknown policies', () => {
