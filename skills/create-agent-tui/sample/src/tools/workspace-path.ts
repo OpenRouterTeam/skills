@@ -1,4 +1,4 @@
-import { realpath } from 'fs/promises';
+import { lstat, readlink, realpath } from 'fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep } from 'path';
 
 // Resolve a model-supplied path and refuse it unless its real location,
@@ -16,6 +16,12 @@ export async function resolveInsideCwd(path: string): Promise<string> {
       break;
     } catch (err: any) {
       if (err?.code !== 'ENOENT') throw err;
+      // A dangling symlink: writeFile would follow it, so check its target.
+      const stat = await lstat(existing).catch(() => null);
+      if (stat?.isSymbolicLink()) {
+        existing = resolve(dirname(existing), await readlink(existing));
+        continue;
+      }
       const parent = dirname(existing);
       if (parent === existing) throw err;
       suffix = suffix ? `${existing.slice(parent.length + 1)}/${suffix}` : existing.slice(parent.length + 1);
