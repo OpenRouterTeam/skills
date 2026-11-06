@@ -19,6 +19,7 @@ Options:
       --no-session          Disable session persistence
       --max-steps <n>       Maximum agent steps (default: 20)
       --max-cost <n>        Maximum cost in dollars (default: 1.0)
+      --config <file>       Config file (default: ~/.config/my-agent/agent.config.json)
       --output-schema <f>   Validate final output against a JSON Schema file
                             (exits 2 on schema mismatch, uses Ajv)
       --allow-shell         Let the agent run shell commands without asking
@@ -71,6 +72,7 @@ async function main() {
       'max-cost': { type: 'string' },
       'output-schema': { type: 'string' },
       'allow-shell': { type: 'boolean', default: false },
+      config: { type: 'string' },
       help: { type: 'boolean', short: 'h', default: false },
     },
     allowPositionals: true,
@@ -124,7 +126,7 @@ async function main() {
 
     if (values['allow-shell']) overrides.allowShell = true;
 
-    const config = loadConfig(overrides);
+    const config = loadConfig(overrides, { configPath: values.config });
     // Text the agent reads (files, web results) can carry injected instructions,
     // so model-chosen shell commands only run when the operator opted in.
     setShellApprover(async () => config.allowShell);

@@ -1,18 +1,27 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { loadConfig } from '../src/config.js';
 
 describe('loadConfig', () => {
   const savedEnv: Record<string, string | undefined> = {};
+  const savedCwd = process.cwd();
+  let tmp: string;
 
   beforeEach(() => {
     // Save and clear relevant env vars
-    for (const key of ['OPENROUTER_API_KEY', 'AGENT_MODEL', 'AGENT_MAX_STEPS', 'AGENT_MAX_COST']) {
+    for (const key of ['OPENROUTER_API_KEY', 'AGENT_MODEL', 'AGENT_MAX_STEPS', 'AGENT_MAX_COST', 'AGENT_CONFIG', 'XDG_CONFIG_HOME']) {
       savedEnv[key] = process.env[key];
       delete process.env[key];
     }
+    tmp = mkdtempSync(join(tmpdir(), 'agent-config-'));
+    process.env.XDG_CONFIG_HOME = join(tmp, 'xdg');
   });
 
   afterEach(() => {
+    process.chdir(savedCwd);
+    rmSync(tmp, { recursive: true, force: true });
     // Restore env vars
     for (const [key, value] of Object.entries(savedEnv)) {
       if (value === undefined) delete process.env[key];
@@ -64,5 +73,48 @@ describe('loadConfig', () => {
 
   test('throws when apiKey missing and skipApiKey not set', () => {
     expect(() => loadConfig({})).toThrow('OPENROUTER_API_KEY is required');
+  });
+
+  test('ignores agent.config.json in the working directory', () => {
+    const project = join(tmp, 'project');
+    mkdirSync(project);
+    writeFileSync(join(project, 'agent.config.json'), JSON.stringify({ systemPrompt: 'MARKER', maxCost: 999, maxSteps: 999 }));
+    process.chdir(project);
+
+    const config = loadConfig({}, { skipApiKey: true });
+
+    expect(config.systemPrompt).not.toContain('MARKER');
+    expect(config.maxCost).toBe(1.0);
+    expect(config.maxSteps).toBe(20);
+  });
+
+  test('reads the user config directory', () => {
+    mkdirSync(join(tmp, 'xdg', 'my-agent'), { recursive: true });
+    writeFileSync(join(tmp, 'xdg', 'my-agent', 'agent.config.json'), JSON.stringify({ model: 'openai/gpt-4o', maxCost: 2 }));
+
+    const config = loadConfig({}, { skipApiKey: true });
+
+    expect(config.model).toBe('openai/gpt-4o');
+    expect(config.maxCost).toBe(2);
+  });
+
+  test('reads an explicit config path', () => {
+    const file = join(tmp, 'custom.json');
+    writeFileSync(file, JSON.stringify({ systemPrompt: 'custom prompt' }));
+
+    expect(loadConfig({}, { skipApiKey: true, configPath: file }).systemPrompt).toBe('custom prompt');
+    expect(() => loadConfig({}, { skipApiKey: true, configPath: join(tmp, 'missing.json') })).toThrow('Config file not found');
+  });
+
+  test('rejects unknown fields, apiKey, and invalid limits in the config file', () => {
+    const file = join(tmp, 'bad.json');
+    for (const [body, error] of [
+      [{ apiKey: 'sk-test' }, 'unsupported field "apiKey"'],
+      [{ maxCost: -1 }, 'must be a positive number'],
+      [{ maxSteps: 'many' }, '"maxSteps" must be a number'],
+    ] as const) {
+      writeFileSync(file, JSON.stringify(body));
+      expect(() => loadConfig({}, { skipApiKey: true, configPath: file })).toThrow(error);
+    }
   });
 });

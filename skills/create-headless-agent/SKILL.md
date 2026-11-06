@@ -256,9 +256,13 @@ The `bin` entry is what makes the agent invokable by name after `bun link`. The 
 
 ```typescript
 import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { homedir } from 'os';
+import { join, resolve } from 'path';
 
-function positiveNumber(name: string, raw: string): number {
+// The <agent-name> chosen above, so each agent gets its own ~/.config/<agent-name>/ directory.
+const APP_NAME = '<agent-name>';
+
+function positiveNumber(name: string, raw: string | number): number {
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) {
     throw new Error(`${name} must be a positive number, got: ${JSON.stringify(raw)}`);
@@ -306,17 +310,54 @@ const DEFAULTS: AgentConfig = {
   allowShell: false,
 };
 
-export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipApiKey?: boolean }): AgentConfig {
-  let config = { ...DEFAULTS };
+// Fields a config file may set, and their types. apiKey is env-only so it never sits in a file.
+const FILE_FIELDS: Record<string, 'string' | 'number' | 'boolean'> = {
+  model: 'string',
+  name: 'string',
+  systemPrompt: 'string',
+  maxSteps: 'number',
+  maxCost: 'number',
+  sessionDir: 'string',
+  sessionEnabled: 'boolean',
+};
 
-  const configPath = resolve('agent.config.json');
-  if (existsSync(configPath)) {
-    const file = JSON.parse(readFileSync(configPath, 'utf-8'));
-    // agent.config.json sits in the working directory, which may be an untrusted
-    // checkout, so it cannot turn on shell access. Only the --allow-shell flag can.
-    delete file.allowShell;
-    config = { ...config, ...file };
+/**
+ * The config file is read from an explicit path (--config or AGENT_CONFIG) or the user's
+ * config directory, never from the working directory: a cloned repo could otherwise ship
+ * an agent.config.json that replaces the system prompt and lifts the cost and step limits.
+ */
+export function resolveConfigPath(explicit?: string): { path: string; required: boolean } {
+  const chosen = explicit || process.env.AGENT_CONFIG;
+  if (chosen) return { path: resolve(chosen), required: true };
+  const base = process.env.XDG_CONFIG_HOME || join(homedir(), '.config');
+  return { path: join(base, APP_NAME, 'agent.config.json'), required: false };
+}
+
+function readConfigFile(path: string, required: boolean): Partial<AgentConfig> {
+  if (!existsSync(path)) {
+    if (required) throw new Error(`Config file not found: ${path}`);
+    return {};
   }
+  const raw: unknown = JSON.parse(readFileSync(path, 'utf-8'));
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    throw new Error(`${path} must contain a JSON object`);
+  }
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const type = FILE_FIELDS[key];
+    if (!type) throw new Error(`${path}: unsupported field "${key}"`);
+    if (typeof value !== type) throw new Error(`${path}: "${key}" must be a ${type}`);
+    out[key] = type === 'number' ? positiveNumber(`${path}: ${key}`, value as number) : value;
+  }
+  return out as Partial<AgentConfig>;
+}
+
+export function loadConfig(
+  overrides: Partial<AgentConfig> = {},
+  opts?: { skipApiKey?: boolean; configPath?: string },
+): AgentConfig {
+  const { path, required } = resolveConfigPath(opts?.configPath);
+  let config: AgentConfig = { ...DEFAULTS, ...readConfigFile(path, required) };
 
   if (process.env.OPENROUTER_API_KEY) config.apiKey = process.env.OPENROUTER_API_KEY;
   if (process.env.AGENT_MODEL) config.model = process.env.AGENT_MODEL;
@@ -521,13 +562,14 @@ const { values, positionals } = parseArgs({
     'max-steps': { type: 'string' },
     'max-cost': { type: 'string' },
     'allow-shell': { type: 'boolean', default: false },
+    config: { type: 'string' },
     help: { type: 'boolean', short: 'h', default: false },
   },
   allowPositionals: true,
 });
 
 // ... resolve prompt from args, positional, or stdin
-// ... call loadConfig with overrides (allowShell: true only from --allow-shell)
+// ... call loadConfig(overrides, { configPath: values.config }) (allowShell: true only from --allow-shell)
 // ... setShellApprover(async () => config.allowShell) so shell stays off by default
 // ... call runAgentWithRetry with appropriate event handler
 // ... exit with code 0 on success, 1 on error
