@@ -28,7 +28,7 @@ Read file contents with optional offset/limit. Full example in SKILL.md.
 Write content to a file, creating it and parent directories if needed.
 
 - **inputSchema**: `path` (string), `content` (string)
-- **Behavior**: `mkdir -p` the parent dir, then `writeFile`. Return `{ written: true, path }`
+- **Behavior**: Confine the path (see below), `mkdir -p` the parent dir, then `writeFile`. Return `{ written: true, path }`
 - **Mutating**
 
 ### file_edit
@@ -37,13 +37,17 @@ Apply search-and-replace edits to a file with diff output.
 
 - **inputSchema**: `path` (string), `edits` (array of `{ old_text: string, new_text: string }`)
 - **Behavior**:
-  1. Read the file
+  1. Confine the path (see below), then read the file
   2. For each edit: verify `old_text` appears exactly once (error if not found or ambiguous)
-  3. Apply replacements sequentially
+  3. Apply replacements sequentially with `indexOf` + `slice`. Do not use `String.prototype.replace`: it expands `$&`, `` $` ``, `$'` and `$$` in `new_text`, so the edit is not literal
   4. Write the result
   5. Return a unified diff of the changes
 - **Key implementation detail**: Generate the diff using string comparison — show `---`/`+++` header, then `@@` hunks with context lines. This helps the model verify its edits.
 - **Mutating**
+
+### Path confinement for file_write and file_edit
+
+The model picks the path, and text it reads (repo files, web results) can steer it. Resolve the path against `process.cwd()`, follow symlinks with `fs.realpath` (for a file that does not exist yet, realpath its nearest existing parent), and refuse it unless the real location is inside the real working directory and not under `.git`. Otherwise injected text can make the agent append to `~/.bashrc` or add a `.git/hooks` script. The sample keeps this in `src/tools/workspace-path.ts` (`resolveInsideCwd`). To also make the developer confirm each write, add `requireApproval` (see Tool Approval in modules.md).
 
 ### glob
 
