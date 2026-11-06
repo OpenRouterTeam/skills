@@ -313,7 +313,7 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
   if (existsSync(configPath)) {
     const file = JSON.parse(readFileSync(configPath, 'utf-8'));
     // agent.config.json sits in the working directory, which may be an untrusted
-    // checkout, so it cannot turn on shell access. Use --allow-shell or AGENT_ALLOW_SHELL=1.
+    // checkout, so it cannot turn on shell access. Only the --allow-shell flag can.
     delete file.allowShell;
     config = { ...config, ...file };
   }
@@ -321,7 +321,6 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
   if (process.env.OPENROUTER_API_KEY) config.apiKey = process.env.OPENROUTER_API_KEY;
   if (process.env.AGENT_MODEL) config.model = process.env.AGENT_MODEL;
   if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
-  if (process.env.AGENT_ALLOW_SHELL === '1') config.allowShell = true;
   if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
   config = { ...config, ...overrides };

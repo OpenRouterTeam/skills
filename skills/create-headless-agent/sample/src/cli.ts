@@ -22,7 +22,7 @@ Options:
       --output-schema <f>   Validate final output against a JSON Schema file
                             (exits 2 on schema mismatch, uses Ajv)
       --allow-shell         Let the agent run shell commands without asking
-                            (off by default; also AGENT_ALLOW_SHELL=1)
+                            (off by default)
   -h, --help                Show this help message
 
 Examples:

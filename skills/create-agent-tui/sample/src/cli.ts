@@ -149,28 +149,6 @@ function borderedReadLine(borderColor = GRAY): Promise<string> {
   });
 }
 
-/** Ask y/N on the terminal. Anything but "y" declines; no TTY means decline. */
-function confirm(question: string): Promise<boolean> {
-  if (!process.stdin.isTTY) return Promise.resolve(false);
-  return new Promise((resolve) => {
-    process.stdout.write(question);
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.once('data', (data: Buffer) => {
-      process.stdin.setRawMode(false);
-      process.stdin.pause();
-      const key = data.toString('utf-8');
-      if (key === '\x03') {
-        process.stdout.write(`${RESET}\n`);
-        process.exit(0);
-      }
-      const yes = key.toLowerCase() === 'y';
-      process.stdout.write(`${yes ? 'yes' : 'no'}\n`);
-      resolve(yes);
-    });
-  });
-}
-
 async function main() {
   const argBanner = parseArg('--banner');
   const argModel = parseArg('--model');
@@ -206,28 +184,33 @@ async function main() {
   if (config.slashCommands) console.log(`  ${DIM}/help for commands${RESET}\n`);
 
   const renderer = new TuiRenderer({ display: config.display });
-  let activeLoader: Loader | null = null;
-
-  // Every model-requested shell command waits for the user's y/N.
-  // Content the agent reads (files, web results) can carry injected instructions.
-  // Prompts are chained so parallel tool calls ask one at a time.
-  let approvalQueue: Promise<unknown> = Promise.resolve();
-  setShellApprover((command) => {
-    const ask = approvalQueue.then(async () => {
-      const wasRunning = activeLoader?.running ?? false;
-      activeLoader?.stop();
-      const ok = await confirm(`\n${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `);
-      if (wasRunning) activeLoader?.start();
-      return ok;
-    });
-    approvalQueue = ask.catch(() => {});
-    return ask;
-  });
 
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: `${GREEN}>${RESET} `,
+  });
+
+  let activeLoader: Loader | null = null;
+
+  // Every model-requested shell command waits for the user's y/N.
+  // Content the agent reads (files, web results) can carry injected instructions.
+  // Prompts are chained so parallel tool calls ask one at a time. rl.question
+  // owns the answer, so it doesn't leak into the next prompt. No TTY declines.
+  let approvalQueue: Promise<unknown> = Promise.resolve();
+  setShellApprover((command) => {
+    if (!process.stdin.isTTY) return Promise.resolve(false);
+    const ask = approvalQueue.then(async () => {
+      const wasRunning = activeLoader?.running ?? false;
+      activeLoader?.stop();
+      process.stdin.resume();
+      const answer = await new Promise<string>((r) =>
+        rl.question(`\n${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `, r));
+      if (wasRunning) activeLoader?.start();
+      return answer.trim().toLowerCase() === 'y';
+    });
+    approvalQueue = ask.catch(() => {});
+    return ask;
   });
 
   const cmdCtx: CommandContext = {

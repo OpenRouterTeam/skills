@@ -455,6 +455,7 @@ import { createInterface } from 'readline';
 import { loadConfig } from './config.js';
 import { runAgentWithRetry, type AgentEvent } from './agent.js';
 import { detectBg } from './terminal-bg.js';
+import { setShellApprover } from './tools/shell.js';
 // import { styledReadLine, borderedReadLine } from ... — see references/input-styles.md
 
 const DIM = '\x1b[2m';
@@ -493,6 +494,26 @@ async function main() {
 
   const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: `${GREEN}>${RESET} ` });
 
+  // Files and web results the agent reads can carry injected instructions, so
+  // the shell tool asks before every command (its default approver declines).
+  // Prompts are chained so parallel tool calls ask one at a time; no TTY declines.
+  let approving = false;
+  let approvalQueue: Promise<unknown> = Promise.resolve();
+  setShellApprover((command) => {
+    if (!process.stdin.isTTY) return Promise.resolve(false);
+    const ask = approvalQueue.then(async () => {
+      approving = true;
+      process.stdout.write('\r\x1b[K');
+      process.stdin.resume();
+      const answer = await new Promise<string>((r) =>
+        rl.question(`${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `, r));
+      approving = false;
+      return answer.trim().toLowerCase() === 'y';
+    });
+    approvalQueue = ask.catch(() => {});
+    return ask;
+  });
+
   async function getInput(): Promise<string> {
     switch (config.display.inputStyle) {
       case 'block': return styledReadLine(BG_INPUT);
@@ -521,7 +542,7 @@ async function main() {
     const dots = ['·', '··', '···'];
     let di = 0;
     const spin = setInterval(() => {
-      if (!started) process.stdout.write(`\r${DIM}${dots[di++ % 3]}${RESET}`);
+      if (!started && !approving) process.stdout.write(`\r${DIM}${dots[di++ % 3]}${RESET}`);
     }, 300);
 
     const handleEvent = (event: AgentEvent) => {

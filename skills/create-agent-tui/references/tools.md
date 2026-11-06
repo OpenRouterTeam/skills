@@ -95,7 +95,7 @@ inputSchema: z.object({
 ```
 
 - **Behavior**:
-  1. Ask the user before every command. `execute` awaits an approver set with `setShellApprover()`; the default approver declines, and `cli.ts` installs a y/N prompt (declines when stdin is not a TTY). A declined call returns `{ output, exitCode: null, declined: true }` without running anything. Files and web results the agent reads can carry injected instructions, so never ship the shell tool without this gate.
+  1. Ask the user before every command. `execute` awaits an approver set with `setShellApprover()`; the default approver declines, and `cli.ts` installs a y/N prompt through `rl.question` (declines when stdin is not a TTY). A declined call returns `{ output, exitCode: null, declined: true }` without running anything. Files and web results the agent reads can carry injected instructions, so never ship the shell tool without this gate.
   2. Clamp `timeout`: missing, zero, negative or non-finite values use the 120s default, and values above 600s are capped. A timeout of 0 must never disable the deadline.
   3. Spawn via `child_process.execFile` with the user's shell (`$SHELL` or `/bin/bash`), `cwd: process.cwd()`, and an `env` with secrets removed (names matching `KEY`, `TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIAL`, `AUTH`, `COOKIE`, `SESSION`, which includes `OPENROUTER_API_KEY`)
   4. Capture stdout + stderr combined
