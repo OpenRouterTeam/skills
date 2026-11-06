@@ -249,7 +249,18 @@ npm install -D tsx typescript @types/node
 
 ```typescript
 import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { homedir } from 'os';
+import { join, resolve } from 'path';
+
+const APP_NAME = 'my-agent';
+
+function positiveNumber(name: string, raw: string | number): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`${name} must be a positive number, got: ${JSON.stringify(raw)}`);
+  }
+  return n;
+}
 
 export interface DisplayConfig {
   toolDisplay: 'emoji' | 'grouped' | 'minimal' | 'hidden';
@@ -294,28 +305,98 @@ const DEFAULTS: AgentConfig = {
   slashCommands: true,
 };
 
-export function loadConfig(overrides: Partial<AgentConfig> = {}): AgentConfig {
+type FieldType = 'string' | 'number' | 'boolean' | readonly string[];
+
+// Fields a config file may set, and their types. apiKey is env-only so it never sits in a file.
+const FILE_FIELDS: Record<string, FieldType> = {
+  model: 'string',
+  systemPrompt: 'string',
+  maxSteps: 'number',
+  maxCost: 'number',
+  sessionDir: 'string',
+  showBanner: 'boolean',
+  slashCommands: 'boolean',
+};
+const DISPLAY_FIELDS: Record<string, FieldType> = {
+  toolDisplay: ['emoji', 'grouped', 'minimal', 'hidden'],
+  reasoning: 'boolean',
+  inputStyle: ['block', 'bordered', 'plain'],
+};
+
+/**
+ * The config file is read from an explicit path (--config or AGENT_CONFIG) or the user's
+ * config directory, never from the working directory: a cloned repo could otherwise ship
+ * an agent.config.json that replaces the system prompt and lifts the cost and step limits.
+ */
+export function resolveConfigPath(explicit?: string): { path: string; required: boolean } {
+  const chosen = explicit || process.env.AGENT_CONFIG;
+  if (chosen) return { path: resolve(chosen), required: true };
+  const base = process.env.XDG_CONFIG_HOME || join(homedir(), '.config');
+  return { path: join(base, APP_NAME, 'agent.config.json'), required: false };
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function pick(where: string, raw: unknown, fields: Record<string, FieldType>): Record<string, unknown> {
+  if (!isObject(raw)) throw new Error(`${where} must be a JSON object`);
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const type = fields[key];
+    if (!type) throw new Error(`${where}: unsupported field "${key}"`);
+    if (Array.isArray(type)) {
+      if (!type.includes(value as string)) throw new Error(`${where}: "${key}" must be one of ${type.join(', ')}`);
+    } else if (typeof value !== type) {
+      throw new Error(`${where}: "${key}" must be a ${type}`);
+    }
+    out[key] = type === 'number' ? positiveNumber(`${where}: ${key}`, value as number) : value;
+  }
+  return out;
+}
+
+function readConfigFile(path: string, required: boolean): Record<string, any> {
+  if (!existsSync(path)) {
+    if (required) throw new Error(`Config file not found: ${path}`);
+    return {};
+  }
+  const raw: unknown = JSON.parse(readFileSync(path, 'utf-8'));
+  if (!isObject(raw)) throw new Error(`${path} must contain a JSON object`);
+  const { display, ...rest } = raw;
+  const out: Record<string, any> = pick(path, rest, FILE_FIELDS);
+  if (display !== undefined) {
+    if (!isObject(display)) throw new Error(`${path}: "display" must be a JSON object`);
+    out.display = pick(`${path}: display`, display, DISPLAY_FIELDS);
+  }
+  return out;
+}
+
+export function loadConfig(
+  overrides: Partial<AgentConfig> = {},
+  opts?: { skipApiKey?: boolean; configPath?: string },
+): AgentConfig {
   let config = { ...DEFAULTS };
 
-  const configPath = resolve('agent.config.json');
-  if (existsSync(configPath)) {
-    const file = JSON.parse(readFileSync(configPath, 'utf-8'));
-    if (file.display) {
-      config.display = { ...config.display, ...file.display };
-    }
-    config = { ...config, ...file, display: config.display };
+  const { path, required } = resolveConfigPath(opts?.configPath);
+  const file = readConfigFile(path, required);
+  if (file.display) {
+    config.display = {
+      ...config.display,
+      ...file.display,
+    };
   }
+  config = { ...config, ...file, display: config.display };
 
   if (process.env.OPENROUTER_API_KEY) config.apiKey = process.env.OPENROUTER_API_KEY;
   if (process.env.AGENT_MODEL) config.model = process.env.AGENT_MODEL;
-  if (process.env.AGENT_MAX_STEPS) config.maxSteps = Number(process.env.AGENT_MAX_STEPS);
-  if (process.env.AGENT_MAX_COST) config.maxCost = Number(process.env.AGENT_MAX_COST);
+  if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
+  if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
   if (overrides.display) {
     config.display = { ...config.display, ...overrides.display };
   }
   config = { ...config, ...overrides, display: config.display };
-  if (!config.apiKey) throw new Error('OPENROUTER_API_KEY is required.');
+  if (!config.apiKey && !opts?.skipApiKey) throw new Error('OPENROUTER_API_KEY is required.');
   return config;
 }
 ```
@@ -604,7 +685,7 @@ if (config.showBanner) {
 }
 ```
 
-Add `showBanner: boolean` to `AgentConfig` (default `false`). Enable via `agent.config.json` or `loadConfig({ showBanner: true })`.
+Add `showBanner: boolean` to `AgentConfig` (default `false`). Enable via `~/.config/my-agent/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`) or `loadConfig({ showBanner: true })`.
 
 ---
 

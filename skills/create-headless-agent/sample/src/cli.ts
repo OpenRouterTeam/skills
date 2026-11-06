@@ -18,6 +18,7 @@ Options:
       --no-session          Disable session persistence
       --max-steps <n>       Maximum agent steps (default: 20)
       --max-cost <n>        Maximum cost in dollars (default: 1.0)
+      --config <file>       Config file (default: ~/.config/my-agent/agent.config.json)
       --output-schema <f>   Validate final output against a JSON Schema file
                             (exits 2 on schema mismatch, uses Ajv)
   -h, --help                Show this help message
@@ -67,6 +68,7 @@ async function main() {
       'max-steps': { type: 'string' },
       'max-cost': { type: 'string' },
       'output-schema': { type: 'string' },
+      config: { type: 'string' },
       help: { type: 'boolean', short: 'h', default: false },
     },
     allowPositionals: true,
@@ -118,7 +120,7 @@ async function main() {
       overrides.maxCost = n;
     }
 
-    const config = loadConfig(overrides);
+    const config = loadConfig(overrides, { configPath: values.config });
     const noSession = values['no-session'];
     let sessionPath: string | undefined;
 

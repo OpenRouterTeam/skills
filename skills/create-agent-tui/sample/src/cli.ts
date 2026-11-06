@@ -168,7 +168,7 @@ async function main() {
     };
   }
 
-  const config = loadConfig(overrides, { skipApiKey: demoMode || demoLoaderMode });
+  const config = loadConfig(overrides, { skipApiKey: demoMode || demoLoaderMode, configPath: parseArg('--config') });
   const BG_INPUT = config.display.inputStyle === 'block' ? await detectBg() : '';
 
   initSessionDir(config.sessionDir);

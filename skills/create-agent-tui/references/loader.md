@@ -121,7 +121,7 @@ The preview input box is a visual-only rendering of the input prompt below the l
 
 ## Config
 
-Set in `agent.config.json`:
+Set in `~/.config/my-agent/agent.config.json` (or the file passed with `--config` / `AGENT_CONFIG`):
 
 ```json
 {
