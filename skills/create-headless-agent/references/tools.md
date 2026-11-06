@@ -30,7 +30,7 @@ Read file contents with optional offset/limit. Full example in SKILL.md.
 Write content to a file, creating it and parent directories if needed.
 
 - **inputSchema**: `path` (string), `content` (string)
-- **Behavior**: Create parent directories with `import { mkdirSync } from 'fs'` and `mkdirSync(dirname(path), { recursive: true })`, then `await Bun.write(path, content)`. Return `{ written: true, path }`
+- **Behavior**: Resolve `path` with `resolveWritablePath(path)` from `src/tools/workspace.ts` (see [Workspace write guard](#workspace-write-guard)) and return `{ error }` if it throws. Then create parent directories with `import { mkdirSync } from 'fs'` and `mkdirSync(dirname(target), { recursive: true })`, then `await Bun.write(target, content)`. Return `{ written: true, path: target }`
 - **Mutating**
 
 ### file_edit
@@ -39,13 +39,26 @@ Apply search-and-replace edits to a file with diff output.
 
 - **inputSchema**: `path` (string), `edits` (array of `{ old_text: string, new_text: string }`)
 - **Behavior**:
-  1. Read the file with `await Bun.file(path).text()`
+  1. Resolve `path` with `const target = resolveWritablePath(path)` (see [Workspace write guard](#workspace-write-guard)) and return `{ error }` if it throws, then read the file with `await Bun.file(target).text()`
   2. For each edit: verify `old_text` appears exactly once (error if not found or ambiguous)
   3. Apply replacements sequentially
   4. Write the result with `await Bun.write(path, result)`
   5. Return a unified diff of the changes
 - **Key implementation detail**: Generate the diff using string comparison — show `---`/`+++` header, then `@@` hunks with context lines. This helps the model verify its edits.
 - **Mutating**
+
+### Workspace write guard
+
+`file_write` and `file_edit` take `path` from the model, and the model reads untrusted text (web search and fetch results, files in the repo it works on). Without a guard, injected instructions can make it overwrite `~/.bashrc`, `~/.ssh/authorized_keys`, or `agent.config.json`. Generate `src/tools/workspace.ts` with a `resolveWritablePath(path, root = process.cwd())` helper that both tools call before touching disk:
+
+1. Resolve `root` with `realpathSync`, then resolve `path` against it.
+2. Walk up to the nearest existing ancestor (use `lstatSync`, so a dangling symlink counts as existing) and resolve it with `realpathSync`, then rejoin the missing tail. A dangling symlink makes `realpathSync` throw, which refuses the write. This stops a symlink inside the root from pointing a write outside it.
+3. Throw unless `relative(realRoot, real)` is non-empty, not `..`, does not start with `../`, and is not absolute.
+4. Throw for protected targets inside the root: any `.git` path segment (hooks run code), `agent.config.json` at the root (it sets `systemPrompt` for future runs), and `.env` / `.env.*` files. Check both the requested path and the resolved path, so a symlink cannot route a write into or out of a protected name.
+
+Return the resolved path and write to it, not to the raw input. Ship `test/workspace.test.ts` that calls each tool's `execute` with an absolute path outside the root, a `../` path, a symlinked directory and a symlinked file that point outside, and protected names; each must return `{ error }` and leave the filesystem unchanged, while a normal path inside the root still writes.
+
+The guard does not cover `shell`, which runs any command the model sends with the user's privileges. If the agent reads untrusted content, enable the [Tool Approval](modules.md#tool-approval) module for `shell` or run the agent in a sandbox (container or dedicated user).
 
 ### glob
 
@@ -105,6 +118,7 @@ inputSchema: z.object({
   6. Kill process on timeout
 - **Key implementation detail**: For simpler use cases, `Bun.spawnSync(['sh', '-c', command])` is a cleaner alternative — it blocks and returns `{ stdout, stderr, exitCode }` directly. Use the async `Bun.spawn()` variant when you need streaming or timeout handling.
 - **Timeout handling**: Use `setTimeout` + `proc.kill()` to enforce the deadline, then return partial output with `timedOut: true`.
+- **Security**: Not confined to the workspace. See the note under [Workspace write guard](#workspace-write-guard).
 - **Mutating**
 
 ### web_fetch

@@ -1,18 +1,20 @@
 import { tool } from '@openrouter/agent/tool';
 import { z } from 'zod';
+import { resolveWritablePath } from './workspace.js';
 
 export const fileEditTool = tool({
   name: 'file_edit',
   description: 'Apply search-and-replace edits to a file',
   inputSchema: z.object({
-    path: z.string().describe('Absolute path to the file'),
+    path: z.string().describe('Path to the file, relative to or inside the working directory'),
     edits: z.array(z.object({
       old_text: z.string().describe('Text to find (must appear exactly once)'),
       new_text: z.string().describe('Replacement text'),
     })),
   }),
-  execute: async ({ path, edits }) => {
+  execute: async ({ path: requested, edits }) => {
     try {
+      const path = resolveWritablePath(requested);
       let content = await Bun.file(path).text();
       // Show each substitution as a self-contained -/+ block. Positional
       // line-by-line diffs lie when an edit inserts or deletes lines — this
