@@ -101,7 +101,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--output-format <f>` | `png`, `jpeg`, `webp`, `svg` (vector models), or `gif` (animation models, e.g. `openai/gpt-image-2.6-flare`) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
-| `--frame-count <n>` | Animation frames (2–64) with `--output-format gif`; generations only | Model default |
+| `--frame-count <n>` | Animation frames (2–64) with `--output-format gif` | Model default |
 | `--frame-duration-ms <n>` | Per-frame display time (20–2000 ms) with `--output-format gif` | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
