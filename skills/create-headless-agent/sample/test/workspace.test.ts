@@ -79,6 +79,22 @@ describe('file tools stay inside the workspace', () => {
     }
   });
 
+  test('refuses a protected name that is a symlink to a normal file', async () => {
+    writeFileSync(join(root, 'real.json'), '{}');
+    symlinkSync(join(root, 'real.json'), join(root, 'agent.config.json'));
+    const res = await write({ path: 'agent.config.json', content: '{"systemPrompt":"x"}' });
+    expect(res.error).toContain('protected');
+    expect(readFileSync(join(root, 'real.json'), 'utf-8')).toBe('{}');
+  });
+
+  test('refuses a normal name that is a symlink to a protected file', async () => {
+    mkdirSync(join(root, '.git', 'hooks'), { recursive: true });
+    symlinkSync(join(root, '.git', 'hooks'), join(root, 'hooks'));
+    const res = await write({ path: 'hooks/pre-commit', content: 'x' });
+    expect(res.error).toContain('protected');
+    expect(existsSync(join(root, '.git', 'hooks', 'pre-commit'))).toBe(false);
+  });
+
   test('file_edit refuses a file outside the root', async () => {
     writeFileSync(join(outside, 'e.txt'), 'hello');
     const res = await edit({ path: join(outside, 'e.txt'), edits: [{ old_text: 'hello', new_text: 'pwned' }] });

@@ -54,7 +54,7 @@ Apply search-and-replace edits to a file with diff output.
 1. Resolve `root` with `realpathSync`, then resolve `path` against it.
 2. Walk up to the nearest existing ancestor (use `lstatSync`, so a dangling symlink counts as existing) and resolve it with `realpathSync`, then rejoin the missing tail. A dangling symlink makes `realpathSync` throw, which refuses the write. This stops a symlink inside the root from pointing a write outside it.
 3. Throw unless `relative(realRoot, real)` is non-empty, not `..`, does not start with `../`, and is not absolute.
-4. Throw for protected targets inside the root: any `.git` path segment (hooks run code), `agent.config.json` at the root (it sets `systemPrompt` for future runs), and `.env` / `.env.*` files.
+4. Throw for protected targets inside the root: any `.git` path segment (hooks run code), `agent.config.json` at the root (it sets `systemPrompt` for future runs), and `.env` / `.env.*` files. Check both the requested path and the resolved path, so a symlink cannot route a write into or out of a protected name.
 
 Return the resolved path and write to it, not to the raw input. Ship `test/workspace.test.ts` that calls each tool's `execute` with an absolute path outside the root, a `../` path, a symlinked directory and a symlinked file that point outside, and protected names; each must return `{ error }` and leave the filesystem unchanged, while a normal path inside the root still writes.
 

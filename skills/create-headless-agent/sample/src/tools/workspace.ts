@@ -5,6 +5,17 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'pat
 const PROTECTED_NAMES = new Set(['agent.config.json']);
 const PROTECTED_SEGMENTS = new Set(['.git']);
 
+function isProtected(rel: string): boolean {
+  const parts = rel.split(sep);
+  const name = parts[parts.length - 1];
+  return (
+    parts.some((p) => PROTECTED_SEGMENTS.has(p)) ||
+    (parts.length === 1 && PROTECTED_NAMES.has(name)) ||
+    name === '.env' ||
+    name.startsWith('.env.')
+  );
+}
+
 function exists(path: string): boolean {
   try {
     lstatSync(path);
@@ -39,14 +50,9 @@ export function resolveWritablePath(path: string, root: string = process.cwd()):
     throw new Error(`Refusing to write outside the workspace (${realRoot}): ${path}`);
   }
 
-  const parts = rel.split(sep);
-  const name = parts[parts.length - 1];
-  if (
-    parts.some((p) => PROTECTED_SEGMENTS.has(p)) ||
-    (parts.length === 1 && PROTECTED_NAMES.has(name)) ||
-    name === '.env' ||
-    name.startsWith('.env.')
-  ) {
+  // Check both the requested path and its resolved target, so a symlink
+  // cannot route a write into or out of a protected name.
+  if (isProtected(rel) || isProtected(relative(realRoot, target))) {
     throw new Error(`Refusing to write protected file: ${path}`);
   }
 
