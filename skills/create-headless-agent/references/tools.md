@@ -39,7 +39,7 @@ Apply search-and-replace edits to a file with diff output.
 
 - **inputSchema**: `path` (string), `edits` (array of `{ old_text: string, new_text: string }`)
 - **Behavior**:
-  1. Resolve `path` with `resolveWritablePath(path)` (see [Workspace write guard](#workspace-write-guard)), then read the file with `await Bun.file(path).text()`
+  1. Resolve `path` with `const target = resolveWritablePath(path)` (see [Workspace write guard](#workspace-write-guard)) and return `{ error }` if it throws, then read the file with `await Bun.file(target).text()`
   2. For each edit: verify `old_text` appears exactly once (error if not found or ambiguous)
   3. Apply replacements sequentially
   4. Write the result with `await Bun.write(path, result)`
