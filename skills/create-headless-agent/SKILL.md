@@ -56,7 +56,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 |------|---------|-------------|
 | File Read | ON | Read files with offset/limit |
 | File Write | ON | Write/create files, auto-create directories |
-| File Edit | ON | Search-and-replace with diff validation |
+| File Edit | ON | Search-and-replace with diff validation, confined to the working directory |
 | Glob/Find | ON | File discovery by glob pattern |
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
@@ -107,6 +107,7 @@ After getting the name and checklist selections, follow this workflow:
 - [ ] Generate src/config.ts
 - [ ] Generate src/tools/index.ts wiring selected tools
 - [ ] Generate selected tool files in src/tools/ (specs in references/tools.md)
+- [ ] If File Edit ON: generate src/tools/workspace-path.ts (spec in references/tools.md)
 - [ ] Generate src/agent.ts (core runner)
 - [ ] If Session Persistence ON: generate src/session.ts (spec in references/modules.md)
 - [ ] Generate selected modules (specs in references/modules.md)

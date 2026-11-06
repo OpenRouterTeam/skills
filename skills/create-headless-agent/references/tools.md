@@ -39,13 +39,27 @@ Apply search-and-replace edits to a file with diff output.
 
 - **inputSchema**: `path` (string), `edits` (array of `{ old_text: string, new_text: string }`)
 - **Behavior**:
-  1. Read the file with `await Bun.file(path).text()`
+  1. Resolve `path` with `resolveWorkspacePath(path)` (see [Workspace path confinement](#workspace-path-confinement)) and use the returned real path for all I/O. Return its error if it throws. Then read the file with `await Bun.file(target).text()`
   2. For each edit: verify `old_text` appears exactly once (error if not found or ambiguous)
   3. Apply replacements sequentially
-  4. Write the result with `await Bun.write(path, result)`
+  4. Write the result with `await Bun.write(target, result)`
   5. Return a unified diff of the changes
+- **Why the path check matters**: The model picks `path`, and text from web pages or files it reads can steer that choice (prompt injection). Without the check, a planted instruction can make the agent edit `~/.bashrc` or `agent.config.json` and run code on the user's machine or take over later runs.
 - **Key implementation detail**: Generate the diff using string comparison — show `---`/`+++` header, then `@@` hunks with context lines. This helps the model verify its edits.
 - **Mutating**
+
+### Workspace path confinement
+
+Shared helper in `src/tools/workspace-path.ts`, used by `file_edit`. `resolveWorkspacePath(path, root = process.cwd())`:
+
+1. `realpathSync(root)`, then resolve `path` against it and follow symlinks with `realpathSync`. For a path that does not exist yet, realpath the nearest existing parent and append the rest.
+2. Throw if the real path is outside the real root (`path.relative` starts with `..` or is absolute). This catches `../` escapes, absolute paths, and in-root symlinks that point outside.
+3. Throw if the path is a protected in-root file: anything under `.git/` (hooks run code), `agent.config.json` (holds `systemPrompt`, loaded every run), `bunfig.toml` (preload scripts), and `.env` / `.env.*` (Bun loads them on start).
+4. Return the real path. Tools do their I/O on it, not on the raw `path`.
+
+Add a `bun test` that calls `file_edit`'s `execute` with an absolute path outside the root, a `../` path, and an in-root symlink to an outside file. Each must return an error and leave the target unchanged, while an in-root edit still applies.
+
+This does not sandbox the `shell` tool. For untrusted input, also enable the Tool Approval module (references/modules.md) or run the agent in a container.
 
 ### glob
 

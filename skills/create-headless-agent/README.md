@@ -117,7 +117,8 @@ my-agent/
       index.ts              Tool registry + server tools
       file-read.ts          Read files (Bun.file)
       file-write.ts         Write files (Bun.write)
-      file-edit.ts          Search-and-replace with diff
+      file-edit.ts          Search-and-replace with diff (confined to cwd)
+      workspace-path.ts     Keeps file paths inside the working directory
       glob.ts               Find files (Bun.Glob)
       grep.ts               Search content by regex
       list-dir.ts           List directories
