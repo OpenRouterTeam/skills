@@ -69,7 +69,7 @@ The skill presents an interactive checklist when invoked:
 | Glob/Find | on | Find files by pattern |
 | Grep/Search | on | Search file contents by regex |
 | Directory List | on | List directory entries |
-| Shell/Bash | on | Execute commands with timeout |
+| Shell/Bash | on | Execute commands with timeout; refuses unless run with `--allow-shell` |
 | Custom Tool Template | on | Empty skeleton for your domain |
 | JS/TS REPL | off | Persistent Bun REPL |
 | Sub-agent Spawn | off | Delegate tasks to child agents |

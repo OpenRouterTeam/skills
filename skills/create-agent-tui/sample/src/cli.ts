@@ -7,6 +7,7 @@ import { TuiRenderer } from './renderer.js';
 import { dispatch, type CommandContext } from './commands.js';
 import { detectBg } from './terminal-bg.js';
 import { Loader } from './loader.js';
+import { setShellApprover } from './tools/shell.js';
 
 const DIM = '\x1b[2m';
 const RESET = '\x1b[0m';
@@ -148,6 +149,28 @@ function borderedReadLine(borderColor = GRAY): Promise<string> {
   });
 }
 
+/** Ask y/N on the terminal. Anything but "y" declines; no TTY means decline. */
+function confirm(question: string): Promise<boolean> {
+  if (!process.stdin.isTTY) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    process.stdout.write(question);
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.once('data', (data: Buffer) => {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      const key = data.toString('utf-8');
+      if (key === '\x03') {
+        process.stdout.write(`${RESET}\n`);
+        process.exit(0);
+      }
+      const yes = key.toLowerCase() === 'y';
+      process.stdout.write(`${yes ? 'yes' : 'no'}\n`);
+      resolve(yes);
+    });
+  });
+}
+
 async function main() {
   const argBanner = parseArg('--banner');
   const argModel = parseArg('--model');
@@ -183,6 +206,23 @@ async function main() {
   if (config.slashCommands) console.log(`  ${DIM}/help for commands${RESET}\n`);
 
   const renderer = new TuiRenderer({ display: config.display });
+  let activeLoader: Loader | null = null;
+
+  // Every model-requested shell command waits for the user's y/N.
+  // Content the agent reads (files, web results) can carry injected instructions.
+  // Prompts are chained so parallel tool calls ask one at a time.
+  let approvalQueue: Promise<unknown> = Promise.resolve();
+  setShellApprover((command) => {
+    const ask = approvalQueue.then(async () => {
+      const wasRunning = activeLoader?.running ?? false;
+      activeLoader?.stop();
+      const ok = await confirm(`\n${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `);
+      if (wasRunning) activeLoader?.start();
+      return ok;
+    });
+    approvalQueue = ask.catch(() => {});
+    return ask;
+  });
 
   const rl = createInterface({
     input: process.stdin,
@@ -312,6 +352,7 @@ async function main() {
 
       let started = false;
       const loader = new Loader(config.display.loader);
+      activeLoader = loader;
       process.stdout.write('\n');
       loader.start();
 

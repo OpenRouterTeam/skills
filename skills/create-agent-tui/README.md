@@ -129,7 +129,7 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | Glob/Find | on | Find files by pattern |
 | Grep/Search | on | Search file contents by regex |
 | Directory List | on | List directory entries |
-| Shell/Bash | on | Execute commands with timeout |
+| Shell/Bash | on | Execute commands with timeout; asks before each command |
 | JS REPL | off | Persistent Node.js environment |
 | Sub-agent Spawn | off | Delegate tasks to child agents |
 | Plan/Todo | off | Track multi-step task progress |
@@ -145,7 +145,7 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | Session Persistence | on | JSONL append-only conversation log |
 | Context Compaction | off | Summarize old messages when context gets long |
 | System Prompt Composition | off | Build instructions from static + dynamic context files |
-| Tool Permissions | off | Gate dangerous tools behind user approval |
+| Tool Permissions | off | Gate other dangerous tools behind user approval (the shell tool always asks) |
 | Structured Logging | off | Emit events for tool calls, API requests, errors |
 
 ## What `@openrouter/agent` handles

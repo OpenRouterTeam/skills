@@ -90,16 +90,18 @@ Execute a shell command and return output.
 ```typescript
 inputSchema: z.object({
   command: z.string().describe('Shell command to execute'),
-  timeout: z.number().optional().describe('Timeout in seconds (default: 120)'),
+  timeout: z.number().optional().describe('Timeout in seconds (default: 120, max: 600)'),
 })
 ```
 
 - **Behavior**:
-  1. Spawn via `child_process.execFile` with the user's shell (`$SHELL` or `/bin/bash`)
-  2. Capture stdout + stderr combined
-  3. Truncate output to last 2000 lines or 256KB
-  4. Return `{ output, exitCode, truncated? }`
-  5. Kill process tree on timeout
+  1. Ask the user before every command. `execute` awaits an approver set with `setShellApprover()`; the default approver declines, and `cli.ts` installs a y/N prompt (declines when stdin is not a TTY). A declined call returns `{ output, exitCode: null, declined: true }` without running anything. Files and web results the agent reads can carry injected instructions, so never ship the shell tool without this gate.
+  2. Clamp `timeout`: missing, zero, negative or non-finite values use the 120s default, and values above 600s are capped. A timeout of 0 must never disable the deadline.
+  3. Spawn via `child_process.execFile` with the user's shell (`$SHELL` or `/bin/bash`), `cwd: process.cwd()`, and an `env` with secrets removed (names matching `KEY`, `TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIAL`, `AUTH`, `COOKIE`, `SESSION`, which includes `OPENROUTER_API_KEY`)
+  4. Capture stdout + stderr combined
+  5. Truncate output to last 2000 lines or 256KB
+  6. Return `{ output, exitCode, truncated? }`
+  7. Kill process tree on timeout
 - **Key implementation detail**: Use `{ timeout: seconds * 1000, maxBuffer: 256 * 1024 }` options. Catch the timeout error and return partial output with `timedOut: true`.
 - **Mutating**
 

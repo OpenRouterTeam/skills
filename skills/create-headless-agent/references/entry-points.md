@@ -25,6 +25,7 @@ import { readFileSync } from 'fs';
 import { loadConfig } from './config.js';
 import { runAgentWithRetry, type AgentEvent } from './agent.js';
 import { initSessionDir, saveMessage, newSessionPath } from './session.js';
+import { setShellApprover } from './tools/shell.js';
 
 // ── Argument parsing ────────────────────────────────────────────────
 // Pre-scan argv for output mode so the catch below can format errors
@@ -56,6 +57,7 @@ try {
       'max-steps':   { type: 'string' },
       'max-cost':    { type: 'string' },
       'output-schema': { type: 'string' },
+      'allow-shell': { type: 'boolean', default: false },
       help:          { type: 'boolean', short: 'h', default: false },
     },
     allowPositionals: true,
@@ -81,6 +83,7 @@ Options:
       --max-steps <n>       Maximum number of agent steps
       --max-cost <n>        Maximum cost in dollars
       --output-schema <f>   Path to a JSON Schema file to validate output
+      --allow-shell         Let the agent run shell commands (off by default)
   -h, --help                Show this help message
 
 Prompt sources (in priority order):
@@ -127,6 +130,11 @@ if (values['max-cost']) {
   if (!Number.isFinite(n) || n <= 0) throw new Error(`--max-cost must be a positive number, got: ${values['max-cost']}`);
   config.maxCost = n;
 }
+if (values['allow-shell']) config.allowShell = true;
+
+// Text the agent reads (files, web results) can carry injected instructions,
+// so model-chosen shell commands only run when the operator opted in.
+setShellApprover(async () => config.allowShell);
 
 // ── Load output schema (optional) ──────────────────────────────────
 
@@ -293,6 +301,8 @@ A `Bun.serve()` HTTP server that exposes the agent over a REST API with optional
 import { loadConfig } from './config.js';
 import { runAgentWithRetry, type AgentEvent } from './agent.js';
 
+// The shell tool keeps its fail-closed default approver here: network callers
+// never get shell access. Don't install an approver that returns true.
 const config = loadConfig();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? '*';

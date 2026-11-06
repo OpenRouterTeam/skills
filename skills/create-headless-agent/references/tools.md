@@ -92,17 +92,19 @@ Execute a shell command and return output.
 ```typescript
 inputSchema: z.object({
   command: z.string().describe('Shell command to execute'),
-  timeout: z.number().optional().describe('Timeout in seconds (default: 120)'),
+  timeout: z.number().optional().describe('Timeout in seconds (default: 120, max: 600)'),
 })
 ```
 
 - **Behavior**:
-  1. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`) and `['-c', command]`
-  2. Read stdout with `await new Response(proc.stdout).text()` and stderr with `await new Response(proc.stderr).text()`
-  3. Wait for exit code via `await proc.exited`
-  4. Truncate combined output to last 2000 lines or 256KB
-  5. Return `{ output, exitCode, truncated? }`
-  6. Kill process on timeout
+  1. Refuse unless the operator opted in. `execute` awaits an approver set with `setShellApprover()`; the default approver declines. `cli.ts` allows commands only with `--allow-shell` or `AGENT_ALLOW_SHELL=1` (never from `agent.config.json`, which may come from an untrusted checkout). A declined call returns `{ output, exitCode: null, declined: true }` without running anything. Files and web results the agent reads can carry injected instructions, so a headless agent must not run model-chosen commands by default. Server and MCP entry points get the same fail-closed default unless they install their own approver.
+  2. Clamp `timeout`: missing, zero, negative or non-finite values use the 120s default, and values above 600s are capped
+  3. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`), `['-c', command]`, `cwd: process.cwd()`, and an `env` with secrets removed (names matching `KEY`, `TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIAL`, `AUTH`, `COOKIE`, `SESSION`, which includes `OPENROUTER_API_KEY`)
+  4. Read stdout with `await new Response(proc.stdout).text()` and stderr with `await new Response(proc.stderr).text()`
+  5. Wait for exit code via `await proc.exited`
+  6. Truncate combined output to last 2000 lines or 256KB
+  7. Return `{ output, exitCode, truncated? }`
+  8. Kill process on timeout
 - **Key implementation detail**: For simpler use cases, `Bun.spawnSync(['sh', '-c', command])` is a cleaner alternative — it blocks and returns `{ stdout, stderr, exitCode }` directly. Use the async `Bun.spawn()` variant when you need streaming or timeout handling.
 - **Timeout handling**: Use `setTimeout` + `proc.kill()` to enforce the deadline, then return partial output with `timedOut: true`.
 - **Mutating**

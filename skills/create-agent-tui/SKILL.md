@@ -55,7 +55,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Glob/Find | ON | File discovery by glob pattern |
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
-| Shell/Bash | ON | Execute commands with timeout and output capture |
+| Shell/Bash | ON | Execute commands with timeout and output capture; asks the user before each command |
 | JS REPL | OFF | Persistent Node.js environment |
 | Sub-agent Spawn | OFF | Delegate tasks to child agents |
 | Plan/Todo | OFF | Track multi-step task progress |
@@ -72,7 +72,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | ASCII Logo Banner | OFF | Custom ASCII art banner on startup — ask for project name |
 | Context Compaction | OFF | Summarize older messages when context is long |
 | System Prompt Composition | OFF | Assemble instructions from static + dynamic context |
-| Tool Permissions / Approval | OFF | Gate dangerous tools behind user confirmation |
+| Tool Permissions / Approval | OFF | Gate other dangerous tools behind user confirmation (the shell tool always asks) |
 | Structured Event Logging | OFF | Emit events for tool calls, API requests, errors |
 | `@`-file References | OFF | `@filename` to attach file content to next message |
 | `!` Shell Shortcut | OFF | `!command` to run shell and inject output into context |

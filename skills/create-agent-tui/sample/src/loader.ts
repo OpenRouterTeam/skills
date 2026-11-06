@@ -23,7 +23,12 @@ export class Loader {
     this.config = config;
   }
 
+  get running(): boolean {
+    return this.interval !== null;
+  }
+
   start(): void {
+    if (this.interval) return;
     this.frame = 0;
     const ms = this.config.style === 'gradient' ? 150 : this.config.style === 'spinner' ? 80 : 300;
     this.interval = setInterval(() => this.draw(), ms);

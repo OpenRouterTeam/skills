@@ -21,6 +21,8 @@ export interface AgentConfig {
   sessionDir: string;
   sessionEnabled: boolean;
   outputMode: OutputMode;
+  /** Let the model run shell commands without asking. Off by default. */
+  allowShell: boolean;
 }
 
 const DEFAULTS: AgentConfig = {
@@ -46,6 +48,7 @@ const DEFAULTS: AgentConfig = {
   sessionDir: '.sessions',
   sessionEnabled: true,
   outputMode: 'text',
+  allowShell: false,
 };
 
 export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipApiKey?: boolean }): AgentConfig {
@@ -54,12 +57,16 @@ export function loadConfig(overrides: Partial<AgentConfig> = {}, opts?: { skipAp
   const configPath = resolve('agent.config.json');
   if (existsSync(configPath)) {
     const file = JSON.parse(readFileSync(configPath, 'utf-8'));
+    // agent.config.json sits in the working directory, which may be an untrusted
+    // checkout, so it cannot turn on shell access. Use --allow-shell or AGENT_ALLOW_SHELL=1.
+    delete file.allowShell;
     config = { ...config, ...file };
   }
 
   if (process.env.OPENROUTER_API_KEY) config.apiKey = process.env.OPENROUTER_API_KEY;
   if (process.env.AGENT_MODEL) config.model = process.env.AGENT_MODEL;
   if (process.env.AGENT_MAX_STEPS) config.maxSteps = positiveNumber('AGENT_MAX_STEPS', process.env.AGENT_MAX_STEPS);
+  if (process.env.AGENT_ALLOW_SHELL === '1') config.allowShell = true;
   if (process.env.AGENT_MAX_COST) config.maxCost = positiveNumber('AGENT_MAX_COST', process.env.AGENT_MAX_COST);
 
   config = { ...config, ...overrides };

@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { loadConfig } from './config.js';
 import { runAgentWithRetry, type AgentEvent } from './agent.js';
 import { initSessionDir, saveMessage, newSessionPath } from './session.js';
+import { setShellApprover } from './tools/shell.js';
 
 const HELP = `
 Usage: my-agent [options] [prompt]
@@ -20,6 +21,8 @@ Options:
       --max-cost <n>        Maximum cost in dollars (default: 1.0)
       --output-schema <f>   Validate final output against a JSON Schema file
                             (exits 2 on schema mismatch, uses Ajv)
+      --allow-shell         Let the agent run shell commands without asking
+                            (off by default; also AGENT_ALLOW_SHELL=1)
   -h, --help                Show this help message
 
 Examples:
@@ -67,6 +70,7 @@ async function main() {
       'max-steps': { type: 'string' },
       'max-cost': { type: 'string' },
       'output-schema': { type: 'string' },
+      'allow-shell': { type: 'boolean', default: false },
       help: { type: 'boolean', short: 'h', default: false },
     },
     allowPositionals: true,
@@ -118,7 +122,12 @@ async function main() {
       overrides.maxCost = n;
     }
 
+    if (values['allow-shell']) overrides.allowShell = true;
+
     const config = loadConfig(overrides);
+    // Text the agent reads (files, web results) can carry injected instructions,
+    // so model-chosen shell commands only run when the operator opted in.
+    setShellApprover(async () => config.allowShell);
     const noSession = values['no-session'];
     let sessionPath: string | undefined;
 
