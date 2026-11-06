@@ -6,7 +6,7 @@ const PROTECTED_NAMES = new Set(['agent.config.json']);
 const PROTECTED_SEGMENTS = new Set(['.git']);
 
 function isProtected(rel: string): boolean {
-  const parts = rel.split(sep);
+  const parts = rel.toLowerCase().split(sep);
   const name = parts[parts.length - 1];
   return (
     parts.some((p) => PROTECTED_SEGMENTS.has(p)) ||
