@@ -24,6 +24,8 @@ export interface AgentConfig {
   sessionDir: string;
   sessionEnabled: boolean;
   outputMode: OutputMode;
+  /** Let the model run shell commands without asking. Off by default. */
+  allowShell: boolean;
 }
 
 const DEFAULTS: AgentConfig = {
@@ -49,6 +51,7 @@ const DEFAULTS: AgentConfig = {
   sessionDir: '.sessions',
   sessionEnabled: true,
   outputMode: 'text',
+  allowShell: false,
 };
 
 // Fields a config file may set, and their types. apiKey is env-only so it never sits in a file.

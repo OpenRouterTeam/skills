@@ -7,6 +7,7 @@ import { TuiRenderer } from './renderer.js';
 import { dispatch, type CommandContext } from './commands.js';
 import { detectBg } from './terminal-bg.js';
 import { Loader } from './loader.js';
+import { setShellApprover } from './tools/shell.js';
 
 const DIM = '\x1b[2m';
 const RESET = '\x1b[0m';
@@ -192,6 +193,28 @@ async function main() {
     prompt: `${GREEN}>${RESET} `,
   });
 
+  let activeLoader: Loader | null = null;
+
+  // Every model-requested shell command waits for the user's y/N.
+  // Content the agent reads (files, web results) can carry injected instructions.
+  // Prompts are chained so parallel tool calls ask one at a time. rl.question
+  // owns the answer, so it doesn't leak into the next prompt. No TTY declines.
+  let approvalQueue: Promise<unknown> = Promise.resolve();
+  setShellApprover((command) => {
+    if (!process.stdin.isTTY) return Promise.resolve(false);
+    const ask = approvalQueue.then(async () => {
+      const wasRunning = activeLoader?.running ?? false;
+      activeLoader?.stop();
+      process.stdin.resume();
+      const answer = await new Promise<string>((r) =>
+        rl.question(`\n${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `, r));
+      if (wasRunning) activeLoader?.start();
+      return answer.trim().toLowerCase() === 'y';
+    });
+    approvalQueue = ask.catch(() => {});
+    return ask;
+  });
+
   const cmdCtx: CommandContext = {
     config,
     rl,
@@ -314,6 +337,7 @@ async function main() {
 
       let started = false;
       const loader = new Loader(config.display.loader);
+      activeLoader = loader;
       process.stdout.write('\n');
       loader.start();
 

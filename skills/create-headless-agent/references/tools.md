@@ -58,7 +58,7 @@ Apply search-and-replace edits to a file with diff output.
 
 Return the resolved path and write to it, not to the raw input. Ship `test/workspace.test.ts` that calls each tool's `execute` with an absolute path outside the root, a `../` path, a symlinked directory and a symlinked file that point outside, and protected names; each must return `{ error }` and leave the filesystem unchanged, while a normal path inside the root still writes.
 
-The guard does not cover `shell`, which runs any command the model sends with the user's privileges. If the agent reads untrusted content, enable the [Tool Approval](modules.md#tool-approval) module for `shell` or run the agent in a sandbox (container or dedicated user).
+The guard does not cover `shell`. It refuses by default (see [shell](#shell)), but once allowed with `--allow-shell` it runs any command the model sends with the user's privileges. If the agent reads untrusted content, keep `shell` off, gate it with the [Tool Approval](modules.md#tool-approval) module, or run the agent in a sandbox (container or dedicated user).
 
 ### glob
 
@@ -105,17 +105,19 @@ Execute a shell command and return output.
 ```typescript
 inputSchema: z.object({
   command: z.string().describe('Shell command to execute'),
-  timeout: z.number().optional().describe('Timeout in seconds (default: 120)'),
+  timeout: z.number().optional().describe('Timeout in seconds (default: 120, max: 600)'),
 })
 ```
 
 - **Behavior**:
-  1. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`) and `['-c', command]`
-  2. Read stdout with `await new Response(proc.stdout).text()` and stderr with `await new Response(proc.stderr).text()`
-  3. Wait for exit code via `await proc.exited`
-  4. Truncate combined output to last 2000 lines or 256KB
-  5. Return `{ output, exitCode, truncated? }`
-  6. Kill process on timeout
+  1. Refuse unless the operator opted in. `execute` awaits an approver set with `setShellApprover()`; the default approver declines. `cli.ts` allows commands only with the `--allow-shell` flag. There is no env var or `agent.config.json` switch, because Bun loads `.env` and the config file from the working directory, which may be an untrusted checkout. A declined call returns `{ output, exitCode: null, declined: true }` without running anything. Files and web results the agent reads can carry injected instructions, so a headless agent must not run model-chosen commands by default. Server and MCP entry points get the same fail-closed default unless they install their own approver.
+  2. Clamp `timeout`: missing, zero, negative or non-finite values use the 120s default, and values above 600s are capped
+  3. Spawn via `Bun.spawn()` with the user's shell (`process.env.SHELL ?? '/bin/bash'`), `['-c', command]`, `cwd: process.cwd()`, and an `env` with secrets removed (names matching `KEY`, `TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIAL`, `AUTH`, `COOKIE`, `SESSION`, which includes `OPENROUTER_API_KEY`)
+  4. Read stdout with `await new Response(proc.stdout).text()` and stderr with `await new Response(proc.stderr).text()`
+  5. Wait for exit code via `await proc.exited`
+  6. Truncate combined output to last 2000 lines or 256KB
+  7. Return `{ output, exitCode, truncated? }`
+  8. Kill process on timeout
 - **Key implementation detail**: For simpler use cases, `Bun.spawnSync(['sh', '-c', command])` is a cleaner alternative — it blocks and returns `{ stdout, stderr, exitCode }` directly. Use the async `Bun.spawn()` variant when you need streaming or timeout handling.
 - **Timeout handling**: Use `setTimeout` + `proc.kill()` to enforce the deadline, then return partial output with `timedOut: true`.
 - **Security**: Not confined to the workspace. See the note under [Workspace write guard](#workspace-write-guard).

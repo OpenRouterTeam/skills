@@ -55,7 +55,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | Glob/Find | ON | File discovery by glob pattern |
 | Grep/Search | ON | Content search by regex |
 | Directory List | ON | List directory contents |
-| Shell/Bash | ON | Execute commands with timeout and output capture |
+| Shell/Bash | ON | Execute commands with timeout and output capture; asks the user before each command |
 | JS REPL | OFF | Persistent Node.js environment |
 | Sub-agent Spawn | OFF | Delegate tasks to child agents |
 | Plan/Todo | OFF | Track multi-step task progress |
@@ -72,7 +72,7 @@ Server tools go in the `tools` array alongside user-defined tools. No client cod
 | ASCII Logo Banner | OFF | Custom ASCII art banner on startup — ask for project name |
 | Context Compaction | OFF | Summarize older messages when context is long |
 | System Prompt Composition | OFF | Assemble instructions from static + dynamic context |
-| Tool Permissions / Approval | OFF | Gate dangerous tools behind user confirmation |
+| Tool Permissions / Approval | OFF | Gate other dangerous tools behind user confirmation (the shell tool always asks) |
 | Structured Event Logging | OFF | Emit events for tool calls, API requests, errors |
 | `@`-file References | OFF | `@filename` to attach file content to next message |
 | `!` Shell Shortcut | OFF | `!command` to run shell and inject output into context |
@@ -537,6 +537,7 @@ import { createInterface } from 'readline';
 import { loadConfig } from './config.js';
 import { runAgentWithRetry, type AgentEvent } from './agent.js';
 import { detectBg } from './terminal-bg.js';
+import { setShellApprover } from './tools/shell.js';
 // import { styledReadLine, borderedReadLine } from ... — see references/input-styles.md
 
 const DIM = '\x1b[2m';
@@ -578,6 +579,26 @@ async function main() {
 
   const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: `${GREEN}>${RESET} ` });
 
+  // Files and web results the agent reads can carry injected instructions, so
+  // the shell tool asks before every command (its default approver declines).
+  // Prompts are chained so parallel tool calls ask one at a time; no TTY declines.
+  let approving = false;
+  let approvalQueue: Promise<unknown> = Promise.resolve();
+  setShellApprover((command) => {
+    if (!process.stdin.isTTY) return Promise.resolve(false);
+    const ask = approvalQueue.then(async () => {
+      approving = true;
+      process.stdout.write('\r\x1b[K');
+      process.stdin.resume();
+      const answer = await new Promise<string>((r) =>
+        rl.question(`${YELLOW}  Run shell command?${RESET}\n  ${BOLD}$ ${command}${RESET}\n  ${DIM}[y/N]${RESET} `, r));
+      approving = false;
+      return answer.trim().toLowerCase() === 'y';
+    });
+    approvalQueue = ask.catch(() => {});
+    return ask;
+  });
+
   async function getInput(): Promise<string> {
     switch (config.display.inputStyle) {
       case 'block': return styledReadLine(BG_INPUT);
@@ -606,7 +627,7 @@ async function main() {
     const dots = ['·', '··', '···'];
     let di = 0;
     const spin = setInterval(() => {
-      if (!started) process.stdout.write(`\r${DIM}${dots[di++ % 3]}${RESET}`);
+      if (!started && !approving) process.stdout.write(`\r${DIM}${dots[di++ % 3]}${RESET}`);
     }, 300);
 
     const handleEvent = (event: AgentEvent) => {
