@@ -1,34 +1,14 @@
 import { lstat, readlink, realpath } from 'fs/promises';
-import { dirname, isAbsolute, relative, resolve, sep } from 'path';
+import { isAbsolute, join, relative, resolve, sep } from 'path';
+
+const MAX_SYMLINKS = 40;
 
 // Resolve a model-supplied path and refuse it unless its real location,
 // after following symlinks, is inside the working directory and not under
 // .git (hooks there run as the user).
 export async function resolveInsideCwd(path: string): Promise<string> {
   const root = await realpath(process.cwd());
-  const target = resolve(root, path);
-
-  let existing = target;
-  let suffix = '';
-  for (;;) {
-    try {
-      existing = await realpath(existing);
-      break;
-    } catch (err: any) {
-      if (err?.code !== 'ENOENT') throw err;
-      // A dangling symlink: writeFile would follow it, so check its target.
-      const stat = await lstat(existing).catch(() => null);
-      if (stat?.isSymbolicLink()) {
-        existing = resolve(dirname(existing), await readlink(existing));
-        continue;
-      }
-      const parent = dirname(existing);
-      if (parent === existing) throw err;
-      suffix = suffix ? `${existing.slice(parent.length + 1)}/${suffix}` : existing.slice(parent.length + 1);
-      existing = parent;
-    }
-  }
-  const real = suffix ? resolve(existing, suffix) : existing;
+  const real = await physicalPath(root, path);
 
   const rel = relative(root, real);
   if (rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
@@ -38,4 +18,39 @@ export async function resolveInsideCwd(path: string): Promise<string> {
     throw new Error(`Refusing to access ${path}: inside a .git directory`);
   }
   return real;
+}
+
+// Walk the path one component at a time the way the kernel does, following
+// every symlink (dangling ones included) before applying the next `..`.
+async function physicalPath(root: string, path: string): Promise<string> {
+  let current = isAbsolute(path) ? resolve('/') : root;
+  const pending = path.split(/[\\/]+/).filter(Boolean);
+  let hops = 0;
+
+  while (pending.length > 0) {
+    const part = pending.shift()!;
+    if (part === '.') continue;
+    if (part === '..') {
+      current = resolve(current, '..');
+      continue;
+    }
+    const next = join(current, part);
+    const stat = await lstat(next).catch((err) => {
+      if (err?.code === 'ENOENT') return null;
+      throw err;
+    });
+    if (!stat) {
+      // Nothing below a missing entry exists yet, so the rest is literal.
+      return resolve(next, ...pending);
+    }
+    if (stat.isSymbolicLink()) {
+      if (++hops > MAX_SYMLINKS) throw new Error(`Too many symlinks resolving ${path}`);
+      const link = await readlink(next);
+      if (isAbsolute(link)) current = resolve('/');
+      pending.unshift(...link.split(/[\\/]+/).filter(Boolean));
+      continue;
+    }
+    current = next;
+  }
+  return current;
 }
