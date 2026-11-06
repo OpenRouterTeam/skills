@@ -86,7 +86,12 @@ describe('scrubbedEnv', () => {
       DB_PASSWORD: 'd',
       SSH_AUTH_SOCK: '/tmp/agent.sock',
     });
-    expect(env).toEqual({ PATH: '/bin', HOME: '/home/u', SSH_AUTH_SOCK: '/tmp/agent.sock' });
+    expect(env).toEqual({ PATH: '/bin', HOME: '/home/u' });
+  });
+
+  test('keeps variables named in AGENT_SHELL_ENV_PASSTHROUGH', () => {
+    const env = scrubbedEnv({ PATH: '/bin', SSH_AUTH_SOCK: '/tmp/agent.sock', GH_TOKEN: 't', AGENT_SHELL_ENV_PASSTHROUGH: 'SSH_AUTH_SOCK' });
+    expect(env).toEqual({ PATH: '/bin', SSH_AUTH_SOCK: '/tmp/agent.sock', AGENT_SHELL_ENV_PASSTHROUGH: 'SSH_AUTH_SOCK' });
   });
 });
 

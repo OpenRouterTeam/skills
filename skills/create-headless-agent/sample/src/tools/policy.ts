@@ -23,15 +23,18 @@ export function deniedResult(name: GatedToolName) {
 }
 
 const SECRET_ENV_NAME = /KEY|TOKEN|SECRET|PASSW|CREDENTIAL|AUTH|SESSION|COOKIE|PRIVATE/i;
-// Socket paths, not secrets; git over SSH needs the agent socket.
-const KEEP_ENV_NAMES = new Set(['SSH_AUTH_SOCK']);
 
-/** Copy of the environment without variables that look like credentials. */
+/**
+ * Copy of the environment without variables that look like credentials.
+ * AGENT_SHELL_ENV_PASSTHROUGH (comma-separated names, e.g. SSH_AUTH_SOCK) keeps
+ * matching variables the operator knowingly hands to approved commands.
+ */
 export function scrubbedEnv(env: Record<string, string | undefined> = process.env): Record<string, string> {
+  const keep = new Set((env.AGENT_SHELL_ENV_PASSTHROUGH ?? '').split(',').map((n) => n.trim()).filter(Boolean));
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(env)) {
     if (value === undefined) continue;
-    if (SECRET_ENV_NAME.test(name) && !KEEP_ENV_NAMES.has(name)) continue;
+    if (SECRET_ENV_NAME.test(name) && !keep.has(name)) continue;
     out[name] = value;
   }
   return out;

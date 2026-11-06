@@ -27,6 +27,7 @@ Tool approval:
   agent reads (web pages, files, piped stdin) can carry prompt injection.
   AGENT_APPROVED_TOOLS=shell,file_edit   allow only the listed tools
   AGENT_APPROVAL_POLICY=never            allow all of them (trusted input only)
+  AGENT_SHELL_ENV_PASSTHROUGH=SSH_AUTH_SOCK  keep named env vars that are scrubbed by default
   (agent.config.json cannot change these: it may come from an untrusted repo)
 
 Examples:

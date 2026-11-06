@@ -117,7 +117,7 @@ Shared helpers for the mutating tools. Generate it whenever `shell`, `file_write
 - `GATED_TOOLS = ['shell', 'file_write', 'file_edit']`
 - `isToolApproved(policy, name)`: true when `policy.approvalPolicy === 'never'` or `policy.approvedTools` includes `name`
 - `deniedResult(name)`: `{ error, denied: true }` telling the model the call was denied and not to retry
-- `scrubbedEnv(env = process.env)`: copy of `env` without names matching `/KEY|TOKEN|SECRET|PASSW|CREDENTIAL|AUTH|SESSION|COOKIE|PRIVATE/i`, except `SSH_AUTH_SOCK` (a socket path that git over SSH needs)
+- `scrubbedEnv(env = process.env)`: copy of `env` without names matching `/KEY|TOKEN|SECRET|PASSW|CREDENTIAL|AUTH|SESSION|COOKIE|PRIVATE/i`, except names listed in `AGENT_SHELL_ENV_PASSTHROUGH` (e.g. `SSH_AUTH_SOCK` for git over SSH, which also lets approved commands use the operator's loaded SSH keys)
 
 `src/tools/index.ts` exports `buildTools(policy, cwd = process.cwd())`, and `agent.ts` calls `buildTools(config)`. See `sample/src/tools/policy.ts`.
 

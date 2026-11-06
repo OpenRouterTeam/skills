@@ -88,6 +88,7 @@ The generated agent therefore defaults to `approvalPolicy: 'always'` with an emp
 
 - `AGENT_APPROVED_TOOLS=shell,file_edit` allows only the listed tools.
 - `AGENT_APPROVAL_POLICY=never` allows all of them. Only use it when the agent never sees untrusted text, or when it runs inside a disposable sandbox (container or VM with no secrets).
+- `AGENT_SHELL_ENV_PASSTHROUGH=SSH_AUTH_SOCK` keeps named variables that the scrubber would otherwise drop. Passing `SSH_AUTH_SOCK` lets approved commands authenticate with your loaded SSH keys, so only pass it when you trust the input.
 - `loadConfig` ignores `approvalPolicy` and `approvedTools` in `agent.config.json`, because that file is read from the working directory, which can be a cloned repo the agent is working on. Set them through env vars or `loadConfig` overrides from code.
 - For per-call human approval, see [Tool Approval](references/modules.md#tool-approval).
 
