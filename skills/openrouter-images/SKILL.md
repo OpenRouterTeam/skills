@@ -13,7 +13,25 @@ The `OPENROUTER_API_KEY` environment variable must be set. Get a key at https://
 
 Discovery (`discover.ts`) is public and works without a key; generation and editing require one.
 
-## First-Time Setup
+## Running Scripts
+
+Choose one execution method:
+
+### Without a local install
+
+For managed or read-only skill directories, skip `npm install` and replace `npx tsx` in the examples below with `npx --yes tsx@4.21.0`:
+
+```bash
+cd <skill-path>/scripts && npx --yes tsx@4.21.0 discover.ts
+```
+
+These scripts use only Node.js built-ins and sibling files. npm installs the runner into its external cache when needed; `--yes` suppresses the installation prompt. The runner version matches this skill's lockfile, but this method does not reproduce the lockfile's full dependency tree. It requires a writable npm cache and registry access on the first run.
+
+For generation and editing, pass an absolute `--output` path in a writable workspace. Use an absolute input image path when it is outside the scripts directory. Replace `/absolute/path/to/workspace` in the examples with an existing writable directory.
+
+### With a local install
+
+For a writable skill directory, install locally and use the `npx tsx` examples below. Use `npm ci` instead of `npm install` to reproduce the full lockfile.
 
 ```bash
 cd <skill-path>/scripts && npm install
@@ -68,10 +86,10 @@ Capability values print as readable strings: an enum shows as `1K | 2K | 4K`, a 
 Create a new image from a text prompt:
 
 ```bash
-cd <skill-path>/scripts && npx tsx generate.ts "a red panda wearing sunglasses"
-cd <skill-path>/scripts && npx tsx generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9
-cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output dragon.png
-cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-3.1-flash-lite-image --resolution 1K
+cd <skill-path>/scripts && npx tsx generate.ts "a red panda wearing sunglasses" --output /absolute/path/to/workspace/panda.png
+cd <skill-path>/scripts && npx tsx generate.ts "a futuristic cityscape at night" --aspect-ratio 16:9 --output /absolute/path/to/workspace/city.png
+cd <skill-path>/scripts && npx tsx generate.ts "pixel art of a dragon" --output /absolute/path/to/workspace/dragon.png
+cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model google/gemini-3.1-flash-lite-image --resolution 1K --output /absolute/path/to/workspace/watercolor.png
 ```
 
 ## Edit Image
@@ -79,9 +97,9 @@ cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model g
 Modify an existing image with a text prompt. The source image is sent as an image-to-image reference (`input_references`), so use a model whose `input_modalities` include `image` — check with `discover.ts <model>`.
 
 ```bash
-cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
-cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
-cd <skill-path>/scripts && npx tsx edit.ts scene.png "convert to watercolor style" --model google/gemini-3.1-flash-lite-image
+cd <skill-path>/scripts && npx tsx edit.ts /absolute/path/to/workspace/photo.png "make the sky purple" --output /absolute/path/to/workspace/photo-purple.png
+cd <skill-path>/scripts && npx tsx edit.ts /absolute/path/to/workspace/avatar.jpg "add a party hat" --output /absolute/path/to/workspace/avatar-hat.png
+cd <skill-path>/scripts && npx tsx edit.ts /absolute/path/to/workspace/scene.png "convert to watercolor style" --model google/gemini-3.1-flash-lite-image --output /absolute/path/to/workspace/scene-watercolor.png
 ```
 
 Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
@@ -109,6 +127,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 
 ```bash
 cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
+  --output /absolute/path/to/workspace/portrait.png \
   --model black-forest-labs/flux.2-pro \
   --provider-options '{"black-forest-labs": {"steps": 40, "guidance": 3}}'
 ```
