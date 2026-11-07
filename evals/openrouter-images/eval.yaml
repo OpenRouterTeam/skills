@@ -1,0 +1,32 @@
+name: openrouter-images-eval
+description: |
+  Evaluates routing among image discovery, generation, and editing; indirect
+  triggers and anti-triggers; and migration to POST /api/v1/images with
+  data[].b64_json responses.
+skill: openrouter-images
+version: "1.0"
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-opus-4.7
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.8
+    description: Did the agent choose the correct workflow and dedicated API shape?
+
+hooks:
+  before_run:
+    - command: "bun evals/_hooks/prepare-skill.ts openrouter-images"
+
+graders:
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 50"
+
+tasks:
+  - "tasks/*.yaml"
