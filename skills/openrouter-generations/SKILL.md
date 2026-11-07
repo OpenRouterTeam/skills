@@ -49,7 +49,7 @@ npx tsx get-generation.ts --id gen-1234567890 --json
 - **Cost**: `total_cost`, `usage`, `upstream_inference_cost`, `cache_discount`
 - **Performance**: `latency`, `generation_time`, `moderation_latency`
 - **Status**: `finish_reason`, `streamed`, `cancelled`, `is_byok`
-- **Context**: `created_at`, `app_id`, `external_user`, `session_id`, `request_id`
+- **Context**: `created_at`, `app_id`, `external_user`, `session_id`, `request_id`, `workspace_id`
 - **Provider chain**: `provider_responses` array showing fallback attempts with per-provider latency and status
 
 ### 2. Get generation content
@@ -113,6 +113,7 @@ curl -G https://openrouter.ai/api/v1/generation/content \
     "cancelled": false,
     "router": "openrouter/auto",
     "service_tier": "priority",
+    "workspace_id": "550e8400-e29b-41d4-a716-446655440000",
     "provider_responses": [
       {
         "provider_name": "OpenAI",
@@ -224,6 +225,7 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 | `external_user` | string\|null | External user identifier (X-External-User header) |
 | `session_id` | string\|null | Session grouping ID |
 | `request_id` | string\|null | Request grouping ID (all gens from one API call) |
+| `workspace_id` | string\|null | Workspace the generation is attributed to. Always present; `null` for accounts without workspaces. Generations created before workspace resolution existed are attributed to the account default workspace. |
 | `router` | string\|null | Router used (e.g., `openrouter/auto`) |
 | `service_tier` | string\|null | Provider service tier |
 | `web_search_engine` | string\|null | Search engine used (e.g., `exa`, `firecrawl`) |
