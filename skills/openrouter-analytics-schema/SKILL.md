@@ -10,7 +10,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 
 ## Prerequisites
 
-- An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
+- An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 
 ## Discovery Endpoint
@@ -62,7 +62,7 @@ Each metric has:
 
 Most volume and cost metrics support time ranges up to **367 days** with day or coarser granularity. Latency/throughput metrics, `blended_cost_per_million_tokens`, and generations-only dimensions (`provider`, `origin`, `country`, `data_region`, `skin`, `finish_reason`, `external_user`, `context_length_bucket`, `generation_id`, `session_id`, `streamed`) are limited to **31-day** time ranges, as is `hour` granularity. Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) always read an hourly rollup, so they are capped at **31 days** too and coarser granularity does not lift that cap.
 
-Exceeding a cap returns 400 with the applicable maximum in the message, not a truncated result. If a query times out instead, try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
+Exceeding a cap returns 400 with the applicable maximum in the message, not a truncated result. If a query times out instead (408), try narrowing the time range or removing latency/throughput metrics and per-generation dimensions.
 
 ### Metric Categories
 
@@ -99,7 +99,7 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `*_total_time_to_first_token` — `latency + router_latency`, computed over streamed requests only
 - `*_generation_time` — provider-side generation time
 - `*_inter_token_latency` — average time between consecutive completion tokens, `(generation_time - latency) / (native_tokens_completion - 1)`, computed over streamed requests with more than one completion token only
-- `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens
+- `*_throughput` — completion tokens per second, derived from `native_tokens_completion / generation_time`; `null` for requests with no completion tokens. Percentiles read the slow tail because higher is better: `pN_throughput` is the speed that N% of requests reached or exceeded (the (100 − N)th percentile of raw values), so `p90_throughput` ≤ `p50_throughput`
 
 All performance metrics exclude server-tool rows (web search / file-parsing charges recorded alongside a request).
 
@@ -109,6 +109,15 @@ All performance metrics exclude server-tool rows (web search / file-parsing char
 - `cache_capture_rate` — ratio of cache-eligible prompt tokens that were actually served from cache (0–1 by construction; 31-day limit, hourly rollup only)
 - `guardrail_invoked_rate` — ratio of requests that triggered guardrails
 - `response_cached_rate` — ratio of responses served from cache
+
+**Request-outcome metrics** (did requests succeed; 31-day limit). Counted once per request from its terminal outcome, failed requests included (`request_count` counts generation rows instead):
+- `total_request_count` — all requests, including failed ones
+- `gateway_5xx_count` — requests that ended in a 5xx without reaching a provider (an OpenRouter-side error)
+- `provider_5xx_count` — requests that ended in a 5xx after a provider call
+
+Requests rejected before routing (auth, credits, validation), requests that failed before any provider call (rate limits, spend-limit denials, budget or request-building 400s, adapter rejections, aborted requests), and response-cache hits are not counted.
+
+These three can only be combined with each other and with the `model`, `provider`, `api_key_id`, `user`, and `workspace` dimensions and filters. Mixing them with any other metric, dimension, filter, or classifier field returns 400 listing the incompatible fields.
 
 ## Understanding Dimensions
 
@@ -247,6 +256,7 @@ Use this guide to translate natural-language questions into the right metric/dim
 | "Web search costs?" | `usage_web`, `usage_upstream_web` | `model` | Up to 367 days |
 | "File processing costs?" | `usage_file`, `usage_upstream_file` | `model` | 31-day limit |
 | "Web fetch costs?" | `usage_web_fetch`, `usage_upstream_web_fetch` | `model` | 31-day limit |
+| "How many requests failed with 5xx, and whose fault?" | `total_request_count`, `gateway_5xx_count`, `provider_5xx_count` | `provider` or `model` | 31-day limit. Cannot be mixed with other metrics |
 
 ## Filter Value Reference
 
@@ -256,7 +266,7 @@ Several dimensions are **label-resolved** in query results — the response show
 |---|---|---|
 | `api_key_id` | Numeric ID **or** 64-char SHA-256 hash | Numeric ID: generation metadata (`api_key_id` field). Hash: `GET /api/v1/keys` (`key_hash` field). Hashes are auto-resolved server-side. If a hash can't be resolved, a sentinel value returns zero rows (no error). |
 | `user` | Clerk user ID (e.g. `user_abc123`) | User settings or org member list — not the display name/email shown in results. |
-| `workspace` | Workspace UUID. Filtering on the default workspace UUID also matches legacy rows written before workspace resolution existed. | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
+| `workspace` | Workspace UUID; any non-UUID value returns 400. Filtering on the default workspace UUID also matches legacy rows written before workspace resolution existed. | Workspace settings page or `GET /api/v1/workspaces` — not the workspace name shown in results. |
 | `app` | Numeric app ID | Generation metadata (`app_id` field) or app settings — not the app title shown in results. |
 | `model` | Permaslug (e.g. `openai/gpt-4o`) | Model page URL or `GET /api/v1/models` — not the display name. |
 
@@ -276,4 +286,5 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Minute granularity: only available when the time window is ≤ 3 hours
 - `hour` granularity reads the minute materialized view: 31-day maximum
 - Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`): 31-day maximum, `hour` or coarser granularity, and only `model`/`provider` dimensions and filters — any other dimension, filter, classifier, or `minute` granularity returns 400
+- Request-outcome metrics (`total_request_count`, `gateway_5xx_count`, `provider_5xx_count`): 31-day maximum, only combinable with each other and the `model`/`provider`/`api_key_id`/`user`/`workspace` dimensions and filters — anything else returns 400
 - Rate-limited to 64 requests per minute
