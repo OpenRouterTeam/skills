@@ -103,6 +103,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
+| `--provider <json>` | Provider routing preferences (`only`, `order`, `ignore`, `sort`, `allow_fallbacks`) | None |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
 
 `--provider-options` takes a JSON object keyed by provider slug, using keys from that endpoint's `allowed_passthrough_parameters`:
@@ -112,6 +113,28 @@ cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
   --model black-forest-labs/flux.2-pro \
   --provider-options '{"black-forest-labs": {"steps": 40, "guidance": 3}}'
 ```
+
+### Provider Routing
+
+When a model has multiple providers, `--provider` controls which endpoints can serve the request via the request's `provider` object:
+
+| Field | Meaning |
+|---|---|
+| `only` | Allow only these provider slugs |
+| `order` | Try providers in this order |
+| `ignore` | Exclude these provider slugs |
+| `sort` | Sort eligible endpoints by `price`, `throughput`, or `latency` |
+| `allow_fallbacks` | When `false`, stop after the primary provider instead of trying another |
+
+Use the `provider_slug` values from `discover.ts <model>` as slugs:
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a red panda astronaut" \
+  --model google/gemini-3.1-flash-image-preview \
+  --provider '{"only": ["google-ai-studio"], "allow_fallbacks": false}'
+```
+
+The response's `X-Provider-Name` header reports which provider served the request.
 
 ## Output Format
 
