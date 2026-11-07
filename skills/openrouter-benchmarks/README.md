@@ -1,6 +1,6 @@
 # openrouter-benchmarks
 
-Query OpenRouter's unified benchmark rankings from Artificial Analysis and Design Arena via `GET /api/v1/benchmarks`.
+Query OpenRouter's unified benchmark rankings from Artificial Analysis, Design Arena, and OpenRouter search benchmarks via `GET /api/v1/benchmarks`.
 
 ## Install
 
@@ -22,8 +22,8 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
-- Querying Artificial Analysis and Design Arena benchmark rankings
-- Filtering by benchmark source, task type, arena, category, and result limit
+- Querying Artificial Analysis, Design Arena, and OpenRouter search benchmark rankings
+- Filtering by benchmark source, task type, benchmark type, search engine/surface, arena, category, and result limit
 - Interpreting source-specific scores without mixing incompatible scales
 - Preserving benchmark citation and dataset timestamp metadata
 - Verifying benchmark-ranked candidates against model availability before recommendation
