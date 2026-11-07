@@ -101,7 +101,7 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--output-format <f>` | `png`, `jpeg`, `webp`, or `svg` (vector models) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
-| `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
+| `--n <count>` | Upper bound on images to generate (1–10); providers may return fewer, and single-image providers reject `n > 1` | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
 
@@ -139,6 +139,8 @@ cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
 ```
 
 The generation cost (USD) is printed to stderr when the API reports it. When `--n` requests multiple images, each is saved with a `-1`, `-2`, … suffix.
+
+`--n` is a ceiling, not a quantity: `count` reflects what the provider actually returned, which can be fewer than requested. For some models the number of images is prompt-dependent, so ask for a set in the prompt (e.g. "generate 2 distinct variations") when you need more than one.
 
 ## API Response Shapes
 
