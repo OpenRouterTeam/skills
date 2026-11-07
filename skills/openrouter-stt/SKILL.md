@@ -98,7 +98,7 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | `input_audio.format` | yes      | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Support varies by provider. |
 | `language`           | no       | ISO-639-1 code (`en`, `ja`, `fr`). Auto-detected if omitted.                                              |
 | `temperature`        | no       | 0–1. Lower is more deterministic.                                                                         |
-| `provider`           | no       | Provider passthrough — see below.                                                                         |
+| `provider`           | no       | Provider routing preferences and passthrough — see below.                                                 |
 
 ### Picking an audio format
 
@@ -107,6 +107,18 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 - **`webm`** / **`ogg`** — typical for browser recordings (`MediaRecorder`).
 
 The `format` field must match the actual container/codec of the bytes. A file saved as `.wav` that is actually mp3 will be rejected or mis-decoded. When in doubt, confirm with `ffprobe <file>`.
+
+## Provider routing
+
+`provider` accepts the same routing preferences as chat completions: `order` (provider slugs to try in order), `only` (allowlist), `ignore` (denylist), and `allow_fallbacks` (default `true`; set `false` to fail instead of falling back to providers outside `order`). Data-policy preferences `zdr` and `data_collection` are also accepted.
+
+```json
+{
+  "model": "openai/whisper-large-v3",
+  "input_audio": { "data": "UklGRiQA...", "format": "wav" },
+  "provider": { "order": ["groq"], "allow_fallbacks": false }
+}
+```
 
 ## Provider-specific options
 
