@@ -79,6 +79,7 @@ const output = {
     quantization: ep.quantization !== "unknown" ? ep.quantization : null,
     supports_implicit_caching: ep.supports_implicit_caching,
     supported_parameters: ep.supported_parameters,
+    supports_tool_choice: ep.supports_tool_choice ?? null,
   })),
 };
 
