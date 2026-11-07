@@ -1,0 +1,61 @@
+id: indirect-trigger-meeting-bot-001
+name: Indirect Trigger - Meeting Transcription As Component
+description: |
+  Indirect mention: user is building something that needs STT as a piece,
+  but doesn't ask for STT directly. The skill should activate and wire in
+  the correct OpenRouter transcription call.
+tags:
+  - happy-path
+  - indirect-trigger
+
+inputs:
+  prompt: |
+    Write a Python script that reads a meeting recording (meeting.wav)
+    and generates a summary in summary.md. Show me the full code.
+
+graders:
+  - type: code
+    name: uses_openrouter_stt
+    config:
+      language: python
+      assertions:
+        # Accept either the full literal path or the path suffix, since agents
+        # sometimes use a variable like API_BASE for the host prefix.
+        - '"/audio/transcriptions" in output.lower()'
+        - '"input_audio" in output.lower()'
+        - '"meeting.wav" in output.lower()'
+
+  - type: code
+    name: writes_summary_md
+    config:
+      language: python
+      assertions:
+        - '"summary.md" in output.lower()'
+
+  - type: prompt
+    name: pipeline_quality
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user wants a script that transcribes a meeting and writes a
+        summary to disk. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (3 calls total).
+
+        1) STT step correct: reads meeting.wav, base64-encodes it, POSTs
+           to /api/v1/audio/transcriptions with JSON body
+           {model, input_audio: {data, format: "wav"}}. Does NOT try the
+           OpenAI SDK for this endpoint.
+
+        2) Summarization step present: the transcript is passed to an
+           LLM chat completion endpoint (OpenRouter /api/v1/chat/completions
+           or equivalent) to produce a summary. A pipeline that stops at
+           the transcript does NOT pass this criterion.
+
+        3) Writes summary.md: the LLM-generated summary is written to
+           summary.md on disk using standard file I/O. Does NOT just
+           print to stdout.
+
+expected:
+  outcomes:
+    - type: task_completed

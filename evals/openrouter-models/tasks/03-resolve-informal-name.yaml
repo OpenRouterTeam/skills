@@ -1,0 +1,57 @@
+id: resolve-informal-001
+name: Resolve Informal Model Name
+description: |
+  Tests the two-step workflow: resolve-model.ts for an informal name, then
+  feed the resolved ID into another script. The skill's decision tree is
+  explicit that informal names go through resolve first.
+tags:
+  - happy-path
+  - resolve-model
+  - two-step
+
+inputs:
+  prompt: |
+    I want to compare "Claude Opus" against "the latest GPT" on context
+    length and pricing. Can you do that?
+
+graders:
+  - type: code
+    name: invoked_resolve_model
+    config:
+      language: python
+      assertions:
+        - '"resolve-model.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: code
+    name: invoked_compare_after_resolve
+    config:
+      language: python
+      assertions:
+        - '"compare-models.ts" in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: prompt
+    name: two_step_workflow
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user gave informal model names ("Claude Opus", "the latest GPT").
+        Call set_waza_grade_pass or set_waza_grade_fail once per criterion
+        (3 calls total).
+
+        1) Resolved before using: the agent called resolve-model.ts for the
+           informal names BEFORE invoking compare-models.ts. Did not guess
+           exact IDs.
+
+        2) Confidence-aware: if either resolution returned medium/low
+           confidence the agent either confirmed with the user or noted
+           the ambiguity. (If both came back high, a direct comparison is
+           fine and this criterion still passes.)
+
+        3) Comparison delivered: the response ends with an actual comparison
+           of the two resolved models on pricing AND context length,
+           not just a list of candidate model IDs.
+
+expected:
+  outcomes:
+    - type: task_completed

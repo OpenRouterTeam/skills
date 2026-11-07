@@ -1,0 +1,45 @@
+id: anti-trigger-image-theory-001
+name: Anti-Trigger - Image Gen Theory
+description: |
+  Conceptual question about image generation. Should not trigger the
+  bundled scripts.
+tags:
+  - anti-trigger
+  - negative-test
+
+inputs:
+  prompt: |
+    How do diffusion models generate images from text? Explain the basic
+    idea — I'm curious about the technique, not looking to generate
+    anything.
+
+graders:
+  - type: code
+    name: no_scripts_invoked
+    config:
+      language: python
+      assertions:
+        - '"generate.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"edit.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: prompt
+    name: stays_educational
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked a conceptual question about diffusion models for
+        image generation. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (2 calls total).
+
+        1) Answers the question: explains the diffusion process (noise →
+           image via iterative denoising guided by a text encoder) at a
+           reasonable depth for someone curious.
+
+        2) Does NOT generate: does not invoke generate.ts or any other
+           script that produces an actual image. The user explicitly
+           said "not looking to generate anything".
+
+expected:
+  outcomes:
+    - type: task_completed

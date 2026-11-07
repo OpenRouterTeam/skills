@@ -1,0 +1,74 @@
+id: happy-path-bash-001
+name: Happy Path - Bash Transcription
+description: |
+  Standard request: transcribe an audio file. Agent should write a bash
+  script using curl that POSTs JSON (not multipart) to
+  /api/v1/audio/transcriptions with the audio base64-encoded under
+  input_audio.data.
+tags:
+  - happy-path
+  - bash
+  - curl
+
+inputs:
+  prompt: |
+    Write a bash script that transcribes audio.wav to plain text using
+    OpenRouter. Print only the transcript to stdout. Show me the full
+    script in your response.
+
+graders:
+  - type: code
+    name: endpoint_and_shape
+    config:
+      language: python
+      assertions:
+        - '"/api/v1/audio/transcriptions" in output.lower()'
+        - '"input_audio" in output.lower()'
+        - '"base64" in output.lower() or "b64" in output.lower()'
+
+  - type: code
+    name: json_not_multipart
+    config:
+      language: python
+      assertions:
+        - '"content-type: application/json" in output.lower() or "content-type\":\"application/json" in output.lower() or "\"content-type\": \"application/json\"" in output.lower()'
+        # Agent should NOT be sending multipart/form-data.
+        - '"multipart" not in output.lower() and "form-data" not in output.lower()'
+
+  - type: code
+    name: auth_handled
+    config:
+      language: python
+      assertions:
+        - '"bearer" in output.lower() and "openrouter_api_key" in output.lower()'
+
+  - type: prompt
+    name: correctness_rubric
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked for a bash script that transcribes audio.wav via
+        OpenRouter's STT API. Call set_waza_grade_pass or set_waza_grade_fail
+        once per criterion (4 calls total).
+
+        1) Correct endpoint: POSTs to
+           https://openrouter.ai/api/v1/audio/transcriptions.
+
+        2) Correct body shape: JSON body with model (a real transcription
+           model slug like google/chirp-3 or openai/whisper-1) and
+           input_audio: {data: <base64>, format: "wav"}. NOT
+           multipart/form-data.
+
+        3) Base64 encoding done correctly: uses base64 on the audio file
+           and strips newlines, uses --data-binary @file to avoid ARG_MAX
+           issues with large payloads, does NOT prefix with a data URI
+           ("data:audio/wav;base64,...").
+
+        4) Prints the transcript: parses response JSON and prints only
+           the .text field to stdout (e.g. via jq -r '.text'). Handles
+           non-200 HTTP with a clear error.
+
+expected:
+  outcomes:
+    - type: task_completed

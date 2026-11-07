@@ -1,0 +1,56 @@
+id: anti-trigger-weather-001
+name: Anti-Trigger - Unrelated Question
+description: |
+  Negative test: unrelated prompt. The skill should not activate, and the
+  response must not invoke any of the bundled scripts or drag OpenRouter
+  model commentary into a weather answer.
+tags:
+  - anti-trigger
+  - negative-test
+  - trigger-specificity
+
+inputs:
+  prompt: |
+    What's the weather going to be in San Francisco tomorrow?
+
+graders:
+  - type: code
+    name: no_skill_scripts_invoked
+    config:
+      language: python
+      assertions:
+        - '"list-models.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"search-models.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"resolve-model.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"compare-models.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+        - '"get-endpoints.ts" not in " ".join([tc["arguments"].get("command", "") for tc in tool_calls if tc["name"] == "bash"])'
+
+  - type: code
+    name: no_openrouter_contamination
+    config:
+      language: python
+      assertions:
+        - "output.lower().count('openrouter') <= 1"
+        - "'anthropic/claude' not in output.lower()"
+        - "'openai/gpt' not in output.lower()"
+
+  - type: prompt
+    name: stays_on_topic
+    config:
+      model: openai/gpt-chat-latest
+      continue_session: true
+      prompt: |
+        The user asked about San Francisco weather. Call set_waza_grade_pass
+        or set_waza_grade_fail once per criterion (2 calls total).
+
+        1) Addresses weather: the response is about weather or politely
+           explains the agent can't provide live weather and suggests an
+           alternative (weather.com, phone app, checking the forecast).
+
+        2) No OpenRouter contamination: the response does NOT invoke or
+           reference the openrouter-models scripts, does NOT list OpenRouter
+           models, does NOT discuss AI model pricing or providers.
+
+expected:
+  outcomes:
+    - type: task_completed
