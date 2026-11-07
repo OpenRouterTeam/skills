@@ -194,6 +194,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
       "max_completion_tokens": 64000,
       "pricing_per_million_tokens": { "prompt": "$3.00", "completion": "$15.00", "cached_input": "$0.30" },
       "supports_implicit_caching": true,
+      "native_tools": { "openrouter:web_search": { "type": "web_search_20260209" } },
       "supported_parameters": ["max_tokens", "temperature", "tools", "..."]
     }
   ]
@@ -215,6 +216,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 | `latency_30m_ms.p50` | Median response latency over last 30 min |
 | `throughput_30m_tokens_per_sec.p50` | Median generation speed over last 30 min |
 | `uptime_30m` | Provider availability percentage over last 30 min |
+| `native_tools` | Server tools the endpoint's provider runs as its own built-in tool (`engine: "native"`), keyed by canonical `openrouter:*` name; each value's `type` is the provider tool type the request is translated to (e.g. `web_search_20260209` on Anthropic, `google_search` on Gemini). `{}` when the provider has none |
 
 ## Presenting Results
 
@@ -223,6 +225,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 - When comparing, use a markdown table with models as columns
 - For provider endpoints, highlight the fastest (lowest p50 latency) and most reliable (highest uptime) providers
 - Call out notable supported parameters: `tools`, `structured_outputs`, `reasoning`, `web_search_options`
+- When a user wants provider-native server tools (e.g. native web search), filter endpoints on `native_tools` having the `openrouter:*` key
 - Note cache pricing when available — it can cut input costs 90%+
 - Flag models with `expiration_date` as deprecated
 - When a model has multiple providers at different prices, mention the cheapest option
