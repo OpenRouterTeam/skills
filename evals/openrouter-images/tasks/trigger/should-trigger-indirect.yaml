@@ -1,0 +1,18 @@
+id: trigger-003
+name: Should trigger on indirect phrasing
+description: >
+  Requests that imply image creation without saying "image" (e.g. logo,
+  wallpaper, sticker) should still trigger the skill.
+
+tags:
+  - trigger
+  - positive
+
+inputs:
+  prompt: "I need a logo for my new bakery, something warm with a croissant motif."
+
+expected:
+  outcomes:
+    - type: task_completed
+    - type: tool_called
+      tool_name: skill

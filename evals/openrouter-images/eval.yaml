@@ -1,0 +1,47 @@
+name: openrouter-images-eval
+description: >
+  Evaluation suite for the openrouter-images skill. Tests capability discovery,
+  image generation, image editing, option handling, error recovery, and result
+  presentation using the dedicated Image API scripts (discover.ts, generate.ts, edit.ts).
+skill: openrouter-images
+schemaVersion: "1.0"
+version: "1.0"
+
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-sonnet-4.6
+  judge_model: gpt-4o
+  inject_skill_body: true
+
+metrics:
+  - name: accuracy
+    weight: 1.0
+    threshold: 0.8
+
+graders:
+  - type: prompt
+    name: correct_script_usage
+    config:
+      prompt: |
+        You are grading an agent that has access to the openrouter-images skill,
+        which provides three scripts:
+          - discover.ts: lists image models and their supported parameters
+          - generate.ts "prompt" [flags]: generates an image from text
+          - edit.ts <path> "prompt" [flags]: edits an existing image
+
+        Call set_waza_grade_pass if the agent:
+          1. Picked the script that matches the user's request (discover vs generate vs edit),
+          2. Only passed flags that are plausibly supported by the target model
+             (or verified support with discover.ts first),
+          3. Did not hand-roll raw HTTP calls to the OpenRouter API when the
+             skill scripts could do the job.
+        Otherwise call set_waza_grade_fail with a short reason.
+
+tasks:
+  - "tasks/discovery/*.yaml"
+  - "tasks/generation/*.yaml"
+  - "tasks/editing/*.yaml"
+  - "tasks/edge-cases/*.yaml"

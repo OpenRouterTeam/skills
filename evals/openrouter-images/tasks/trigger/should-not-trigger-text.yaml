@@ -1,0 +1,19 @@
+id: trigger-006
+name: Should NOT trigger on text-only request
+description: >
+  A pure text task that merely mentions imagery should not invoke the images
+  skill.
+
+tags:
+  - trigger
+  - negative
+
+inputs:
+  prompt: "Write a short poem that paints a vivid picture of a stormy sea."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    forbidden_tools:
+      - skill

@@ -1,0 +1,24 @@
+id: discovery-002
+name: Check a specific model's parameters
+description: >
+  User asks whether a specific model supports a capability (4K resolution).
+  The agent should run discover.ts with the model ID and answer from the
+  per-endpoint supported_parameters, not from memory.
+
+tags:
+  - discovery
+  - happy-path
+
+inputs:
+  prompt: "Does bytedance-seed/seedream-4.5 support 4K output? What aspect ratios does it accept?"
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "4K"
+    - "supported_parameters"
+    - "aspect"

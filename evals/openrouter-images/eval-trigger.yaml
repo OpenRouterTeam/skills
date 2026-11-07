@@ -1,0 +1,24 @@
+name: openrouter-images-trigger
+description: >
+  Trigger-precision suite for the openrouter-images skill. Measures whether the
+  agent invokes the skill when it should (image generation/editing requests) and
+  leaves it alone when it should not (text, video, audio, or vision-analysis requests).
+skill: openrouter-images
+schemaVersion: "1.0"
+version: "1.0"
+
+config:
+  trials_per_task: 1
+  timeout_seconds: 120
+  parallel: false
+  executor: copilot-sdk
+  model: claude-sonnet-4.6
+  inject_skill_body: false
+
+metrics:
+  - name: trigger_precision
+    weight: 1.0
+    threshold: 0.8
+
+tasks:
+  - "tasks/trigger/*.yaml"

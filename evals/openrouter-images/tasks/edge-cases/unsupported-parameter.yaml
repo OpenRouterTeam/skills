@@ -1,0 +1,24 @@
+id: edge-001
+name: Unsupported parameter handling
+description: >
+  User requests an option the default model likely doesn't support. Instead of
+  blindly sending the flag and hitting a 400, the agent should discover the
+  model's supported_parameters and either pick a capable model or explain the
+  limitation.
+
+tags:
+  - edge-case
+  - capability-check
+
+inputs:
+  prompt: "Generate an 8K SVG vector illustration of a mountain range using the default model."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_not_contains:
+    - "traceback"
+    - "unhandled"
