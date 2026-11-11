@@ -16,7 +16,7 @@ Every decision model on OpenRouter speaks the same Decisions API (also served as
 | Degree along ordered levels | `score` | `score` (probability-weighted position), `probabilities` per level, `confidence` |
 | Where something is in an image (Jev 1.14 only) | `box` | `box` edges as fractions of the image, `confidence` |
 
-Read [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response, sending images, or calling through the System One API or TypeSafe SDK. Read [references/question-design.md](references/question-design.md) when designing the truth table, state, wording, and criteria, when an answer looks wrong, and for cookbook patterns. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.
+Read [references/decisions-api.md](references/decisions-api.md) when writing a request or reading a response, sending images or documents, or calling through the System One API or TypeSafe SDK. Read [references/question-design.md](references/question-design.md) when designing the truth table, state, wording, and criteria, when an answer looks wrong, and for cookbook patterns. Read [references/models.md](references/models.md) when picking between the decision models the live catalog returns. Read [references/decision-model-limits.md](references/decision-model-limits.md) whenever a question involves quantities, dates, negation, indirection, or untrusted text, since those are the things a decision model does not do.
 
 ## Steps
 
