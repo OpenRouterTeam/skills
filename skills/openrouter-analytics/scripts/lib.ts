@@ -99,7 +99,7 @@ async function fetchApi<T>(
         break;
       case 429:
         console.error(
-          "Error 429: Rate limited (64 RPM). Wait a moment and try again."
+          "Error 429: Rate limited (256 requests per minute per IP). Wait a moment and try again."
         );
         break;
       default:
