@@ -11,6 +11,7 @@ Full reference for constructing and executing analytics queries against the Open
 ## Prerequisites
 
 - `OPENROUTER_API_KEY` must be set to a **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
+- A **workspace-scoped management key** also works, but reads only its own workspace and needs the `activity:view_all` permission there. A `workspace` filter naming another workspace returns 403, legacy rows with no workspace are excluded (even for the default workspace), and possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) return 400.
 
 ## Query Endpoint
 
@@ -325,7 +326,7 @@ Combine up to 2 dimensions for cross-tabulation:
 |---|---|---|
 | 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
-| 403 | Not a management key | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys |
+| 403 | Not a management key, or a workspace-scoped key filtering on another workspace | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys. Workspace-scoped keys can only filter on their own workspace. |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
 | 429 | Rate limited (256 requests per minute per IP) | Wait and retry |
 | 500 | Server error | Retry after a moment |
