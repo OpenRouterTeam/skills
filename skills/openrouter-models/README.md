@@ -18,12 +18,14 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 `OPENROUTER_API_KEY` is optional for most scripts. It is only required for `get-endpoints.ts` (provider performance data). Get a key at [openrouter.ai/keys](https://openrouter.ai/keys).
 
+When the key is set, the model list is scoped to the models that key can route to; unset it to see the full public catalog.
+
 ## What it covers
 
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - Listing and sorting models by newest, price, or throughput (`list-models.ts`)
 - Filtering by category (programming, roleplay, vision, etc.)
-- Looking up a specific model's pricing, context length, and modalities
+- Looking up a specific model's pricing, context length, and modalities, and which API paths serve it
 - Per-provider latency, uptime, and throughput via `get-endpoints.ts`
 - Fuzzy model-name resolution
