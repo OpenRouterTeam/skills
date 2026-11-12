@@ -276,4 +276,4 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Minute granularity: only available when the time window is ≤ 3 hours
 - `hour` granularity reads the minute materialized view: 31-day maximum
 - Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`): 31-day maximum, `hour` or coarser granularity, and only `model`/`provider` dimensions and filters — any other dimension, filter, classifier, or `minute` granularity returns 400
-- Rate-limited to 64 requests per minute
+- Rate-limited to 256 requests per minute per IP
