@@ -78,7 +78,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `voice`           | yes      | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `provider`        | no       | Provider passthrough — see below.                                                                                 |
+| `provider`        | no       | Provider routing preferences and passthrough — see below.                                                         |
 
 ### Picking a format
 
@@ -86,6 +86,20 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 - **`pcm`** (`audio/pcm;rate=<rate>;channels=<n>`) — uncompressed raw samples. The response `Content-Type` carries the sample rate and channel count (e.g. `rate=24000;channels=1` for OpenAI TTS), which you'll need if you wrap the bytes into a WAV container. Lower latency for real-time streaming pipelines, but not directly playable on its own. Pick this only when the user explicitly wants raw audio or is piping into a streaming system.
 
 Match the file extension to the format — saving pcm bytes as `.mp3` produces a file no player will open, and this is the most common cause of "empty/corrupted audio" reports.
+
+## Provider routing
+
+`provider` accepts the same routing preferences as chat completions: `order` (provider slugs to try in order), `only` (allowlist), `ignore` (denylist), and `allow_fallbacks` (default `true`; set `false` to fail instead of falling back to providers outside `order`). Data-policy preferences `zdr` and `data_collection` are also accepted.
+
+```json
+{
+  "model": "openai/gpt-4o-mini-tts-2025-12-15",
+  "input": "Welcome to the show.",
+  "voice": "alloy",
+  "response_format": "mp3",
+  "provider": { "only": ["openai"] }
+}
+```
 
 ## Provider-specific options
 
