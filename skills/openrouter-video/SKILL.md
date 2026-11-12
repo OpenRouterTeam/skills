@@ -74,8 +74,8 @@ echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
 
 Required: `model`, `prompt`. Common optional fields:
 
-- `duration` (int) — must be one of the model's `supported_durations`.
-- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio.
+- `duration` (int) — must be one of the model's `supported_durations`. `-1` lets the model choose the length (e.g. following an input video); send it only when `-1` is in `supported_durations` (currently some BytePlus Seedance models).
+- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio. Omit `aspect_ratio` to use the model default; on models with adaptive aspect ratio (e.g. Seedance) that follows the input image or video.
 - `generate_audio` (bool) — only meaningful if the model's `generate_audio` capability is true.
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
