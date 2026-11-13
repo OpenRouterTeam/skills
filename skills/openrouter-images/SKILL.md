@@ -98,9 +98,11 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--resolution <t>` | Resolution tier (`512`, `1K`, `2K`, `4K`) | Model default |
 | `--size <s>` | Shorthand: a tier (`2K`) or explicit pixels (`2048x2048`) | Model default |
 | `--quality <q>` | `auto`, `low`, `medium`, or `high` | Model default |
-| `--output-format <f>` | `png`, `jpeg`, `webp`, or `svg` (vector models) | Model default |
+| `--output-format <f>` | `png`, `jpeg`, `webp`, `svg` (vector models), or `gif` (animation models, e.g. `openai/gpt-image-2.6-flare`) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
+| `--frame-count <n>` | Animation frames (2–64) with `--output-format gif` | Model default |
+| `--frame-duration-ms <n>` | Per-frame display time (20–2000 ms) with `--output-format gif` | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
@@ -139,6 +141,24 @@ cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
 ```
 
 The generation cost (USD) is printed to stderr when the API reports it. When `--n` requests multiple images, each is saved with a `-1`, `-2`, … suffix.
+
+### Layer decomposition (Seedream)
+
+Seedream can split one generation into a base image plus separate layers. Request it through `--provider-options` with `layer_decomposition: true` and the required `layer_decomposition_options.max_images` (2–16). Leave `--n` at 1 and don't pass `--aspect-ratio` or an explicit `WIDTHxHEIGHT` `--size`; invalid combinations return a 400. Confirm both keys are in the endpoint's `allowed_passthrough_parameters` with `discover.ts` first.
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a sale poster with a red circle and bold text" \
+  --model bytedance-seed/seedream-5-5 \
+  --provider-options '{"seed": {"layer_decomposition": true, "layer_decomposition_options": {"max_images": 4}}}'
+```
+
+Up to `max_images` images come back (base plus layers), each saved with a numbered suffix. Each returned image carries a `layer` object, which `generate.ts` echoes in a `layers` array next to the saved file path:
+
+- `z_index` (always present): stacking order; `0` is the opaque base image, higher values sit on top.
+- `name`, `description`: provider-assigned labels.
+- `background`: `opaque` or `transparent`.
+- `bounding_box`: `{ absolute, normalized }`, each `[x_min, y_min, x_max, y_max]` (`absolute` in base-image pixels, `normalized` on a 0–1000 scale).
+- `text_recognition`: `{ text, lines[] }` when the provider recognized text; each line has `runs[]` of `{ text, style }` (e.g. `similar_font_family`, `foreground_color`, `bold`).
 
 ## API Response Shapes
 

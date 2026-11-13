@@ -16,8 +16,9 @@ if (!prompt) {
   console.error(
     'Usage: npx tsx generate.ts "prompt" [--model <id>] [--output <path>]\n' +
       "  [--aspect-ratio <r>] [--resolution <512|1K|2K|4K>] [--size <s>] [--n <count>]\n" +
-      "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg>]\n" +
+      "  [--quality <auto|low|medium|high>] [--output-format <png|jpeg|webp|svg|gif>]\n" +
       "  [--background <auto|transparent|opaque>] [--output-compression <n>] [--seed <int>]\n" +
+      "  [--frame-count <2-64>] [--frame-duration-ms <20-2000>]\n" +
       "  [--provider-options '<json>']\n\n" +
       "Run discover.ts <model> first to see which parameters a model accepts."
   );
@@ -55,4 +56,12 @@ if (json.usage?.cost !== undefined) {
   console.error(`Cost: $${json.usage.cost}`);
 }
 
-console.log(JSON.stringify({ model, prompt, images_saved: saved, count: saved.length }, null, 2));
+const layers = images.flatMap((image, i) => (image.layer ? [{ file: saved[i], ...image.layer }] : []));
+
+console.log(
+  JSON.stringify(
+    { model, prompt, images_saved: saved, count: saved.length, ...(layers.length > 0 ? { layers } : {}) },
+    null,
+    2,
+  ),
+);
