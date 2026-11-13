@@ -142,6 +142,24 @@ cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
 
 The generation cost (USD) is printed to stderr when the API reports it. When `--n` requests multiple images, each is saved with a `-1`, `-2`, … suffix.
 
+### Layer decomposition (Seedream)
+
+Seedream can split one generation into a base image plus separate layers. Request it through `--provider-options` with `layer_decomposition: true` and the required `layer_decomposition_options.max_images` (2–16). Leave `--n` at 1 and don't pass `--aspect-ratio` or an explicit `WIDTHxHEIGHT` `--size`; invalid combinations return a 400. Confirm both keys are in the endpoint's `allowed_passthrough_parameters` with `discover.ts` first.
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a sale poster with a red circle and bold text" \
+  --model bytedance-seed/seedream-5-5 \
+  --provider-options '{"seed": {"layer_decomposition": true, "layer_decomposition_options": {"max_images": 4}}}'
+```
+
+Up to `max_images` images come back (base plus layers), each saved with a numbered suffix. Each returned image carries a `layer` object, which `generate.ts` echoes in a `layers` array next to the saved file path:
+
+- `z_index` (always present): stacking order; `0` is the opaque base image, higher values sit on top.
+- `name`, `description`: provider-assigned labels.
+- `background`: `opaque` or `transparent`.
+- `bounding_box`: `{ absolute, normalized }`, each `[x_min, y_min, x_max, y_max]` (`absolute` in base-image pixels, `normalized` on a 0–1000 scale).
+- `text_recognition`: `{ text, lines[] }` when the provider recognized text; each line has `runs[]` of `{ text, style }` (e.g. `similar_font_family`, `foreground_color`, `bold`).
+
 ## API Response Shapes
 
 Generation uses `POST /api/v1/images`. See the [Image Generation guide](https://openrouter.ai/docs/guides/overview/multimodal/image-generation) for full request/response details.

@@ -227,7 +227,7 @@ export function defaultOutputPath(): string {
 
 export type ImageGenerationResponse = {
   created?: number;
-  data?: { b64_json?: string; media_type?: string }[];
+  data?: { b64_json?: string; media_type?: string; layer?: Record<string, unknown> }[];
   usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number; cost?: number };
 };
 

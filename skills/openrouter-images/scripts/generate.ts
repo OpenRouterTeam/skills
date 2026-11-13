@@ -56,4 +56,12 @@ if (json.usage?.cost !== undefined) {
   console.error(`Cost: $${json.usage.cost}`);
 }
 
-console.log(JSON.stringify({ model, prompt, images_saved: saved, count: saved.length }, null, 2));
+const layers = images.flatMap((image, i) => (image.layer ? [{ file: saved[i], ...image.layer }] : []));
+
+console.log(
+  JSON.stringify(
+    { model, prompt, images_saved: saved, count: saved.length, ...(layers.length > 0 ? { layers } : {}) },
+    null,
+    2,
+  ),
+);
