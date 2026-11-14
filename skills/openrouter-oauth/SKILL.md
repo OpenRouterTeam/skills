@@ -47,6 +47,7 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 | `callback_url` | Your app's URL (where the user returns after auth) |
 | `code_challenge` | The S256 challenge from Step 1 |
 | `code_challenge_method` | Always `S256` |
+| `key_label` | Optional. Pre-fills the API key label shown on the consent page (the user can still edit it). Defaults to your app's title. |
 
 ### Step 3: Handle the redirect back
 
