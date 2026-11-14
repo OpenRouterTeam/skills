@@ -25,7 +25,7 @@ cd <skill-path>/scripts && npm install
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/v1/generation` | GET | Request metadata and usage (tokens, cost, latency, model, provider) |
-| `/api/v1/generation/content` | GET | Stored prompt and completion text |
+| `/api/v1/generation/content` | GET | Stored prompt, completion, and failure error |
 
 Both take a single query parameter: `id` (the generation ID).
 
@@ -65,8 +65,9 @@ npx tsx get-generation-content.ts --id gen-1234567890 --json
 
 - **Input**: `prompt` (raw text) and/or `messages` (array of `{role, content}`)
 - **Output**: `completion` (the model's response) and `reasoning` (chain-of-thought, if applicable)
+- **Error**: `status`, `message`, `provider_name`, `raw`, and `previous_errors` for a stored failed generation, or `null` when the generation succeeded
 
-**Note:** Content is only available if the generation was *not* made with Zero Data Retention (ZDR) enabled. If ZDR was on, this endpoint returns empty/null content.
+**Note:** Content is only available if the generation was *not* made with Zero Data Retention (ZDR) enabled. If ZDR was on, this endpoint returns empty/null content. A failed generation may return a stored `error` even when `input` and `output` are empty. On a failed generation, `output.completion` is `null`.
 
 ## Direct API Usage (curl)
 
@@ -131,6 +132,7 @@ curl -G https://openrouter.ai/api/v1/generation/content \
 ```json
 {
   "data": {
+    "error": null,
     "input": {
       "prompt": "What is the meaning of life?",
       "messages": [
@@ -148,6 +150,34 @@ curl -G https://openrouter.ai/api/v1/generation/content \
 }
 ```
 
+For a failed generation, `output.completion` is `null` and `error` contains the returned error plus any earlier failed provider attempts:
+
+```json
+{
+  "data": {
+    "input": {},
+    "output": {
+      "completion": null,
+      "reasoning": null
+    },
+    "error": {
+      "status": 504,
+      "message": "Timed out waiting for the provider",
+      "provider_name": "Vertex",
+      "raw": "{\"error\":{\"code\":504,\"message\":\"Deadline exceeded\"}}",
+      "previous_errors": [
+        {
+          "code": 429,
+          "message": "Provider returned error",
+          "provider_name": "Google",
+          "raw": "{\"error\":{\"code\":429,\"message\":\"Resource exhausted\"}}"
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Common Use Cases
 
 ### Debug a failed generation
@@ -155,6 +185,8 @@ curl -G https://openrouter.ai/api/v1/generation/content \
 ```bash
 # Check what happened — look at finish_reason, provider_responses, and cancelled
 cd <skill-path>/scripts && npx tsx get-generation.ts gen-abc123 --json
+# Inspect the stored client/provider error and earlier failed attempts
+npx tsx get-generation-content.ts gen-abc123 --json
 ```
 
 Look for:
@@ -162,6 +194,7 @@ Look for:
 - `finish_reason` = `"content_filter"` means content was filtered
 - `cancelled` = `true` means the request was cancelled by the client
 - `provider_responses` with multiple entries means fallbacks occurred
+- Content response `data.error` for the status, message, returned provider, raw error body, and `previous_errors`
 
 ### Check cost of a specific request
 
@@ -238,3 +271,12 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 | `data.input.messages` | array\|null | Messages array (`[{role, content}]`) |
 | `data.output.completion` | string\|null | Model's completion text |
 | `data.output.reasoning` | string\|null | Chain-of-thought reasoning |
+| `data.error.status` | integer\|null | HTTP status returned to the client |
+| `data.error.message` | string\|null | Error message returned to the client |
+| `data.error.provider_name` | string\|null | Provider whose error was returned |
+| `data.error.raw` | string\|null | Raw provider error body when stored |
+| `data.error.previous_errors[]` | array | Earlier failed provider attempts, in attempt order |
+| `data.error.previous_errors[].code` | integer | HTTP status returned by the attempt |
+| `data.error.previous_errors[].message` | string | Error message returned by the attempt |
+| `data.error.previous_errors[].provider_name` | string\|null | Provider that served the attempt |
+| `data.error.previous_errors[].raw` | string\|null | Raw provider error body for the attempt |
