@@ -35,7 +35,7 @@ Pick the right script based on what the user is asking:
 
 ## Discover Capabilities First
 
-Different models accept different parameters. Rather than hardcoding flags and hitting 400s, discover what's available before generating.
+Different models accept different parameters. Routing is capability-aware: if any of a model's endpoints supports the values you send, the request routes to a capable endpoint; if none does, the API returns a field-scoped 400 naming the offending field and value (e.g. `resolution "4K"`) with each provider's rejection reason. Discover what's available before generating so you don't send values no endpoint supports.
 
 List every image model with a compact capability summary:
 
@@ -61,7 +61,7 @@ This calls `GET /api/v1/images/models/{author}/{slug}/endpoints` and returns, pe
 | `supports_streaming` | Whether this endpoint streams. |
 | `pricing` | Per-image / per-token pricing lines. |
 
-Capability values print as readable strings: an enum shows as `1K | 2K | 4K`, a range as `0–100`, a boolean as `supported`. A parameter that's absent is unsupported — don't send it.
+Capability values print as readable strings: an enum shows as `1K | 2K | 4K`, a range as `0–100`, a boolean as `supported`. A parameter that's absent from an endpoint is unsupported there — sending it reroutes the request to a sibling endpoint that supports it, or 400s when no endpoint does. A tier-shaped `size` (e.g. `"4K"`) is treated as `resolution` for this check.
 
 ## Generate Image
 
@@ -88,7 +88,7 @@ Supported input formats: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`
 
 ## Options
 
-Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the target model supports — verify with `discover.ts <model>`.
+Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the target model supports — verify with `discover.ts <model>`. A parameter supported by some (not all) of a model's endpoints is fine: routing drops the incapable endpoints; a parameter no endpoint supports returns a 400.
 
 | Flag | Description | Default |
 |---|---|---|
