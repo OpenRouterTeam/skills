@@ -24,7 +24,7 @@ curl -sS https://openrouter.ai/api/v1/videos/models \
   | jq '.data[] | select(.id == "MODEL_ID")'
 ```
 
-Fields on each model worth knowing: `supported_resolutions`, `supported_aspect_ratios`, `supported_sizes`, `supported_durations` (often discrete like `[4,6,8]`, not a range), `supported_frame_images` (which `frame_type` values are accepted), `generate_audio` and `seed` (capability bools), `pricing_skus`, and `allowed_passthrough_parameters`. An out-of-set value returns a 400, so validate client-side.
+Fields on each model worth knowing: `input_modalities` (which reference modalities the model accepts — e.g. `image`, `audio`, `video`), `supported_resolutions`, `supported_aspect_ratios`, `supported_sizes`, `supported_durations` (often discrete like `[4,6,8]`, not a range), `supported_frame_images` (which `frame_type` values are accepted), `generate_audio` and `seed` (capability bools), `pricing_skus`, and `allowed_passthrough_parameters`. An out-of-set value returns a 400, so validate client-side.
 
 ## Full workflow (drop-in)
 
@@ -80,8 +80,10 @@ Required: `model`, `prompt`. Common optional fields:
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `input_references[]` — reference-to-video (style guidance); each entry is `{ type: "image_url" | "audio_url" | "video_url", ... }`. If both arrays are present, `frame_images` wins.
 - `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+
+Reference modalities are gated by the model's `input_modalities`: sending an `input_references` entry (or `frame_images`, always `image`) whose modality the model doesn't accept returns a 400 (e.g. `model "X" does not accept audio input references`). Check `input_modalities` before submitting.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
