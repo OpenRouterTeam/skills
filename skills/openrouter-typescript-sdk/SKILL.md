@@ -599,6 +599,95 @@ const skillTool = tool({
 
 ---
 
+## Lifecycle Hooks
+
+Lifecycle hooks let you observe and control specific points in the `callModel`
+agent loop: inspect/modify/block tool calls, rewrite or reject prompts, gate
+approvals, override stop conditions, and collect per-call token/latency/cost
+telemetry. They are distinct from transport hooks (`SDKHooks` /
+`BeforeRequestHook`), which intercept HTTP requests.
+
+Pass built-in hooks inline via the `hooks` option on `callModel`:
+
+```typescript
+import { OpenRouter, tool } from '@openrouter/agent';
+
+const result = client.callModel({
+  model: 'openai/gpt-5.2',
+  input: 'Delete temporary build files',
+  tools: [shellTool] as const,
+  hooks: {
+    PreToolUse: [
+      {
+        matcher: 'run_shell',
+        handler: ({ toolInput }) => {
+          if (String(toolInput.command).includes('rm -rf /')) {
+            return { block: 'Refusing to run a destructive command' };
+          }
+        },
+      },
+    ],
+    PostToolUse: [
+      { handler: ({ toolName, durationMs }) => recordLatency(toolName, durationMs) },
+    ],
+  },
+});
+```
+
+### Built-in Hooks
+
+| Hook | When it fires | Effect |
+|------|---------------|--------|
+| `SessionStart` | Before the initial request | Observe |
+| `UserPromptSubmit` | Before the initial prompt | Rewrite (`mutatedPrompt`) or reject |
+| `PostModelCall` | After each model response | Observe (usage, cost, latency, `responseId`) |
+| `PermissionRequest` | Before tool approval | `allow` / `deny` / `ask_user` |
+| `PreToolUse` | Before client tool execution | Rewrite (`mutatedInput`) or `block` |
+| `PostToolUse` | After tool success | Observe |
+| `PostToolUseFailure` | After tool failure | Observe |
+| `Stop` | When `stopWhen` halts the loop | `appendPrompt` / `forceResume` |
+| `SessionEnd` | When the run exits | Observe (`totalUsage`) |
+
+### HooksManager
+
+For custom hooks, dynamic registration, programmatic `emit()`, or shared use
+across concurrent `callModel` runs, use a `HooksManager` (exported from
+`@openrouter/agent`, or the `@openrouter/agent/hooks-manager` subpath):
+
+```typescript
+import { HooksManager, OpenRouter } from '@openrouter/agent';
+
+const hooks = new HooksManager();
+
+const unsubscribe = hooks.on('PreToolUse', {
+  matcher: /^db_/,
+  handler: ({ toolInput }, context) => {
+    audit(context.sessionId, toolInput);
+    return { mutatedInput: { ...toolInput, dryRun: true } };
+  },
+});
+
+const result = client.callModel({
+  model: 'openai/gpt-5.2',
+  input: 'Check which old records can be removed',
+  tools: [databaseTool] as const,
+  hooks,
+});
+
+await result.getText();
+unsubscribe();
+```
+
+Handlers run sequentially in registration order; mutations pipe through the
+chain and a `block`/`reject` stops it. Handlers may return a promise, or an
+`AsyncOutput` (`{ async: true, work, asyncTimeout }`) to detach telemetry
+without delaying the loop. `matcher` (string | RegExp | predicate) scopes
+tool-name hooks; use `filter` for session/prompt/model-call/stop hooks. See the
+[Lifecycle Hooks guide](https://openrouter.ai/docs/agent-sdk/call-model/lifecycle-hooks)
+for full payload/result types and the `HooksManager` API.
+
+---
+
 ## Generation Parameters
 
 Control model behavior with these parameters:
