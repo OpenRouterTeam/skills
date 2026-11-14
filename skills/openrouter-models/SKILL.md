@@ -143,6 +143,7 @@ Returns for each provider:
 - To check modalities, use `model.architecture.input_modalities` / `model.architecture.output_modalities`.
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
+- `max_completion_tokens` is a ceiling for `max_tokens`, not a guaranteed output size — input and output share `context_length`, so the usable output for a request is whatever context is left after the prompt. Values are also clamped before being published: an endpoint whose reported completion cap is at or above `context_length` is advertised as the router's usable-context ceiling instead, so the advertised number is always requestable.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
@@ -206,7 +207,7 @@ A subset of the raw API fields — the scripts run `formatModel()` which drops `
 |---|---|
 | `pricing.prompt` / `pricing.completion` | Cost per token in USD. Multiply by 1,000,000 for per-million-token pricing |
 | `context_length` | Max total tokens (input + output) |
-| `top_provider.max_completion_tokens` | Max output tokens from the best provider |
+| `top_provider.max_completion_tokens` | Max output tokens from the best provider — an upper bound on `max_tokens`, reduced in practice by the prompt's share of `context_length` |
 | `top_provider.is_moderated` | Whether content moderation is applied |
 | `per_request_limits` | Per-request token limits (when non-null) |
 | `supported_parameters` | API parameters the model accepts (e.g., `tools`, `structured_outputs`, `reasoning`, `web_search_options`) |
