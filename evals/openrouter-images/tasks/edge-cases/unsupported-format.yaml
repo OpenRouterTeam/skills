@@ -1,0 +1,24 @@
+id: edge-003
+name: Unsupported input format
+description: >
+  User asks to edit a file type edit.ts does not accept (.tiff — supported
+  formats are png/jpg/jpeg/webp/gif). The agent should surface the format
+  limitation, ideally offering to convert first, rather than failing opaquely.
+
+tags:
+  - edge-case
+  - negative
+
+inputs:
+  prompt: "Take scan.tiff and make it look like an oil painting."
+  files:
+    - path: scan.tiff
+      content: "placeholder tiff bytes"
+
+expected:
+  outcomes:
+    - type: task_completed
+  output_contains_any:
+    - "tiff"
+    - "format"
+    - "convert"

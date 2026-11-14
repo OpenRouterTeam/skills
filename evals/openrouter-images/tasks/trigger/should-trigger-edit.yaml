@@ -1,0 +1,20 @@
+id: trigger-002
+name: Should trigger on edit request
+description: >
+  An image-editing request phrased without the words "generate" or "image API"
+  should still trigger the skill.
+
+tags:
+  - trigger
+  - positive
+
+inputs:
+  prompt: "Can you touch up photo.png so it looks like it was taken at golden hour?"
+  files:
+    - path: photo.png
+
+expected:
+  outcomes:
+    - type: task_completed
+    - type: tool_called
+      tool_name: skill

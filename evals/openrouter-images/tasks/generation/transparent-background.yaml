@@ -1,0 +1,24 @@
+id: generation-006
+name: Transparent background with capability check
+description: >
+  User wants a transparent PNG. Not all models support the background
+  parameter, so the agent should verify support with discover.ts (or pick a
+  model that supports it) before passing --background transparent.
+
+tags:
+  - generation
+  - options
+  - capability-check
+
+inputs:
+  prompt: "I need a sticker-style image of a cartoon cactus with a transparent background as a PNG. Make sure the model you use actually supports transparency."
+
+expected:
+  outcomes:
+    - type: task_completed
+  behavior:
+    required_tools:
+      - bash
+  output_contains_any:
+    - "transparent"
+    - "background"
