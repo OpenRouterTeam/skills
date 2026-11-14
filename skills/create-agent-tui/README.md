@@ -118,6 +118,7 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | Web Search | on | Real-time web search via `openrouter:web_search` |
 | Datetime | on | Current date/time via `openrouter:datetime` |
 | Image Generation | off | Generate images via `openrouter:image_generation` |
+| Shell | off | Sandbox command execution via `openrouter:shell` |
 
 ### User-defined tools (your code, executed locally)
 
@@ -137,6 +138,8 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | Web Fetch | off | Fetch and extract text from URLs |
 | View Image | off | Read local images as base64 |
 | Custom Tool Template | on | Empty skeleton for your domain |
+
+`openrouter:shell` runs in the OpenRouter sandbox; use it for sandbox execution on Responses, while `openrouter:bash` with `engine: 'openrouter'` is Messages-only.
 
 ### Harness modules (architectural components)
 
