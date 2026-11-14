@@ -1,0 +1,19 @@
+{
+  "name": "agent-only-fixture",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openrouter/sdk": "0.13.43",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.4.0"
+  },
+  "resolutions": {
+    "zod": "3.25.76"
+  }
+}
