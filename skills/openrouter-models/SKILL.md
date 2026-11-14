@@ -144,6 +144,9 @@ Returns for each provider:
 - Pricing values are per-token in USD as strings — multiply by 1,000,000 for per-million-token pricing.
 - `knowledge_cutoff` and `expiration_date` are date strings or null.
 - `links.details` points to the per-provider endpoints API for that model. `GET /api/v1/models/{author}/{slug}/endpoints` returns `{ data: { id, name, endpoints: Endpoint[] } }`.
+- Variant suffixes come in two kinds (see [Model Variants](https://openrouter.ai/docs/guides/routing/model-variants/overview)). Catalog variants (`:free`, `:batch`, and the deprecated `:thinking`/`:extended`) are their own entries in `GET /api/v1/models` with their own `id`, pricing, and context length. Routing variants (`:nitro`, `:floor`, `:exacto`, deprecated `:online`) are accepted on any model at request time but never appear in the list — their metadata is the base model's.
+- To find the catalog entry for a requested model ID, keep the catalog variant and drop the routing variants: `openai/gpt-5.2:nitro` → `openai/gpt-5.2`, `poolside/laguna-s-2.1:free:nitro` → `poolside/laguna-s-2.1:free`. Don't strip `:free` — the paid entry has different pricing and context length. The scripts match IDs exactly, so pass the resolved catalog ID (not a `:nitro`/`:floor`/`:exacto` ID) to `compare-models.ts`.
+- `GET /api/v1/model/{author}/{slug}` and the endpoints route apply that rule server-side, so a suffixed ID can be passed through unchanged. A catalog suffix on a model without that entry does not fall back to the base model: the single-model route returns `404` and the endpoints route returns `200` with `"endpoints": []`.
 - Endpoint `status`: `0` = operational, non-zero = degraded.
 - Endpoint `latency_last_30m` / `throughput_last_30m`: percentile objects with `p50`, `p75`, `p90`, `p99`.
 
