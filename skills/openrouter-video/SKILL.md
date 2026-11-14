@@ -82,6 +82,7 @@ Required: `model`, `prompt`. Common optional fields:
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
 - `provider.order` / `provider.only` / `provider.ignore` — provider routing preferences (provider slugs). Video serves a single endpoint with no fallback loop, so `allow_fallbacks` is not accepted.
+- `provider.data_collection` (`allow` default, or `deny`) — `deny` excludes endpoints that train on your data, but not endpoints that retain prompts. `provider.zdr: true` is accepted but no video endpoint currently offers Zero Data Retention, so it fails routing (no job is started).
 - `provider.options.<slug>.<key>` — provider passthrough (Google Veo nests keys in `parameters`), see below.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
