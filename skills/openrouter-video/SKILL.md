@@ -72,7 +72,7 @@ echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
 
 ## Parameters
 
-Required: `model`, `prompt`. Common optional fields:
+Required: `model`. `prompt` (string) is required by most models, but optional for models that can generate from image input alone (e.g. `x-ai/grok-imagine-video-1.5` driven by `frame_images`) — omitting it for a model that requires one returns a 400. Common optional fields:
 
 - `duration` (int) — must be one of the model's `supported_durations`.
 - `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio.
