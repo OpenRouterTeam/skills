@@ -118,6 +118,7 @@ The skill presents an interactive checklist when invoked. You pick what you need
 | Web Search | on | Real-time web search via `openrouter:web_search` |
 | Datetime | on | Current date/time via `openrouter:datetime` |
 | Image Generation | off | Generate images via `openrouter:image_generation` |
+| Advisor | off | Consult a stronger model mid-generation via `openrouter:advisor` |
 
 ### User-defined tools (your code, executed locally)
 
