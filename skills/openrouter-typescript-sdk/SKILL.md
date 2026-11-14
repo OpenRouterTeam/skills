@@ -22,6 +22,9 @@ npm install @openrouter/agent
 
 # For platform features (models, credits, OAuth, API keys)
 npm install @openrouter/sdk
+
+# For defining tool schemas (used by the tool() examples below)
+npm install zod
 ```
 
 ## Setup
