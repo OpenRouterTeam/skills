@@ -15,7 +15,10 @@ Architecture draws from three production agent systems:
 ## Prerequisites
 
 - Node.js 18+
-- `OPENROUTER_API_KEY` from [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
+- `OPENROUTER_API_KEY` — get one from the [dashboard](https://openrouter.ai/settings/keys), or provision via [Stripe Projects](https://openrouter.ai/announcements/openrouter-on-stripe-projects) CLI:
+  ```bash
+  stripe projects add openrouter/api   # creates account + key, writes to .env
+  ```
 - For full SDK reference, see the `openrouter-typescript-sdk` skill
 
 ---
@@ -144,6 +147,7 @@ After getting checklist selections, follow this workflow:
 - [ ] If ASCII Logo Banner is ON: generate src/banner.ts (see ASCII Logo Banner section below)
 - [ ] Generate src/cli.ts entry point (or src/server.ts — see references/server-entry-points.md)
 - [ ] Generate .env.example with OPENROUTER_API_KEY=
+- [ ] If Stripe CLI is available (`command -v stripe`): offer to run `stripe projects add openrouter/api` to auto-provision the key into .env
 - [ ] Verify: run npx tsc --noEmit to check types
 ```
 
