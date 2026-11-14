@@ -144,12 +144,12 @@ The generation cost (USD) is printed to stderr when the API reports it. When `--
 
 Generation uses `POST /api/v1/images`. See the [Image Generation guide](https://openrouter.ai/docs/guides/overview/multimodal/image-generation) for full request/response details.
 
-Images come back base64-encoded in a `data` array. For raster PNG output, `media_type` is omitted; vector outputs (e.g. SVG) include it, and the saved file extension follows it:
+Images come back base64-encoded in a `data` array. Each entry includes `media_type` (e.g. `image/png`, `image/jpeg`, `image/webp`, `image/svg+xml`) whenever the format is identifiable; it's omitted only when the format couldn't be determined. The saved file extension follows it:
 
 ```json
 {
   "created": 1748372400,
-  "data": [{ "b64_json": "<base64-encoded image data>" }],
+  "data": [{ "b64_json": "<base64-encoded image data>", "media_type": "image/png" }],
   "usage": { "prompt_tokens": 0, "completion_tokens": 4175, "total_tokens": 4175, "cost": 0.04 }
 }
 ```
