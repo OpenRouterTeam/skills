@@ -189,7 +189,7 @@ If you have a `request_id` or `session_id` from one generation, you can find rel
 |--------|---------|
 | 401 | Invalid or missing API key |
 | 403 | You don't have access to this generation (belongs to another user) |
-| 404 | Generation ID not found |
+| 404 | Generation ID not found, or not visible to this key — a workspace-scoped key only reads generations in its own workspace (and only its creator's own rows when the creator is limited to their own activity) |
 | 429 | Rate limited — wait and retry |
 | 500 | Server error — retry |
 | 502 | Upstream failure — retry |
