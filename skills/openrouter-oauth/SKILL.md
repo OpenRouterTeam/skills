@@ -1,8 +1,8 @@
 ---
 name: openrouter-oauth
 description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add OpenRouter login, authentication, sign-in buttons, OAuth, or AI model inference API keys for browser apps, CLI tools, or remote environments. No client registration, no backend, no secrets required.
-version: 2.1.0
-compatibility: browser, CLI, or Node.js (requires Web Crypto API; browser flows also use localStorage and sessionStorage)
+version: 2.2.0
+compatibility: browser, CLI, or Node.js (requires Web Crypto API; browser flows also use sessionStorage)
 ---
 
 # Sign In with OpenRouter
@@ -32,9 +32,9 @@ code_verifier  = base64url(32 random bytes)
 code_challenge = base64url(SHA-256(code_verifier))
 ```
 
-- Use `crypto.getRandomValues(new Uint8Array(32))` for the random bytes
+- Use `crypto.getRandomValues(new Uint8Array(32))` for the random bytes, and generate a fresh verifier for every authorization request
 - base64url encoding: standard base64, then replace `+` → `-`, `/` → `_`, strip trailing `=`
-- Store `code_verifier` in **`sessionStorage`** (not `localStorage`) — so the verifier doesn't persist after the tab closes or leak to other tabs (security: the verifier is a one-time secret)
+- Store `code_verifier` in **`sessionStorage`** (not `localStorage`) — so the verifier doesn't persist after the tab closes or leak to other tabs (security: the verifier is a one-time secret). Never put the verifier in a URL.
 
 ### Step 2: Redirect to OpenRouter
 
@@ -45,9 +45,11 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 | Param | Value |
 |---|---|
 | `callback_url` | Your app's URL (where the user returns after auth) |
-| `code_challenge` | The S256 challenge from Step 1 |
-| `code_challenge_method` | Always `S256` |
+| `code_challenge` | The S256 challenge from Step 1 (required) |
+| `code_challenge_method` | `S256` (required) |
 | `state` | Optional. Returned unchanged as a `state` query parameter on the callback URL after the user authorizes, so you can match the response to the request and protect against CSRF. Not returned when the user denies access or in headless mode. |
+
+PKCE is mandatory: without it, anyone who obtains the code from browser history, extensions, logs, or another app registered for the same custom scheme could exchange it for a key on the user's account. A plain `http://` callback to a non-localhost host without `code_challenge` and `code_challenge_method=S256` is refused (`/auth` redirects to the OpenRouter homepage instead of showing consent). Use an `https://` callback for hosted apps; localhost callbacks and custom schemes (e.g. `vscode://`) also work.
 
 ### Headless / no-callback flow
 
@@ -64,7 +66,7 @@ https://openrouter.ai/auth?code_challenge={challenge}&code_challenge_method=S256
 | `key_label` | Optional app title on the approval screen; defaults to `A command-line app` |
 
 - Do not include `callback_url` or `oauth_client_id`. A no-callback request with `oauth_client_id`, a missing `code_challenge`, or a `plain` challenge method is rejected and redirected to the OpenRouter home page instead of showing a code.
-- Keep the `code_verifier` in the process until the user pastes the displayed code. `sessionStorage` and `localStorage` from the browser auth module do not apply in a CLI or Node.js context.
+- Keep the `code_verifier` in the process until the user pastes the displayed code. `sessionStorage` from the browser auth module does not apply in a CLI or Node.js context.
 - The displayed code is single-use and expires 10 minutes after issuance.
 - After the user pastes the code, continue with Step 4. The `POST /api/v1/auth/keys` exchange is unchanged.
 
@@ -124,9 +126,9 @@ Remove the verifier from `sessionStorage` before or after the exchange.
 
 ### Step 5: Store the key and clean up
 
-- Store `key` in `localStorage`
+- The key is a secret that can spend the user's credits until they revoke it. **Never persist it in browser-side storage** — `localStorage`, `sessionStorage`, IndexedDB, or cookies readable by JavaScript — because any script running on your origin can read them. Keep it out of URLs and logs.
+- In a browser-only app, hold the key in memory for the life of the page (the user signs in again after a reload). To keep users signed in, send the key to your backend and store it encrypted server-side, or use the OS keychain in desktop and mobile apps.
 - Clean the URL: `history.replaceState({}, "", location.pathname)` to remove `?code=`
-- **Cross-tab sync:** Listen for `storage` events on the API key's `localStorage` entry so other tabs update when the user signs in or out
 
 ---
 
@@ -136,7 +138,6 @@ Drop-in module implementing the full PKCE flow. Reduces risk of getting base64ur
 
 ```typescript
 // lib/openrouter-auth.ts
-const STORAGE_KEY = "openrouter_api_key";
 const VERIFIER_KEY = "openrouter_code_verifier";
 
 type AuthListener = () => void;
@@ -144,16 +145,13 @@ const listeners = new Set<AuthListener>();
 export const onAuthChange = (fn: AuthListener) => { listeners.add(fn); return () => listeners.delete(fn); };
 const notify = () => listeners.forEach((fn) => fn());
 
-// Cross-tab sync: other tabs update when user signs in/out
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", (e) => { if (e.key === STORAGE_KEY) notify(); });
-}
+// In memory only: never persist the key in localStorage, sessionStorage, IndexedDB, or JS-readable cookies
+let apiKey: string | null = null;
 
-export const getApiKey = (): string | null =>
-  typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+export const getApiKey = (): string | null => apiKey;
 
-export const setApiKey = (key: string) => { localStorage.setItem(STORAGE_KEY, key); notify(); };
-export const clearApiKey = () => { localStorage.removeItem(STORAGE_KEY); notify(); };
+export const setApiKey = (key: string) => { apiKey = key; notify(); };
+export const clearApiKey = () => { apiKey = null; notify(); };
 
 // Guard: only process ?code= if we initiated an OAuth flow in this tab
 export const hasOAuthCallbackPending = (): boolean =>

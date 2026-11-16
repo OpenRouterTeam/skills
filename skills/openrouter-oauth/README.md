@@ -16,7 +16,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 
 ## Compatibility
 
-Browser, CLI, and Node.js environments. Browser flows require Web Crypto API, `localStorage`, and `sessionStorage`. Headless flows require Web Crypto API and can keep the verifier in process memory.
+Browser, CLI, and Node.js environments. Browser flows require Web Crypto API and `sessionStorage` (for the one-time verifier; the API key itself is kept in memory, never in browser storage). Headless flows require Web Crypto API and can keep the verifier in process memory.
 
 ## What it covers
 
