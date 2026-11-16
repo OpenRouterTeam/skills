@@ -11,6 +11,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 ## Prerequisites
 
 - An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys. Read-write and read-only management keys both work; a read-only key must belong to an organization (read-only keys on a personal account get 403).
+- A **workspace-scoped management key** also works, but reads only its own workspace and needs the `activity:view_all` permission there. A `workspace` filter naming another workspace returns 403, legacy rows with no workspace are excluded (even for the default workspace), and possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`) return 400.
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
 
 ## Discovery Endpoint
