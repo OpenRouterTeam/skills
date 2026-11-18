@@ -16,7 +16,7 @@ The endpoint aggregates Artificial Analysis, Design Arena, and OpenRouter search
 | Parameter | Values | Description |
 |---|---|---|
 | `source` | `artificial-analysis`, `design-arena`, `openrouter` | Benchmark source. Omitting it returns all sources. The source determines row shape. |
-| `task_type` | `coding`, `intelligence`, `agentic`, `search` | Workload filter. For Artificial Analysis, maps to the corresponding index. For Design Arena, maps to the matching category. `search` scopes to OpenRouter search benchmarks. |
+| `task_type` | `intelligence`, `finance-and-accounting`, `strategy-and-ops`, `legal`, `healthcare-and-medical`, `engineering`, `economics`, `cyber`, `openness`, `multilingual`, `decision`, `coding`, `agentic`, `search` | Workload filter. Every value except `search` names the Artificial Analysis index of the same slug and returns only models scored on it, best first. `coding` and `agentic` are deprecated for Artificial Analysis (retired indexes; no items). Design Arena answers only `coding`, `intelligence`, and `agentic`; `search` returns OpenRouter search benchmark results only. |
 | `benchmark_type` | `gpqa_diamond`, `tau_bench_verified_airline`, `search_browsecomp`, `search_hle`, `search_dsqa`, `search_widesearch` | OpenRouter benchmark filter. `search_*` values scope to search results. |
 | `include_run_config` | `true`, `false` | Search benchmarks only. Defaults to `false`; when true, includes the published lane configuration. |
 | `search_engine` | string | Search benchmarks only. Filters by the search engine used. |
@@ -50,13 +50,27 @@ type ArtificialAnalysisItem = {
   model_permaslug: string;
   display_name: string;
   intelligence_index: number | null;
-  coding_index: number | null;
-  agentic_index: number | null;
+  finance_and_accounting_index: number | null;
+  strategy_and_ops_index: number | null;
+  legal_index: number | null;
+  healthcare_and_medical_index: number | null;
+  engineering_index: number | null;
+  economics_index: number | null;
+  cyber_index: number | null;
+  openness_index: number | null;
+  multilingual_index: number | null; // 0-1 fraction; other indexes are 0-100
+  decision_index: number | null;
+  /** @deprecated retired by Artificial Analysis; always null */
+  coding_index: null;
+  /** @deprecated retired by Artificial Analysis; always null */
+  agentic_index: null;
   pricing: { prompt: string; completion: string } | null;
 };
 ```
 
-Higher index scores are better. Use `coding_index`, `intelligence_index`, or `agentic_index` according to the user request. If the user did not name a task, prefer `intelligence_index` for general capability ranking.
+Higher index scores are better. Each score is the model's best on that index across the configurations Artificial Analysis evaluated (for example reasoning levels), so two indexes of one model can come from different configurations. Use the index matching the user's domain; if the user did not name one, prefer `intelligence_index` for general capability ranking. `decision_index` covers decision models and language models evaluated on decision tasks. `coding_index` and `agentic_index` are always `null` because Artificial Analysis retired those indexes; for coding or agentic rankings use Design Arena.
+
+`GET /api/v1/models` also accepts `sort=<slug>-high-to-low` and `min_<field>` / `max_<field>` filters (e.g. `min_legal_index=50`) for every index; bounds use the index's own scale, and the `coding`/`agentic` sorts and filters are deprecated.
 
 ### Design Arena Item
 

@@ -1,6 +1,6 @@
 ---
 name: openrouter-benchmarks
-description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores, including OpenRouter search benchmarks. Use when the user asks for benchmark-backed model selection, model rankings by coding/intelligence/agentic ability, Artificial Analysis or Design Arena ELO/win-rate results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
+description: Query OpenRouter's Benchmarks API for model benchmark rankings and scores, including OpenRouter search benchmarks. Use when the user asks for benchmark-backed model selection, model rankings by intelligence, coding, agentic, or domain (legal, finance, healthcare, engineering, cyber, multilingual) ability, Artificial Analysis or Design Arena ELO/win-rate results, benchmark citations, or wants to call GET /api/v1/benchmarks. Also use alongside openrouter-models when the user asks what model should power an app, product, workflow, or use case and benchmark evidence could inform or rule out part of the recommendation, including creative writing, editing, coding, design, agentic, or intelligence-heavy apps. Do not use for OpenRouter usage analytics, billing/spend analysis, generation metadata, provider uptime/latency, generic model pricing/capability lookup without any selection or benchmark-relevance decision, or creating an evaluation suite for a local app.
 ---
 
 # OpenRouter Benchmarks
@@ -21,7 +21,8 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 |---|---|
 | See benchmark-ranked models across sources | Call `GET /api/v1/benchmarks` and preserve source/citation metadata |
 | Choose a model for an app/use case | Check whether Artificial Analysis or Design Arena contains a relevant signal; say when no direct benchmark exists |
-| Find best coding, intelligence, or agentic models | Use `task_type=coding`, `task_type=intelligence`, or `task_type=agentic` |
+| Find best models on an Artificial Analysis index | Use `task_type=<index slug>` (e.g. `intelligence`, `legal`, `healthcare-and-medical`, `cyber`) |
+| Find best coding or agentic models | Use `task_type=coding` or `task_type=agentic` with `source=design-arena`; Artificial Analysis retired those indexes |
 | Find best search models or compare search evaluations | Use `task_type=search` or a `search_*` `benchmark_type`; optionally filter by `search_engine` or `search_surface` |
 | Query Artificial Analysis only | Use `source=artificial-analysis` |
 | Query Design Arena only | Use `source=design-arena`, plus `arena` and `category` when relevant |
@@ -31,7 +32,7 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 
 Use `openrouter-models` instead when the user needs pricing, context length, supported parameters, modalities, or provider endpoint performance without asking for benchmark rankings.
 
-For creative writing, storytelling, or editorial apps, this endpoint currently has no direct writing-quality benchmark. Treat Artificial Analysis `intelligence_index` as a weak general-capability signal, and use `agentic_index` only if the app performs multi-step planning/revision. Do not imply that Design Arena visual/code categories measure prose quality.
+For creative writing, storytelling, or editorial apps, this endpoint currently has no direct writing-quality benchmark. Treat Artificial Analysis `intelligence_index` as a weak general-capability signal (and `multilingual_index` for non-English writing). Do not imply that Design Arena visual/code categories measure prose quality.
 
 ## Availability Gate
 
@@ -54,7 +55,7 @@ Query parameters:
 | Flag | Values | Notes |
 |---|---|---|
 | `source` | `artificial-analysis`, `design-arena`, `openrouter` | Omitting it returns all sources. |
-| `task_type` | `coding`, `intelligence`, `agentic`, `search` | Maps to source-specific indices/categories; `search` scopes to OpenRouter search benchmarks. |
+| `task_type` | `intelligence`, `finance-and-accounting`, `strategy-and-ops`, `legal`, `healthcare-and-medical`, `engineering`, `economics`, `cyber`, `openness`, `multilingual`, `decision`, `coding`, `agentic`, `search` | For Artificial Analysis, names the index of the same slug and returns only models scored on it, best first. `coding` and `agentic` are deprecated for Artificial Analysis (retired indexes, no items). Design Arena answers only `coding`, `intelligence`, `agentic`; `search` returns OpenRouter search benchmark results only. |
 | `benchmark_type` | `gpqa_diamond`, `tau_bench_verified_airline`, `search_browsecomp`, `search_hle`, `search_dsqa`, `search_widesearch` | OpenRouter benchmark filter; `search_*` values scope to search results. |
 | `include_run_config` | `true`, `false` | Search benchmarks only; defaults to `false`. |
 | `search_engine` | string | Search benchmarks only. |
@@ -69,7 +70,8 @@ When results include both sources, do not present them as a single absolute lead
 
 ## Interpreting Results
 
-- Artificial Analysis rows include `intelligence_index`, `coding_index`, and `agentic_index`; higher is better.
+- Artificial Analysis rows include one `<index>_index` field per index (`intelligence_index`, `finance_and_accounting_index`, `strategy_and_ops_index`, `legal_index`, `healthcare_and_medical_index`, `engineering_index`, `economics_index`, `cyber_index`, `openness_index`, `multilingual_index`, `decision_index`); higher is better. Scores are 0-100 except `multilingual_index`, a 0-1 fraction. Each is the model's best across evaluated configurations, so two indexes of one model can come from different configurations.
+- `coding_index` and `agentic_index` are deprecated and always `null`: Artificial Analysis retired them. Do not rank by them; use Design Arena for coding/agentic signals.
 - Design Arena rows include `elo`, `win_rate`, `avg_generation_time_ms`, `arena`, `category`, and `tournament_stats`; higher `elo`/`win_rate` is better, lower generation time is faster.
 - Search rows include `primary_metric` and `primary_score`; `primary_metric` is `f1_by_item` only for WideSearch and `accuracy` otherwise, and higher scores are better. Search scores are not comparable to Artificial Analysis indices or Design Arena ELO.
 - `pricing.prompt` and `pricing.completion` are USD per token as decimal strings for Artificial Analysis and Design Arena rows. Search rows do not include a `pricing` field. Multiply by 1,000,000 for per-million-token costs.
@@ -79,7 +81,7 @@ When results include both sources, do not present them as a single absolute lead
 ## Direct API Call
 
 ```bash
-curl 'https://openrouter.ai/api/v1/benchmarks?source=artificial-analysis&task_type=coding&max_results=10' \
+curl 'https://openrouter.ai/api/v1/benchmarks?source=artificial-analysis&task_type=intelligence&max_results=10' \
   -H "Authorization: Bearer $OPENROUTER_API_KEY"
 ```
 
