@@ -70,7 +70,8 @@ cd <openrouter-analytics-skill-path>/scripts && npx tsx query-analytics.ts --met
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `dimensions` | `string[]` | `[]` | Up to 2 dimensions to group by |
+| `dimensions` | `string[]` | `[]` | Up to 3 dimensions to group by. A third dimension is allowed only when every metric, dimension, and filter is served from the activity rollups (e.g. `model`, `api_key_id`, `endpoint`, `workspace`, `app`, `user`, `variant`) or, for token-kind cost metrics, their daily rollup; otherwise 400. |
+| `api_key_tag_key` | `string` | none | Tag key (1–32 chars, e.g. `team`) to group by when `dimensions` includes `api_key_tag`. Keys with the tag group under its value, keys with the tag but no value under the key name, untagged keys under `""`. Without it, each `key:value` tag is its own group and a key with several tags counts toward each, so groups can sum to more than the total. |
 | `granularity` | `string` | none | Time bucketing: `minute`, `hour`, `day`, `week`, `month` |
 | `time_range` | `object` | last 7 days | `{ start, end }` as ISO 8601 UTC datetime strings. Seconds are required (`YYYY-MM-DDTHH:MM:SSZ`; fractional seconds allowed) — minute-precision values such as `2026-05-01T00:00Z` are rejected with 400. |
 | `filters` | `object[]` | `[]` | Up to 20 filter conditions |
@@ -309,7 +310,7 @@ Narrow results with filters. Multiple filters are ANDed:
 
 ### Multi-Dimension Queries
 
-Combine up to 2 dimensions for cross-tabulation:
+Combine up to 3 dimensions for cross-tabulation (the third only on rollup-served fields; see `dimensions` above):
 
 ```json
 {
@@ -324,7 +325,7 @@ Combine up to 2 dimensions for cross-tabulation:
 
 | Status | Meaning | Action |
 |---|---|---|
-| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 2 dimensions, 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
+| 400 | Invalid query (malformed JSON body, bad metric name, too many dimensions, invalid time range) | Check the meta endpoint for valid values. Verify time range start < end and that both timestamps include seconds. Max 3 dimensions (3 only on rollup-served metrics/dimensions/filters; the 400 names the incompatible fields), 20 filters. Possible-cache metrics combined with an unsupported dimension, filter, classifier, or `minute` granularity also return 400. |
 | 401 | Invalid or missing API key | Check `OPENROUTER_API_KEY` is set correctly |
 | 403 | Not a management key, or a workspace-scoped key filtering on another workspace | The key must be a provisioning/management key. Create one at openrouter.ai/settings/management-keys. Workspace-scoped keys can only filter on their own workspace. |
 | 408 | Query timed out | Narrow the time range, reduce dimensions, or add filters to scan less data |
@@ -336,6 +337,8 @@ Combine up to 2 dimensions for cross-tabulation:
 `start` and `end` must be ISO 8601 UTC timestamps that include seconds (`2026-05-01T00:00:00Z`). Fractional seconds are accepted; minute-precision timestamps and non-UTC offsets are rejected before the query runs.
 
 Some metric/dimension combinations support time ranges up to **367 days** (with daily granularity), while others are limited to **31 days**. The server resolves this automatically based on the requested metrics and dimensions.
+
+Token-kind cost metrics (`usage_upstream_{uncached_input,cache_read,cache_write,output,reasoning}`, `byok_usage_*` of the same kinds, `*_token_kind_total`, `uncached_input_tokens`, `cache_write_tokens`, `token_kind_request_count`) split `usage_upstream`/`byok_usage` by billed token kind. They read a UTC-daily rollup up to a year, grouped only by `model`, `api_key_id`, `workspace`, `variant`, `endpoint`, `provider`, `data_region`, `billed_service_tier`, `long_context` with `day`/`week`/`month`/no granularity; anything else reads raw generations (31-day max). Use UTC-midnight `time_range` bounds (a 3-dimension query with off-midnight bounds returns 400). A row is `null` unless every request in it carries the split (`token_kind_request_count` = `request_count`); batch requests never do. Data starts 2026-11-20 UTC with no backfill.
 
 Usage breakdown metrics follow the same pattern: `credits_usage`, `usage_upstream`, `usage_cache`, `usage_data`, `usage_web`, and `usage_upstream_web` support up to 367 days, while `openrouter_usage`, `byok_fees`, `usage_file`, `usage_upstream_file`, `usage_web_fetch`, and `usage_upstream_web_fetch` are limited to 31 days.
 
