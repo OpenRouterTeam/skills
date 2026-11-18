@@ -83,6 +83,7 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `openrouter_usage` — non-BYOK inference spend in USD; excludes requests made with user-provided keys (31-day limit)
 - `byok_fees` — BYOK platform fees in USD; the platform fee portion of `credits_usage` charged on BYOK requests (31-day limit). `credits_usage` includes both non-BYOK inference charges and these BYOK platform fees.
 - `usage_upstream` — provider-side (upstream) cost in USD (up to 367 days)
+- Token-kind costs — `usage_upstream_uncached_input`, `usage_upstream_cache_read`, `usage_upstream_cache_write`, `usage_upstream_output`, `usage_upstream_reasoning` (and `byok_usage_*` of the same kinds) split upstream/BYOK cost by billed token kind at billed rates; `usage_upstream_token_kind_total` / `byok_usage_token_kind_total` give the sum over the same requests; `uncached_input_tokens`, `cache_write_tokens` are billed counts; `token_kind_request_count` counts requests carrying the split. UTC-daily rollup up to a year (raw generations, 31 days, for other dimensions/filters, hour/minute granularity, or a timezone). A row is `null` unless every request in it has the split; batch never does. Reasoning is its own kind only where the provider bills it separately (Gemini, Perplexity); elsewhere it is in output. The kinds can sum to less than `usage_upstream` (server tools and other non-token charges). Data starts 2026-11-20 UTC.
 - `usage_cache` — cache cost component in USD (up to 367 days)
 - `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 367 days)
 - `usage_web` — web search cost in USD (up to 367 days)
@@ -154,6 +155,10 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `user` — the creator user ID (for org-level queries)
 - `workspace` — workspace ID
 - `app` — application ID
+- `endpoint` — endpoint UUID, returned as is (same `endpoint_id` as `GET /api/v1/activity`)
+- `api_key_tag` — API key tag; pair with `api_key_tag_key` to group by one tag key's values (untagged keys group under `""`)
+- `billed_service_tier` — service tier you were billed at (may differ from the tier that served the request)
+- `long_context` — `"true"` when a long-context price tier applied
 
 **Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
