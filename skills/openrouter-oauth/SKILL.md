@@ -1,7 +1,7 @@
 ---
 name: openrouter-oauth
 description: Implement "Sign In with OpenRouter" using OAuth PKCE — framework-agnostic, no SDK or client registration required. Use when the user wants to add OpenRouter login, authentication, sign-in buttons, OAuth, or AI model inference API keys for browser apps, CLI tools, or remote environments. No client registration, no backend, no secrets required.
-version: 2.2.0
+version: 2.3.0
 compatibility: browser, CLI, or Node.js (requires Web Crypto API; browser flows also use sessionStorage)
 ---
 
@@ -47,7 +47,11 @@ https://openrouter.ai/auth?callback_url={url}&code_challenge={challenge}&code_ch
 | `callback_url` | Your app's URL (where the user returns after auth) |
 | `code_challenge` | The S256 challenge from Step 1 (required) |
 | `code_challenge_method` | `S256` (required) |
+| `limit` | Optional. Prefills the new key's credit limit in US dollars: a positive amount below 1,000,000 with at most two decimals (e.g. `25`, `12.50`). The user can still change it. |
+| `expiration` | Optional. Prefills the new key's expiry: `1-hour`, `1-day`, `7-days`, `30-days`, `90-days`, `180-days`, `1-year`, or `never`. The user can still change it. |
 | `state` | Optional. Returned unchanged as a `state` query parameter on the callback URL after the user authorizes, so you can match the response to the request and protect against CSRF. Not returned when the user denies access or in headless mode. |
+
+A missing or invalid `limit` or `expiration` falls back to that field's default (no credit limit, no expiry) without affecting the other parameter.
 
 PKCE is mandatory: without it, anyone who obtains the code from browser history, extensions, logs, or another app registered for the same custom scheme could exchange it for a key on the user's account. A plain `http://` callback to a non-localhost host without `code_challenge` and `code_challenge_method=S256` is refused (`/auth` redirects to the OpenRouter homepage instead of showing consent). Use an `https://` callback for hosted apps; localhost callbacks and custom schemes (e.g. `vscode://`) also work.
 
