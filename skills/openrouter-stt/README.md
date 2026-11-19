@@ -27,5 +27,7 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - A drop-in bash script that base64-encodes audio, posts JSON, and extracts the transcript
 - Discovering STT models via `/api/v1/models?output_modalities=transcription`
 - Audio format guidance (`wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, `aac`) and avoiding format/bytes mismatch
-- Provider passthrough (`provider.options.<slug>`) for things like Groq's vocabulary `prompt`
+- Provider routing (`provider.order` / `only` / `ignore` / `allow_fallbacks`)
+- Context hints with the top-level `prompt` field (OpenAI, Azure, Groq, Together, Alibaba, AssemblyAI)
+- Provider passthrough (`provider.options.<slug>`) for provider-specific options
 - Zero-dep TypeScript (`fetch`) and Python (`requests`) examples

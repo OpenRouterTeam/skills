@@ -97,8 +97,10 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 | `input_audio.data`   | yes      | Base64-encoded raw audio bytes. **Not** a data URI — just the base64 payload, no `data:audio/...;base64,` prefix. |
 | `input_audio.format` | yes      | `wav`, `mp3`, `flac`, `m4a`, `ogg`, `webm`, or `aac`. Must match the actual bytes. Support varies by provider. |
 | `language`           | no       | ISO-639-1 code (`en`, `ja`, `fr`). Auto-detected if omitted.                                              |
+| `prompt`             | no       | Context to guide transcription (domain vocabulary, a previous segment). Only some providers honor it — see below. |
 | `temperature`        | no       | 0–1. Lower is more deterministic.                                                                         |
-| `provider`           | no       | Provider passthrough — see below.                                                                         |
+| `keyterms`           | no       | Array of domain terms, names, or phrases to bias recognition toward (up to 1000 terms, 1–100 chars each). Only some providers support it — see below. |
+| `provider`           | no       | Provider routing preferences and passthrough — see below.                                                 |
 
 ### Picking an audio format
 
@@ -108,9 +110,51 @@ Models are provider-namespaced — use the full slug (`google/chirp-3`, `openai/
 
 The `format` field must match the actual container/codec of the bytes. A file saved as `.wav` that is actually mp3 will be rejected or mis-decoded. When in doubt, confirm with `ffprobe <file>`.
 
+### Boosting vocabulary with `keyterms`
+
+`keyterms` is the provider-agnostic way to hint names, jargon, or product terms. OpenRouter maps it to each provider's native field (a keyword/keyterm list or a vocabulary prompt), so you don't need per-provider passthrough for this.
+
+```json
+{
+  "model": "openai/whisper-large-v3",
+  "input_audio": { "data": "UklGRiQA...", "format": "wav" },
+  "keyterms": ["OpenRouter", "Scribe", "PKCE"]
+}
+```
+
+- If the selected model cannot use keyterms, the request is rejected with a 400 rather than silently ignored — drop `keyterms` or pick another model/provider.
+- Providers may enforce stricter limits (fewer terms, shorter terms, restricted characters) and return a 400 naming the problem; some charge extra when keyterms are sent.
+- An empty array is treated as absent.
+- When `keyterms` is non-empty it takes precedence over the equivalent field in `provider.options.<slug>`.
+
+### Context with `prompt`
+
+`prompt` is a top-level string (or multipart text field) that gives the model context; it is not an instruction to rewrite the transcript, and the output may be identical with or without it.
+
+| Provider | Behavior |
+| --- | --- |
+| OpenAI, Azure OpenAI, Groq, Together | Forwarded as `prompt` (not supported by OpenAI `gpt-4o-transcribe-diarize`) |
+| Alibaba | Mapped to the system message |
+| AssemblyAI | Mapped to `config.prompt` only on endpoints with prompted pricing (billed at that rate); otherwise ignored. AssemblyAI ignores `language` when a prompt is applied |
+| Others | Ignored — use `keyterms` where supported |
+
+Canonical `prompt` takes precedence over provider-specific prompt options (e.g. `provider.options.groq.prompt`, `provider.options.alibaba.system_prompt`, `provider.options.assemblyai.prompt`), and an empty string clears them. Provider limits still apply (Groq 224 tokens, AssemblyAI 6000 characters).
+
+## Provider routing
+
+`provider` accepts the same routing preferences as chat completions: `order` (provider slugs to try in order), `only` (allowlist), `ignore` (denylist), and `allow_fallbacks` (default `true`; set `false` to fail instead of falling back to providers outside `order`). Data-policy preferences `zdr` and `data_collection` are also accepted.
+
+```json
+{
+  "model": "openai/whisper-large-v3",
+  "input_audio": { "data": "UklGRiQA...", "format": "wav" },
+  "provider": { "order": ["groq"], "allow_fallbacks": false }
+}
+```
+
 ## Provider-specific options
 
-Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Example — Groq's `prompt` for vocabulary hinting:
+Provider passthrough goes under `provider.options.<slug>` and is only forwarded when that provider handles the request. Example — a Groq passthrough option (prefer the top-level `prompt` above for context hints; it overrides `provider.options.groq.prompt`):
 
 ```json
 {
