@@ -189,6 +189,8 @@ export function buildImageParams(args: Map<string, string | true>): Record<strin
   setInt("n", "n");
   setInt("seed", "seed");
   setInt("output-compression", "output_compression");
+  setInt("frame-count", "frame_count");
+  setInt("frame-duration-ms", "frame_duration_ms");
 
   const providerOptions = args.get("provider-options");
   if (typeof providerOptions === "string") {
@@ -225,7 +227,7 @@ export function defaultOutputPath(): string {
 
 export type ImageGenerationResponse = {
   created?: number;
-  data?: { b64_json?: string; media_type?: string }[];
+  data?: { b64_json?: string; media_type?: string; layer?: Record<string, unknown> }[];
   usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number; cost?: number };
 };
 
