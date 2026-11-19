@@ -174,6 +174,19 @@ Images come back base64-encoded in a `data` array. For raster PNG output, `media
 }
 ```
 
+### Signed URLs instead of base64
+
+Send `"response_format": "url"` (default `b64_json`) to get a signed download link per image instead of inline bytes. Each `data[]` item then carries `url` (plus `media_type`) and the response adds `expires_at` (Unix seconds, up to 24 hours after storage). The URL is a bearer link — anyone holding it can download the image until it expires — and the stored copy is deleted soon after. The response falls back to `b64_json` when a URL can't be issued: streaming, zero-data-retention requests or endpoints, or storage unavailable, so always handle both shapes. A completed `url` generation is billed once stored, even if the client disconnects before receiving the response. The bundled scripts use the default `b64_json`.
+
+```json
+{
+  "created": 1748372400,
+  "data": [{ "url": "https://example.com/generated-image.png", "media_type": "image/png" }],
+  "expires_at": 1748458800,
+  "usage": { "prompt_tokens": 0, "completion_tokens": 4175, "total_tokens": 4175, "cost": 0.04 }
+}
+```
+
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-3.1-flash-lite-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
