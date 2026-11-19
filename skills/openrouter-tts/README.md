@@ -24,7 +24,7 @@ For other install methods (Claude Code plugin marketplace, Cursor Rules, etc.) s
 See [SKILL.md](SKILL.md) for the full reference, including:
 
 - A drop-in bash script that handles headers, error bodies, and generation ID capture
-- Discovering TTS models via `/api/v1/models?output_modalities=speech`
+- Discovering TTS models, voices, formats, and speed ranges via `/api/v1/audio/speech/models`
 - Picking between `mp3` and `pcm`, and avoiding the format/extension mismatch that accounts for most "empty audio" reports
 - Provider routing (`provider.order` / `only` / `ignore` / `allow_fallbacks`)
 - Provider passthrough (`provider.options.<slug>`) including OpenAI's `instructions` for tone/pacing
