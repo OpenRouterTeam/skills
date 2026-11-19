@@ -55,17 +55,28 @@ echo "Saved $(realpath "$OUTPUT") (generation_id=${gen_id:-unknown})"
 
 ## Discovering TTS models and voices
 
-Filter the models endpoint by output modality to list speech models. Each model carries a `supported_voices` array with the exact voice IDs that provider accepts.
+The speech models endpoint (`GET /api/v1/audio/speech/models`, no auth needed) lists the public speech catalog with the parameters each model accepts. `GET /api/v1/audio/speech/models/{author}/{slug}` reads one model and returns a 404 for a slug that isn't a public speech model. Private models and BYOK-only endpoints are left out, so a model missing here can still be available to your account.
 
 ```bash
-# Models + voices in one shot
-curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
-  | jq '.data[] | {id, name, supported_voices, pricing}'
+# Models + their speech parameters
+curl -sS "https://openrouter.ai/api/v1/audio/speech/models" \
+  | jq '.data[] | {id, name, params: .output_modalities[0].supported_parameters}'
 
 # Just the voices for a specific model
-curl -sS "https://openrouter.ai/api/v1/models?output_modalities=speech" \
-  | jq -r '.data[] | select(.id=="openai/gpt-4o-mini-tts-2025-12-15") | .supported_voices[]'
+curl -sS "https://openrouter.ai/api/v1/audio/speech/models/elevenlabs/eleven-v3" \
+  | jq '.output_modalities[] | select(.type=="speech") | .supported_parameters.voice'
 ```
+
+Each model's speech `output_modalities` entry carries `supported_parameters`, merged across every endpoint that serves it; the `endpoints` array has each provider's own (possibly narrower) values:
+
+- `voice` — `{ "type": "enum", "values": [...] }` lists published voice IDs (a provider may also accept custom/cloned voices not listed); `{ "type": "unknown" }` means no list is published, so check the provider's docs.
+- `response_format` — enum of output formats the model can return.
+- `speed` — `{ "type": "range", "min", "max" }` when a range is published. Missing doesn't always mean `speed` is ignored.
+- `instructions` — present when the model accepts free-text delivery instructions.
+
+To pin a request to providers that support your voice and format, use `provider.only` / `provider.ignore` (see Provider routing); `provider.order` is only a preference.
+
+`/api/v1/models?output_modalities=speech` still includes TTS models in the general catalog (with `supported_voices`), but the speech models endpoint is the canonical source for voices and per-endpoint capabilities.
 
 Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtral encodes language + persona + emotion (`en_paul_happy`), Kokoro prefixes with language/gender (`af_bella` = American female Bella).
 
@@ -75,10 +86,10 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `model`           | yes      | TTS model slug (e.g. `openai/gpt-4o-mini-tts-2025-12-15`, `mistralai/voxtral-mini-tts-2603`).                     |
 | `input`           | yes      | The text to synthesize.                                                                                           |
-| `voice`           | yes      | Voice identifier. Look up the exact set for your model in `supported_voices` on the models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
+| `voice`           | yes      | Voice identifier. Look up the exact set for your model in its `voice` parameter on the speech models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
-| `provider`        | no       | Provider passthrough — see below.                                                                                 |
+| `provider`        | no       | Provider routing preferences and passthrough — see below.                                                         |
 
 ### Picking a format
 
@@ -86,6 +97,20 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 - **`pcm`** (`audio/pcm;rate=<rate>;channels=<n>`) — uncompressed raw samples. The response `Content-Type` carries the sample rate and channel count (e.g. `rate=24000;channels=1` for OpenAI TTS), which you'll need if you wrap the bytes into a WAV container. Lower latency for real-time streaming pipelines, but not directly playable on its own. Pick this only when the user explicitly wants raw audio or is piping into a streaming system.
 
 Match the file extension to the format — saving pcm bytes as `.mp3` produces a file no player will open, and this is the most common cause of "empty/corrupted audio" reports.
+
+## Provider routing
+
+`provider` accepts the same routing preferences as chat completions: `order` (provider slugs to try in order), `only` (allowlist), `ignore` (denylist), and `allow_fallbacks` (default `true`; set `false` to fail instead of falling back to providers outside `order`). Data-policy preferences `zdr` and `data_collection` are also accepted.
+
+```json
+{
+  "model": "openai/gpt-4o-mini-tts-2025-12-15",
+  "input": "Welcome to the show.",
+  "voice": "alloy",
+  "response_format": "mp3",
+  "provider": { "only": ["openai"] }
+}
+```
 
 ## Provider-specific options
 
@@ -176,4 +201,5 @@ Splitting also improves time-to-first-audio if you stream chunks to a user as th
 ## References
 
 - [TTS guide](https://openrouter.ai/docs/guides/overview/multimodal/tts)
+- [Speech models API](https://openrouter.ai/api/v1/audio/speech/models)
 - [Models page — filter to speech output](https://openrouter.ai/models?output_modalities=speech)
