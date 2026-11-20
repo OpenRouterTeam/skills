@@ -13,6 +13,7 @@ Video generation is async: submit → poll → download. A single request can't 
 
 1. `POST /api/v1/videos` → `{ id, polling_url, status: "pending" }`
 2. `GET <polling_url>` every ~30s until `status` is `completed` (terminal failures: `failed`, `cancelled`, `expired` — surface the `error` field verbatim)
+   - While the job is in flight the response may also carry `status_detail` (`submitting` / `queued_at_provider` under `pending`, `generating` / `finalizing` under `in_progress`) and `progress` (0–100, only while `generating` and only for providers that report it). Both are optional and absent once the job finishes — show them to the user, but decide completion from `status` alone.
 3. `GET /api/v1/videos/{id}/content?index=0` **with the auth header** → MP4 bytes
 
 ## Pick parameters from the models endpoint, don't guess
@@ -53,7 +54,7 @@ while :; do
   resp=$(curl -sS "$poll_url" -H "Authorization: Bearer $OPENROUTER_API_KEY")
   # Avoid the name `status` — zsh treats it as read-only.
   st=$(echo "$resp" | jq -r '.status')
-  echo "Status: $st" >&2
+  echo "Status: $st $(echo "$resp" | jq -r '[.status_detail, (.progress | if . then "\(.)%" else empty end)] | map(select(.)) | join(" ")')" >&2
   case "$st" in
     completed) break ;;
     failed|cancelled|expired)
