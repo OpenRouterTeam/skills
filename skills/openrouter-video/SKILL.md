@@ -13,6 +13,7 @@ Video generation is async: submit → poll → download. A single request can't 
 
 1. `POST /api/v1/videos` → `{ id, polling_url, status: "pending" }`
 2. `GET <polling_url>` every ~30s until `status` is `completed` (terminal failures: `failed`, `cancelled`, `expired` — surface the `error` field verbatim)
+   - While the job is in flight the response may also carry `status_detail` (`submitting` / `queued_at_provider` under `pending`, `generating` / `finalizing` under `in_progress`) and `progress` (0–100, only while `generating` and only for providers that report it). Both are optional and absent once the job finishes — show them to the user, but decide completion from `status` alone.
 3. `GET /api/v1/videos/{id}/content?index=0` **with the auth header** → MP4 bytes
 
 ## Pick parameters from the models endpoint, don't guess
@@ -53,7 +54,7 @@ while :; do
   resp=$(curl -sS "$poll_url" -H "Authorization: Bearer $OPENROUTER_API_KEY")
   # Avoid the name `status` — zsh treats it as read-only.
   st=$(echo "$resp" | jq -r '.status')
-  echo "Status: $st" >&2
+  echo "Status: $st $(echo "$resp" | jq -r '[.status_detail, (.progress | if . then "\(.)%" else empty end)] | map(select(.)) | join(" ")')" >&2
   case "$st" in
     completed) break ;;
     failed|cancelled|expired)
@@ -74,22 +75,24 @@ echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
 
 Required: `model`, `prompt`. Common optional fields:
 
-- `duration` (int) — must be one of the model's `supported_durations`.
-- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio.
-- `generate_audio` (bool) — only meaningful if the model's `generate_audio` capability is true.
+- `duration` (int) — must be one of the model's `supported_durations`. `-1` lets the model choose the length (e.g. following an input video); send it only when `-1` is in `supported_durations` (currently some BytePlus Seedance models).
+- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio. Omit `aspect_ratio` to use the model default; on models with adaptive aspect ratio (e.g. Seedance) that follows the input image or video.
+- `generate_audio` (bool) — only meaningful if the model's `generate_audio` capability is true. When omitted it defaults to that capability flag, but some providers (such as xAI) apply their own default and generate audio anyway, so send `false` explicitly for a silent video. Some models always include audio and ignore `false`.
 - `seed` (int) — honored only if the model's `seed` capability is true.
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
-- `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+- `provider.order` / `provider.only` / `provider.ignore` — provider routing preferences (provider slugs). Video serves a single endpoint with no fallback loop, so `allow_fallbacks` is not accepted.
+- `provider.data_collection` (`allow` default, or `deny`) — `deny` excludes endpoints that train on your data, but not endpoints that retain prompts. `provider.zdr: true` is accepted but no video endpoint currently offers Zero Data Retention, so it fails routing (no job is started).
+- `provider.options.<slug>.<key>` — provider passthrough (Google Veo nests keys in `parameters`), see below.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
 ## Provider passthrough
 
-Provider-specific params go under `provider.options.<slug>.parameters`. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
+Provider-specific params are keyed by the slug of the provider the request is routed to; only the matched provider's options are forwarded. Google Veo models are the only video models that nest them in a `parameters` object (`provider.options.<slug>.parameters.<key>`). Every other video model, including other Google video models, takes its keys directly under the slug (`provider.options.<slug>.<key>`); a `parameters` object sent to them is not forwarded, and Runway video upscale rejects any provider options. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
 
-Example:
+Google Veo example:
 
 ```json
 {
@@ -102,6 +105,22 @@ Example:
           "personGeneration": "allow",
           "negativePrompt": "blurry, low quality"
         }
+      }
+    }
+  }
+}
+```
+
+Any other video model, e.g. Seedance 2.0 served by the Seed provider (use the `byteplus` slug when it is routed to BytePlus):
+
+```json
+{
+  "model": "bytedance/seedance-2.0",
+  "prompt": "a time-lapse of a flower blooming",
+  "provider": {
+    "options": {
+      "seed": {
+        "watermark": false
       }
     }
   }
