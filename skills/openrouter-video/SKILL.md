@@ -82,6 +82,7 @@ Required: `model`, `prompt`. Common optional fields:
 - `callback_url` (HTTPS) — webhook instead of polling.
 - `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
 - `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `previous_job_id` (string) — ID of a completed video job to edit or extend. The new job runs on the same model and endpoint as the previous one; only models that support continuation accept it. Ownership is checked against your OpenRouter account, not the request's `user`, so if one account serves many end users, verify the signed-in user owns the job before forwarding a client-supplied ID.
 - `provider.order` / `provider.only` / `provider.ignore` — provider routing preferences (provider slugs). Video serves a single endpoint with no fallback loop, so `allow_fallbacks` is not accepted.
 - `provider.data_collection` (`allow` default, or `deny`) — `deny` excludes endpoints that train on your data, but not endpoints that retain prompts. `provider.zdr: true` is accepted but no video endpoint currently offers Zero Data Retention, so it fails routing (no job is started).
 - `provider.options.<slug>.<key>` — provider passthrough (Google Veo nests keys in `parameters`), see below.
