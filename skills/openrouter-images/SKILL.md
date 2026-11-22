@@ -63,6 +63,8 @@ This calls `GET /api/v1/images/models/{author}/{slug}/endpoints` and returns, pe
 
 Capability values print as readable strings: an enum shows as `1K | 2K | 4K`, a range as `0–100`, a boolean as `supported`. A parameter that's absent is unsupported — don't send it.
 
+Free variants are listed as their own entries with an ID ending in `:free` (e.g. `recraft/recraft-v4.1-flash-v2:free`), next to the paid entry when both exist. Pass a `:free` ID as `--model`, or to `discover.ts` to see its free endpoints. Free variants have per-minute and daily rate limits.
+
 ## Generate Image
 
 Create a new image from a text prompt:
@@ -190,6 +192,14 @@ Send `"response_format": "url"` (default `b64_json`) to get a signed download li
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-3.1-flash-lite-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
+
+## Billing Errors (402 / 403)
+
+Paid image requests are checked against your credit balance, per-key credit limits, and the in-flight spending budget (an estimated cost held while requests run and settle). Read `error.metadata.limit_source`:
+
+- `402` + `openrouter_in_flight_budget` — running and recently completed requests filled the in-flight budget. Transient: wait for `Retry-After` and retry.
+- `402` + `openrouter_credits` — the balance is below the minimum needed to start (shrinking the request won't help; add credits), or one request's estimated cost exceeds the whole in-flight budget (lower `--n` or resolution).
+- `403` + `openrouter_key_limit` — the API key's spending cap is exhausted (including pending charges). Raise the key limit or wait for its window to reset.
 
 ## Presenting Results
 
