@@ -12,6 +12,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 
 - An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
+- A **Custom** management key must be organization-scoped and hold `analytics:view`; workspace-scoped keys need base Read Only or Read Write access
 
 ## Discovery Endpoint
 
@@ -122,7 +123,7 @@ Each dimension has:
 
 Dimensions are what you break down by — "show me spend *by model*" means `dimensions: ["model"]`.
 
-You can combine up to 2 dimensions in a single query (e.g., `["model", "provider"]`).
+You can combine up to 2 dimensions in a single query (e.g., `["model", "provider"]`), or 3 when every metric, dimension, and filter is served from the activity rollups or the token-kind daily rollup.
 
 ### Label Resolution
 
@@ -134,6 +135,7 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 | `app` | App title or origin URL |
 | `user` | User name or email address |
 | `workspace` | Workspace name (deleted workspaces are still named) |
+| `endpoint` | `provider · model`, plus tier, region and quantization where set (deleted endpoints are still named) |
 
 Sentinel buckets get named labels rather than raw values:
 - `api_key_id` `-1` → `Chatroom` (traffic with no API key, e.g. chatroom requests)
@@ -155,7 +157,7 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `user` — the creator user ID (for org-level queries)
 - `workspace` — workspace ID
 - `app` — application ID
-- `endpoint` — endpoint UUID, returned as is (same `endpoint_id` as `GET /api/v1/activity`)
+- `endpoint` — endpoint UUID (same `endpoint_id` as `GET /api/v1/activity`); results show the endpoint label, filters take the UUID
 - `api_key_tag` — API key tag; pair with `api_key_tag_key` to group by one tag key's values (untagged keys group under `""`)
 - `billed_service_tier` — service tier you were billed at (may differ from the tier that served the request)
 - `long_context` — `"true"` when a long-context price tier applied
