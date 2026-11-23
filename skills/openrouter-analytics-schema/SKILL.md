@@ -12,6 +12,7 @@ Discover what analytics data is available for querying. The meta endpoint return
 
 - An OpenRouter **management key**. Management keys are separate from regular API keys — get one at https://openrouter.ai/settings/management-keys
 - Pass it via `--api-key <key>` or set the `OPENROUTER_API_KEY` environment variable
+- A **Custom** management key must be organization-scoped and hold `analytics:view`; workspace-scoped keys need base Read Only or Read Write access
 
 ## Discovery Endpoint
 
@@ -83,6 +84,7 @@ Exceeding a cap returns 400 with the applicable maximum in the message, not a tr
 - `openrouter_usage` — non-BYOK inference spend in USD; excludes requests made with user-provided keys (31-day limit)
 - `byok_fees` — BYOK platform fees in USD; the platform fee portion of `credits_usage` charged on BYOK requests (31-day limit). `credits_usage` includes both non-BYOK inference charges and these BYOK platform fees.
 - `usage_upstream` — provider-side (upstream) cost in USD (up to 367 days)
+- Token-kind costs — `usage_upstream_uncached_input`, `usage_upstream_cache_read`, `usage_upstream_cache_write`, `usage_upstream_output`, `usage_upstream_reasoning` (and `byok_usage_*` of the same kinds) split upstream/BYOK cost by billed token kind at billed rates; `usage_upstream_token_kind_covered` / `byok_usage_token_kind_covered` are the cost of the requests that carry the split (what the parts explain); `usage_upstream_token_kind_total` / `byok_usage_token_kind_total` are the cost of every request in the row, split or not (server-tool calls excluded); `uncached_input_tokens`, `cache_write_tokens` are billed counts; `token_kind_request_count` counts requests carrying the split. UTC-daily rollup up to a year (raw generations, 31 days, for other dimensions/filters, hour/minute granularity, or a timezone). The parts sum only the requests that carry the split (xAI, Perplexity-reported-cost, fallback-estimated, decisions, and batch requests don't); a metric is `null` only when the row has requests of its kind and none split, `0` when it has none. Request coverage = `token_kind_request_count / request_count`; cost coverage = `*_token_kind_covered / *_token_kind_total`. Reasoning is its own kind only where the provider bills it separately (Gemini, Perplexity); elsewhere it is in output. The kinds can sum to slightly less than `*_token_kind_covered` (non-token charges inside a request such as per-image fees or provider-billed tools, plus 6- vs 9-decimal rounding). Data starts 2026-11-20 UTC.
 - `usage_cache` — cache cost component in USD (up to 367 days)
 - `usage_data` — data logging cost adjustment in USD; typically negative when a data logging discount applies (up to 367 days)
 - `usage_web` — web search cost in USD (up to 367 days)
@@ -121,7 +123,7 @@ Each dimension has:
 
 Dimensions are what you break down by — "show me spend *by model*" means `dimensions: ["model"]`.
 
-You can combine up to 2 dimensions in a single query (e.g., `["model", "provider"]`).
+You can combine up to 2 dimensions in a single query (e.g., `["model", "provider"]`), or 3 when every metric, dimension, and filter is served from the activity rollups or the token-kind daily rollup.
 
 ### Label Resolution
 
@@ -133,6 +135,7 @@ Some dimensions have their raw IDs automatically resolved to human-readable labe
 | `app` | App title or origin URL |
 | `user` | User name or email address |
 | `workspace` | Workspace name (deleted workspaces are still named) |
+| `endpoint` | `provider · model`, plus tier, region and quantization where set (deleted endpoints are still named) |
 
 Sentinel buckets get named labels rather than raw values:
 - `api_key_id` `-1` → `Chatroom` (traffic with no API key, e.g. chatroom requests)
@@ -154,6 +157,10 @@ All other dimensions (e.g., `model`, `provider`, `country`) are returned as-is w
 - `user` — the creator user ID (for org-level queries)
 - `workspace` — workspace ID
 - `app` — application ID
+- `endpoint` — endpoint UUID (same `endpoint_id` as `GET /api/v1/activity`); results show the endpoint label, filters take the UUID
+- `api_key_tag` — API key tag; pair with `api_key_tag_key` to group by one tag key's values (untagged keys group under `""`)
+- `billed_service_tier` — service tier you were billed at (may differ from the tier that served the request)
+- `long_context` — `"true"` when a long-context price tier applied
 
 **Limited to 31-day time ranges:**
 - `generation_id` — unique ID for each generation (use to drill down to individual requests, then inspect via the `openrouter-generations` skill)
@@ -276,4 +283,4 @@ Other dimensions (`provider`, `origin`, `country`, `finish_reason`, `external_us
 - Minute granularity: only available when the time window is ≤ 3 hours
 - `hour` granularity reads the minute materialized view: 31-day maximum
 - Possible-cache metrics (`possible_cached_tokens`, `possible_cache_hit_rate`, `cache_capture_rate`): 31-day maximum, `hour` or coarser granularity, and only `model`/`provider` dimensions and filters — any other dimension, filter, classifier, or `minute` granularity returns 400
-- Rate-limited to 64 requests per minute
+- Rate-limited to 256 requests per minute per IP
