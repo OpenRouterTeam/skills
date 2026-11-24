@@ -16,6 +16,10 @@ Two response headers are worth keeping:
 - `Content-Type` — `audio/mpeg` for mp3; for pcm it includes the sample rate and channel count, e.g. `audio/pcm;rate=24000;channels=1`. Parse these parameters if you need to wrap the raw bytes into a WAV container.
 - `X-Generation-Id` — the generation ID (format `gen-tts-<timestamp>-<suffix>`), useful for tracking, debugging, and cost lookups.
 
+### Signed URL instead of bytes (`output_delivery: "url"`)
+
+Set `"output_delivery": "url"` (default `stream`) to have OpenRouter store the audio and return JSON instead of bytes: `{"url": "https://openrouter.ai/api/v1/audio/speech/media/...", "expires_at": 1748458800, "media_type": "audio/mpeg"}`. `response_format` still picks the codec. The URL is a bearer link — anyone holding it can download the audio until `expires_at` (Unix seconds, up to 24 hours after storage) — and the stored copy is deleted within the following day. When zero-data-retention applies (account settings, guardrails, `provider.zdr: true`, or a ZDR endpoint) the request silently falls back to streaming raw bytes, so branch on the response `Content-Type` (`application/json` vs `audio/*`) rather than assuming JSON.
+
 ## Drop-in workflow
 
 ```bash
@@ -88,6 +92,7 @@ Voices are provider-namespaced: OpenAI uses short names (`alloy`, `nova`), Voxtr
 | `input`           | yes      | The text to synthesize.                                                                                           |
 | `voice`           | yes      | Voice identifier. Look up the exact set for your model in its `voice` parameter on the speech models endpoint (see the discovery section above). Voices are provider-namespaced — e.g. `alloy` is an OpenAI voice and will not work on Voxtral or Kokoro. |
 | `response_format` | no       | `mp3` or `pcm`. Default is `pcm`. **Set this explicitly** — the default is usually not what a user wants to save. |
+| `output_delivery` | no       | `stream` (default) returns raw audio bytes; `url` returns JSON with a signed 24-hour download `url`, `expires_at`, and `media_type` (falls back to bytes under ZDR). |
 | `speed`           | no       | Playback multiplier (e.g. `1.25`). Honored by OpenAI TTS. Other providers may accept and ignore it, or reject unknown fields — check the provider's behavior if it matters. |
 | `provider`        | no       | Provider routing preferences and passthrough — see below.                                                         |
 
