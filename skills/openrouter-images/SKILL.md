@@ -80,6 +80,8 @@ cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model g
 
 Modify an existing image with a text prompt. The source image is sent as an image-to-image reference (`input_references`), so use a model whose `input_modalities` include `image` — check with `discover.ts <model>`.
 
+Models that accept references advertise `supported_parameters.input_references` with an allowed `min` and `max` count (up to 16 globally, narrowed per model); `min: 1` marks an edit-only model that requires a source image. List them with `curl -s https://openrouter.ai/api/v1/images/models | jq '[.data[] | select(.supported_parameters.input_references != null) | {id, input_references: .supported_parameters.input_references}]'`. Reference entries take no `bbox` placement parameter — describe placement in the prompt.
+
 ```bash
 cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
 cd <skill-path>/scripts && npx tsx edit.ts avatar.jpg "add a party hat" --output avatar-hat.png
@@ -161,6 +163,16 @@ Up to `max_images` images come back (base plus layers), each saved with a number
 - `background`: `opaque` or `transparent`.
 - `bounding_box`: `{ absolute, normalized }`, each `[x_min, y_min, x_max, y_max]` (`absolute` in base-image pixels, `normalized` on a 0–1000 scale).
 - `text_recognition`: `{ text, lines[] }` when the provider recognized text; each line has `runs[]` of `{ text, style }` (e.g. `similar_font_family`, `foreground_color`, `bold`).
+
+### Text placement (Recraft V3)
+
+`recraft/recraft-v3` accepts `text_layout` under the `recraft` provider options to place text. Each entry pairs a `text` string with a `bbox` of four `[x, y]` corner points, as fractions (0–1) of the image width and height:
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a red panda holding a sign" \
+  --model recraft/recraft-v3 \
+  --provider-options '{"recraft": {"text_layout": [{"text": "HELLO", "bbox": [[0.3, 0.45], [0.7, 0.45], [0.7, 0.55], [0.3, 0.55]]}]}}'
+```
 
 ## API Response Shapes
 
