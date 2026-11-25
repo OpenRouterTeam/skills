@@ -128,6 +128,15 @@ Any other video model, e.g. Seedance 2.0 served by the Seed provider (use the `b
 }
 ```
 
+## Errors and billing
+
+- Submit errors (`POST /api/v1/videos`) happen before a job exists, so `4xx` responses are never billed. Notable causes: `400` unsupported parameter value (the message lists supported values) or bad `previous_job_id`; `402` balance/key limit can't cover the estimated cost (holds for your other running jobs count — if `Retry-After` is present, wait and retry); `403` HIPAA workspace (Videos API unavailable), key/guardrail spend limit reached, or prompt flagged by required moderation; `404` no available endpoint (e.g. ZDR filtered all) or `previous_job_id` not found; `409` the `previous_job_id` job isn't completed (wait if still running; failed/cancelled/expired jobs can never be continued); `413` prompt over the moderation budget; `429` honor `Retry-After`.
+- A `5xx`/`503` from submit can leave the outcome unknown — the job may have started and can still bill. Don't blindly resubmit (a retry can create a second paid job) unless the message says moderation or the spending hold failed.
+- Accepted jobs place a hold for the estimated cost; billing happens on completion with a usable video (`usage.cost` on the poll response). Failed/cancelled/expired jobs are usually released, but a job whose output the provider blocked in moderation can still be charged.
+- Poll every 10–30s and back off on `429`. A `completed` job can briefly report `in_progress` while the result is stored — keep polling until terminal.
+- `/content` returns `404` before `completed` (and for failed/cancelled/expired jobs), `400` for an out-of-range `index`, `409` if the provider says the video isn't ready yet (retry shortly), and `410` once the provider has deleted it. After `expires_at`, OpenRouter's stored copy and signed `urls` are gone; `/content` may still serve from the provider until it returns `410` (or a `5xx` for some providers). Download promptly.
+- Even with `callback_url`, keep a timeout and fallback poll: if webhook delivery exhausts its retries, the job can complete and bill without a callback.
+
 ## Webhooks (optional)
 
 Pass `callback_url` (HTTPS) in the submit body. On terminal state, OpenRouter POSTs a `video.generation.{completed,failed,cancelled,expired}` event. Each delivery carries `X-OpenRouter-Idempotency-Key: <job_id>-<status>`. If a signing secret is configured on the workspace, verify `X-OpenRouter-Signature: t=<ts>,v1=<hmac>` — HMAC-SHA256 of `<ts>,<raw_body>` with the secret, reject timestamps older than ~5 minutes.
@@ -135,6 +144,7 @@ Pass `callback_url` (HTTPS) in the submit body. On terminal state, OpenRouter PO
 ## References
 
 - [Video generation guide](https://openrouter.ai/docs/guides/overview/multimodal/video-generation)
+- [Video API errors and billing](https://openrouter.ai/docs/api_reference/videos#errors)
 - [Models page (filter by video output)](https://openrouter.ai/models?output_modalities=video)
 
 Video generation is not ZDR-eligible because the provider must temporarily retain the output for the async download step.
