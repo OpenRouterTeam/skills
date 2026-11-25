@@ -25,5 +25,6 @@ See [SKILL.md](SKILL.md) for the full reference, including:
 - Model and per-endpoint capability discovery (`discover.ts`) — see which models exist and which params each accepts before generating
 - Text-to-image generation with aspect ratio, resolution, quality, and provider-passthrough options (`generate.ts`)
 - Editing and transforming existing images via image-to-image references (`edit.ts`)
+- `response_format: "url"` for signed 24-hour download links instead of base64
 - Selecting specific image models (e.g. `google/gemini-3.1-flash-lite-image`)
 - Decision tree for picking between discover, generate, and edit flows

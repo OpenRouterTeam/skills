@@ -63,6 +63,8 @@ This calls `GET /api/v1/images/models/{author}/{slug}/endpoints` and returns, pe
 
 Capability values print as readable strings: an enum shows as `1K | 2K | 4K`, a range as `0–100`, a boolean as `supported`. A parameter that's absent is unsupported — don't send it.
 
+Free variants are listed as their own entries with an ID ending in `:free` (e.g. `recraft/recraft-v4.1-flash-v2:free`), next to the paid entry when both exist. Pass a `:free` ID as `--model`, or to `discover.ts` to see its free endpoints. Free variants have per-minute and daily rate limits.
+
 ## Generate Image
 
 Create a new image from a text prompt:
@@ -77,6 +79,8 @@ cd <skill-path>/scripts && npx tsx generate.ts "a watercolor painting" --model g
 ## Edit Image
 
 Modify an existing image with a text prompt. The source image is sent as an image-to-image reference (`input_references`), so use a model whose `input_modalities` include `image` — check with `discover.ts <model>`.
+
+Models that accept references advertise `supported_parameters.input_references` with an allowed `min` and `max` count (up to 16 globally, narrowed per model); `min: 1` marks an edit-only model that requires a source image. List them with `curl -s https://openrouter.ai/api/v1/images/models | jq '[.data[] | select(.supported_parameters.input_references != null) | {id, input_references: .supported_parameters.input_references}]'`. Reference entries take no `bbox` placement parameter — describe placement in the prompt.
 
 ```bash
 cd <skill-path>/scripts && npx tsx edit.ts photo.png "make the sky purple"
@@ -98,9 +102,11 @@ Both `generate.ts` and `edit.ts` accept the same flags. Only pass parameters the
 | `--resolution <t>` | Resolution tier (`512`, `1K`, `2K`, `4K`) | Model default |
 | `--size <s>` | Shorthand: a tier (`2K`) or explicit pixels (`2048x2048`) | Model default |
 | `--quality <q>` | `auto`, `low`, `medium`, or `high` | Model default |
-| `--output-format <f>` | `png`, `jpeg`, `webp`, or `svg` (vector models) | Model default |
+| `--output-format <f>` | `png`, `jpeg`, `webp`, `svg` (vector models), or `gif` (animation models, e.g. `openai/gpt-image-2.6-flare`) | Model default |
 | `--background <b>` | `auto`, `transparent`, or `opaque` | Model default |
 | `--output-compression <n>` | Compression 0–100 for webp/jpeg | Model default |
+| `--frame-count <n>` | Animation frames (2–64) with `--output-format gif` | Model default |
+| `--frame-duration-ms <n>` | Per-frame display time (20–2000 ms) with `--output-format gif` | Model default |
 | `--n <count>` | Number of images to generate (1–10, provider permitting) | 1 |
 | `--seed <int>` | Seed for deterministic generation (where supported) | Random |
 | `--provider-options <json>` | Provider-specific passthrough, keyed by `provider_slug` | None |
@@ -140,6 +146,34 @@ cd <skill-path>/scripts && npx tsx generate.ts "a dramatic portrait" \
 
 The generation cost (USD) is printed to stderr when the API reports it. When `--n` requests multiple images, each is saved with a `-1`, `-2`, … suffix.
 
+### Layer decomposition (Seedream)
+
+Seedream can split one generation into a base image plus separate layers. Request it through `--provider-options` with `layer_decomposition: true` and the required `layer_decomposition_options.max_images` (2–16). Leave `--n` at 1 and don't pass `--aspect-ratio` or an explicit `WIDTHxHEIGHT` `--size`; invalid combinations return a 400. Confirm both keys are in the endpoint's `allowed_passthrough_parameters` with `discover.ts` first.
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a sale poster with a red circle and bold text" \
+  --model bytedance-seed/seedream-5-5 \
+  --provider-options '{"seed": {"layer_decomposition": true, "layer_decomposition_options": {"max_images": 4}}}'
+```
+
+Up to `max_images` images come back (base plus layers), each saved with a numbered suffix. Each returned image carries a `layer` object, which `generate.ts` echoes in a `layers` array next to the saved file path:
+
+- `z_index` (always present): stacking order; `0` is the opaque base image, higher values sit on top.
+- `name`, `description`: provider-assigned labels.
+- `background`: `opaque` or `transparent`.
+- `bounding_box`: `{ absolute, normalized }`, each `[x_min, y_min, x_max, y_max]` (`absolute` in base-image pixels, `normalized` on a 0–1000 scale).
+- `text_recognition`: `{ text, lines[] }` when the provider recognized text; each line has `runs[]` of `{ text, style }` (e.g. `similar_font_family`, `foreground_color`, `bold`).
+
+### Text placement (Recraft V3)
+
+`recraft/recraft-v3` accepts `text_layout` under the `recraft` provider options to place text. Each entry pairs a `text` string with a `bbox` of four `[x, y]` corner points, as fractions (0–1) of the image width and height:
+
+```bash
+cd <skill-path>/scripts && npx tsx generate.ts "a red panda holding a sign" \
+  --model recraft/recraft-v3 \
+  --provider-options '{"recraft": {"text_layout": [{"text": "HELLO", "bbox": [[0.3, 0.45], [0.7, 0.45], [0.7, 0.55], [0.3, 0.55]]}]}}'
+```
+
 ## API Response Shapes
 
 Generation uses `POST /api/v1/images`. See the [Image Generation guide](https://openrouter.ai/docs/guides/overview/multimodal/image-generation) for full request/response details.
@@ -154,9 +188,30 @@ Images come back base64-encoded in a `data` array. For raster PNG output, `media
 }
 ```
 
+### Signed URLs instead of base64
+
+Send `"response_format": "url"` (default `b64_json`) to get a signed download link per image instead of inline bytes. Each `data[]` item then carries `url` (plus `media_type`) and the response adds `expires_at` (Unix seconds, up to 24 hours after storage). The URL is a bearer link — anyone holding it can download the image until it expires — and the stored copy is deleted soon after. The response falls back to `b64_json` when a URL can't be issued: streaming, zero-data-retention requests or endpoints, or storage unavailable, so always handle both shapes. A completed `url` generation is billed once stored, even if the client disconnects before receiving the response. The bundled scripts use the default `b64_json`.
+
+```json
+{
+  "created": 1748372400,
+  "data": [{ "url": "https://example.com/generated-image.png", "media_type": "image/png" }],
+  "expires_at": 1748458800,
+  "usage": { "prompt_tokens": 0, "completion_tokens": 4175, "total_tokens": 4175, "cost": 0.04 }
+}
+```
+
 ## Using a Different Model
 
 The default model is `google/gemini-3.1-flash-image-preview` (Nano Banana 2). To use another, pass `--model <id>` with any image model ID (e.g. `google/gemini-3.1-flash-lite-image`). Run `discover.ts` to browse image models and `discover.ts <model>` to confirm which parameters and providers it supports before generating.
+
+## Billing Errors (402 / 403)
+
+Paid image requests are checked against your credit balance, per-key credit limits, and the in-flight spending budget (an estimated cost held while requests run and settle). Read `error.metadata.limit_source`:
+
+- `402` + `openrouter_in_flight_budget` — running and recently completed requests filled the in-flight budget. Transient: wait for `Retry-After` and retry.
+- `402` + `openrouter_credits` — the balance is below the minimum needed to start (shrinking the request won't help; add credits), or one request's estimated cost exceeds the whole in-flight budget (lower `--n` or resolution).
+- `403` + `openrouter_key_limit` — the API key's spending cap is exhausted (including pending charges). Raise the key limit or wait for its window to reset.
 
 ## Presenting Results
 
