@@ -13,6 +13,7 @@ Video generation is async: submit → poll → download. A single request can't 
 
 1. `POST /api/v1/videos` → `{ id, polling_url, status: "pending" }`
 2. `GET <polling_url>` every ~30s until `status` is `completed` (terminal failures: `failed`, `cancelled`, `expired` — surface the `error` field verbatim)
+   - While the job is in flight the response may also carry `status_detail` (`submitting` / `queued_at_provider` under `pending`, `generating` / `finalizing` under `in_progress`) and `progress` (0–100, only while `generating` and only for providers that report it). Both are optional and absent once the job finishes — show them to the user, but decide completion from `status` alone.
 3. `GET /api/v1/videos/{id}/content?index=0` **with the auth header** → MP4 bytes
 
 ## Pick parameters from the models endpoint, don't guess
@@ -53,7 +54,7 @@ while :; do
   resp=$(curl -sS "$poll_url" -H "Authorization: Bearer $OPENROUTER_API_KEY")
   # Avoid the name `status` — zsh treats it as read-only.
   st=$(echo "$resp" | jq -r '.status')
-  echo "Status: $st" >&2
+  echo "Status: $st $(echo "$resp" | jq -r '[.status_detail, (.progress | if . then "\(.)%" else empty end)] | map(select(.)) | join(" ")')" >&2
   case "$st" in
     completed) break ;;
     failed|cancelled|expired)
@@ -72,24 +73,27 @@ echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
 
 ## Parameters
 
-Required: `model`, `prompt`. Common optional fields:
+Required: `model`, `prompt` (a blank or whitespace-only prompt is rejected). Common optional fields:
 
-- `duration` (int) — must be one of the model's `supported_durations`.
-- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio.
-- `generate_audio` (bool) — only meaningful if the model's `generate_audio` capability is true.
-- `seed` (int) — honored only if the model's `seed` capability is true.
+- `duration` (int) — must be one of the model's `supported_durations`. `-1` lets the model choose the length (e.g. following an input video); send it only when `-1` is in `supported_durations` (currently some BytePlus Seedance models).
+- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio, and is checked against the same `supported_resolutions` / `supported_aspect_ratios` / `supported_sizes` lists (unsupported values return `400`). Omit `aspect_ratio` to use the model default; on models with adaptive aspect ratio (e.g. Seedance) that follows the input image or video.
+- `generate_audio` (bool) — `true` returns `400` if the model's `generate_audio` capability is false; `false` is always accepted. When omitted it defaults to that capability flag, but some providers (such as xAI) apply their own default and generate audio anyway, so send `false` explicitly for a silent video. Some models always include audio and ignore `false`.
+- `seed` (int) — only send it if the model's `seed` capability is true; otherwise submit returns `400` instead of silently dropping it. Determinism is not guaranteed for every provider.
 - `callback_url` (HTTPS) — webhook instead of polling.
-- `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
-- `provider.options.<slug>.parameters.<key>` — provider passthrough, see below.
+- `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`. Each `frame_type` may appear at most once, and only values in `supported_frame_images` are accepted (`400` otherwise).
+- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. A reference modality the model doesn't support is rejected with `400`, not ignored. Combining `input_references` with `frame_images` is provider-specific: some models reject it (`400` on submit or a failed job), some use only the frame images, and some use both (e.g. Runway applies references as style guidance alongside the frames).
+- `previous_job_id` (string) — ID of a completed video job to edit or extend. The new job runs on the same model and endpoint as the previous one; only models that support continuation accept it. Ownership is checked against your OpenRouter account, not the request's `user`, so if one account serves many end users, verify the signed-in user owns the job before forwarding a client-supplied ID.
+- `provider.order` / `provider.only` / `provider.ignore` — provider routing preferences (provider slugs). Video serves a single endpoint with no fallback loop, so `allow_fallbacks` is not accepted.
+- `provider.data_collection` (`allow` default, or `deny`) — `deny` excludes endpoints that train on your data, but not endpoints that retain prompts. `provider.zdr: true` is accepted but no video endpoint currently offers Zero Data Retention, so it fails routing (no job is started).
+- `provider.options.<slug>.<key>` — provider passthrough (Google Veo nests keys in `parameters`), see below.
 
 Image `url` can be a public `https://` URL or a local-file data URL: `MIME=image/png; B64=$(base64 < file.png | tr -d '\n'); url="data:${MIME};base64,${B64}"`.
 
 ## Provider passthrough
 
-Provider-specific params go under `provider.options.<slug>.parameters`. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
+Provider-specific params are keyed by the slug of the provider the request is routed to; only the matched provider's options are forwarded. Google Veo models are the only video models that nest them in a `parameters` object (`provider.options.<slug>.parameters.<key>`). Every other video model, including other Google video models, takes its keys directly under the slug (`provider.options.<slug>.<key>`); a `parameters` object sent to them is not forwarded, and Runway video upscale rejects any provider options. The allowed keys for a given model are listed (flat) in `allowed_passthrough_parameters` on the models endpoint — but the meaning, value range, and required combinations come from the *upstream provider's* API docs (Google Vertex, Alibaba Dashscope, Kwai, ByteDance Volc Engine, MiniMax, OpenAI, etc.). Read the upstream docs before using an unfamiliar key; casing conventions differ between providers (Google/OpenAI use camelCase, most others use snake_case).
 
-Example:
+Google Veo example:
 
 ```json
 {
@@ -108,6 +112,31 @@ Example:
 }
 ```
 
+Any other video model, e.g. Seedance 2.0 served by the Seed provider (use the `byteplus` slug when it is routed to BytePlus):
+
+```json
+{
+  "model": "bytedance/seedance-2.0",
+  "prompt": "a time-lapse of a flower blooming",
+  "provider": {
+    "options": {
+      "seed": {
+        "watermark": false
+      }
+    }
+  }
+}
+```
+
+## Errors and billing
+
+- Submit errors (`POST /api/v1/videos`) happen before a job exists, so `4xx` responses are never billed. Notable causes: `400` unsupported parameter value (the message lists supported values) or bad `previous_job_id`; `402` balance/key limit can't cover the estimated cost (holds for your other running jobs count — if `Retry-After` is present, wait and retry); `403` HIPAA workspace (Videos API unavailable), key/guardrail spend limit reached, or prompt flagged by required moderation; `404` no available endpoint (e.g. ZDR filtered all) or `previous_job_id` not found; `409` the `previous_job_id` job isn't completed (wait if still running; failed/cancelled/expired jobs can never be continued); `413` prompt over the moderation budget; `429` honor `Retry-After`.
+- A `5xx`/`503` from submit can leave the outcome unknown — the job may have started and can still bill. Don't blindly resubmit (a retry can create a second paid job) unless the message says moderation or the spending hold failed.
+- Accepted jobs place a hold for the estimated cost; billing happens on completion with a usable video (`usage.cost` on the poll response). Failed/cancelled/expired jobs are usually released, but a job whose output the provider blocked in moderation can still be charged.
+- Poll every 10–30s and back off on `429`. A `completed` job can briefly report `in_progress` while the result is stored — keep polling until terminal.
+- `/content` returns `404` before `completed` (and for failed/cancelled/expired jobs), `400` for an out-of-range `index`, `409` if the provider says the video isn't ready yet (retry shortly), and `410` once the provider has deleted it. After `expires_at`, OpenRouter's stored copy and signed `urls` are gone; `/content` may still serve from the provider until it returns `410` (or a `5xx` for some providers). Download promptly.
+- Even with `callback_url`, keep a timeout and fallback poll: if webhook delivery exhausts its retries, the job can complete and bill without a callback.
+
 ## Webhooks (optional)
 
 Pass `callback_url` (HTTPS) in the submit body. On terminal state, OpenRouter POSTs a `video.generation.{completed,failed,cancelled,expired}` event. Each delivery carries `X-OpenRouter-Idempotency-Key: <job_id>-<status>`. If a signing secret is configured on the workspace, verify `X-OpenRouter-Signature: t=<ts>,v1=<hmac>` — HMAC-SHA256 of `<ts>,<raw_body>` with the secret, reject timestamps older than ~5 minutes.
@@ -115,6 +144,7 @@ Pass `callback_url` (HTTPS) in the submit body. On terminal state, OpenRouter PO
 ## References
 
 - [Video generation guide](https://openrouter.ai/docs/guides/overview/multimodal/video-generation)
+- [Video API errors and billing](https://openrouter.ai/docs/api_reference/videos#errors)
 - [Models page (filter by video output)](https://openrouter.ai/models?output_modalities=video)
 
 Video generation is not ZDR-eligible because the provider must temporarily retain the output for the async download step.
