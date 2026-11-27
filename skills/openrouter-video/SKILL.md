@@ -73,15 +73,15 @@ echo "$resp" | jq --arg out "$(realpath "$OUTPUT")" \
 
 ## Parameters
 
-Required: `model`, `prompt`. Common optional fields:
+Required: `model`, `prompt` (a blank or whitespace-only prompt is rejected). Common optional fields:
 
 - `duration` (int) — must be one of the model's `supported_durations`. `-1` lets the model choose the length (e.g. following an input video); send it only when `-1` is in `supported_durations` (currently some BytePlus Seedance models).
-- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio. Omit `aspect_ratio` to use the model default; on models with adaptive aspect ratio (e.g. Seedance) that follows the input image or video.
-- `generate_audio` (bool) — only meaningful if the model's `generate_audio` capability is true. When omitted it defaults to that capability flag, but some providers (such as xAI) apply their own default and generate audio anyway, so send `false` explicitly for a silent video. Some models always include audio and ignore `false`.
-- `seed` (int) — honored only if the model's `seed` capability is true.
+- `resolution` (string) / `aspect_ratio` (string) / `size` (string, `"WxH"`) — `size` is interchangeable with resolution + aspect_ratio, and is checked against the same `supported_resolutions` / `supported_aspect_ratios` / `supported_sizes` lists (unsupported values return `400`). Omit `aspect_ratio` to use the model default; on models with adaptive aspect ratio (e.g. Seedance) that follows the input image or video.
+- `generate_audio` (bool) — `true` returns `400` if the model's `generate_audio` capability is false; `false` is always accepted. When omitted it defaults to that capability flag, but some providers (such as xAI) apply their own default and generate audio anyway, so send `false` explicitly for a silent video. Some models always include audio and ignore `false`.
+- `seed` (int) — only send it if the model's `seed` capability is true; otherwise submit returns `400` instead of silently dropping it. Determinism is not guaranteed for every provider.
 - `callback_url` (HTTPS) — webhook instead of polling.
-- `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`.
-- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. If both arrays are present, `frame_images` wins.
+- `frame_images[]` — image-to-video; each entry is `{ type: "image_url", image_url: { url }, frame_type: "first_frame" | "last_frame" }`. Each `frame_type` may appear at most once, and only values in `supported_frame_images` are accepted (`400` otherwise).
+- `input_references[]` — reference-to-video (style guidance); same entry shape, no `frame_type`. A reference modality the model doesn't support is rejected with `400`, not ignored. Combining `input_references` with `frame_images` is provider-specific: some models reject it (`400` on submit or a failed job), some use only the frame images, and some use both (e.g. Runway applies references as style guidance alongside the frames).
 - `previous_job_id` (string) — ID of a completed video job to edit or extend. The new job runs on the same model and endpoint as the previous one; only models that support continuation accept it. Ownership is checked against your OpenRouter account, not the request's `user`, so if one account serves many end users, verify the signed-in user owns the job before forwarding a client-supplied ID.
 - `provider.order` / `provider.only` / `provider.ignore` — provider routing preferences (provider slugs). Video serves a single endpoint with no fallback loop, so `allow_fallbacks` is not accepted.
 - `provider.data_collection` (`allow` default, or `deny`) — `deny` excludes endpoints that train on your data, but not endpoints that retain prompts. `provider.zdr: true` is accepted but no video endpoint currently offers Zero Data Retention, so it fails routing (no job is started).
